@@ -1,17 +1,19 @@
 {
   "expo": {
-    "name": "srw-app",
-    "slug": "srw-app",
-    "version": "1.0.0",
-    "orientation": "portrait",
+    "name": "Super Robot Wars XYZ",
+    "slug": "super-robot-wars-xyz",
+    "version": "0.1.0",
+    "orientation": "landscape",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#05070f",
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "package": "com.fareza777.srwxyz",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#05070f",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
