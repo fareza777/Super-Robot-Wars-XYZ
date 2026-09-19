@@ -1,0 +1,95 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ART } from '../assets';
+import { play, setSoundEnabled } from '../audio';
+import { useGame } from '../game/store';
+
+function MenuItem({ label, sub, accent, onPress, delay }: { label: string; sub?: string; accent: string; onPress: () => void; delay: number }) {
+  const v = useRef(new Animated.Value(0)).current;
+  const [hot, setHot] = useState(false);
+  useEffect(() => {
+    Animated.timing(v, { toValue: 1, duration: 420, delay, useNativeDriver: true }).start();
+  }, []);
+  return (
+    <Animated.View style={{ opacity: v, transform: [{ translateX: v.interpolate({ inputRange: [0, 1], outputRange: [-36, 0] }) }] }}>
+      <Pressable
+        style={[styles.item, hot && { borderColor: accent, backgroundColor: 'rgba(20,26,48,0.85)' }]}
+        onPress={() => {
+          play('ui_confirm');
+          onPress();
+        }}
+        onHoverIn={() => setHot(true)}
+        onHoverOut={() => setHot(false)}
+      >
+        <View style={[styles.itemBar, { backgroundColor: accent }]} />
+        <View>
+          <Text style={styles.itemTxt}>{label}</Text>
+          {!!sub && <Text style={styles.itemSub}>{sub}</Text>}
+        </View>
+        <Text style={[styles.itemArrow, { color: accent }]}>▸</Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+export function HomeMenu() {
+  const gotoBriefing = useGame((s) => s.gotoBriefing);
+  const replayStory = useGame((s) => s.replayStory);
+  const [sound, setSound] = useState(true);
+  const glow = useRef(new Animated.Value(0)).current;
+  const drift = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(Animated.sequence([Animated.timing(glow, { toValue: 1, duration: 1600, useNativeDriver: true }), Animated.timing(glow, { toValue: 0, duration: 1600, useNativeDriver: true })])).start();
+    Animated.loop(Animated.sequence([Animated.timing(drift, { toValue: 1, duration: 16000, useNativeDriver: true }), Animated.timing(drift, { toValue: 0, duration: 16000, useNativeDriver: true })])).start();
+  }, []);
+
+  return (
+    <View style={styles.root}>
+      <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ scale: 1.12 }, { translateX: drift.interpolate({ inputRange: [0, 1], outputRange: [-18, 18] }) }] }]}>
+        <Image source={ART.homeBg} style={StyleSheet.absoluteFill} contentFit="cover" />
+      </Animated.View>
+      <LinearGradient colors={['rgba(3,5,14,0.25)', 'rgba(3,5,14,0.55)', 'rgba(3,5,14,0.94)']} style={StyleSheet.absoluteFill} />
+
+      <View style={styles.brand}>
+        <Animated.Text style={[styles.brandTitle, { opacity: glow.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }]}>SUPER ROBOT WARS</Animated.Text>
+        <Text style={styles.brandXyz}>X Y Z</Text>
+        <View style={styles.brandRule} />
+      </View>
+
+      <View style={styles.menu}>
+        <MenuItem label="STORY CAMPAIGN" sub="Mission SSS — Steel Sky Siege" accent="#ffd34d" delay={150} onPress={gotoBriefing} />
+        <MenuItem label="REPLAY STORY" sub="Watch the intro again" accent="#7ee7ff" delay={280} onPress={replayStory} />
+        <MenuItem
+          label={sound ? 'SOUND: ON' : 'SOUND: OFF'}
+          sub="Voice lines & battle SFX"
+          accent="#9dffa0"
+          delay={410}
+          onPress={() => {
+            setSound(!sound);
+            setSoundEnabled(!sound);
+          }}
+        />
+      </View>
+
+      <Text style={styles.foot}>v0.2 · original mecha tactics · not affiliated with Bandai Namco</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: { ...StyleSheet.absoluteFill, backgroundColor: '#03050e', zIndex: 40 },
+  brand: { position: 'absolute', top: '10%', left: 40 },
+  brandTitle: { color: '#dbe8ff', fontSize: 30, fontWeight: '900', letterSpacing: 8, fontStyle: 'italic', textShadowColor: '#4d7cff', textShadowRadius: 14 },
+  brandXyz: { color: '#ffd34d', fontSize: 64, fontWeight: '900', letterSpacing: 22, fontStyle: 'italic', marginTop: -6, textShadowColor: '#8a5c00', textShadowRadius: 16 },
+  brandRule: { height: 2, width: 240, backgroundColor: '#ffd34d', marginTop: 10, opacity: 0.8 },
+  menu: { position: 'absolute', left: 40, bottom: 70, width: 380, gap: 12 },
+  item: { flexDirection: 'row', alignItems: 'center', gap: 14, borderWidth: 1, borderColor: '#3a4160', borderRadius: 10, paddingVertical: 13, paddingHorizontal: 16, backgroundColor: 'rgba(12,16,32,0.72)' },
+  itemBar: { width: 4, alignSelf: 'stretch', borderRadius: 2 },
+  itemTxt: { color: '#eef2ff', fontWeight: '900', fontSize: 16, letterSpacing: 2.5 },
+  itemSub: { color: '#8fa1c7', fontSize: 11, marginTop: 2, letterSpacing: 0.6 },
+  itemArrow: { marginLeft: 'auto', fontSize: 18, fontWeight: '900' },
+  foot: { position: 'absolute', bottom: 16, alignSelf: 'center', color: '#55618a', fontSize: 10, letterSpacing: 1.5 },
+});

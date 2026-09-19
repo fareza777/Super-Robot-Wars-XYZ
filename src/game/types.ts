@@ -94,6 +94,8 @@ export interface MapDef {
 
 export type Phase =
   | 'title'
+  | 'onboarding'
+  | 'home'
   | 'briefing'
   | 'player'
   | 'enemy'

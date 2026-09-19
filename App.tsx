@@ -2,9 +2,11 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { BattleScene } from './src/components/BattleScene';
+import { HomeMenu } from './src/components/HomeMenu';
 import { MapGrid } from './src/components/MapGrid';
 import { BriefingScreen, EndScreen, TitleScreen } from './src/components/Screens';
 import { SidePanel } from './src/components/SidePanel';
+import { StoryIntro } from './src/components/StoryIntro';
 import { useGame } from './src/game/store';
 
 function EnemyBanner() {
@@ -26,6 +28,8 @@ export default function App() {
   return (
     <View style={styles.root}>
       {phase === 'title' && <TitleScreen />}
+      {phase === 'onboarding' && <StoryIntro />}
+      {phase === 'home' && <HomeMenu />}
       {phase === 'briefing' && <BriefingScreen />}
       {(phase === 'player' || phase === 'enemy' || phase === 'battle') && (
         <View style={styles.gameRow}>

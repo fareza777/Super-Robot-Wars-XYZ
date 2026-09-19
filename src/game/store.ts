@@ -43,6 +43,9 @@ interface Store {
   screenShake: number;
 
   start: () => void;
+  finishOnboarding: () => void;
+  gotoBriefing: () => void;
+  replayStory: () => void;
   startMission: () => void;
   tapTile: (p: Pos) => void;
   cancel: () => void;
@@ -86,12 +89,15 @@ export const useGame = create<Store>((set, get) => ({
   enemyBusy: false,
   screenShake: 0,
 
-  start: () => set({ phase: 'briefing', units: initUnits(), log: ['Mission SSS: Steel Sky Siege'] }),
+  start: () => set({ phase: 'onboarding', units: initUnits(), log: ['Mission SSS: Steel Sky Siege'] }),
+  finishOnboarding: () => set({ phase: 'home' }),
+  gotoBriefing: () => set({ phase: 'briefing' }),
+  replayStory: () => set({ phase: 'onboarding' }),
   startMission: () => set({ phase: 'player' }),
 
   restart: () =>
     set({
-      phase: 'title',
+      phase: 'home',
       turn: 1,
       units: [],
       cursor: null,

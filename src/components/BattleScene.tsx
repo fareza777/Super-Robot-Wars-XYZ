@@ -1,16 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ART, KIND_SFX, MECH_ART, PILOT_ART, SUBTITLES, UNIT_VOICE } from '../assets';
+import { play } from '../audio';
 import { useGame } from '../game/store';
 import { UnitState, WeaponDef } from '../game/types';
-import { MechSprite } from './MechSprite';
 
 /**
- * SRW-style battle cut-in:
+ * SRW-style battle cut-in with generated anime art:
  * stage 0 intro slide-in -> 1 weapon banner+attack anim -> 2 impact/damage
  * -> 3 counter anim -> 4 counter impact -> 5 outro -> finishBattle()
  */
 
-const DUR = { intro: 550, banner: 500, attack: 1150, impact: 1100, outro: 450 };
+const DUR = { intro: 700, banner: 550, attack: 1300, impact: 1150, outro: 500 };
 
 export function BattleScene() {
   const battle = useGame((s) => s.battle);
@@ -19,14 +22,20 @@ export function BattleScene() {
   const [stage, setStage] = useState(0);
   const [dmgShown, setDmgShown] = useState(0);
   const [counterDmgShown, setCounterDmgShown] = useState(0);
+  const [voiceLine, setVoiceLine] = useState<string | null>(null);
 
-  const bgShift = useRef(new Animated.Value(0)).current;
+  const bgZoom = useRef(new Animated.Value(0)).current;
   const fade = useRef(new Animated.Value(0)).current;
   const shakeX = useRef(new Animated.Value(0)).current;
   const defFlash = useRef(new Animated.Value(0)).current;
   const attFlash = useRef(new Animated.Value(0)).current;
   const defFall = useRef(new Animated.Value(0)).current;
   const attFall = useRef(new Animated.Value(0)).current;
+  const attEnter = useRef(new Animated.Value(0)).current;
+  const defEnter = useRef(new Animated.Value(0)).current;
+  const attLunge = useRef(new Animated.Value(0)).current;
+  const defLunge = useRef(new Animated.Value(0)).current;
+  const cutIn = useRef(new Animated.Value(0)).current;
 
   const atk = battle?.attacker;
   const def = battle?.defender;
@@ -38,9 +47,18 @@ export function BattleScene() {
     setStage(0);
     setDmgShown(0);
     setCounterDmgShown(0);
+    setVoiceLine(null);
     fade.setValue(0);
+    attEnter.setValue(0);
+    defEnter.setValue(0);
+    attLunge.setValue(0);
+    defLunge.setValue(0);
     Animated.timing(fade, { toValue: 1, duration: 250, useNativeDriver: true }).start();
-    Animated.loop(Animated.timing(bgShift, { toValue: 1, duration: 4000, easing: Easing.linear, useNativeDriver: true })).start();
+    Animated.timing(bgZoom, { toValue: 1, duration: 9000, easing: Easing.linear, useNativeDriver: true }).start();
+    Animated.parallel([
+      Animated.timing(attEnter, { toValue: 1, duration: 650, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.timing(defEnter, { toValue: 1, duration: 650, delay: 120, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+    ]).start();
   }, [battle]);
 
   useEffect(() => {
@@ -62,12 +80,52 @@ export function BattleScene() {
     return () => timers.forEach(clearTimeout);
   }, [battle, hasCounter, finishBattle]);
 
+  // audio + cut-ins + motion on attack stages
+  useEffect(() => {
+    if (!battle) return;
+    if (stage === 2) {
+      const vk = UNIT_VOICE[battle.attacker.def.id]?.[0];
+      if (vk) {
+        play(vk);
+        setVoiceLine(SUBTITLES[vk] ?? null);
+      }
+      play(KIND_SFX[battle.weapon.kind] ?? 'sfx_beam');
+      cutIn.setValue(0);
+      Animated.sequence([
+        Animated.timing(cutIn, { toValue: 1, duration: 260, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+        Animated.timing(cutIn, { toValue: 0, duration: 260, delay: 1050, useNativeDriver: true }),
+      ]).start();
+      Animated.sequence([
+        Animated.timing(attLunge, { toValue: 1, duration: 380, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+        Animated.timing(attLunge, { toValue: 0, duration: 420, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      ]).start();
+    }
+    if (stage === 4 && battle.result.counter) {
+      const vk = UNIT_VOICE[battle.defender.def.id]?.[1] ?? UNIT_VOICE[battle.defender.def.id]?.[0];
+      if (vk) {
+        play(vk);
+        setVoiceLine(SUBTITLES[vk] ?? null);
+      }
+      play(KIND_SFX[battle.result.counter.weapon.kind] ?? 'sfx_beam');
+      cutIn.setValue(0);
+      Animated.sequence([
+        Animated.timing(cutIn, { toValue: 1, duration: 260, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+        Animated.timing(cutIn, { toValue: 0, duration: 260, delay: 1050, useNativeDriver: true }),
+      ]).start();
+      Animated.sequence([
+        Animated.timing(defLunge, { toValue: 1, duration: 380, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+        Animated.timing(defLunge, { toValue: 0, duration: 420, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      ]).start();
+    }
+  }, [stage]);
+
   // damage counter + shake + flash on impact stages
   useEffect(() => {
     if (!battle) return;
     if (stage === 3) {
       const r = battle.result;
       if (r.hit) {
+        play(r.destroyed ? 'sfx_explosion' : 'sfx_hit');
         pulse(defFlash, shakeX);
         countUp(r.damage, setDmgShown, 700);
         if (r.destroyed)
@@ -77,6 +135,7 @@ export function BattleScene() {
     if (stage === 5 && battle.result.counter) {
       const c = battle.result.counter;
       if (c.hit) {
+        play(c.destroyed ? 'sfx_explosion' : 'sfx_hit');
         pulse(attFlash, shakeX);
         countUp(c.damage, setCounterDmgShown, 700);
         if (c.destroyed)
@@ -86,58 +145,80 @@ export function BattleScene() {
   }, [stage]);
 
   if (!battle || !atk || !def) return null;
-  const mech = Math.min(150, height * 0.42);
+
+  const PW = width * 0.46; // mech panel width
+  const PH = height * 0.58;
+  const counterActive = stage >= 4;
+  const activePilot = counterActive ? def : atk;
 
   return (
     <Animated.View style={[styles.root, { opacity: fade }]}>
-      {/* animated starfield bg */}
-      <StarField shift={bgShift} w={width} h={height} />
+      {/* bg */}
+      <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ scale: bgZoom.interpolate({ inputRange: [0, 1], outputRange: [1.05, 1.22] }) }] }]}>
+        <Image source={ART.battleBg} style={StyleSheet.absoluteFill} contentFit="cover" />
+      </Animated.View>
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(4,6,16,0.35)' }]} />
+
+      <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateX: shakeX }] }]}>
+        {/* attacker mech panel */}
+        <Animated.View
+          style={[
+            styles.panel,
+            {
+              left: width * 0.045,
+              bottom: height * 0.1,
+              width: PW,
+              height: PH,
+              borderColor: atk.def.accent,
+              opacity: attFall.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }),
+              transform: [
+                { translateX: Animated.add(attEnter.interpolate({ inputRange: [0, 1], outputRange: [-PW * 1.2, 0] }), attLunge.interpolate({ inputRange: [0, 1], outputRange: [0, width * 0.07] })) },
+                { translateY: attFall.interpolate({ inputRange: [0, 1], outputRange: [0, 160] }) },
+                { rotate: attFall.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '12deg'] }) },
+              ],
+            },
+          ]}
+        >
+          <Image source={MECH_ART[atk.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" />
+          <LinearGradient colors={['transparent', 'rgba(0,0,0,0.55)']} style={StyleSheet.absoluteFill} />
+          <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#fff', opacity: attFlash }]} />
+        </Animated.View>
+
+        {/* defender mech panel */}
+        <Animated.View
+          style={[
+            styles.panel,
+            {
+              right: width * 0.045,
+              top: height * 0.08,
+              width: PW,
+              height: PH,
+              borderColor: def.def.accent,
+              opacity: defFall.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }),
+              transform: [
+                { translateX: Animated.add(defEnter.interpolate({ inputRange: [0, 1], outputRange: [PW * 1.2, 0] }), defLunge.interpolate({ inputRange: [0, 1], outputRange: [0, -width * 0.07] })) },
+                { translateY: defFall.interpolate({ inputRange: [0, 1], outputRange: [0, 160] }) },
+                { rotate: defFall.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '-12deg'] }) },
+              ],
+            },
+          ]}
+        >
+          <Image source={MECH_ART[def.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" />
+          <LinearGradient colors={['transparent', 'rgba(0,0,0,0.55)']} style={StyleSheet.absoluteFill} />
+          <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#fff', opacity: defFlash }]} />
+        </Animated.View>
+
+        {/* attack VFX overlays */}
+        {(stage === 2 || stage === 3) && <AttackAnim weapon={battle.weapon} side="attacker" w={width} h={height} />}
+        {counterActive && <AttackAnim weapon={battle.result.counter!.weapon} side="defender" w={width} h={height} />}
+
+        {/* pilot cut-in */}
+        <PilotCutIn unit={activePilot} side={counterActive ? 'right' : 'left'} anim={cutIn} line={voiceLine} />
+      </Animated.View>
 
       {/* name plates */}
       <NamePlate unit={atk} side="left" />
       <NamePlate unit={def} side="right" />
-
-      <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateX: shakeX }] }]}>
-        {/* attacker */}
-        <Animated.View
-          style={[
-            styles.mech,
-            {
-              left: width * 0.14,
-              bottom: height * 0.16,
-              opacity: attFall.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }),
-              transform: [
-                { translateY: attFall.interpolate({ inputRange: [0, 1], outputRange: [0, 160] }) },
-                { rotate: attFall.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '40deg'] }) },
-              ],
-            },
-          ]}
-        >
-          {stage >= 1 && stage < 4 && <AttackAnim weapon={battle.weapon} side="attacker" w={width} h={height} />}
-          <MechSprite def={atk.def} size={mech} />
-          <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#fff', opacity: attFlash }]} />
-        </Animated.View>
-
-        {/* defender */}
-        <Animated.View
-          style={[
-            styles.mech,
-            {
-              right: width * 0.14,
-              top: height * 0.14,
-              opacity: defFall.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }),
-              transform: [
-                { translateY: defFall.interpolate({ inputRange: [0, 1], outputRange: [0, 160] }) },
-                { rotate: defFall.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '-40deg'] }) },
-              ],
-            },
-          ]}
-        >
-          {stage >= 4 && <AttackAnim weapon={battle.result.counter!.weapon} side="defender" w={width} h={height} />}
-          <MechSprite def={def.def} size={mech} flip />
-          <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#fff', opacity: defFlash }]} />
-        </Animated.View>
-      </Animated.View>
 
       {/* weapon banner */}
       {stage === 1 && <Banner text={battle.weapon.name} color="#ffd34d" />}
@@ -164,7 +245,7 @@ export function BattleScene() {
         ))}
       {stage === 5 && battle.result.counter?.hit && battle.result.counter.destroyed && <Explosion w={width} h={height} />}
 
-      {/* hit chance footer */}
+      {/* footer */}
       <View style={styles.footer}>
         <Text style={styles.footerTxt}>
           {battle.weapon.name} · HIT {battle.result.hitChance}% · POW {battle.weapon.power}
@@ -205,62 +286,57 @@ function countUp(to: number, set: (n: number) => void, ms: number) {
 
 // ---------- sub-visuals ----------
 
-function StarField({ shift, w, h }: { shift: Animated.Value; w: number; h: number }) {
-  const stars = useRef(
-    Array.from({ length: 46 }, (_, i) => ({
-      x: (i * 173) % w,
-      y: (i * 97) % h,
-      r: (i % 3) + 1,
-      speed: 0.4 + (i % 5) * 0.25,
-    })),
-  ).current;
+function PilotCutIn({ unit, side, anim, line }: { unit: UnitState; side: 'left' | 'right'; anim: Animated.Value; line: string | null }) {
+  const { width, height } = useWindowDimensions();
+  const fromLeft = side === 'left';
+  const W = Math.min(250, width * 0.3);
   return (
-    <View style={[StyleSheet.absoluteFill, { backgroundColor: '#05070f' }]}>
-      {/* horizon grid */}
-      {Array.from({ length: 7 }, (_, i) => (
-        <View key={`h${i}`} style={[styles.gridLine, { top: h * 0.55 + i * i * 3.2, opacity: 0.16 + i * 0.02 }]} />
-      ))}
-      {stars.map((s, i) => (
-        <Animated.View
-          key={i}
-          style={{
-            position: 'absolute',
-            top: s.y,
-            left: 0,
-            width: s.r * 2,
-            height: s.r,
-            borderRadius: s.r,
-            backgroundColor: '#bcd6ff',
-            opacity: 0.7,
-            transform: [
-              {
-                translateX: shift.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [s.x, s.x - w * s.speed],
-                }),
-              },
-            ],
-          }}
-        />
-      ))}
-      <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(20,30,80,0.25)' }]} />
-    </View>
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        styles.cutIn,
+        fromLeft ? { left: width * 0.03, top: height * 0.06 } : { right: width * 0.03, bottom: height * 0.06 },
+        {
+          opacity: anim,
+          transform: [
+            { translateX: anim.interpolate({ inputRange: [0, 1], outputRange: [fromLeft ? -W * 1.4 : W * 1.4, 0] }) },
+            { skewX: fromLeft ? '-8deg' : '8deg' },
+          ],
+          width: W,
+        },
+      ]}
+    >
+      <View style={[styles.cutInImgWrap, { borderColor: unit.def.accent }]}>
+        <Image source={PILOT_ART[unit.def.id]} style={{ width: W * 0.62, height: W * 0.62 }} contentFit="cover" />
+        <View style={styles.cutInName}>
+          <Text style={styles.cutInNameTxt}>{unit.def.pilot.name}</Text>
+        </View>
+      </View>
+      {!!line && (
+        <View style={[styles.cutInLine, { borderColor: unit.def.accent }]}>
+          <Text style={styles.cutInLineTxt}>"{line}"</Text>
+        </View>
+      )}
+    </Animated.View>
   );
 }
 
 function NamePlate({ unit, side }: { unit: UnitState; side: 'left' | 'right' }) {
   const pct = Math.max(0, unit.hp / unit.def.maxHp);
   return (
-    <View style={[styles.plate, side === 'left' ? { left: 14, bottom: 14 } : { right: 14, top: 14 }]}>
-      <Text style={styles.plateName}>
-        {unit.def.name} · {unit.def.pilot.callsign}
-      </Text>
-      <View style={styles.plateBarTrack}>
-        <View style={[styles.plateBarFill, { width: `${pct * 100}%` }]} />
+    <View style={[styles.plate, side === 'left' ? { left: 14, bottom: 12 } : { right: 14, top: 12 }]}>
+      <Image source={PILOT_ART[unit.def.id]} style={styles.plateFace} contentFit="cover" />
+      <View style={{ flex: 1 }}>
+        <Text style={styles.plateName} numberOfLines={1}>
+          {unit.def.name} · {unit.def.pilot.callsign}
+        </Text>
+        <View style={styles.plateBarTrack}>
+          <View style={[styles.plateBarFill, { width: `${pct * 100}%`, backgroundColor: pct > 0.5 ? '#4dff7a' : pct > 0.25 ? '#ffd34d' : '#ff5a5a' }]} />
+        </View>
+        <Text style={styles.plateHp}>
+          {unit.hp}/{unit.def.maxHp}
+        </Text>
       </View>
-      <Text style={styles.plateHp}>
-        {unit.hp}/{unit.def.maxHp}
-      </Text>
     </View>
   );
 }
@@ -271,7 +347,7 @@ function Banner({ text, color }: { text: string; color: string }) {
     Animated.spring(slide, { toValue: 0, useNativeDriver: true, friction: 7 }).start();
   }, []);
   return (
-    <Animated.View style={[styles.banner, { borderColor: color, transform: [{ translateX: slide.interpolate({ inputRange: [-1, 0], outputRange: [-420, 0] }) }] }]}>
+    <Animated.View style={[styles.banner, { borderColor: color, transform: [{ translateX: slide.interpolate({ inputRange: [-1, 0], outputRange: [-520, 0] }) }] }]}>
       <Text style={[styles.bannerTxt, { color }]}>{text}</Text>
     </Animated.View>
   );
@@ -304,8 +380,8 @@ function Explosion({ w, h, right }: { w: number; h: number; right?: boolean }) {
     rings.forEach((r, i) => Animated.timing(r, { toValue: 1, duration: 600, delay: i * 120, useNativeDriver: true }).start());
     parts.forEach((p) => Animated.timing(p.v, { toValue: 1, duration: 550, easing: Easing.out(Easing.quad), useNativeDriver: true }).start());
   }, []);
-  const cx = right ? w * 0.86 : w * 0.14;
-  const cy = right ? h * 0.32 : h * 0.62;
+  const cx = right ? w * 0.74 : w * 0.26;
+  const cy = right ? h * 0.38 : h * 0.64;
   return (
     <View style={[StyleSheet.absoluteFill]} pointerEvents="none">
       {rings.map((r, i) => (
@@ -351,75 +427,73 @@ function AttackAnim({ weapon, side, w, h }: { weapon: WeaponDef; side: 'attacker
   const v = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     v.setValue(0);
-    Animated.timing(v, { toValue: 1, duration: DUR.attack + DUR.banner, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+    Animated.timing(v, { toValue: 1, duration: DUR.attack + DUR.impact * 0.6, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
   }, [weapon.id]);
 
-  // attacker sits left shooting right; defender (countering) sits right shooting left
+  // attacker panel left firing right; defender (countering) right firing left
   const fromLeft = side === 'attacker';
-  const sx = fromLeft ? w * 0.2 : w * 0.8;
-  const sy = fromLeft ? h * 0.5 : h * 0.36;
-  const tx = fromLeft ? w * 0.82 : w * 0.16;
-  const ty = fromLeft ? h * 0.32 : h * 0.62;
+  const sx = fromLeft ? w * 0.3 : w * 0.7;
+  const sy = fromLeft ? h * 0.52 : h * 0.4;
+  const tx = fromLeft ? w * 0.74 : w * 0.26;
+  const ty = fromLeft ? h * 0.4 : h * 0.6;
   const dir = tx - sx;
   const dy = ty - sy;
 
   switch (weapon.kind) {
     case 'melee': {
-      // dash + slash line on target
       return (
-        <>
-          <Animated.View
-            style={{
-              position: 'absolute',
-              left: sx,
-              top: sy,
-              width: 8,
-              height: 46,
-              backgroundColor: '#7ee7ff',
-              borderRadius: 4,
-              opacity: v.interpolate({ inputRange: [0, 0.6, 1], outputRange: [0, 1, 0] }),
-              transform: [
-                { translateX: v.interpolate({ inputRange: [0, 1], outputRange: [0, dir] }) },
-                { translateY: v.interpolate({ inputRange: [0, 1], outputRange: [0, dy] }) },
-                { rotate: '35deg' },
-                { scaleY: v.interpolate({ inputRange: [0, 0.7, 1], outputRange: [0.2, 1.6, 0.4] }) },
-              ],
-            }}
-          />
-        </>
+        <Animated.View
+          style={{
+            position: 'absolute',
+            left: sx,
+            top: sy,
+            width: 9,
+            height: 120,
+            backgroundColor: '#aef3ff',
+            borderRadius: 5,
+            shadowColor: '#7ee7ff',
+            shadowRadius: 14,
+            shadowOpacity: 1,
+            opacity: v.interpolate({ inputRange: [0, 0.55, 1], outputRange: [0, 1, 0] }),
+            transform: [
+              { translateX: v.interpolate({ inputRange: [0, 1], outputRange: [0, dir] }) },
+              { translateY: v.interpolate({ inputRange: [0, 1], outputRange: [0, dy] }) },
+              { rotate: '38deg' },
+              { scaleY: v.interpolate({ inputRange: [0, 0.7, 1], outputRange: [0.3, 1.5, 0.4] }) },
+            ],
+          }}
+        />
       );
     }
     case 'beam': {
       return (
         <>
-          {/* charge glow */}
           <Animated.View
             style={{
               position: 'absolute',
-              left: sx - 14,
-              top: sy - 14,
-              width: 28,
-              height: 28,
-              borderRadius: 14,
+              left: sx - 18,
+              top: sy - 18,
+              width: 36,
+              height: 36,
+              borderRadius: 18,
               backgroundColor: '#9fd0ff',
-              opacity: v.interpolate({ inputRange: [0, 0.35, 0.6, 1], outputRange: [0, 0.9, 0.9, 0] }),
-              transform: [{ scale: v.interpolate({ inputRange: [0, 0.35], outputRange: [0.2, 1.4] }) }],
+              opacity: v.interpolate({ inputRange: [0, 0.3, 0.55, 1], outputRange: [0, 0.9, 0.9, 0] }),
+              transform: [{ scale: v.interpolate({ inputRange: [0, 0.3], outputRange: [0.2, 1.5] }) }],
             }}
           />
-          {/* beam */}
           <Animated.View
             style={{
               position: 'absolute',
               left: sx,
               top: sy,
               width: Math.abs(dir),
-              height: 10,
-              borderRadius: 5,
-              backgroundColor: '#7ee7ff',
+              height: 12,
+              borderRadius: 6,
+              backgroundColor: '#8ee9ff',
               shadowColor: '#7ee7ff',
-              shadowRadius: 12,
-              shadowOpacity: 0.9,
-              opacity: v.interpolate({ inputRange: [0, 0.38, 0.42, 0.95, 1], outputRange: [0, 0, 1, 1, 0] }),
+              shadowRadius: 16,
+              shadowOpacity: 1,
+              opacity: v.interpolate({ inputRange: [0, 0.35, 0.42, 0.95, 1], outputRange: [0, 0, 1, 1, 0] }),
               transform: [{ translateX: dir < 0 ? dir : 0 }, { scaleX: v.interpolate({ inputRange: [0.4, 0.75], outputRange: [0.02, 1], extrapolate: 'clamp' }) }],
             }}
           />
@@ -436,14 +510,17 @@ function AttackAnim({ weapon, side, w, h }: { weapon: WeaponDef; side: 'attacker
                 position: 'absolute',
                 left: sx,
                 top: sy,
-                width: 10,
-                height: 5,
-                borderRadius: 3,
+                width: 14,
+                height: 7,
+                borderRadius: 4,
                 backgroundColor: '#ffd0a0',
-                opacity: v.interpolate({ inputRange: [0, 0.15 + i * 0.1, 0.9, 1], outputRange: [0, 1, 1, 0] }),
+                shadowColor: '#ffb84d',
+                shadowRadius: 8,
+                shadowOpacity: 0.9,
+                opacity: v.interpolate({ inputRange: [0, 0.12 + i * 0.09, 0.9, 1], outputRange: [0, 1, 1, 0] }),
                 transform: [
-                  { translateX: v.interpolate({ inputRange: [0.1 + i * 0.1, 0.95], outputRange: [0, dir], extrapolate: 'clamp' }) },
-                  { translateY: v.interpolate({ inputRange: [0.1 + i * 0.1, 0.5, 0.95], outputRange: [0, dy - 60 - i * 8, dy], extrapolate: 'clamp' }) },
+                  { translateX: v.interpolate({ inputRange: [0.08 + i * 0.09, 0.95], outputRange: [0, dir], extrapolate: 'clamp' }) },
+                  { translateY: v.interpolate({ inputRange: [0.08 + i * 0.09, 0.5, 0.95], outputRange: [0, dy - 70 - i * 9, dy], extrapolate: 'clamp' }) },
                   { rotate: v.interpolate({ inputRange: [0, 1], outputRange: ['-30deg', '10deg'] }) },
                 ],
               }}
@@ -462,12 +539,15 @@ function AttackAnim({ weapon, side, w, h }: { weapon: WeaponDef; side: 'attacker
                 position: 'absolute',
                 left: sx,
                 top: sy,
-                width: 16,
-                height: 4,
-                borderRadius: 2,
+                width: 20,
+                height: 5,
+                borderRadius: 3,
                 backgroundColor: '#ffe28a',
-                opacity: v.interpolate({ inputRange: [0, 0.2 + i * 0.12, 0.3 + i * 0.12, 1], outputRange: [0, 0, 1, 0] }),
-                transform: [{ translateX: v.interpolate({ inputRange: [0.2 + i * 0.12, 0.6 + i * 0.12], outputRange: [0, dir], extrapolate: 'clamp' }) }, { translateY: dy * 0.9 }],
+                shadowColor: '#ffd34d',
+                shadowRadius: 8,
+                shadowOpacity: 1,
+                opacity: v.interpolate({ inputRange: [0, 0.18 + i * 0.12, 0.28 + i * 0.12, 1], outputRange: [0, 0, 1, 0] }),
+                transform: [{ translateX: v.interpolate({ inputRange: [0.18 + i * 0.12, 0.6 + i * 0.12], outputRange: [0, dir], extrapolate: 'clamp' }) }, { translateY: dy * 0.9 }],
               }}
             />
           ))}
@@ -478,7 +558,7 @@ function AttackAnim({ weapon, side, w, h }: { weapon: WeaponDef; side: 'attacker
       return (
         <>
           {Array.from({ length: 4 }, (_, i) => {
-            const off = (i - 1.5) * 26;
+            const off = (i - 1.5) * 30;
             return (
               <Animated.View
                 key={i}
@@ -486,14 +566,17 @@ function AttackAnim({ weapon, side, w, h }: { weapon: WeaponDef; side: 'attacker
                   position: 'absolute',
                   left: sx,
                   top: sy + off,
-                  width: 12,
-                  height: 6,
-                  borderRadius: 3,
+                  width: 15,
+                  height: 8,
+                  borderRadius: 4,
                   backgroundColor: '#d0a0ff',
-                  opacity: v.interpolate({ inputRange: [0, 0.15, 0.9, 1], outputRange: [0, 1, 1, 0] }),
+                  shadowColor: '#b06cff',
+                  shadowRadius: 10,
+                  shadowOpacity: 1,
+                  opacity: v.interpolate({ inputRange: [0, 0.12, 0.9, 1], outputRange: [0, 1, 1, 0] }),
                   transform: [
-                    { translateX: v.interpolate({ inputRange: [0.15, 0.85], outputRange: [0, dir], extrapolate: 'clamp' }) },
-                    { translateY: v.interpolate({ inputRange: [0.15, 0.5, 0.85], outputRange: [0, -60 - off, dy - off], extrapolate: 'clamp' }) },
+                    { translateX: v.interpolate({ inputRange: [0.12, 0.85], outputRange: [0, dir], extrapolate: 'clamp' }) },
+                    { translateY: v.interpolate({ inputRange: [0.12, 0.5, 0.85], outputRange: [0, -70 - off, dy - off], extrapolate: 'clamp' }) },
                   ],
                 }}
               />
@@ -508,19 +591,25 @@ function AttackAnim({ weapon, side, w, h }: { weapon: WeaponDef; side: 'attacker
 }
 
 const styles = StyleSheet.create({
-  root: { ...StyleSheet.absoluteFill, backgroundColor: '#05070f', zIndex: 50, elevation: 50 },
-  gridLine: { position: 'absolute', left: 0, right: 0, height: 1, backgroundColor: '#3a5fd0' },
-  mech: { position: 'absolute' },
-  plate: { position: 'absolute', backgroundColor: 'rgba(10,14,28,0.85)', borderWidth: 1, borderColor: '#3a4160', borderRadius: 8, padding: 8, width: 190, zIndex: 60 },
-  plateName: { color: '#fff', fontWeight: '800', fontSize: 13 },
+  root: { ...StyleSheet.absoluteFill, backgroundColor: '#04060f', zIndex: 50, elevation: 50 },
+  panel: { position: 'absolute', borderRadius: 14, overflow: 'hidden', borderWidth: 2, backgroundColor: '#0a0e1e' },
+  cutIn: { position: 'absolute', zIndex: 70 },
+  cutInImgWrap: { borderRadius: 12, overflow: 'hidden', borderWidth: 2, backgroundColor: '#0a0e1e' },
+  cutInName: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(8,10,22,0.85)', paddingVertical: 4, alignItems: 'center' },
+  cutInNameTxt: { color: '#fff', fontWeight: '900', fontSize: 12, letterSpacing: 1.5 },
+  cutInLine: { marginTop: 6, borderWidth: 1, borderRadius: 8, backgroundColor: 'rgba(8,10,22,0.85)', padding: 7 },
+  cutInLineTxt: { color: '#ffe9b0', fontSize: 11.5, fontStyle: 'italic', lineHeight: 16 },
+  plate: { position: 'absolute', flexDirection: 'row', gap: 8, alignItems: 'center', backgroundColor: 'rgba(10,14,28,0.88)', borderWidth: 1, borderColor: '#3a4160', borderRadius: 10, padding: 7, width: 220, zIndex: 60 },
+  plateFace: { width: 40, height: 40, borderRadius: 8 },
+  plateName: { color: '#fff', fontWeight: '800', fontSize: 12.5 },
   plateBarTrack: { height: 7, backgroundColor: '#0a0c12', borderRadius: 3, marginTop: 5, overflow: 'hidden' },
   plateBarFill: { height: 7, backgroundColor: '#4dff7a' },
   plateHp: { color: '#9fb0d0', fontSize: 10, marginTop: 3, textAlign: 'right' },
-  banner: { position: 'absolute', top: '44%', left: 0, right: 0, alignItems: 'center', borderTopWidth: 1, borderBottomWidth: 1, backgroundColor: 'rgba(5,8,18,0.75)', paddingVertical: 10 },
-  bannerTxt: { fontSize: 22, fontWeight: '900', letterSpacing: 4, fontStyle: 'italic' },
-  impactWrap: { position: 'absolute', top: '40%', left: 0, right: 0, alignItems: 'center' },
-  impactTxt: { fontSize: 56, fontWeight: '900', fontStyle: 'italic', textShadowColor: '#000', textShadowRadius: 10 },
-  impactSub: { color: '#ffb84d', fontSize: 15, fontWeight: '800', letterSpacing: 2, marginTop: 2 },
-  footer: { position: 'absolute', bottom: 12, left: 0, right: 0, alignItems: 'center' },
-  footerTxt: { color: '#6b7694', fontSize: 11, letterSpacing: 1 },
+  banner: { position: 'absolute', top: '44%', left: 0, right: 0, alignItems: 'center', borderTopWidth: 1, borderBottomWidth: 1, backgroundColor: 'rgba(5,8,18,0.78)', paddingVertical: 10 },
+  bannerTxt: { fontSize: 26, fontWeight: '900', letterSpacing: 6, fontStyle: 'italic' },
+  impactWrap: { position: 'absolute', top: '30%', left: 0, right: 0, alignItems: 'center' },
+  impactTxt: { fontSize: 58, fontWeight: '900', fontStyle: 'italic', textShadowColor: '#000', textShadowRadius: 10 },
+  impactSub: { color: '#ffd34d', fontSize: 18, fontWeight: '900', letterSpacing: 5, marginTop: 2 },
+  footer: { position: 'absolute', bottom: 8, alignSelf: 'center' },
+  footerTxt: { color: 'rgba(200,214,255,0.7)', fontSize: 11, letterSpacing: 2 },
 });

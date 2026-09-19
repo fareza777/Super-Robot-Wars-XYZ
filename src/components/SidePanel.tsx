@@ -1,5 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image } from 'expo-image';
+import { PILOT_ART } from '../assets';
 import { SPIRITS } from '../game/data';
 import { usableWeapons, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, useGame } from '../game/store';
@@ -46,7 +48,7 @@ export function SidePanel() {
       {unit && (
         <View style={styles.unitCard}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <MechSprite def={unit.def} size={44} flip={unit.side === 'enemy'} dimmed={unit.acted} />
+            <Image source={PILOT_ART[unit.def.id]} style={styles.face} contentFit="cover" />
             <View style={{ flex: 1 }}>
               <Text style={styles.unitName}>{unit.def.name}</Text>
               <Text style={styles.pilotName}>
@@ -123,6 +125,7 @@ const styles = StyleSheet.create({
   turnTxt: { color: '#9fb0d0', fontWeight: '700', fontSize: 12 },
   counts: { color: '#6b7694', fontSize: 10, marginTop: 2 },
   unitCard: { backgroundColor: '#1a1e2c', borderRadius: 8, padding: 8, marginTop: 8 },
+  face: { width: 46, height: 46, borderRadius: 8, borderWidth: 1, borderColor: '#3a4160' },
   unitName: { color: '#fff', fontWeight: '800', fontSize: 14 },
   pilotName: { color: '#8fa1c7', fontSize: 10 },
   barRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 6 },

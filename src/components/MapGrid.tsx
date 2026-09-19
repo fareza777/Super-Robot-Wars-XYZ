@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Image } from 'expo-image';
+import { ART } from '../assets';
 import { MISSION_SSS, TERRAIN_INFO } from '../game/data';
 import { key, same } from '../game/engine';
 import { useGame } from '../game/store';
@@ -27,9 +29,12 @@ export function MapGrid() {
   const ghost = pendingMove && selectedUid ? units.find((u) => u.uid === selectedUid) : undefined;
 
   return (
-    <ScrollView horizontal style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        <View style={{ width: tile * 14, height: tile * 10 }}>
+    <View style={styles.scroll}>
+      <Image source={ART.boardBg} style={StyleSheet.absoluteFill} contentFit="cover" />
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(4,6,16,0.45)' }]} />
+      <ScrollView horizontal style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+          <View style={{ width: tile * 14, height: tile * 10 }}>
           {tiles.map((p) => {
             const ter = TERRAIN_INFO[T(p.y, p.x)];
             const inMove = moveTiles.has(key(p));
@@ -72,9 +77,10 @@ export function MapGrid() {
               <MechSprite def={ghost.def} size={tile * 0.92} />
             </View>
           )}
-        </View>
+          </View>
+        </ScrollView>
       </ScrollView>
-    </ScrollView>
+    </View>
   );
 }
 
