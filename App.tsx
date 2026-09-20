@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { BattleScene } from './src/components/BattleScene';
 import { ChapterDialog } from './src/components/ChapterDialog';
 import { HomeMenu } from './src/components/HomeMenu';
+import { HQScreen } from './src/components/HQScreen';
 import { MapGrid } from './src/components/MapGrid';
 import { BriefingScreen, EndScreen, TitleScreen } from './src/components/Screens';
 import { SidePanel } from './src/components/SidePanel';
@@ -25,6 +26,11 @@ function EnemyBanner() {
 export default function App() {
   const phase = useGame((s) => s.phase);
   const battle = useGame((s) => s.battle);
+  const loadSave = useGame((s) => s.loadSave);
+
+  useEffect(() => {
+    void loadSave();
+  }, []);
 
   return (
     <View style={styles.root}>
@@ -32,6 +38,7 @@ export default function App() {
       {phase === 'onboarding' && <StoryIntro />}
       {phase === 'home' && <HomeMenu />}
       {phase === 'briefing' && <BriefingScreen />}
+      {phase === 'hq' && <HQScreen />}
       {phase === 'dialog' && <ChapterDialog />}
       {(phase === 'player' || phase === 'enemy' || phase === 'battle') && (
         <View style={styles.gameRow}>

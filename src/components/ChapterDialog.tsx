@@ -2,14 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ART, DIALOGUE, PILOT_ART } from '../assets';
+import { ART, AudioKey, PILOT_ART } from '../assets';
 import { play } from '../audio';
-import { UNITS } from '../game/data';
+import { chapterOf } from '../game/campaign';
+import { ALL_UNITS } from '../game/campaign';
 import { useGame } from '../game/store';
 
-/** Chapter 1 pre-mission dialogue — VN-style exchange over the battlefield. */
+/** Pre-mission dialogue — VN-style exchange over the battlefield, per chapter. */
 export function ChapterDialog() {
   const finish = useGame((s) => s.finishDialog);
+  const chapter = useGame((s) => s.chapter);
   const { width, height } = useWindowDimensions();
   const [idx, setIdx] = useState(0);
   const [chars, setChars] = useState(0);
@@ -17,9 +19,11 @@ export function ChapterDialog() {
   const portIn = useRef(new Animated.Value(0)).current;
   const bgZoom = useRef(new Animated.Value(0)).current;
 
-  const line = DIALOGUE[idx];
-  const def = UNITS[line.speaker];
-  const enemy = def.id === 'kargan';
+  const chDef = chapterOf(chapter);
+  const lines = chDef.lines;
+  const line = lines[Math.min(idx, lines.length - 1)];
+  const def = ALL_UNITS[line.speaker];
+  const enemy = !['valstray', 'arielis', 'gruntborg', 'zephyra'].includes(line.speaker);
   const done = chars >= line.text.length;
 
   useEffect(() => {
@@ -30,7 +34,7 @@ export function ChapterDialog() {
   useEffect(() => {
     setChars(0);
     portIn.setValue(0);
-    play(line.voice);
+    play(`c${chDef.id}_l${idx}` as AudioKey);
     Animated.spring(portIn, { toValue: 1, useNativeDriver: true, friction: 7 }).start();
     // elapsed-time driven so starved timers on slow devices still finish on schedule
     const t0 = Date.now();
@@ -45,7 +49,7 @@ export function ChapterDialog() {
       setChars(line.text.length);
       return;
     }
-    if (idx >= DIALOGUE.length - 1) {
+    if (idx >= lines.length - 1) {
       finish();
       return;
     }
@@ -64,7 +68,7 @@ export function ChapterDialog() {
       <LinearGradient colors={['rgba(3,5,14,0.65)', 'transparent', 'rgba(3,5,14,0.9)']} style={StyleSheet.absoluteFill} pointerEvents="none" />
 
       <View style={styles.chapterTag}>
-        <Text style={styles.chapterTxt}>CHAPTER 1 · STEEL SKY SIEGE</Text>
+        <Text style={styles.chapterTxt}>{`CHAPTER ${chDef.id} · ${chDef.name.toUpperCase()}`}</Text>
       </View>
 
       {/* active speaker portrait */}

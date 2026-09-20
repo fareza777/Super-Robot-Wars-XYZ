@@ -70,6 +70,8 @@ export const TERRAIN_INFO: Record<Terrain, { name: string; def: number; eva: num
   water: { name: 'Water', def: 0, eva: 0, moveCost: { land: 99, air: 1 }, passable: { land: false, air: true }, color: '#1e3f66', glyph: '≈' },
   city: { name: 'City', def: 200, eva: -10, moveCost: { land: 1, air: 1 }, passable: { land: true, air: true }, color: '#4a4a58', glyph: '▦' },
   base: { name: 'Base', def: 250, eva: 0, moveCost: { land: 1, air: 1 }, passable: { land: true, air: true }, color: '#584a6e', glyph: '⌂' },
+  void: { name: 'Void', def: 0, eva: 10, moveCost: { land: 1, air: 1 }, passable: { land: true, air: true }, color: '#141428', glyph: '·' },
+  moon: { name: 'Moon Surface', def: 50, eva: 5, moveCost: { land: 2, air: 1 }, passable: { land: true, air: true }, color: '#555560', glyph: '◌' },
 };
 
 // ---------- Mission SSS: "Steel Sky Siege" ----------

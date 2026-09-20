@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
 import { MECH_ART, TERRAIN_ART } from '../assets';
-import { MISSION_SSS } from '../game/data';
 import { key, same } from '../game/engine';
 import { useGame } from '../game/store';
 import { Pos } from '../game/types';
@@ -13,6 +12,7 @@ const PANEL_W = 237;
 
 export function MapGrid() {
   const units = useGame((s) => s.units);
+  const map = useGame((s) => s.map);
   const moveTiles = useGame((s) => s.moveTiles);
   const attackTiles = useGame((s) => s.attackTiles);
   const selectedUid = useGame((s) => s.selectedUid);
@@ -40,7 +40,7 @@ export function MapGrid() {
         const inAtk = attackTiles.has(key(p));
         return (
           <Pressable key={key(p)} onPress={() => tapTile(p)} style={[styles.tile, { left: p.x * tw, top: p.y * th, width: tw, height: th }]}>
-            <Image source={TERRAIN_ART[T(p.y, p.x)]} style={StyleSheet.absoluteFill} contentFit="cover" />
+            <Image source={TERRAIN_ART[map.terrain[p.y][p.x]]} style={StyleSheet.absoluteFill} contentFit="cover" />
             <View style={styles.gridLine} pointerEvents="none" />
             {inMove && <View style={[styles.overlay, styles.moveOv]} pointerEvents="none" />}
             {inAtk && <View style={[styles.overlay, styles.atkOv]} pointerEvents="none" />}
@@ -86,9 +86,6 @@ export function MapGrid() {
     </View>
   );
 }
-
-// fixed map in this mission
-const T = (y: number, x: number) => MISSION_SSS.terrain[y][x];
 
 const styles = StyleSheet.create({
   board: { backgroundColor: '#0a0e1a', alignSelf: 'stretch' },

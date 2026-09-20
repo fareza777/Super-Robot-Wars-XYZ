@@ -1,0 +1,221 @@
+import chaptersJson from './chapters.json';
+import { PILOTS, UNITS, WEAPONS, TERRAIN_INFO, MISSION_SSS } from './data';
+import { MapDef, PilotDef, Pos, Terrain, UnitDef } from './types';
+
+// ---------- Items (usable in battle, bought at merchant) ----------
+
+export interface ItemDef {
+  id: string;
+  name: string;
+  desc: string;
+  price: number;
+  apply: 'hp' | 'en' | 'ammo' | 'sp' | 'valor';
+  amount: number;
+}
+
+export const ITEMS: Record<string, ItemDef> = {
+  repairKit: { id: 'repairKit', name: 'Repair Kit', desc: 'Restore 3000 HP', price: 400, apply: 'hp', amount: 3000 },
+  megaKit: { id: 'megaKit', name: 'Mega Repair Kit', desc: 'Restore full HP', price: 900, apply: 'hp', amount: 99999 },
+  enCell: { id: 'enCell', name: 'EN Cell', desc: 'Restore 80 EN', price: 350, apply: 'en', amount: 80 },
+  ammoBox: { id: 'ammoBox', name: 'Ammo Box', desc: 'Refill all weapon ammo', price: 300, apply: 'ammo', amount: 0 },
+  spiritWing: { id: 'spiritWing', name: 'Spirit Wing', desc: 'Restore 40 SP', price: 500, apply: 'sp', amount: 40 },
+  valorPill: { id: 'valorPill', name: 'Valor Pill', desc: 'Next attack damage x1.5', price: 600, apply: 'valor', amount: 0 },
+};
+
+export type ItemId = keyof typeof ITEMS;
+
+// ---------- Upgrades (hangar; per unit defId, per stat level) ----------
+
+export interface UpgradeStat {
+  id: 'hp' | 'en' | 'armor' | 'mobility';
+  name: string;
+  desc: string;
+  per: number; // flat amount per level
+  cost: (lvl: number) => number;
+}
+
+export const UPGRADE_STATS: UpgradeStat[] = [
+  { id: 'hp', name: 'Hull Plating', desc: '+400 max HP per level', per: 400, cost: (l) => 300 + l * 220 },
+  { id: 'en', name: 'Reactor Output', desc: '+15 max EN per level', per: 15, cost: (l) => 250 + l * 180 },
+  { id: 'armor', name: 'Composite Armor', desc: '+90 armor per level', per: 90, cost: (l) => 320 + l * 240 },
+  { id: 'mobility', name: 'Servo Tuning', desc: '+6 mobility per level', per: 6, cost: (l) => 320 + l * 240 },
+];
+
+export const MAX_UPGRADE_LEVEL = 8;
+
+export type UpgradeMap = Record<string, Record<string, number>>; // defId -> statId -> level
+
+export function upgradedStat(def: UnitDef, stat: UpgradeStat['id'], up: UpgradeMap): number {
+  const lvl = up[def.id]?.[stat] ?? 0;
+  const per = UPGRADE_STATS.find((s) => s.id === stat)!.per;
+  const base = stat === 'hp' ? def.maxHp : stat === 'en' ? def.maxEn : stat === 'armor' ? def.armor : def.mobility;
+  return base + lvl * per;
+}
+
+// ---------- New pilots & units (campaign) ----------
+
+const P = (p: PilotDef) => p;
+const U = (u: UnitDef) => u;
+
+export const CAMPAIGN_PILOTS = {
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike'], faceColor: '#ff7a7a' }),
+  moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0' }),
+  serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff' }),
+  bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878' }),
+  vaelp: P({ name: 'Emperor Vael', callsign: 'THRONE', melee: 82, ranged: 84, defense: 76, evade: 72, maxSp: 90, spirits: ['strike', 'valor', 'focus', 'guard'], faceColor: '#ffe08a' }),
+};
+
+// merged pilot lookup (unit.def.pilot stays typed as PilotDef)
+export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
+  zoldaTank: U({ id: 'zoldaTank', name: 'Zolda Bastion', title: 'Imperial Heavy', color: '#5c6b52', accent: '#b8c4a8', maxHp: 5200, maxEn: 90, armor: 1300, mobility: 70, moveRange: 4, moveType: 'land', weapons: [WEAPONS.railgun, WEAPONS.heatRod], pilot: PILOTS.grunt }),
+  vexia: U({ id: 'vexia', name: 'Vexia', title: 'Imperial Interceptor', color: '#4a6b8a', accent: '#c0e0ff', maxHp: 4400, maxEn: 130, armor: 800, mobility: 138, moveRange: 7, moveType: 'air', weapons: [WEAPONS.photonRifle, WEAPONS.vulcan], pilot: PILOTS.grunt }),
+  nightmare: U({ id: 'nightmare', name: 'Nightmare', title: 'Royal Guard', color: '#5a2f3a', accent: '#ffb0c0', maxHp: 6800, maxEn: 140, armor: 1150, mobility: 122, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.missilePods], pilot: PILOTS.grunt }),
+  raxden: U({ id: 'raxden', name: 'Raxden Crimson', title: 'Custom Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.plasmaEdge, WEAPONS.railgun, WEAPONS.vulcan], pilot: CAMPAIGN_PILOTS.raxp, boss: true }),
+  moorin: U({ id: 'moorin', name: 'Moorin Anvil', title: 'Imperial General', color: '#4a5a48', accent: '#d0e0c0', maxHp: 9800, maxEn: 160, armor: 1500, mobility: 96, moveRange: 5, moveType: 'land', weapons: [WEAPONS.megaBeam, WEAPONS.gatling, WEAPONS.punch], pilot: CAMPAIGN_PILOTS.moorinp, boss: true }),
+  serka: U({ id: 'serka', name: 'Serka Vanta', title: 'Void Empress', color: '#5a2f6e', accent: '#e0b8ff', maxHp: 8200, maxEn: 190, armor: 1000, mobility: 140, moveRange: 7, moveType: 'air', weapons: [WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.serkap, boss: true }),
+  empress: U({ id: 'empress', name: 'Empress Ascendant', title: 'True Void Form', color: '#7a3f8e', accent: '#ffe0ff', maxHp: 11000, maxEn: 220, armor: 1250, mobility: 146, moveRange: 7, moveType: 'air', weapons: [WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.chestBlaster], pilot: CAMPAIGN_PILOTS.serkap, boss: true }),
+  warden: U({ id: 'warden', name: 'Gate Warden', title: 'Ancient Guardian', color: '#7a5a30', accent: '#ffe0a8', maxHp: 12000, maxEn: 140, armor: 1600, mobility: 90, moveRange: 4, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.bramp, boss: true }),
+  emperor: U({ id: 'emperor', name: 'Throne of Vael', title: 'The Emperor', color: '#e8d8a0', accent: '#fff8d8', maxHp: 15000, maxEn: 240, armor: 1500, mobility: 130, moveRange: 6, moveType: 'air', weapons: [WEAPONS.chestBlaster, WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.vaelp, boss: true }),
+};
+
+export const ALL_UNITS: Record<string, UnitDef> = { ...UNITS, ...CAMPAIGN_UNITS };
+
+export const PLAYER_DEF_IDS = ['valstray', 'gruntborg', 'arielis', 'zephyra'];
+
+// ---------- Chapters ----------
+
+export interface ChapterDef {
+  id: number;
+  name: string;
+  subtitle: string;
+  act: 1 | 2 | 3;
+  theme: string;
+  lvl: number;
+  count: number;
+  boss?: string;
+  bossLevel?: number;
+  objective: string;
+  lines: { speaker: string; text: string }[];
+}
+
+export const CHAPTERS: ChapterDef[] = chaptersJson as unknown as ChapterDef[];
+
+export function chapterOf(idx: number): ChapterDef {
+  return CHAPTERS[Math.max(0, Math.min(CHAPTERS.length - 1, idx))];
+}
+
+// ---------- Procedural map generation (14x10, theme-weighted, seeded) ----------
+
+function rng(seed: number) {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const THEME_WEIGHTS: Record<string, [Terrain, number][]> = {
+  earth: [['plain', 0.55], ['forest', 0.18], ['road', 0.12], ['mountain', 0.06], ['water', 0.05], ['city', 0.04]],
+  forest: [['forest', 0.45], ['plain', 0.3], ['road', 0.08], ['mountain', 0.1], ['water', 0.07]],
+  sea: [['plain', 0.4], ['water', 0.3], ['road', 0.1], ['city', 0.08], ['forest', 0.12]],
+  city: [['city', 0.4], ['road', 0.18], ['plain', 0.28], ['forest', 0.08], ['base', 0.06]],
+  mountain: [['mountain', 0.32], ['plain', 0.4], ['road', 0.1], ['forest', 0.14], ['water', 0.04]],
+  base: [['base', 0.22], ['plain', 0.34], ['road', 0.2], ['city', 0.1], ['forest', 0.08], ['mountain', 0.06]],
+  road: [['road', 0.2], ['plain', 0.44], ['water', 0.14], ['forest', 0.12], ['city', 0.06], ['mountain', 0.04]],
+  void: [['void', 0.68], ['mountain', 0.14], ['base', 0.08], ['plain', 0.1]],
+  colony: [['void', 0.36], ['city', 0.24], ['base', 0.12], ['plain', 0.14], ['road', 0.14]],
+  moon: [['moon', 0.6], ['mountain', 0.18], ['base', 0.1], ['plain', 0.12]],
+  fortress: [['base', 0.3], ['city', 0.22], ['road', 0.16], ['mountain', 0.12], ['plain', 0.2]],
+};
+
+function pickTerrain(r: () => number, theme: string): Terrain {
+  const w = THEME_WEIGHTS[theme] ?? THEME_WEIGHTS.earth;
+  const roll = r();
+  let acc = 0;
+  for (const [t, p] of w) {
+    acc += p;
+    if (roll <= acc) return t;
+  }
+  return 'plain';
+}
+
+const PLAYER_SPAWNS: Pos[] = [
+  { x: 1, y: 8 }, { x: 3, y: 9 }, { x: 4, y: 8 }, { x: 2, y: 9 },
+];
+
+export function genMap(ch: ChapterDef): MapDef {
+  if (ch.theme === 'custom') return MISSION_SSS;
+  const r = rng(ch.id * 7919);
+  const terrain: Terrain[][] = [];
+  for (let y = 0; y < 10; y++) {
+    const row: Terrain[] = [];
+    for (let x = 0; x < 14; x++) {
+      let t = pickTerrain(r, ch.theme);
+      // keep spawn zones clean & passable
+      const inSpawn = (x <= 3 && y >= 5) || (x >= 9 && y <= 7);
+      if (inSpawn && (t === 'water' || t === 'mountain' || t === 'void' || t === 'moon')) t = ch.theme === 'void' ? 'base' : 'plain';
+      row.push(t);
+    }
+    terrain.push(row);
+  }
+  // blob smoothing: grow clusters — second pass pushes same-type neighbors
+  const terrain2 = terrain.map((row) => row.slice());
+  for (let y = 0; y < 10; y++)
+    for (let x = 0; x < 14; x++) {
+      const t = terrain[y][x];
+      if (r() < 0.55) {
+        const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+        const [dx, dy] = dirs[Math.floor(r() * 4)];
+        const nx = x + dx, ny = y + dy;
+        if (nx >= 0 && nx < 14 && ny >= 0 && ny < 10) terrain2[ny][nx] = t;
+      }
+    }
+  // enemy spawns along the right edge
+  const enemySpawns: { defId: string; pos: Pos }[] = [];
+  const used = new Set<string>();
+  const comps = enemyComp(ch);
+  const rSpawn = rng(ch.id * 4243);
+  for (const defId of comps) {
+    for (let tries = 0; tries < 40; tries++) {
+      const x = 9 + Math.floor(rSpawn() * 5);
+      const y = Math.floor(rSpawn() * 8);
+      const k = `${x},${y}`;
+      const ti = TERRAIN_INFO[terrain2[y][x]];
+      if (!used.has(k) && ti.passable.land) {
+        used.add(k);
+        enemySpawns.push({ defId, pos: { x, y } });
+        break;
+      }
+    }
+  }
+  return {
+    id: `c${ch.id}`,
+    name: `CHAPTER ${ch.id}`,
+    subtitle: `${ch.name} — ${ch.subtitle}`,
+    cols: 14,
+    rows: 10,
+    terrain: terrain2,
+    objective: ch.objective,
+    playerSpawns: PLAYER_SPAWNS.map((p, i) => ({ defId: ['valstray', 'gruntborg', 'arielis', 'zephyra'][i], pos: p })),
+    enemySpawns,
+  };
+}
+
+function enemyComp(ch: ChapterDef): string[] {
+  const comp: string[] = [];
+  const fill = ch.act === 1 ? 'zolda' : ch.act === 2 ? 'vexia' : 'nightmare';
+  const alt = ch.act === 1 ? 'zoldaAir' : ch.act === 2 ? 'nightmare' : 'zoldaTank';
+  const heavy = ch.act === 1 ? 'zoldaTank' : 'nightmare';
+  for (let i = 0; i < ch.count; i++) comp.push(i % 3 === 2 ? alt : i % 4 === 3 ? heavy : fill);
+  if (ch.boss) comp.push(ch.boss);
+  return comp;
+}
+
+export function enemyLevelOf(ch: ChapterDef, defId: string): number {
+  return ch.boss === defId ? ch.bossLevel ?? ch.lvl + 2 : ch.lvl;
+}
+
+export const CHAPTERS_COUNT = CHAPTERS.length;

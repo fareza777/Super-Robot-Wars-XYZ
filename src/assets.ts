@@ -1,5 +1,6 @@
 // Central registry for generated art + audio assets.
 // Images are JPGs produced by Recraft (see scripts/genart), audio MP3s by ElevenLabs.
+import { GEN_AUDIO } from './assets_audio_gen';
 
 export const ART = {
   icon: require('../assets/art/icon.png'),
@@ -8,6 +9,8 @@ export const ART = {
   homeBg: require('../assets/art/home_bg.jpg'),
   battleBg: require('../assets/art/battle_bg.jpg'),
   boardBg: require('../assets/art/board_bg.jpg'),
+  hqBg: require('../assets/art/hq_bg.jpg'),
+  hangarBg: require('../assets/art/hangar_bg.jpg'),
   story: [
     require('../assets/art/story_1.jpg'),
     require('../assets/art/story_2.jpg'),
@@ -26,6 +29,15 @@ export const MECH_ART: Record<string, number> = {
   zolda: require('../assets/art/mech_zolda.jpg'),
   zolda_air: require('../assets/art/mech_zoldaair.jpg'),
   kargan: require('../assets/art/mech_kargan.jpg'),
+  zoldaTank: require('../assets/art/mech_zoldatank.jpg'),
+  vexia: require('../assets/art/mech_vexia.jpg'),
+  nightmare: require('../assets/art/mech_nightmare.jpg'),
+  raxden: require('../assets/art/mech_raxden.jpg'),
+  moorin: require('../assets/art/mech_moorin.jpg'),
+  serka: require('../assets/art/mech_serka.jpg'),
+  empress: require('../assets/art/mech_empress.jpg'),
+  warden: require('../assets/art/mech_warden.jpg'),
+  emperor: require('../assets/art/mech_emperor.jpg'),
 };
 
 // Keyed by terrain id — generated top-down map tiles
@@ -37,6 +49,8 @@ export const TERRAIN_ART: Record<string, number> = {
   water: require('../assets/art/ter_water.jpg'),
   city: require('../assets/art/ter_city.jpg'),
   base: require('../assets/art/ter_base.jpg'),
+  void: require('../assets/art/ter_void.jpg'),
+  moon: require('../assets/art/ter_moon.jpg'),
 };
 
 export const PILOT_ART: Record<string, number> = {
@@ -47,6 +61,21 @@ export const PILOT_ART: Record<string, number> = {
   kargan: require('../assets/art/pilot_karg.jpg'),
   zolda: require('../assets/art/pilot_grunt.jpg'),
   zolda_air: require('../assets/art/pilot_grunt.jpg'),
+  zoldaTank: require('../assets/art/pilot_grunt.jpg'),
+  vexia: require('../assets/art/pilot_grunt.jpg'),
+  nightmare: require('../assets/art/pilot_grunt.jpg'),
+  raxden: require('../assets/art/pilot_rax.jpg'),
+  moorin: require('../assets/art/pilot_moorin.jpg'),
+  serka: require('../assets/art/pilot_serka.jpg'),
+  empress: require('../assets/art/pilot_serka.jpg'),
+  warden: require('../assets/art/pilot_bram.jpg'),
+  emperor: require('../assets/art/pilot_vael.jpg'),
+};
+
+export const NPC_ART: Record<string, number> = {
+  merchant: require('../assets/art/npc_merchant.jpg'),
+  mechanic: require('../assets/art/npc_mechanic.jpg'),
+  captain: require('../assets/art/npc_captain.jpg'),
 };
 
 export const AUDIO = {
@@ -82,6 +111,7 @@ export const AUDIO = {
   d_ray_3: require('../assets/audio/d_ray_3.mp3'),
   d_karg_2: require('../assets/audio/d_karg_2.mp3'),
   d_ray_4: require('../assets/audio/d_ray_4.mp3'),
+  ...GEN_AUDIO,
 };
 
 export type AudioKey = keyof typeof AUDIO;

@@ -2,6 +2,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Image } from 'expo-image';
 import { PILOT_ART } from '../assets';
+import { ITEMS } from '../game/campaign';
 import { SPIRITS } from '../game/data';
 import { weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, useGame } from '../game/store';
@@ -93,6 +94,15 @@ export function SidePanel() {
               );
             })}
             {unit.def.pilot.spirits.length > 0 && <Btn label="✦ SPIRIT COMMANDS" sub={`SP ${unit.sp}`} onPress={() => s.openSpirits(unit.uid)} accent="#c9a0ff" />}
+            {Object.values(ITEMS).some((it) => (s.inventory[it.id] ?? 0) > 0) && (
+              <>
+                <Text style={styles.menuTitle}>ITEMS</Text>
+                {Object.values(ITEMS).map((it) => {
+                  const n = s.inventory[it.id] ?? 0;
+                  return <Btn key={it.id} label={`▣ ${it.name} ×${n}`} sub={it.desc} disabled={n <= 0} onPress={() => s.useItem(unit.uid, it.id)} accent="#7ee0a0" />;
+                })}
+              </>
+            )}
             <Btn label="WAIT" onPress={s.waitUnit} />
             <Btn label="CANCEL" onPress={s.cancel} accent="#666" />
           </View>

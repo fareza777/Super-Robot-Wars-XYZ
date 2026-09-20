@@ -1,4 +1,5 @@
-import { SPIRITS, TERRAIN_INFO, UNITS } from './data';
+import { ALL_UNITS } from './campaign';
+import { SPIRITS, TERRAIN_INFO } from './data';
 import { AttackResult, MapDef, Pos, SpiritId, Terrain, UnitState, WeaponDef } from './types';
 
 export const key = (p: Pos) => `${p.x},${p.y}`;
@@ -6,7 +7,7 @@ export const same = (a: Pos, b: Pos) => a.x === b.x && a.y === b.y;
 export const dist = (a: Pos, b: Pos) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 
 export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: string): UnitState {
-  const def = UNITS[defId];
+  const def = ALL_UNITS[defId];
   const ammo: Record<string, number> = {};
   for (const w of def.weapons) if (w.ammo != null) ammo[w.id] = w.ammo;
   return {

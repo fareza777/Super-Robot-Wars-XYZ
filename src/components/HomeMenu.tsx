@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART } from '../assets';
 import { play, setSoundEnabled } from '../audio';
+import { CHAPTERS_COUNT, chapterOf } from '../game/campaign';
 import { useGame } from '../game/store';
 
 function MenuItem({ label, sub, accent, onPress, delay }: { label: string; sub?: string; accent: string; onPress: () => void; delay: number }) {
@@ -35,8 +36,12 @@ function MenuItem({ label, sub, accent, onPress, delay }: { label: string; sub?:
 }
 
 export function HomeMenu() {
-  const gotoBriefing = useGame((s) => s.gotoBriefing);
+  const gotoHq = useGame((s) => s.gotoHq);
+  const newCampaign = useGame((s) => s.newCampaign);
   const replayStory = useGame((s) => s.replayStory);
+  const hasSave = useGame((s) => s.hasSave);
+  const chapter = useGame((s) => s.chapter);
+  const nextCh = chapterOf(chapter);
   const { width, height } = useWindowDimensions();
   const [sound, setSound] = useState(true);
   const titleFs = Math.round(Math.min(30, height * 0.07));
@@ -65,7 +70,14 @@ export function HomeMenu() {
       </View>
 
       <View style={[styles.menu, { width: menuW }]}>
-        <MenuItem label="STORY CAMPAIGN" sub="Mission SSS — Steel Sky Siege" accent="#ffd34d" delay={150} onPress={gotoBriefing} />
+        {hasSave ? (
+          <>
+            <MenuItem label="CONTINUE CAMPAIGN" sub={chapter >= CHAPTERS_COUNT ? 'Campaign complete' : `Chapter ${nextCh.id} — ${nextCh.name}`} accent="#4dff7a" delay={150} onPress={gotoHq} />
+            <MenuItem label="NEW CAMPAIGN" sub="Restart from Chapter 1 (erases save)" accent="#ff8a5c" delay={200} onPress={newCampaign} />
+          </>
+        ) : (
+          <MenuItem label="STORY CAMPAIGN" sub="30 chapters — the XYZ war begins" accent="#ffd34d" delay={150} onPress={newCampaign} />
+        )}
         <MenuItem label="REPLAY STORY" sub="Watch the intro again" accent="#7ee7ff" delay={280} onPress={replayStory} />
         <MenuItem
           label={sound ? 'SOUND: ON' : 'SOUND: OFF'}
@@ -79,7 +91,7 @@ export function HomeMenu() {
         />
       </View>
 
-      <Text style={styles.foot}>v0.4.0 · original mecha tactics · not affiliated with Bandai Namco</Text>
+      <Text style={styles.foot}>v0.5.0 · original mecha tactics · not affiliated with Bandai Namco</Text>
     </View>
   );
 }

@@ -170,7 +170,7 @@ export function BattleScene() {
             styles.panel,
             {
               left: width * 0.035,
-              bottom: height * 0.1,
+              bottom: height * 0.14,
               width: PW,
               height: PH,
               borderColor: atk.def.accent,
@@ -293,13 +293,15 @@ function countUp(to: number, set: (n: number) => void, ms: number) {
 function PilotCutIn({ unit, side, anim, line }: { unit: UnitState; side: 'left' | 'right'; anim: Animated.Value; line: string | null }) {
   const { width, height } = useWindowDimensions();
   const fromLeft = side === 'left';
-  const W = Math.min(250, width * 0.3);
+  // horizontal voice bar in the free diagonal corner — never touches a mech card
+  const W = Math.min(320, width * 0.4);
+  const IMG = Math.min(64, height * 0.19);
   return (
     <Animated.View
       pointerEvents="none"
       style={[
         styles.cutIn,
-        fromLeft ? { left: width * 0.03, top: height * 0.06 } : { right: width * 0.03, bottom: height * 0.06 },
+        fromLeft ? { left: width * 0.02, top: height * 0.02 } : { right: width * 0.02, bottom: height * 0.02 },
         {
           opacity: anim,
           transform: [
@@ -307,29 +309,37 @@ function PilotCutIn({ unit, side, anim, line }: { unit: UnitState; side: 'left' 
             { skewX: fromLeft ? '-8deg' : '8deg' },
           ],
           width: W,
+          flexDirection: fromLeft ? 'row' : 'row-reverse',
         },
       ]}
     >
       <View style={[styles.cutInImgWrap, { borderColor: unit.def.accent }]}>
-        <Image source={PILOT_ART[unit.def.id]} style={{ width: W * 0.62, height: W * 0.62 }} contentFit="cover" />
-        <View style={styles.cutInName}>
-          <Text style={styles.cutInNameTxt}>{unit.def.pilot.name}</Text>
-        </View>
+        <Image source={PILOT_ART[unit.def.id]} style={{ width: IMG, height: IMG }} contentFit="cover" />
       </View>
-      {!!line && (
-        <View style={[styles.cutInLine, { borderColor: unit.def.accent }]}>
-          <Text style={styles.cutInLineTxt}>"{line}"</Text>
+      <View style={{ flex: 1, marginLeft: fromLeft ? 6 : 0, marginRight: fromLeft ? 0 : 6 }}>
+        <View style={[styles.cutInNameBar, { borderColor: unit.def.accent }]}>
+          <Text style={styles.cutInNameTxt} numberOfLines={1}>
+            {unit.def.pilot.name}
+          </Text>
         </View>
-      )}
+        {!!line && (
+          <View style={[styles.cutInLine, { borderColor: unit.def.accent }]}>
+            <Text style={styles.cutInLineTxt} numberOfLines={2}>
+              "{line}"
+            </Text>
+          </View>
+        )}
+      </View>
     </Animated.View>
   );
 }
 
 function NamePlate({ unit, hp, side }: { unit: UnitState; hp?: number; side: 'left' | 'right' }) {
+  const { height } = useWindowDimensions();
   const shown = hp ?? unit.hp;
   const pct = Math.max(0, shown / unit.def.maxHp);
   return (
-    <View style={[styles.plate, side === 'left' ? { left: 14, bottom: 12 } : { right: 14, top: 12 }]}>
+    <View style={[styles.plate, side === 'left' ? { left: 14, bottom: 10 } : { right: 14, top: height * 0.68 }]}>
       <Image source={PILOT_ART[unit.def.id]} style={styles.plateFace} contentFit="cover" />
       <View style={{ flex: 1 }}>
         <Text style={styles.plateName} numberOfLines={1}>
@@ -600,6 +610,7 @@ const styles = StyleSheet.create({
   panel: { position: 'absolute', borderRadius: 14, overflow: 'hidden', borderWidth: 2, backgroundColor: '#0a0e1e' },
   cutIn: { position: 'absolute', zIndex: 70 },
   cutInImgWrap: { borderRadius: 12, overflow: 'hidden', borderWidth: 2, backgroundColor: '#0a0e1e' },
+  cutInNameBar: { borderWidth: 1, borderRadius: 8, backgroundColor: 'rgba(8,10,22,0.9)', paddingVertical: 4, paddingHorizontal: 8 },
   cutInName: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(8,10,22,0.85)', paddingVertical: 4, alignItems: 'center' },
   cutInNameTxt: { color: '#fff', fontWeight: '900', fontSize: 12, letterSpacing: 1.5 },
   cutInLine: { marginTop: 6, borderWidth: 1, borderRadius: 8, backgroundColor: 'rgba(8,10,22,0.85)', padding: 7 },

@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART, PILOT_ART } from '../assets';
 import { play } from '../audio';
-import { MISSION_SSS } from '../game/data';
+import { CHAPTERS_COUNT, PLAYER_DEF_IDS, chapterOf, ALL_UNITS } from '../game/campaign';
 import { useGame } from '../game/store';
 
 export function TitleScreen() {
@@ -46,62 +46,79 @@ export function TitleScreen() {
 
 export function BriefingScreen() {
   const startMission = useGame((s) => s.startMission);
-  const units = useGame((s) => s.units);
-  const squad = units.filter((u) => u.side === 'player');
+  const gotoHq = useGame((s) => s.gotoHq);
+  const chapter = useGame((s) => s.chapter);
+  const pilotProg = useGame((s) => s.pilotProg);
+  const ch = chapterOf(chapter);
   return (
     <View style={styles.center}>
       <Image source={ART.story[4]} style={StyleSheet.absoluteFill} contentFit="cover" />
       <LinearGradient colors={['rgba(3,5,14,0.5)', 'rgba(3,5,14,0.95)']} style={StyleSheet.absoluteFill} />
 
-      <Text style={styles.briefTitle}>{MISSION_SSS.name}</Text>
-      <Text style={styles.briefSub}>— {MISSION_SSS.subtitle} —</Text>
+      <Text style={styles.briefTitle}>CHAPTER {ch.id}: {ch.name}</Text>
+      <Text style={styles.briefSub}>— {ch.subtitle} —</Text>
 
       <View style={styles.briefBox}>
-        <Text style={styles.briefTxt}>{MISSION_SSS.objective}</Text>
+        <Text style={styles.briefTxt}>{ch.objective}</Text>
         <View style={styles.squadRow}>
-          {squad.map((u) => (
-            <View key={u.uid} style={styles.squadCard}>
-              <Image source={PILOT_ART[u.def.id]} style={styles.squadFace} contentFit="cover" />
-              <Text style={styles.squadName}>{u.def.pilot.callsign}</Text>
-              <Text style={styles.squadUnit} numberOfLines={1}>{u.def.name}</Text>
-            </View>
-          ))}
+          {PLAYER_DEF_IDS.map((id) => {
+            const d = ALL_UNITS[id];
+            const prog = pilotProg[id];
+            return (
+              <View key={id} style={styles.squadCard}>
+                <Image source={PILOT_ART[id]} style={styles.squadFace} contentFit="cover" />
+                <Text style={styles.squadName}>{d.pilot.callsign} · Lv{prog?.level ?? 1}</Text>
+                <Text style={styles.squadUnit} numberOfLines={1}>{d.name}</Text>
+              </View>
+            );
+          })}
         </View>
         <Text style={styles.briefTxtSmall}>
-          Tap a unit for move range · tap again for actions · red tiles are targets{'\n'}Terrain gives DEF/EVA bonuses · weapons marked [No P] can't fire after moving
+          Tap a unit for move range · tap again for actions · red tiles are targets{'\n'}Terrain gives DEF/EVA bonuses · weapons marked [No P] can't fire after moving · ITEMS consume the unit's turn
         </Text>
       </View>
 
-      <TouchableOpacity
-        style={styles.bigBtn}
-        onPress={() => {
-          play('ui_confirm');
-          startMission();
-        }}
-      >
-        <Text style={styles.bigBtnTxt}>DEPLOY ▸</Text>
-      </TouchableOpacity>
+      <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+        <TouchableOpacity
+          style={styles.bigBtn}
+          onPress={() => {
+            play('ui_confirm');
+            startMission();
+          }}
+        >
+          <Text style={styles.bigBtnTxt}>DEPLOY ▸</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.bigBtn, { borderColor: '#3a4160' }]} onPress={gotoHq}>
+          <Text style={[styles.bigBtnTxt, { color: '#9fd0ff' }]}>◂ HQ</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 export function EndScreen({ victory }: { victory: boolean }) {
-  const restart = useGame((s) => s.restart);
+  const gotoHq = useGame((s) => s.gotoHq);
+  const gotoBriefing = useGame((s) => s.gotoBriefing);
   const turn = useGame((s) => s.turn);
+  const chapter = useGame((s) => s.chapter);
+  const campaignDone = victory && chapter >= CHAPTERS_COUNT;
   return (
     <View style={styles.center}>
       <Image source={victory ? ART.titleKey : ART.story[1]} style={StyleSheet.absoluteFill} contentFit="cover" />
       <LinearGradient colors={['rgba(3,5,14,0.55)', 'rgba(3,5,14,0.94)']} style={StyleSheet.absoluteFill} />
-      <Text style={[styles.title, { color: victory ? '#ffd34d' : '#ff5a5a', fontSize: 40 }]}>{victory ? 'MISSION COMPLETE' : 'MISSION FAILED'}</Text>
-      <Text style={styles.briefSub}>{victory ? `Cleared in ${turn} turns` : 'Your squad was wiped out'}</Text>
+      <Text style={[styles.title, { color: victory ? '#ffd34d' : '#ff5a5a', fontSize: 40 }]}>{campaignDone ? 'CAMPAIGN COMPLETE' : victory ? 'MISSION COMPLETE' : 'MISSION FAILED'}</Text>
+      <Text style={styles.briefSub}>
+        {campaignDone ? 'The Steel Throne has fallen — the skies are free. (All 30 chapters cleared!)' : victory ? `Cleared in ${turn} turns` : 'Your squad was wiped out'}
+      </Text>
       <TouchableOpacity
         style={styles.bigBtn}
         onPress={() => {
           play('ui_confirm');
-          restart();
+          if (victory) gotoHq();
+          else gotoBriefing();
         }}
       >
-        <Text style={styles.bigBtnTxt}>{victory ? 'BACK TO BASE' : 'RETRY'}</Text>
+        <Text style={styles.bigBtnTxt}>{victory ? 'RETURN TO HQ ▸' : 'RETRY ▸'}</Text>
       </TouchableOpacity>
     </View>
   );
