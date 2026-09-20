@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Image, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Image as ExpoImage } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART, AudioKey, MECH_ART, NPC_ART } from '../assets';
 import { play } from '../audio';
@@ -187,8 +188,10 @@ function HqCard({ title, sub, art, accent, onPress }: { title: string; sub: stri
   const bob = useIdle(Math.random() * 400);
   return (
     <Pressable style={styles.hqCard} onPress={onPress}>
-      <Animated.Image source={art} style={[styles.hqCardImg, { transform: [{ translateY: bob.interpolate({ inputRange: [0, 1], outputRange: [0, -6] }) }] }]} resizeMode="cover" />
-      <LinearGradient colors={['transparent', 'rgba(3,5,14,0.92)']} style={StyleSheet.absoluteFill} pointerEvents="none" />
+      <Animated.View style={[styles.hqCardImg, { transform: [{ translateY: bob.interpolate({ inputRange: [0, 1], outputRange: [0, -6] }) }] }]}>
+        <ExpoImage source={art} style={StyleSheet.absoluteFill} contentFit="cover" contentPosition="top center" />
+      </Animated.View>
+      <LinearGradient colors={['transparent', 'rgba(3,5,14,0.94)']} style={styles.cardGrad} pointerEvents="none" />
       <View style={styles.hqCardLabel}>
         <Text style={[styles.hqCardTitle, { color: accent }]}>{title}</Text>
         <Text style={styles.hqCardSub}>{sub}</Text>
@@ -228,6 +231,7 @@ const styles = StyleSheet.create({
   mainRow: { position: 'absolute', left: 16, right: 16, bottom: 14, top: 60, flexDirection: 'row', gap: 12, alignItems: 'stretch' },
   hqCard: { flex: 1, borderRadius: 12, overflow: 'hidden', borderWidth: 1.5, borderColor: '#3a4160', backgroundColor: '#0a0e1e' },
   hqCardImg: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
+  cardGrad: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '46%' },
   hqCardLabel: { position: 'absolute', left: 10, right: 10, bottom: 10 },
   hqCardTitle: { fontWeight: '900', fontSize: 15, letterSpacing: 2 },
   hqCardSub: { color: '#c8d4f0', fontSize: 10.5, marginTop: 2 },

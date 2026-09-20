@@ -172,3 +172,19 @@ export const SUBTITLES: Partial<Record<AudioKey, string>> = {
   karg_2: 'Witness Imperial might!',
   grunt_1: 'For the Empire!',
 };
+
+// Text-only barks used when a unit has no voice clip (new campaign units)
+export const UNIT_BARK: Record<string, string> = {
+  zolda: 'For the Empire!',
+  zolda_air: 'For the Empire!',
+  zoldaTank: 'Bastion holds!',
+  vexia: 'For the Empire!',
+  nightmare: 'Die, Ark scum!',
+  raxden: 'The Crimson Fang strikes!',
+  moorin: 'The Anvil falls on you!',
+  serka: 'The void takes you.',
+  empress: 'Kneel before the void.',
+  warden: 'None pass the gate.',
+  emperor: 'Perish, insects.',
+  kargan: 'Witness Imperial might!',
+};

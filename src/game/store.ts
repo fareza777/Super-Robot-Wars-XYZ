@@ -513,12 +513,17 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         kills: st.kills + (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0),
         log: result.expEvents.reduce(
           (l, e) => push(l, e),
-          push(
-            st.log,
-            result.hit
-              ? `${att.def.name} hits ${def.def.name} for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''}`
-              : `${att.def.name} missed ${def.def.name}`,
-          ),
+          result.counter
+            ? push(
+                st.log,
+                `${att.def.name} hits ${def.def.name} for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''} · ${def.def.name} counters for ${result.counter.damage}${result.counter.destroyed ? ' — DESTROYED' : ''}`,
+              )
+            : push(
+                st.log,
+                result.hit
+                  ? `${att.def.name} hits ${def.def.name} for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''}`
+                  : `${att.def.name} missed ${def.def.name}`,
+              ),
         ),
         battle: { attacker: { ...att }, defender: { ...def }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: plan.weapon!, result },
       }));

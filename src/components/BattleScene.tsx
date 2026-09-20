@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ART, KIND_SFX, MECH_ART, PILOT_ART, SUBTITLES, UNIT_VOICE } from '../assets';
+import { ART, KIND_SFX, MECH_ART, PILOT_ART, SUBTITLES, UNIT_BARK, UNIT_VOICE } from '../assets';
 import { play } from '../audio';
 import { useGame } from '../game/store';
 import { UnitState, WeaponDef } from '../game/types';
@@ -22,7 +22,6 @@ export function BattleScene() {
   const [stage, setStage] = useState(0);
   const [dmgShown, setDmgShown] = useState(0);
   const [counterDmgShown, setCounterDmgShown] = useState(0);
-  const [voiceLine, setVoiceLine] = useState<string | null>(null);
 
   const bgZoom = useRef(new Animated.Value(0)).current;
   const fade = useRef(new Animated.Value(0)).current;
@@ -35,7 +34,6 @@ export function BattleScene() {
   const defEnter = useRef(new Animated.Value(0)).current;
   const attLunge = useRef(new Animated.Value(0)).current;
   const defLunge = useRef(new Animated.Value(0)).current;
-  const cutIn = useRef(new Animated.Value(0)).current;
 
   const atk = battle?.attacker;
   const def = battle?.defender;
@@ -47,7 +45,6 @@ export function BattleScene() {
     setStage(0);
     setDmgShown(0);
     setCounterDmgShown(0);
-    setVoiceLine(null);
     fade.setValue(0);
     attEnter.setValue(0);
     defEnter.setValue(0);
@@ -86,16 +83,8 @@ export function BattleScene() {
     if (!battle) return;
     if (stage === 2) {
       const vk = UNIT_VOICE[battle.attacker.def.id]?.[0];
-      if (vk) {
-        play(vk);
-        setVoiceLine(SUBTITLES[vk] ?? null);
-      }
+      if (vk) play(vk);
       play(KIND_SFX[battle.weapon.kind] ?? 'sfx_beam');
-      cutIn.setValue(0);
-      Animated.sequence([
-        Animated.timing(cutIn, { toValue: 1, duration: 380, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
-        Animated.timing(cutIn, { toValue: 0, duration: 420, delay: 1900, useNativeDriver: true }),
-      ]).start();
       Animated.sequence([
         Animated.timing(attLunge, { toValue: 1, duration: 620, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
         Animated.timing(attLunge, { toValue: 0, duration: 780, easing: Easing.out(Easing.quad), useNativeDriver: true }),
@@ -103,16 +92,8 @@ export function BattleScene() {
     }
     if (stage === 4 && battle.result.counter) {
       const vk = UNIT_VOICE[battle.defender.def.id]?.[1] ?? UNIT_VOICE[battle.defender.def.id]?.[0];
-      if (vk) {
-        play(vk);
-        setVoiceLine(SUBTITLES[vk] ?? null);
-      }
+      if (vk) play(vk);
       play(KIND_SFX[battle.result.counter.weapon.kind] ?? 'sfx_beam');
-      cutIn.setValue(0);
-      Animated.sequence([
-        Animated.timing(cutIn, { toValue: 1, duration: 380, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
-        Animated.timing(cutIn, { toValue: 0, duration: 420, delay: 1900, useNativeDriver: true }),
-      ]).start();
       Animated.sequence([
         Animated.timing(defLunge, { toValue: 1, duration: 620, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
         Animated.timing(defLunge, { toValue: 0, duration: 780, easing: Easing.out(Easing.quad), useNativeDriver: true }),
@@ -149,8 +130,7 @@ export function BattleScene() {
 
   const PW = width * 0.415; // mech panel width — sized so both cards never overlap
   const PH = height * 0.58;
-  const counterActive = stage >= 4;
-  const activePilot = counterActive ? def : atk;
+  const counterActive = stage >= 4 && !!battle.result.counter;
   // HP shown drains live during the impact stage (post-attack states stored on battle)
   const defHpShown = Math.max(0, Math.min(def.hp, Math.max(battle.defenderAfter.hp, def.hp - dmgShown)));
   const attHpShown = Math.max(0, Math.min(atk.hp, Math.max(battle.attackerAfter.hp, atk.hp - counterDmgShown)));
@@ -216,8 +196,9 @@ export function BattleScene() {
         {(stage === 2 || stage === 3) && <AttackAnim weapon={battle.weapon} side="attacker" w={width} h={height} />}
         {counterActive && <AttackAnim weapon={battle.result.counter!.weapon} side="defender" w={width} h={height} />}
 
-        {/* pilot cut-in */}
-        <PilotCutIn unit={activePilot} side={counterActive ? 'right' : 'left'} anim={cutIn} line={voiceLine} />
+        {/* pilot cut-in — mounted for the whole attack+impact window */}
+        {(stage === 2 || stage === 3) && <PilotCutIn key="atk" unit={atk} side="left" />}
+        {counterActive && <PilotCutIn key="def" unit={def} side="right" />}
       </Animated.View>
 
       {/* name plates */}
@@ -226,7 +207,7 @@ export function BattleScene() {
 
       {/* weapon banner */}
       {stage === 1 && <Banner text={battle.weapon.name} color="#ffd34d" />}
-      {stage === 4 && <Banner text={battle.result.counter!.weapon.name} color="#ff8a5c" />}
+      {stage === 4 && !!battle.result.counter && <Banner text={battle.result.counter!.weapon.name} color="#ff8a5c" />}
 
       {/* impact feedback */}
       {stage === 3 &&
@@ -290,27 +271,23 @@ function countUp(to: number, set: (n: number) => void, ms: number) {
 
 // ---------- sub-visuals ----------
 
-function PilotCutIn({ unit, side, anim, line }: { unit: UnitState; side: 'left' | 'right'; anim: Animated.Value; line: string | null }) {
+function PilotCutIn({ unit, side }: { unit: UnitState; side: 'left' | 'right' }) {
   const { width, height } = useWindowDimensions();
   const fromLeft = side === 'left';
-  // horizontal voice bar in the free diagonal corner — never touches a mech card
+  // horizontal voice bar in the free diagonal corner — never touches a mech card.
+  // Static (no entrance anim): native-driver animations get starved by the battle scene's many concurrent values.
   const W = Math.min(320, width * 0.4);
   const IMG = Math.min(64, height * 0.19);
+  // quote derived from the unit itself — attacker uses voice 1, counter voice 2; bark fallback
+  const vk = side === 'left' ? UNIT_VOICE[unit.def.id]?.[0] : UNIT_VOICE[unit.def.id]?.[1] ?? UNIT_VOICE[unit.def.id]?.[0];
+  const quote = (vk ? SUBTITLES[vk] : undefined) ?? UNIT_BARK[unit.def.id] ?? null;
   return (
-    <Animated.View
+    <View
       pointerEvents="none"
       style={[
         styles.cutIn,
         fromLeft ? { left: width * 0.02, top: height * 0.02 } : { right: width * 0.02, bottom: height * 0.02 },
-        {
-          opacity: anim,
-          transform: [
-            { translateX: anim.interpolate({ inputRange: [0, 1], outputRange: [fromLeft ? -W * 1.4 : W * 1.4, 0] }) },
-            { skewX: fromLeft ? '-8deg' : '8deg' },
-          ],
-          width: W,
-          flexDirection: fromLeft ? 'row' : 'row-reverse',
-        },
+        { width: W, flexDirection: fromLeft ? 'row' : 'row-reverse', backgroundColor: 'rgba(8,10,22,0.72)', borderRadius: 10, padding: 6 },
       ]}
     >
       <View style={[styles.cutInImgWrap, { borderColor: unit.def.accent }]}>
@@ -322,15 +299,15 @@ function PilotCutIn({ unit, side, anim, line }: { unit: UnitState; side: 'left' 
             {unit.def.pilot.name}
           </Text>
         </View>
-        {!!line && (
+        {!!quote && (
           <View style={[styles.cutInLine, { borderColor: unit.def.accent }]}>
             <Text style={styles.cutInLineTxt} numberOfLines={2}>
-              "{line}"
+              "{quote}"
             </Text>
           </View>
         )}
       </View>
-    </Animated.View>
+    </View>
   );
 }
 
