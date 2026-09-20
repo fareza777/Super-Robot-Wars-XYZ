@@ -13,7 +13,7 @@ import { UnitState, WeaponDef } from '../game/types';
  * -> 3 counter anim -> 4 counter impact -> 5 outro -> finishBattle()
  */
 
-const DUR = { intro: 700, banner: 550, attack: 1300, impact: 1150, outro: 500 };
+const DUR = { intro: 1000, banner: 950, attack: 2300, impact: 2000, outro: 900 };
 
 export function BattleScene() {
   const battle = useGame((s) => s.battle);
@@ -53,11 +53,12 @@ export function BattleScene() {
     defEnter.setValue(0);
     attLunge.setValue(0);
     defLunge.setValue(0);
-    Animated.timing(fade, { toValue: 1, duration: 250, useNativeDriver: true }).start();
-    Animated.timing(bgZoom, { toValue: 1, duration: 9000, easing: Easing.linear, useNativeDriver: true }).start();
+    Animated.timing(fade, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+    bgZoom.setValue(0);
+    Animated.timing(bgZoom, { toValue: 1, duration: 24000, easing: Easing.linear, useNativeDriver: true }).start();
     Animated.parallel([
-      Animated.timing(attEnter, { toValue: 1, duration: 650, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
-      Animated.timing(defEnter, { toValue: 1, duration: 650, delay: 120, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.timing(attEnter, { toValue: 1, duration: 950, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.timing(defEnter, { toValue: 1, duration: 950, delay: 220, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
     ]).start();
   }, [battle]);
 
@@ -92,12 +93,12 @@ export function BattleScene() {
       play(KIND_SFX[battle.weapon.kind] ?? 'sfx_beam');
       cutIn.setValue(0);
       Animated.sequence([
-        Animated.timing(cutIn, { toValue: 1, duration: 260, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
-        Animated.timing(cutIn, { toValue: 0, duration: 260, delay: 1050, useNativeDriver: true }),
+        Animated.timing(cutIn, { toValue: 1, duration: 380, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+        Animated.timing(cutIn, { toValue: 0, duration: 420, delay: 1900, useNativeDriver: true }),
       ]).start();
       Animated.sequence([
-        Animated.timing(attLunge, { toValue: 1, duration: 380, easing: Easing.in(Easing.quad), useNativeDriver: true }),
-        Animated.timing(attLunge, { toValue: 0, duration: 420, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(attLunge, { toValue: 1, duration: 620, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(attLunge, { toValue: 0, duration: 780, easing: Easing.out(Easing.quad), useNativeDriver: true }),
       ]).start();
     }
     if (stage === 4 && battle.result.counter) {
@@ -109,12 +110,12 @@ export function BattleScene() {
       play(KIND_SFX[battle.result.counter.weapon.kind] ?? 'sfx_beam');
       cutIn.setValue(0);
       Animated.sequence([
-        Animated.timing(cutIn, { toValue: 1, duration: 260, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
-        Animated.timing(cutIn, { toValue: 0, duration: 260, delay: 1050, useNativeDriver: true }),
+        Animated.timing(cutIn, { toValue: 1, duration: 380, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+        Animated.timing(cutIn, { toValue: 0, duration: 420, delay: 1900, useNativeDriver: true }),
       ]).start();
       Animated.sequence([
-        Animated.timing(defLunge, { toValue: 1, duration: 380, easing: Easing.in(Easing.quad), useNativeDriver: true }),
-        Animated.timing(defLunge, { toValue: 0, duration: 420, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(defLunge, { toValue: 1, duration: 620, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(defLunge, { toValue: 0, duration: 780, easing: Easing.out(Easing.quad), useNativeDriver: true }),
       ]).start();
     }
   }, [stage]);
@@ -127,9 +128,9 @@ export function BattleScene() {
       if (r.hit) {
         play(r.destroyed ? 'sfx_explosion' : 'sfx_hit');
         pulse(defFlash, shakeX);
-        countUp(r.damage, setDmgShown, 700);
+        countUp(r.damage, setDmgShown, 1200);
         if (r.destroyed)
-          Animated.timing(defFall, { toValue: 1, duration: 700, delay: 250, easing: Easing.in(Easing.quad), useNativeDriver: true }).start();
+          Animated.timing(defFall, { toValue: 1, duration: 950, delay: 500, easing: Easing.in(Easing.quad), useNativeDriver: true }).start();
       }
     }
     if (stage === 5 && battle.result.counter) {
@@ -137,9 +138,9 @@ export function BattleScene() {
       if (c.hit) {
         play(c.destroyed ? 'sfx_explosion' : 'sfx_hit');
         pulse(attFlash, shakeX);
-        countUp(c.damage, setCounterDmgShown, 700);
+        countUp(c.damage, setCounterDmgShown, 1200);
         if (c.destroyed)
-          Animated.timing(attFall, { toValue: 1, duration: 700, delay: 250, easing: Easing.in(Easing.quad), useNativeDriver: true }).start();
+          Animated.timing(attFall, { toValue: 1, duration: 950, delay: 500, easing: Easing.in(Easing.quad), useNativeDriver: true }).start();
       }
     }
   }, [stage]);
@@ -150,6 +151,9 @@ export function BattleScene() {
   const PH = height * 0.58;
   const counterActive = stage >= 4;
   const activePilot = counterActive ? def : atk;
+  // HP shown drains live during the impact stage (post-attack states stored on battle)
+  const defHpShown = Math.max(0, Math.min(def.hp, Math.max(battle.defenderAfter.hp, def.hp - dmgShown)));
+  const attHpShown = Math.max(0, Math.min(atk.hp, Math.max(battle.attackerAfter.hp, atk.hp - counterDmgShown)));
 
   return (
     <Animated.View style={[styles.root, { opacity: fade }]}>
@@ -217,8 +221,8 @@ export function BattleScene() {
       </Animated.View>
 
       {/* name plates */}
-      <NamePlate unit={atk} side="left" />
-      <NamePlate unit={def} side="right" />
+      <NamePlate unit={atk} hp={attHpShown} side="left" />
+      <NamePlate unit={def} hp={defHpShown} side="right" />
 
       {/* weapon banner */}
       {stage === 1 && <Banner text={battle.weapon.name} color="#ffd34d" />}
@@ -321,8 +325,9 @@ function PilotCutIn({ unit, side, anim, line }: { unit: UnitState; side: 'left' 
   );
 }
 
-function NamePlate({ unit, side }: { unit: UnitState; side: 'left' | 'right' }) {
-  const pct = Math.max(0, unit.hp / unit.def.maxHp);
+function NamePlate({ unit, hp, side }: { unit: UnitState; hp?: number; side: 'left' | 'right' }) {
+  const shown = hp ?? unit.hp;
+  const pct = Math.max(0, shown / unit.def.maxHp);
   return (
     <View style={[styles.plate, side === 'left' ? { left: 14, bottom: 12 } : { right: 14, top: 12 }]}>
       <Image source={PILOT_ART[unit.def.id]} style={styles.plateFace} contentFit="cover" />
@@ -334,7 +339,7 @@ function NamePlate({ unit, side }: { unit: UnitState; side: 'left' | 'right' }) 
           <View style={[styles.plateBarFill, { width: `${pct * 100}%`, backgroundColor: pct > 0.5 ? '#4dff7a' : pct > 0.25 ? '#ffd34d' : '#ff5a5a' }]} />
         </View>
         <Text style={styles.plateHp}>
-          {unit.hp}/{unit.def.maxHp}
+          {shown}/{unit.def.maxHp}
         </Text>
       </View>
     </View>

@@ -2,17 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ART, NARRATION } from '../assets';
+import { ART, CAPTIONS, NARRATION } from '../assets';
 import { play } from '../audio';
 import { useGame } from '../game/store';
-
-const CAPTIONS = [
-  'Year 2199. The solar system burns. The Zeth Empire\'s machine legions have crushed colony after colony.',
-  'Cities fall. Fleets shatter. Humanity\'s last hope lies in a forgotten weapons project — the XYZ Frame.',
-  'Lieutenant Ray Ardent. A rookie pilot with nothing left to lose — and a machine that answers only to him.',
-  'Valstray Squadron — launch! The counterattack begins at Sector SSS.',
-  'Lord Karg awaits. The fate of three worlds will be decided here.',
-];
 
 const PANEL_MS = 7200;
 

@@ -61,11 +61,43 @@ export const AUDIO = {
   sfx_missiles: require('../assets/audio/sfx_missiles.mp3'),
   sfx_hit: require('../assets/audio/sfx_hit.mp3'),
   ui_confirm: require('../assets/audio/ui_confirm.mp3'),
+  // chapter 1 pre-mission dialogue
+  d_ray_1: require('../assets/audio/d_ray_1.mp3'),
+  d_mira_1: require('../assets/audio/d_mira_1.mp3'),
+  d_gara_1: require('../assets/audio/d_gara_1.mp3'),
+  d_orin_1: require('../assets/audio/d_orin_1.mp3'),
+  d_ray_2: require('../assets/audio/d_ray_2.mp3'),
+  d_karg_1: require('../assets/audio/d_karg_1.mp3'),
+  d_ray_3: require('../assets/audio/d_ray_3.mp3'),
+  d_karg_2: require('../assets/audio/d_karg_2.mp3'),
+  d_ray_4: require('../assets/audio/d_ray_4.mp3'),
 };
 
 export type AudioKey = keyof typeof AUDIO;
 
 export const NARRATION: AudioKey[] = ['nar_1', 'nar_2', 'nar_3', 'nar_4', 'nar_5'];
+
+// Story captions — identical to the narrated lines so text and VO always match.
+export const CAPTIONS = [
+  "Year 2199. War has reached the heavens. Above a burning Earth, the Imperial fleet clashes with the last of humanity's defenders.",
+  "On the surface, the Empire's machine legions march unopposed. City after city falls beneath their black steel.",
+  "But in a hidden hangar, one pilot waits with humanity's final answer — the XYZ Frame. The Valstray.",
+  'At dawn, the counterattack begins. Squadron XYZ launches — four machines against an empire.',
+  "And waiting at Sector Triple-S — the Emperor's ace, Colonel Karg Draven. This is where the war turns.",
+];
+
+// Chapter 1 pre-mission dialogue. speaker = unit defId (portrait + pilot name).
+export const DIALOGUE: { speaker: string; voice: AudioKey; text: string }[] = [
+  { speaker: 'valstray', voice: 'd_ray_1', text: 'All units, check in. Valstray — green and ready.' },
+  { speaker: 'arielis', voice: 'd_mira_1', text: "Arielis, all systems nominal. I'm picking up six Imperial signatures dead ahead." },
+  { speaker: 'gruntborg', voice: 'd_gara_1', text: 'Six of them? Ha! Just enough to make it interesting.' },
+  { speaker: 'zephyra', voice: 'd_orin_1', text: "Zephyra standing by! Let's send them home in pieces!" },
+  { speaker: 'valstray', voice: 'd_ray_2', text: 'Cut the chatter. There are still civilians down there — we break through fast and clean.' },
+  { speaker: 'kargan', voice: 'd_karg_1', text: 'So. The Federation sends its little toys to die in my sky.' },
+  { speaker: 'valstray', voice: 'd_ray_3', text: 'Karg Draven... the butcher of Veridia Colony.' },
+  { speaker: 'kargan', voice: 'd_karg_2', text: 'You remember my work, boy. Then come — show me what that white machine of yours can do.' },
+  { speaker: 'valstray', voice: 'd_ray_4', text: 'Squadron XYZ — weapons free! Mission start!' },
+];
 
 // Voice lines per unit (played during attack cut-in)
 export const UNIT_VOICE: Record<string, AudioKey[]> = {

@@ -19,6 +19,8 @@ import { AttackResult, BattleData, Phase, Pos, SpiritId, UnitState, WeaponDef } 
 export interface BattleAnim {
   attacker: UnitState;
   defender: UnitState;
+  attackerAfter: UnitState; // post-attack state (for HP drain animation)
+  defenderAfter: UnitState;
   weapon: WeaponDef;
   result: AttackResult;
 }
@@ -47,6 +49,7 @@ interface Store {
   gotoBriefing: () => void;
   replayStory: () => void;
   startMission: () => void;
+  finishDialog: () => void;
   tapTile: (p: Pos) => void;
   cancel: () => void;
   confirmMove: (p: Pos) => void;
@@ -93,7 +96,8 @@ export const useGame = create<Store>((set, get) => ({
   finishOnboarding: () => set({ phase: 'home' }),
   gotoBriefing: () => set({ phase: 'briefing' }),
   replayStory: () => set({ phase: 'onboarding' }),
-  startMission: () => set({ phase: 'player' }),
+  startMission: () => set({ phase: 'dialog' }),
+  finishDialog: () => set({ phase: 'player' }),
 
   restart: () =>
     set({
@@ -213,6 +217,8 @@ export const useGame = create<Store>((set, get) => ({
     const att = s.units.find((x) => x.uid === s.menuForUid)!;
     const def = s.units.find((x) => x.uid === uid)!;
     const { state, result } = applyAttack({ map: MISSION_SSS, units: s.units, turn: s.turn }, att.uid, uid, s.pendingWeapon.id);
+    const attAfter = state.units.find((u) => u.uid === att.uid)!;
+    const defAfter = state.units.find((u) => u.uid === uid)!;
     const log = push(
       s.log,
       result.hit
@@ -230,7 +236,7 @@ export const useGame = create<Store>((set, get) => ({
     set({
       units: state.units,
       log: log2,
-      battle: { attacker: { ...att }, defender: { ...def }, weapon: s.pendingWeapon, result },
+      battle: { attacker: { ...att }, defender: { ...def }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: s.pendingWeapon, result },
       phase: 'battle',
       pendingWeapon: null,
       attackTiles: new Set(),
@@ -313,6 +319,8 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       const att = cur.units.find((u) => u.uid === plan.unit.uid)!;
       const def = cur.units.find((u) => u.uid === plan.target!.uid)!;
       const { state, result } = applyAttack({ map: MISSION_SSS, units: cur.units, turn: cur.turn }, att.uid, def.uid, plan.weapon.id);
+      const attAfter = state.units.find((u) => u.uid === att.uid)!;
+      const defAfter = state.units.find((u) => u.uid === def.uid)!;
       set((st) => ({
         units: state.units,
         phase: 'battle',
@@ -322,7 +330,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
             ? `${att.def.name} hits ${def.def.name} for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''}`
             : `${att.def.name} missed ${def.def.name}`,
         ),
-        battle: { attacker: { ...att }, defender: { ...def }, weapon: plan.weapon!, result },
+        battle: { attacker: { ...att }, defender: { ...def }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: plan.weapon!, result },
       }));
       // wait for player-visible battle anim to finish (finishBattle returns phase to 'enemy' since enemyBusy)
       await waitFor(() => get().battle === null);

@@ -1,12 +1,11 @@
 import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
-import { ART } from '../assets';
+import { ART, MECH_ART } from '../assets';
 import { MISSION_SSS, TERRAIN_INFO } from '../game/data';
 import { key, same } from '../game/engine';
 import { useGame } from '../game/store';
 import { Pos } from '../game/types';
-import { MechSprite } from './MechSprite';
 
 export function MapGrid() {
   const units = useGame((s) => s.units);
@@ -64,7 +63,19 @@ export function MapGrid() {
             const ghosting = ghost && u.uid === ghost.uid;
             return (
               <View key={u.uid} pointerEvents="none" style={[styles.unitWrap, { left: u.pos.x * tile, top: u.pos.y * tile, width: tile, height: tile }]}>
-                <MechSprite def={u.def} size={tile * 0.92} flip={u.side === 'enemy'} dimmed={u.acted || ghosting} />
+                <View
+                  style={[
+                    styles.chip,
+                    {
+                      width: tile * 0.92,
+                      height: tile * 0.92,
+                      borderColor: u.def.boss ? '#ffd34d' : u.side === 'player' ? '#6db4ff' : '#ff6b6b',
+                      opacity: u.acted || ghosting ? 0.45 : 1,
+                    },
+                  ]}
+                >
+                  <Image source={MECH_ART[u.def.id]} style={[StyleSheet.absoluteFill, u.side === 'enemy' && { transform: [{ scaleX: -1 }] }]} contentFit="cover" />
+                </View>
                 <View style={[styles.hpBarBg, { width: tile * 0.8 }]}>
                   <View style={[styles.hpBar, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.side === 'player' ? '#4dff7a' : '#ff5a5a' }]} />
                 </View>
@@ -74,7 +85,9 @@ export function MapGrid() {
           })}
           {ghost && pendingMove && !same(ghost.pos, pendingMove) && (
             <View pointerEvents="none" style={[styles.unitWrap, { left: pendingMove.x * tile, top: pendingMove.y * tile, width: tile, height: tile, opacity: 0.65 }]}>
-              <MechSprite def={ghost.def} size={tile * 0.92} />
+              <View style={[styles.chip, { width: tile * 0.92, height: tile * 0.92, borderColor: '#6db4ff' }]}>
+                <Image source={MECH_ART[ghost.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" />
+              </View>
             </View>
           )}
           </View>
@@ -96,6 +109,7 @@ const styles = StyleSheet.create({
   moveOv: { backgroundColor: 'rgba(70,140,255,0.38)' },
   atkOv: { backgroundColor: 'rgba(255,60,60,0.45)' },
   unitWrap: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
+  chip: { borderRadius: 6, overflow: 'hidden', borderWidth: 1.5, backgroundColor: '#0a0e1e' },
   hpBarBg: { position: 'absolute', bottom: -2, height: 3, backgroundColor: '#111', borderRadius: 1 },
   hpBar: { height: 3, borderRadius: 1 },
   bossTag: { position: 'absolute', top: -6, fontSize: 8, color: '#ffd34d', fontWeight: '800' },

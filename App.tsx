@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { BattleScene } from './src/components/BattleScene';
+import { ChapterDialog } from './src/components/ChapterDialog';
 import { HomeMenu } from './src/components/HomeMenu';
 import { MapGrid } from './src/components/MapGrid';
 import { BriefingScreen, EndScreen, TitleScreen } from './src/components/Screens';
@@ -31,6 +32,7 @@ export default function App() {
       {phase === 'onboarding' && <StoryIntro />}
       {phase === 'home' && <HomeMenu />}
       {phase === 'briefing' && <BriefingScreen />}
+      {phase === 'dialog' && <ChapterDialog />}
       {(phase === 'player' || phase === 'enemy' || phase === 'battle') && (
         <View style={styles.gameRow}>
           <MapGrid />

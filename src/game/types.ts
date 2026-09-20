@@ -97,6 +97,7 @@ export type Phase =
   | 'onboarding'
   | 'home'
   | 'briefing'
+  | 'dialog'
   | 'player'
   | 'enemy'
   | 'battle'
