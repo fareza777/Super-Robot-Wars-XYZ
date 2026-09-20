@@ -18,6 +18,8 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     sp: def.pilot.maxSp,
     pos,
     ammo,
+    level: def.level ?? 1,
+    exp: 0,
     moved: false,
     acted: false,
     alive: true,
@@ -98,16 +100,16 @@ export function attackTiles(map: MapDef, from: Pos, w: WeaponDef): Pos[] {
 
 function evadeOf(u: UnitState, map: MapDef): number {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
-  return u.def.mobility + u.def.pilot.evade + t.eva + (u.focusUntilEndOfEnemyPhase ? 30 : 0);
+  return u.def.mobility + u.def.pilot.evade + (u.level - 1) * 2 + t.eva + (u.focusUntilEndOfEnemyPhase ? 30 : 0);
 }
 
 function armorOf(u: UnitState, map: MapDef): number {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
-  return u.def.armor + t.def + (u.gritUntilEndOfEnemyPhase ? 400 : 0);
+  return u.def.armor + (u.level - 1) * 40 + t.def + (u.gritUntilEndOfEnemyPhase ? 400 : 0);
 }
 
 function statFor(u: UnitState, w: WeaponDef): number {
-  return w.kind === 'melee' ? u.def.pilot.melee : u.def.pilot.ranged;
+  return (w.kind === 'melee' ? u.def.pilot.melee : u.def.pilot.ranged) + (u.level - 1) * 3;
 }
 
 export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef): number {
@@ -163,7 +165,7 @@ export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map
       counter = { weapon: cw, ...c };
     }
   }
-  return { hit: first.hit, crit: first.crit, damage: first.damage, destroyed: first.destroyed, hitChance: first.hitChance, counter };
+  return { hit: first.hit, crit: first.crit, damage: first.damage, destroyed: first.destroyed, hitChance: first.hitChance, counter, expEvents: [] };
 }
 
 // ---------- Store-level actions (pure functions on state slices) ----------
@@ -198,7 +200,26 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   att.acted = true;
   att.strikeForNextAttack = false;
   att.valorForNextAttack = false;
+
+  // EXP: +30 for a landed hit, +70 for a kill (counter kills award the countering unit)
+  result.expEvents = [];
+  if (result.hit) awardExp(att, result.destroyed ? 70 : 30, result.expEvents);
+  if (result.counter?.hit) awardExp(def, result.counter.destroyed ? 70 : 25, result.expEvents);
   return { state: { ...state, units }, result };
+}
+
+const MAX_LEVEL = 9;
+
+function awardExp(u: UnitState, amount: number, events: string[]) {
+  if (!u.alive || u.level >= MAX_LEVEL) return;
+  u.exp += amount;
+  events.push(`${u.def.name} +${amount} EXP`);
+  while (u.exp >= 100 && u.level < MAX_LEVEL) {
+    u.exp -= 100;
+    u.level += 1;
+    events.push(`${u.def.pilot.name} LEVEL UP → Lv${u.level}!`);
+  }
+  if (u.level >= MAX_LEVEL) u.exp = 0;
 }
 
 export function applySpirit(u: UnitState, spirit: SpiritId): void {

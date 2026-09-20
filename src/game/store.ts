@@ -225,7 +225,7 @@ export const useGame = create<Store>((set, get) => ({
         ? `${att.def.name} hits ${def.def.name} with ${s.pendingWeapon.name} for ${result.damage}${result.crit ? ' CRIT!' : ''}${result.destroyed ? ' — DESTROYED' : ''}`
         : `${att.def.name} missed ${def.def.name} (${result.hitChance}%)`,
     );
-    const log2 = result.counter
+    let log2 = result.counter
       ? push(
           log,
           result.counter.hit
@@ -233,6 +233,7 @@ export const useGame = create<Store>((set, get) => ({
             : `${def.def.name}'s counter missed`,
         )
       : log;
+    for (const e of result.expEvents) log2 = push(log2, e);
     set({
       units: state.units,
       log: log2,
@@ -324,11 +325,14 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       set((st) => ({
         units: state.units,
         phase: 'battle',
-        log: push(
-          st.log,
-          result.hit
-            ? `${att.def.name} hits ${def.def.name} for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''}`
-            : `${att.def.name} missed ${def.def.name}`,
+        log: result.expEvents.reduce(
+          (l, e) => push(l, e),
+          push(
+            st.log,
+            result.hit
+              ? `${att.def.name} hits ${def.def.name} for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''}`
+              : `${att.def.name} missed ${def.def.name}`,
+          ),
         ),
         battle: { attacker: { ...att }, defender: { ...def }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: plan.weapon!, result },
       }));

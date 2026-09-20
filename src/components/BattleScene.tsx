@@ -147,7 +147,7 @@ export function BattleScene() {
 
   if (!battle || !atk || !def) return null;
 
-  const PW = width * 0.46; // mech panel width
+  const PW = width * 0.415; // mech panel width — sized so both cards never overlap
   const PH = height * 0.58;
   const counterActive = stage >= 4;
   const activePilot = counterActive ? def : atk;
@@ -169,7 +169,7 @@ export function BattleScene() {
           style={[
             styles.panel,
             {
-              left: width * 0.045,
+              left: width * 0.035,
               bottom: height * 0.1,
               width: PW,
               height: PH,
@@ -193,7 +193,7 @@ export function BattleScene() {
           style={[
             styles.panel,
             {
-              right: width * 0.045,
+              right: width * 0.035,
               top: height * 0.08,
               width: PW,
               height: PH,
@@ -333,7 +333,7 @@ function NamePlate({ unit, hp, side }: { unit: UnitState; hp?: number; side: 'le
       <Image source={PILOT_ART[unit.def.id]} style={styles.plateFace} contentFit="cover" />
       <View style={{ flex: 1 }}>
         <Text style={styles.plateName} numberOfLines={1}>
-          {unit.def.name} · {unit.def.pilot.callsign}
+          {unit.def.name} · {unit.def.pilot.callsign} · Lv{unit.level}
         </Text>
         <View style={styles.plateBarTrack}>
           <View style={[styles.plateBarFill, { width: `${pct * 100}%`, backgroundColor: pct > 0.5 ? '#4dff7a' : pct > 0.25 ? '#ffd34d' : '#ff5a5a' }]} />

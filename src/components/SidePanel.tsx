@@ -55,13 +55,14 @@ export function SidePanel() {
                   {unit.def.name}
                 </Text>
                 <Text style={styles.pilotName} numberOfLines={1}>
-                  {unit.def.pilot.name} · {unit.def.pilot.callsign}
+                  {unit.def.pilot.name} · Lv{unit.level}
                 </Text>
               </View>
             </View>
             <Bar label="HP" val={unit.hp} max={unit.def.maxHp} color="#4dff7a" />
             <Bar label="EN" val={unit.en} max={unit.def.maxEn} color="#4db4ff" />
             <Bar label="SP" val={unit.sp} max={unit.def.pilot.maxSp} color="#ffb84d" />
+            <Bar label="EXP" val={unit.exp} max={100} color="#c9a0ff" />
           </View>
         )}
 
@@ -150,7 +151,7 @@ const styles = StyleSheet.create({
   unitName: { color: '#fff', fontWeight: '800', fontSize: 13 },
   pilotName: { color: '#8fa1c7', fontSize: 9.5 },
   barRow: { flexDirection: 'row', alignItems: 'center', marginTop: 3, gap: 5 },
-  barLabel: { color: '#9fb0d0', fontSize: 8.5, width: 16, fontWeight: '700' },
+  barLabel: { color: '#9fb0d0', fontSize: 8.5, width: 22, fontWeight: '700' },
   barTrack: { flex: 1, height: 5, backgroundColor: '#0a0c12', borderRadius: 3, overflow: 'hidden' },
   barFill: { height: 5, borderRadius: 3 },
   barVal: { color: '#9fb0d0', fontSize: 8.5, width: 58, textAlign: 'right' },

@@ -56,6 +56,7 @@ export interface UnitDef {
   weapons: WeaponDef[];
   pilot: PilotDef;
   boss?: boolean;
+  level?: number; // starting level (default 1)
 }
 
 export interface UnitState {
@@ -67,6 +68,8 @@ export interface UnitState {
   sp: number;
   pos: Pos;
   ammo: Record<string, number>; // weaponId -> remaining
+  level: number;
+  exp: number; // 0-99, level up at 100
   moved: boolean;
   acted: boolean;
   alive: boolean;
@@ -112,6 +115,8 @@ export interface AttackResult {
   hitChance: number;
   // counter-attack performed by defender, if any
   counter: CounterResult | null;
+  // human-readable EXP/level-up events for the log
+  expEvents: string[];
 }
 
 export interface CounterResult {

@@ -28,6 +28,17 @@ export const MECH_ART: Record<string, number> = {
   kargan: require('../assets/art/mech_kargan.jpg'),
 };
 
+// Keyed by terrain id — generated top-down map tiles
+export const TERRAIN_ART: Record<string, number> = {
+  plain: require('../assets/art/ter_plain.jpg'),
+  road: require('../assets/art/ter_road.jpg'),
+  forest: require('../assets/art/ter_forest.jpg'),
+  mountain: require('../assets/art/ter_mountain.jpg'),
+  water: require('../assets/art/ter_water.jpg'),
+  city: require('../assets/art/ter_city.jpg'),
+  base: require('../assets/art/ter_base.jpg'),
+};
+
 export const PILOT_ART: Record<string, number> = {
   valstray: require('../assets/art/pilot_ray.jpg'),
   arielis: require('../assets/art/pilot_mira.jpg'),

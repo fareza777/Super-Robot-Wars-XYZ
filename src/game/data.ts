@@ -57,7 +57,7 @@ export const UNITS: Record<string, UnitDef> = {
   // --- enemy ---
   zolda: U({ id: 'zolda', name: 'Zolda', title: 'Imperial Mass Unit', color: '#6b6f7a', accent: '#c9ccd6', maxHp: 3800, maxEn: 100, armor: 850, mobility: 88, moveRange: 5, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod], pilot: PILOTS.grunt }),
   zoldaAir: U({ id: 'zolda_air', name: 'Zolda Flyer', title: 'Imperial Air Unit', color: '#7a6b6f', accent: '#d6c9cc', maxHp: 3400, maxEn: 110, armor: 700, mobility: 104, moveRange: 7, moveType: 'air', weapons: [WEAPONS.missilePods, WEAPONS.vulcan], pilot: PILOTS.grunt }),
-  kargan: U({ id: 'kargan', name: 'Kargan Rex', title: 'Imperial Ace', color: '#8a2fbe', accent: '#e0b3ff', maxHp: 8600, maxEn: 170, armor: 1250, mobility: 124, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.funnelArray, WEAPONS.chestBlaster], pilot: PILOTS.karg, boss: true }),
+  kargan: U({ id: 'kargan', name: 'Kargan Rex', title: 'Imperial Ace', color: '#8a2fbe', accent: '#e0b3ff', maxHp: 8600, maxEn: 170, armor: 1250, mobility: 124, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.funnelArray, WEAPONS.chestBlaster], pilot: PILOTS.karg, boss: true, level: 5 }),
 };
 
 // ---------- Terrain table ----------
