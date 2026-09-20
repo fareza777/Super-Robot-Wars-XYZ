@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART } from '../assets';
@@ -37,7 +37,12 @@ function MenuItem({ label, sub, accent, onPress, delay }: { label: string; sub?:
 export function HomeMenu() {
   const gotoBriefing = useGame((s) => s.gotoBriefing);
   const replayStory = useGame((s) => s.replayStory);
+  const { width, height } = useWindowDimensions();
   const [sound, setSound] = useState(true);
+  const titleFs = Math.round(Math.min(30, height * 0.07));
+  const xyzFs = Math.round(Math.min(64, height * 0.115));
+  const xyzLs = Math.round(Math.min(22, height * 0.05));
+  const menuW = Math.round(Math.min(380, width * 0.46));
   const glow = useRef(new Animated.Value(0)).current;
   const drift = useRef(new Animated.Value(0)).current;
 
@@ -54,12 +59,12 @@ export function HomeMenu() {
       <LinearGradient colors={['rgba(3,5,14,0.25)', 'rgba(3,5,14,0.55)', 'rgba(3,5,14,0.94)']} style={StyleSheet.absoluteFill} />
 
       <View style={styles.brand}>
-        <Animated.Text style={[styles.brandTitle, { opacity: glow.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }]}>SUPER ROBOT WARS</Animated.Text>
-        <Text style={styles.brandXyz}>X Y Z</Text>
+        <Animated.Text style={[styles.brandTitle, { fontSize: titleFs, opacity: glow.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }]}>SUPER ROBOT WARS</Animated.Text>
+        <Text style={[styles.brandXyz, { fontSize: xyzFs, letterSpacing: xyzLs }]}>X Y Z</Text>
         <View style={styles.brandRule} />
       </View>
 
-      <View style={styles.menu}>
+      <View style={[styles.menu, { width: menuW }]}>
         <MenuItem label="STORY CAMPAIGN" sub="Mission SSS — Steel Sky Siege" accent="#ffd34d" delay={150} onPress={gotoBriefing} />
         <MenuItem label="REPLAY STORY" sub="Watch the intro again" accent="#7ee7ff" delay={280} onPress={replayStory} />
         <MenuItem
@@ -74,19 +79,19 @@ export function HomeMenu() {
         />
       </View>
 
-      <Text style={styles.foot}>v0.2 · original mecha tactics · not affiliated with Bandai Namco</Text>
+      <Text style={styles.foot}>v0.3.1 · original mecha tactics · not affiliated with Bandai Namco</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { ...StyleSheet.absoluteFill, backgroundColor: '#03050e', zIndex: 40 },
-  brand: { position: 'absolute', top: '10%', left: 40 },
+  brand: { position: 'absolute', top: '6%', left: 40 },
   brandTitle: { color: '#dbe8ff', fontSize: 30, fontWeight: '900', letterSpacing: 8, fontStyle: 'italic', textShadowColor: '#4d7cff', textShadowRadius: 14 },
   brandXyz: { color: '#ffd34d', fontSize: 64, fontWeight: '900', letterSpacing: 22, fontStyle: 'italic', marginTop: -6, textShadowColor: '#8a5c00', textShadowRadius: 16 },
   brandRule: { height: 2, width: 240, backgroundColor: '#ffd34d', marginTop: 10, opacity: 0.8 },
-  menu: { position: 'absolute', left: 40, bottom: 70, width: 380, gap: 12 },
-  item: { flexDirection: 'row', alignItems: 'center', gap: 14, borderWidth: 1, borderColor: '#3a4160', borderRadius: 10, paddingVertical: 13, paddingHorizontal: 16, backgroundColor: 'rgba(12,16,32,0.72)' },
+  menu: { position: 'absolute', left: 40, bottom: 44, gap: 10 },
+  item: { flexDirection: 'row', alignItems: 'center', gap: 14, borderWidth: 1, borderColor: '#3a4160', borderRadius: 10, paddingVertical: 11, paddingHorizontal: 16, backgroundColor: 'rgba(12,16,32,0.72)' },
   itemBar: { width: 4, alignSelf: 'stretch', borderRadius: 2 },
   itemTxt: { color: '#eef2ff', fontWeight: '900', fontSize: 16, letterSpacing: 2.5 },
   itemSub: { color: '#8fa1c7', fontSize: 11, marginTop: 2, letterSpacing: 0.6 },

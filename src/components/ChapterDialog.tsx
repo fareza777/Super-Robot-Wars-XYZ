@@ -32,9 +32,11 @@ export function ChapterDialog() {
     portIn.setValue(0);
     play(line.voice);
     Animated.spring(portIn, { toValue: 1, useNativeDriver: true, friction: 7 }).start();
+    // elapsed-time driven so starved timers on slow devices still finish on schedule
+    const t0 = Date.now();
     const t = setInterval(() => {
-      setChars((c) => (c >= line.text.length ? c : c + 2));
-    }, 24);
+      setChars(Math.floor((Date.now() - t0) / 15));
+    }, 32);
     return () => clearInterval(t);
   }, [idx]);
 
