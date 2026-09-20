@@ -9,6 +9,7 @@ import {
   clearTransientForOwnPhase,
   key,
   makeUnit,
+  MoveRec,
   movementRange,
   planEnemyActions,
   same,
@@ -51,7 +52,8 @@ interface Store {
   kills: number; // enemies destroyed this mission
   cursor: Pos | null;
   selectedUid: string | null;
-  moveTiles: Map<string, Pos>;
+  moveTiles: Map<string, MoveRec>;
+  walk: { uid: string; path: Pos[] } | null; // unit walking animation in progress
   pendingMove: Pos | null; // unit previewed here, menu open
   preMovePos: Pos | null; // original tile to revert to on cancel
   pendingMovedFlag: boolean;
@@ -142,6 +144,7 @@ export const useGame = create<Store>((set, get) => ({
   cursor: null,
   selectedUid: null,
   moveTiles: new Map(),
+  walk: null,
   pendingMove: null,
   preMovePos: null,
   pendingMovedFlag: false,
@@ -266,6 +269,7 @@ export const useGame = create<Store>((set, get) => ({
       cursor: null,
       selectedUid: null,
       moveTiles: new Map(),
+      walk: null,
       pendingMove: null,
       attackTiles: new Set(),
       pendingWeapon: null,
@@ -320,7 +324,7 @@ export const useGame = create<Store>((set, get) => ({
       set({
         selectedUid: u.uid,
         cursor: p,
-        moveTiles: new Map([...tiles.entries()].map(([k, v]) => [k, v.pos])),
+        moveTiles: tiles,
       });
       return;
     }
@@ -332,7 +336,10 @@ export const useGame = create<Store>((set, get) => ({
     const sel = s.units.find((x) => x.uid === s.selectedUid);
     if (!sel) return;
     const units = s.units.map((u) => (u.uid === sel.uid ? { ...u, pos: p, moved: true } : u));
-    set({ units, pendingMove: p, preMovePos: sel.pos, pendingMovedFlag: !same(sel.pos, p), menuForUid: sel.uid, moveTiles: new Map(), selectedUid: sel.uid });
+    const path = pathTo(s.moveTiles, p);
+    const walking = path.length > 1 ? { uid: sel.uid, path } : null;
+    set({ units, walk: walking, pendingMove: p, preMovePos: sel.pos, pendingMovedFlag: !same(sel.pos, p), menuForUid: sel.uid, moveTiles: new Map(), selectedUid: sel.uid });
+    if (walking) scheduleWalkClear(set, get, sel.uid, path.length);
   },
 
   cancel: () => {
@@ -347,6 +354,7 @@ export const useGame = create<Store>((set, get) => ({
     set({
       selectedUid: null,
       moveTiles: new Map(),
+      walk: null,
       pendingMove: null,
       preMovePos: null,
       pendingMovedFlag: false,
@@ -432,7 +440,7 @@ export const useGame = create<Store>((set, get) => ({
       units,
       spiritForUid: null,
       log: push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
-      moveTiles: s.menuForUid ? new Map() : new Map([...tiles.entries()].map(([k, v]) => [k, v.pos])),
+      moveTiles: s.menuForUid ? new Map() : tiles,
     });
   },
 
@@ -461,6 +469,26 @@ type SetFn = (fn: Partial<Store> | ((s: Store) => Partial<Store>)) => void;
 type Get = () => Store;
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/** Reconstruct the tile-by-tile walked path to `dest` from movementRange records. */
+function pathTo(recs: Map<string, MoveRec>, dest: Pos): Pos[] {
+  const out: Pos[] = [];
+  let cur = recs.get(key(dest));
+  for (let g = 0; cur && g < 60; g++) {
+    out.unshift(cur.pos);
+    cur = cur.from ? recs.get(key(cur.from)) : undefined;
+  }
+  return out;
+}
+
+let walkTimer: ReturnType<typeof setTimeout> | null = null;
+function scheduleWalkClear(set: SetFn, get: Get, uid: string, len: number) {
+  if (walkTimer) clearTimeout(walkTimer);
+  walkTimer = setTimeout(() => {
+    walkTimer = null;
+    if (get().walk?.uid === uid) set({ walk: null });
+  }, Math.min(2400, len * 220 + 150));
+}
 
 // award credits + persist pilot levels when a mission is won
 function applyVictory(set: SetFn, get: Get) {
@@ -494,11 +522,18 @@ async function runEnemyPhase(set: SetFn, get: Get) {
     const plan = remaining[0];
     if (!plan) break;
 
-    // move unit
-    set((st) => ({
-      units: st.units.map((u) => (u.uid === plan.unit.uid ? { ...u, pos: plan.moveTo, moved: true } : u)),
-    }));
-    await sleep(320);
+    // move unit — animate the walk along its BFS path
+    {
+      const cur0 = get();
+      const moving = cur0.units.find((u) => u.uid === plan.unit.uid);
+      const path = moving && !same(moving.pos, plan.moveTo) ? pathTo(movementRange(cur0.map, cur0.units, moving), plan.moveTo) : null;
+      set((st) => ({
+        units: st.units.map((u) => (u.uid === plan.unit.uid ? { ...u, pos: plan.moveTo, moved: true } : u)),
+        walk: path && path.length > 1 ? { uid: plan.unit.uid, path } : null,
+      }));
+      await sleep(path && path.length > 1 ? 160 + path.length * 190 : 200);
+      set({ walk: null });
+    }
 
     if (plan.target && plan.weapon) {
       const cur = get();

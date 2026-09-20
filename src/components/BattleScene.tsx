@@ -13,7 +13,7 @@ import { UnitState, WeaponDef } from '../game/types';
  * -> 3 counter anim -> 4 counter impact -> 5 outro -> finishBattle()
  */
 
-const DUR = { intro: 1000, banner: 950, attack: 2300, impact: 2000, outro: 900 };
+const DUR = { intro: 820, banner: 800, attack: 2100, impact: 1700, outro: 700 };
 
 export function BattleScene() {
   const battle = useGame((s) => s.battle);
@@ -109,7 +109,7 @@ export function BattleScene() {
       if (r.hit) {
         play(r.destroyed ? 'sfx_explosion' : 'sfx_hit');
         pulse(defFlash, shakeX);
-        countUp(r.damage, setDmgShown, 1200);
+        countUp(r.damage, setDmgShown, 1000);
         if (r.destroyed)
           Animated.timing(defFall, { toValue: 1, duration: 950, delay: 500, easing: Easing.in(Easing.quad), useNativeDriver: true }).start();
       }
@@ -119,7 +119,7 @@ export function BattleScene() {
       if (c.hit) {
         play(c.destroyed ? 'sfx_explosion' : 'sfx_hit');
         pulse(attFlash, shakeX);
-        countUp(c.damage, setCounterDmgShown, 1200);
+        countUp(c.damage, setCounterDmgShown, 1000);
         if (c.destroyed)
           Animated.timing(attFall, { toValue: 1, duration: 950, delay: 500, easing: Easing.in(Easing.quad), useNativeDriver: true }).start();
       }
@@ -259,7 +259,7 @@ function pulse(flash: Animated.Value, shake: Animated.Value) {
 }
 
 function countUp(to: number, set: (n: number) => void, ms: number) {
-  const steps = 18;
+  const steps = 10;
   const iv = ms / steps;
   let i = 0;
   const t = setInterval(() => {

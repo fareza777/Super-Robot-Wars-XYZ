@@ -41,11 +41,17 @@ export function moveRangeOf(u: UnitState): number {
 }
 
 /** BFS over terrain move cost; blocked tiles occupied by other units. */
-export function movementRange(map: MapDef, units: UnitState[], u: UnitState): Map<string, { pos: Pos; cost: number }> {
+export interface MoveRec {
+  pos: Pos;
+  cost: number;
+  from?: Pos; // BFS predecessor — reconstructs the walked path
+}
+
+export function movementRange(map: MapDef, units: UnitState[], u: UnitState): Map<string, MoveRec> {
   const range = moveRangeOf(u);
   const mt = u.def.moveType;
   const blocked = new Set(units.filter((o) => o.alive && o.uid !== u.uid).map((o) => key(o.pos)));
-  const out = new Map<string, { pos: Pos; cost: number }>();
+  const out = new Map<string, MoveRec>();
   const start = key(u.pos);
   out.set(start, { pos: u.pos, cost: 0 });
   // dijkstra-lite (costs 1-3)
@@ -69,7 +75,7 @@ export function movementRange(map: MapDef, units: UnitState[], u: UnitState): Ma
       if (nc > range) continue;
       const prev = out.get(nk);
       if (prev && prev.cost <= nc) continue;
-      out.set(nk, { pos: np, cost: nc });
+      out.set(nk, { pos: np, cost: nc, from: cur.pos });
       frontier.push({ pos: np, cost: nc });
     }
   }

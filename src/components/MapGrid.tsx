@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
 import { MECH_ART, TERRAIN_ART } from '../assets';
 import { key, same } from '../game/engine';
@@ -17,6 +17,7 @@ export function MapGrid() {
   const attackTiles = useGame((s) => s.attackTiles);
   const selectedUid = useGame((s) => s.selectedUid);
   const pendingMove = useGame((s) => s.pendingMove);
+  const walk = useGame((s) => s.walk);
   const tapTile = useGame((s) => s.tapTile);
   const { width, height } = useWindowDimensions();
 
@@ -51,8 +52,9 @@ export function MapGrid() {
         .filter((u) => u.alive)
         .map((u) => {
           const ghosting = ghost && u.uid === ghost.uid;
-          return (
-            <View key={u.uid} pointerEvents="none" style={[styles.unitWrap, { left: u.pos.x * tw, top: u.pos.y * th, width: tw, height: th }]}>
+          const walking = walk && walk.uid === u.uid && walk.path.length > 1;
+          const cell = (
+            <>
               <View
                 style={[
                   styles.chip,
@@ -73,6 +75,12 @@ export function MapGrid() {
                 <Text style={styles.lvTxt}>Lv{u.level}</Text>
               </View>
               {u.def.boss && <Text style={styles.bossTag}>ACE</Text>}
+            </>
+          );
+          if (walking) return <WalkingChip key={u.uid} path={walk!.path} tw={tw} th={th} cell={cell} />;
+          return (
+            <View key={u.uid} pointerEvents="none" style={[styles.unitWrap, { left: u.pos.x * tw, top: u.pos.y * th, width: tw, height: th }]}>
+              {cell}
             </View>
           );
         })}
@@ -84,6 +92,32 @@ export function MapGrid() {
         </View>
       )}
     </View>
+  );
+}
+
+/** Animated unit chip walking tile-by-tile along `path` with a little hop per step. */
+function WalkingChip({ path, tw, th, cell }: { path: Pos[]; tw: number; th: number; cell: React.ReactNode }) {
+  const p = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(p, { toValue: path.length - 1, duration: 190 * (path.length - 1), easing: Easing.linear, useNativeDriver: true }).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const idx = path.map((_, i) => i);
+  const tx = p.interpolate({ inputRange: idx, outputRange: path.map((wp) => wp.x * tw) });
+  const ty = p.interpolate({ inputRange: idx, outputRange: path.map((wp) => wp.y * th) });
+  const hopIn: number[] = [];
+  const hopOut: number[] = [];
+  for (let i = 0; i < path.length - 1; i++) {
+    hopIn.push(i, i + 0.5);
+    hopOut.push(0, -th * 0.18);
+  }
+  hopIn.push(path.length - 1);
+  hopOut.push(0);
+  const hop = p.interpolate({ inputRange: hopIn, outputRange: hopOut });
+  return (
+    <Animated.View pointerEvents="none" style={[styles.unitWrap, { width: tw, height: th, transform: [{ translateX: tx }, { translateY: Animated.add(ty, hop) }] }]}>
+      {cell}
+    </Animated.View>
   );
 }
 

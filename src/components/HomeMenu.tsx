@@ -91,7 +91,7 @@ export function HomeMenu() {
         />
       </View>
 
-      <Text style={styles.foot}>v0.5.0 · original mecha tactics · not affiliated with Bandai Namco</Text>
+      <Text style={styles.foot}>v0.6.0 · original mecha tactics · not affiliated with Bandai Namco</Text>
     </View>
   );
 }
