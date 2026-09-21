@@ -1,6 +1,6 @@
 export type Pos = { x: number; y: number };
 
-export type Terrain = 'plain' | 'forest' | 'mountain' | 'water' | 'city' | 'road' | 'base' | 'void' | 'moon';
+export type Terrain = 'plain' | 'forest' | 'mountain' | 'water' | 'city' | 'road' | 'base' | 'void' | 'moon' | 'desert' | 'snow' | 'lava' | 'ruins';
 
 export type Side = 'player' | 'enemy';
 

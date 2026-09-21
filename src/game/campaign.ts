@@ -155,6 +155,10 @@ const THEME_WEIGHTS: Record<string, [Terrain, number][]> = {
   colony: [['void', 0.36], ['city', 0.24], ['base', 0.12], ['plain', 0.14], ['road', 0.14]],
   moon: [['moon', 0.6], ['mountain', 0.18], ['base', 0.1], ['plain', 0.12]],
   fortress: [['base', 0.3], ['city', 0.22], ['road', 0.16], ['mountain', 0.12], ['plain', 0.2]],
+  desert: [['desert', 0.55], ['plain', 0.16], ['mountain', 0.12], ['ruins', 0.09], ['road', 0.08]],
+  snow: [['snow', 0.5], ['forest', 0.14], ['mountain', 0.14], ['plain', 0.14], ['water', 0.07]],
+  volcano: [['plain', 0.28], ['lava', 0.24], ['mountain', 0.2], ['ruins', 0.12], ['desert', 0.1], ['road', 0.06]],
+  ruins: [['ruins', 0.38], ['city', 0.12], ['road', 0.14], ['plain', 0.2], ['forest', 0.16]],
 };
 
 function pickTerrain(r: () => number, theme: string): Terrain {
@@ -185,7 +189,7 @@ export function genMap(ch: ChapterDef): MapDef {
       let t = pickTerrain(r, ch.theme);
       // keep spawn zones clean & passable
       const inSpawn = (x <= 3 && y >= 5) || (x >= 9 && y <= 7);
-      if (inSpawn && (t === 'water' || t === 'mountain' || t === 'void' || t === 'moon')) t = ch.theme === 'void' ? 'base' : 'plain';
+      if (inSpawn && (t === 'water' || t === 'mountain' || t === 'void' || t === 'moon' || t === 'lava')) t = ch.theme === 'void' ? 'base' : 'plain';
       row.push(t);
     }
     terrain.push(row);
@@ -213,7 +217,8 @@ export function genMap(ch: ChapterDef): MapDef {
       const y = Math.floor(rSpawn() * 8);
       const k = `${x},${y}`;
       const ti = TERRAIN_INFO[terrain2[y][x]];
-      if (!used.has(k) && ti.passable.land) {
+      // never spawn a unit on damaging terrain
+      if (!used.has(k) && ti.passable.land && !ti.hpDmg) {
         used.add(k);
         enemySpawns.push({ defId, pos: { x, y } });
         break;
@@ -278,6 +283,17 @@ export const SIDE_MISSIONS: SideMissionDef[] = [
   },
   {
     id: 's2',
+    name: 'Dust Crown Ambush',
+    desc: 'Imperial scavengers circle a wrecked carrier in the Glass Desert.',
+    unlockCh: 6,
+    theme: 'desert',
+    lvl: 6,
+    count: 6,
+    rewardCr: 1600,
+    rewardItem: 'repairKit',
+  },
+  {
+    id: 's3',
     name: 'Signals in the Drift',
     desc: 'A derelict emitter is broadcasting Ark codes in the void belt.',
     unlockCh: 9,
@@ -288,7 +304,29 @@ export const SIDE_MISSIONS: SideMissionDef[] = [
     rewardItem: 'enCell',
   },
   {
-    id: 's3',
+    id: 's4',
+    name: 'The Frozen Relay',
+    desc: 'A listening post went dark in the polar shelf — investigate.',
+    unlockCh: 11,
+    theme: 'snow',
+    lvl: 10,
+    count: 6,
+    rewardCr: 1800,
+    rewardItem: 'enCell',
+  },
+  {
+    id: 's5',
+    name: 'Ember Gate Raid',
+    desc: 'A weapons convoy crosses the volcanic shelf. Hit it before it dives.',
+    unlockCh: 13,
+    theme: 'volcano',
+    lvl: 12,
+    count: 7,
+    rewardCr: 2200,
+    rewardItem: 'spiritWing',
+  },
+  {
+    id: 's6',
     name: 'The Lost Convoy',
     desc: 'Escort fragments hold beyond the lunar shadow — go get them.',
     unlockCh: 14,
@@ -300,7 +338,30 @@ export const SIDE_MISSIONS: SideMissionDef[] = [
     rewardItem: 'megaKit',
   },
   {
-    id: 's4',
+    id: 's7',
+    name: 'Sunken Bastion',
+    desc: 'An Imperial flotilla anchors over the flooded fortress. Break it.',
+    unlockCh: 16,
+    theme: 'sea',
+    lvl: 14,
+    count: 7,
+    rewardCr: 2400,
+    rewardItem: 'megaKit',
+  },
+  {
+    id: 's8',
+    name: 'Ruins of Veridia',
+    desc: 'Kargan loyalists dig through the colony Ray failed to save.',
+    unlockCh: 18,
+    theme: 'ruins',
+    lvl: 15,
+    count: 7,
+    boss: 'kargan',
+    rewardCr: 2800,
+    rewardItem: 'valorPill',
+  },
+  {
+    id: 's9',
     name: "Falcon's Errand",
     desc: 'Vee found a weapons cache inside a dead colony. Quietly.',
     unlockCh: 21,
@@ -310,6 +371,18 @@ export const SIDE_MISSIONS: SideMissionDef[] = [
     boss: 'serka',
     rewardCr: 3400,
     rewardItem: 'spiritWing',
+  },
+  {
+    id: 's10',
+    name: "Throne's Shadow",
+    desc: 'The Emperor\'s personal guard patrols the approach. Prove the squad is ready.',
+    unlockCh: 25,
+    theme: 'fortress',
+    lvl: 19,
+    count: 8,
+    boss: 'warden',
+    rewardCr: 3800,
+    rewardItem: 'megaKit',
   },
 ];
 

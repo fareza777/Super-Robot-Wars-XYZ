@@ -205,7 +205,7 @@ export function HQScreen() {
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 12 }}>
               <Text style={styles.panelTitle}>BOND EVENTS — hearts grow beside you</Text>
               <Text style={styles.bondHint}>Bonded pilots within 2 tiles in battle: +4% hit & +6% damage per level.</Text>
-              {BOND_EVENTS.map((ev) => {
+              {[...BOND_EVENTS].sort((a, b) => a.chapter - b.chapter).map((ev) => {
                 const lvl = bondLevel(s.bonds, ev.a, ev.b);
                 const seen = s.bondSeen.includes(ev.id);
                 const locked = s.chapter < ev.chapter;

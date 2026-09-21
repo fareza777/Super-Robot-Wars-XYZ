@@ -339,12 +339,25 @@ export function checkEnd(units: UnitState[], obj?: EndObjective | null, turn?: n
   return null;
 }
 
-/** Start-of-own-phase recovery: EN regen + heal on base/city tiles (SRW style). */
-export function phaseRecovery(u: UnitState, map: MapDef): { hpGain: number; enGain: number } {
-  const onBase = terrainAt(map, u.pos) === 'base' || terrainAt(map, u.pos) === 'city';
-  const enGain = Math.min(u.def.maxEn - u.en, 5 + (onBase ? 10 : 0));
-  const hpGain = onBase ? Math.min(u.def.maxHp - u.hp, Math.round(u.def.maxHp * 0.1)) : 0;
+/** Start-of-own-phase recovery: base EN regen + terrain effects (heal on base/city, burn on lava). */
+export function phaseRecovery(u: UnitState, map: MapDef): { hpGain: number; enGain: number; hpLoss: number } {
+  const t = TERRAIN_INFO[terrainAt(map, u.pos)];
+  const enGain = Math.min(u.def.maxEn - u.en, 5 + (t.enRegen ?? 0));
+  const hpGain = Math.min(u.def.maxHp - u.hp, Math.round(u.def.maxHp * (t.hpRegen ?? 0)));
+  const hpLoss = Math.min(u.hp - 1, Math.round(u.def.maxHp * (t.hpDmg ?? 0))); // terrain can't kill — leaves 1 HP
   u.en += enGain;
-  u.hp += hpGain;
-  return { hpGain, enGain };
+  u.hp = Math.max(1, u.hp + hpGain - Math.max(0, hpLoss));
+  return { hpGain, enGain, hpLoss: Math.max(0, hpLoss) };
+}
+
+/** One-line terrain effect summary for unit/inspect cards, e.g. "Forest · DEF+100 · EVA+15". */
+export function terrainDesc(map: MapDef, p: Pos): string {
+  const t = TERRAIN_INFO[terrainAt(map, p)];
+  const parts = [t.name];
+  if (t.def) parts.push(`DEF${t.def > 0 ? '+' : ''}${t.def}`);
+  if (t.eva) parts.push(`EVA${t.eva > 0 ? '+' : ''}${t.eva}`);
+  if (t.hpRegen) parts.push(`+${Math.round(t.hpRegen * 100)}% HP/turn`);
+  if (t.enRegen) parts.push(`+${t.enRegen} EN/turn`);
+  if (t.hpDmg) parts.push(`-${Math.round(t.hpDmg * 100)}% HP/turn`);
+  return parts.join(' · ');
 }

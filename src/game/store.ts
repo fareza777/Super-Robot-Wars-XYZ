@@ -677,6 +677,7 @@ export const useGame = create<Store>((set, get) => ({
       const c = { ...u };
       const r = phaseRecovery(c, s.map);
       if (r.hpGain > 0) healed.push(`${c.def.name} +${r.hpGain} HP`);
+      if (r.hpLoss > 0) healed.push(`${c.def.name} -${r.hpLoss} HP (burning terrain)`);
       return c;
     });
     let log = push(s.log, `— Turn ${s.turn} enemy phase —`);
@@ -839,6 +840,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
   // new player turn — clear flags + EN regen / base-city heal
   let pendingVictory = false;
   set((st) => {
+    const recovered: string[] = [];
     const units = st.units.map((u) => {
       const c = { ...u };
       if (c.side === 'player') clearTransientForOwnPhase(c);
@@ -846,11 +848,17 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         c.moved = false;
         c.acted = false;
       }
-      if (c.alive) phaseRecovery(c, st.map);
+      if (c.alive) {
+        const r = phaseRecovery(c, st.map);
+        if (r.hpGain > 0) recovered.push(`${c.def.name} +${r.hpGain} HP`);
+        if (r.hpLoss > 0) recovered.push(`${c.def.name} -${r.hpLoss} HP (burning terrain)`);
+      }
       return c;
     });
     const nextTurn = st.turn + 1;
     const end = checkEnd(units, st.missionCh, nextTurn);
+    let log = push(st.log, `— Turn ${nextTurn} player phase —`);
+    for (const l of recovered) log = push(log, l);
     if (end === 'victory') {
       // survive-objective reached its turn limit — resolve outside this updater
       pendingVictory = true;
@@ -861,7 +869,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       phase: end === 'defeat' ? 'defeat' : 'player',
       enemyBusy: false,
       turn: nextTurn,
-      log: push(st.log, `— Turn ${nextTurn} player phase —`),
+      log,
     };
   });
   if (pendingVictory) applyVictory(set, get);

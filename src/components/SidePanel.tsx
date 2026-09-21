@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ITEMS } from '../game/campaign';
 import { SPIRITS } from '../game/data';
 import { bondMods } from '../game/bonds';
-import { damageOf, hitChance, key, weaponsAgainst } from '../game/engine';
+import { damageOf, hitChance, key, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, useGame } from '../game/store';
 import { SpiritId } from '../game/types';
 
@@ -66,6 +66,7 @@ export function SidePanel() {
             <Bar label="EN" val={unit.en} max={unit.def.maxEn} color="#4db4ff" />
             <Bar label="SP" val={unit.sp} max={unit.def.pilot.maxSp} color="#ffb84d" />
             <Bar label="EXP" val={unit.exp} max={100} color="#c9a0ff" />
+            <Text style={styles.terrainLine}>{terrainDesc(s.map, unit.pos)}</Text>
           </View>
         )}
 
@@ -184,6 +185,7 @@ export function SidePanel() {
                 {w.ammo != null ? ` · ×${inspect.ammo[w.id] ?? 0}` : ` · EN ${w.enCost}`}
               </Text>
             ))}
+            <Text style={styles.terrainLine}>{terrainDesc(s.map, inspect.pos)}</Text>
             <Text style={styles.threatNote}>Orange = its move + weapon range</Text>
             <Btn label="CLOSE" onPress={s.clearInspect} accent="#666" />
           </View>
@@ -244,6 +246,7 @@ const styles = StyleSheet.create({
   logLine: { color: '#9fb0d0', fontSize: 9, marginBottom: 2 },
   endTurn: { marginTop: 6, borderWidth: 1, borderColor: '#ffd34d', borderRadius: 6, paddingVertical: 7, alignItems: 'center', backgroundColor: '#26251a' },
   endTurnTxt: { color: '#ffd34d', fontWeight: '900', fontSize: 11, letterSpacing: 1 },
+  terrainLine: { color: '#7fd4a8', fontSize: 8.5, marginTop: 4, fontWeight: '700' },
   inspectCard: { borderWidth: 1, borderColor: '#ff6b6b' },
   statRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 },
   statTxt: { color: '#c9a0ff', fontSize: 9, fontWeight: '700' },

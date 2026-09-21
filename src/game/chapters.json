@@ -9,11 +9,11 @@
     "count": 6,
     "boss": "kargan",
     "bossLevel": 5,
-    "objective": "Defeat all Imperial units. Ace pilot Col. Karg Draven commands the Kargan Rex — bring him down.",
+    "objective": "Defeat all Imperial units. Ace pilot Col. Karg Draven commands the Kargan Rex \u2014 bring him down.",
     "lines": [
       {
         "speaker": "valstray",
-        "text": "All units, check in. Valstray — green and ready."
+        "text": "All units, check in. Valstray \u2014 green and ready."
       },
       {
         "speaker": "arielis",
@@ -33,7 +33,7 @@
       },
       {
         "speaker": "valstray",
-        "text": "Squadron XYZ — weapons free! Mission start!"
+        "text": "Squadron XYZ \u2014 weapons free! Mission start!"
       }
     ]
   },
@@ -53,11 +53,11 @@
       },
       {
         "speaker": "arielis",
-        "text": "The canopy is thick — my sensors are half blind down there."
+        "text": "The canopy is thick \u2014 my sensors are half blind down there."
       },
       {
         "speaker": "gruntborg",
-        "text": "Trees, metal, whatever — Grunborg punches through all of it."
+        "text": "Trees, metal, whatever \u2014 Grunborg punches through all of it."
       },
       {
         "speaker": "zephyra",
@@ -65,7 +65,7 @@
       },
       {
         "speaker": "valstray",
-        "text": "Move out. Sector Triple-S isn't won yet — this is just the beginning."
+        "text": "Move out. Sector Triple-S isn't won yet \u2014 this is just the beginning."
       }
     ]
   },
@@ -81,7 +81,7 @@
     "lines": [
       {
         "speaker": "arielis",
-        "text": "Imperial dropships on the horizon — they're making a beachhead."
+        "text": "Imperial dropships on the horizon \u2014 they're making a beachhead."
       },
       {
         "speaker": "gruntborg",
@@ -97,7 +97,7 @@
       },
       {
         "speaker": "arielis",
-        "text": "Contacts closing fast. Squadron XYZ — engage!"
+        "text": "Contacts closing fast. Squadron XYZ \u2014 engage!"
       }
     ]
   },
@@ -109,7 +109,7 @@
     "theme": "city",
     "lvl": 4,
     "count": 7,
-    "objective": "Protect the evacuation convoy — destroy the Imperial raiders in the city.",
+    "objective": "Protect the evacuation convoy \u2014 destroy the Imperial raiders in the city.",
     "lines": [
       {
         "speaker": "zephyra",
@@ -151,7 +151,7 @@
       },
       {
         "speaker": "raxden",
-        "text": "The XYZ Squadron. The Emperor himself wants your heads — lucky me."
+        "text": "The XYZ Squadron. The Emperor himself wants your heads \u2014 lucky me."
       },
       {
         "speaker": "valstray",
@@ -163,7 +163,7 @@
       },
       {
         "speaker": "arielis",
-        "text": "Energy readings spiking — his machine is no ordinary Zolda. Careful!"
+        "text": "Energy readings spiking \u2014 his machine is no ordinary Zolda. Careful!"
       }
     ],
     "objectiveType": "boss"
@@ -180,7 +180,7 @@
     "lines": [
       {
         "speaker": "zephyra",
-        "text": "Fuel, ammo, spare cores — this depot feeds their whole southern front."
+        "text": "Fuel, ammo, spare cores \u2014 this depot feeds their whole southern front."
       },
       {
         "speaker": "arielis",
@@ -196,7 +196,7 @@
       },
       {
         "speaker": "zephyra",
-        "text": "Contact! They've scrambled the guards — here they come!"
+        "text": "Contact! They've scrambled the guards \u2014 here they come!"
       }
     ]
   },
@@ -208,7 +208,7 @@
     "theme": "road",
     "lvl": 7,
     "count": 7,
-    "objective": "Defend the Grand Bridge for 8 turns — reinforcements are en route.",
+    "objective": "Defend the Grand Bridge for 8 turns \u2014 reinforcements are en route.",
     "lines": [
       {
         "speaker": "arielis",
@@ -220,11 +220,11 @@
       },
       {
         "speaker": "zephyra",
-        "text": "Charge pattern on their lead unit — it has heavier plating than the rest."
+        "text": "Charge pattern on their lead unit \u2014 it has heavier plating than the rest."
       },
       {
         "speaker": "valstray",
-        "text": "Nobody crosses. Not today, not ever. XYZ — hold the line!"
+        "text": "Nobody crosses. Not today, not ever. XYZ \u2014 hold the line!"
       },
       {
         "speaker": "arielis",
@@ -254,7 +254,7 @@
       },
       {
         "speaker": "gruntborg",
-        "text": "Eight contacts. Good — I was getting bored."
+        "text": "Eight contacts. Good \u2014 I was getting bored."
       },
       {
         "speaker": "arielis",
@@ -262,7 +262,7 @@
       },
       {
         "speaker": "valstray",
-        "text": "Squadron XYZ — make this bay a graveyard for the Empire!"
+        "text": "Squadron XYZ \u2014 make this bay a graveyard for the Empire!"
       }
     ]
   },
@@ -274,7 +274,7 @@
     "theme": "earth",
     "lvl": 9,
     "count": 8,
-    "objective": "Smash the Imperial field army on the Ash Plains — Earth's counterattack starts here.",
+    "objective": "Smash the Imperial field army on the Ash Plains \u2014 Earth's counterattack starts here.",
     "lines": [
       {
         "speaker": "valstray",
@@ -282,7 +282,7 @@
       },
       {
         "speaker": "arielis",
-        "text": "Their line is stretched thin — we break the center and it all folds."
+        "text": "Their line is stretched thin \u2014 we break the center and it all folds."
       },
       {
         "speaker": "gruntborg",
@@ -294,7 +294,7 @@
       },
       {
         "speaker": "valstray",
-        "text": "Squadron XYZ — tip of the spear. Advance!"
+        "text": "Squadron XYZ \u2014 tip of the spear. Advance!"
       }
     ]
   },
@@ -316,11 +316,11 @@
       },
       {
         "speaker": "valstray",
-        "text": "General Moorin — the last real soldier they have left down here."
+        "text": "General Moorin \u2014 the last real soldier they have left down here."
       },
       {
         "speaker": "moorin",
-        "text": "Forty years I have served the throne. Come, children — earn your legend."
+        "text": "Forty years I have served the throne. Come, children \u2014 earn your legend."
       },
       {
         "speaker": "gruntborg",
@@ -345,12 +345,12 @@
     "lines": [
       {
         "speaker": "valstray",
-        "text": "Commander — a Crimson frame just broke formation. It's Rax Daver. He's requesting a berth.",
+        "text": "Commander \u2014 a Crimson frame just broke formation. It's Rax Daver. He's requesting a berth.",
         "voice": "c11_j0"
       },
       {
         "speaker": "raxdenR",
-        "text": "I fought you at Kharon Pass and saw what you protect. My blade serves the Ark now — Crimson Fang, reporting for duty.",
+        "text": "I fought you at Kharon Pass and saw what you protect. My blade serves the Ark now \u2014 Crimson Fang, reporting for duty.",
         "voice": "c11_j1"
       },
       {
@@ -365,7 +365,7 @@
       },
       {
         "speaker": "zephyra",
-        "text": "Platform defenders on approach vector — they're not giving it up cheap.",
+        "text": "Platform defenders on approach vector \u2014 they're not giving it up cheap.",
         "voice": "c11_l2"
       },
       {
@@ -375,7 +375,7 @@
       },
       {
         "speaker": "arielis",
-        "text": "Hold on to your stomachs, everyone. Next stop — the heavens.",
+        "text": "Hold on to your stomachs, everyone. Next stop \u2014 the heavens.",
         "voice": "c11_l4"
       }
     ]
@@ -396,7 +396,7 @@
       },
       {
         "speaker": "arielis",
-        "text": "Wreckage everywhere — perfect ambush cover. Eyes open."
+        "text": "Wreckage everywhere \u2014 perfect ambush cover. Eyes open."
       },
       {
         "speaker": "gruntborg",
@@ -404,7 +404,7 @@
       },
       {
         "speaker": "valstray",
-        "text": "Then nobody dies. XYZ, spread formation — clear the picket."
+        "text": "Then nobody dies. XYZ, spread formation \u2014 clear the picket."
       },
       {
         "speaker": "zephyra",
@@ -420,7 +420,7 @@
     "theme": "colony",
     "lvl": 13,
     "count": 8,
-    "objective": "Liberate Colony Ring Seven — the Empire's slave-labor station in orbit.",
+    "objective": "Liberate Colony Ring Seven \u2014 the Empire's slave-labor station in orbit.",
     "lines": [
       {
         "speaker": "arielis",
@@ -432,7 +432,7 @@
       },
       {
         "speaker": "zephyra",
-        "text": "Careful with your fire — hull breaches mean civilian casualties."
+        "text": "Careful with your fire \u2014 hull breaches mean civilian casualties."
       },
       {
         "speaker": "valstray",
@@ -464,7 +464,7 @@
       },
       {
         "speaker": "zephyra",
-        "text": "Escorts turning to intercept — they know we're here."
+        "text": "Escorts turning to intercept \u2014 they know we're here."
       },
       {
         "speaker": "valstray",
@@ -508,7 +508,7 @@
       },
       {
         "speaker": "arielis",
-        "text": "Her frame is radiating power like a small star. XYZ — full power!"
+        "text": "Her frame is radiating power like a small star. XYZ \u2014 full power!"
       }
     ],
     "objectiveType": "boss"
@@ -521,7 +521,7 @@
     "theme": "moon",
     "lvl": 16,
     "count": 8,
-    "objective": "Destroy Moonfall Base — the Empire's lunar foundry feeding the throne.",
+    "objective": "Destroy Moonfall Base \u2014 the Empire's lunar foundry feeding the throne.",
     "lines": [
       {
         "speaker": "gruntborg",
@@ -533,7 +533,7 @@
       },
       {
         "speaker": "zephyra",
-        "text": "Low gravity — good for jumps, bad for footing. Adjust your gyros."
+        "text": "Low gravity \u2014 good for jumps, bad for footing. Adjust your gyros."
       },
       {
         "speaker": "valstray",
@@ -569,11 +569,11 @@
       },
       {
         "speaker": "valstray",
-        "text": "Then we take it from them twice. XYZ — through the lattice!"
+        "text": "Then we take it from them twice. XYZ \u2014 through the lattice!"
       },
       {
         "speaker": "zephyra",
-        "text": "Ambush pattern confirmed. They come from every angle — hold formation!"
+        "text": "Ambush pattern confirmed. They come from every angle \u2014 hold formation!"
       }
     ]
   },
@@ -614,7 +614,7 @@
     "name": "Throne Approach",
     "subtitle": "Fortress Outskirts",
     "act": 2,
-    "theme": "fortress",
+    "theme": "mountain",
     "lvl": 19,
     "count": 9,
     "objective": "Reach the throne fortress perimeter and destroy its outer guard.",
@@ -629,11 +629,11 @@
       },
       {
         "speaker": "arielis",
-        "text": "Outer guard is elite — every one of them is a decorated ace."
+        "text": "Outer guard is elite \u2014 every one of them is a decorated ace."
       },
       {
         "speaker": "valstray",
-        "text": "So are we. Squadron XYZ — knock that door down!"
+        "text": "So are we. Squadron XYZ \u2014 knock that door down!"
       },
       {
         "speaker": "gruntborg",
@@ -659,7 +659,7 @@
       },
       {
         "speaker": "valstray",
-        "text": "Serka's back — and her frame is twice the machine it was."
+        "text": "Serka's back \u2014 and her frame is twice the machine it was."
       },
       {
         "speaker": "empress",
@@ -667,7 +667,7 @@
       },
       {
         "speaker": "zephyra",
-        "text": "Gate's behind her — no way through but through her."
+        "text": "Gate's behind her \u2014 no way through but through her."
       },
       {
         "speaker": "arielis",
@@ -688,7 +688,7 @@
     "lines": [
       {
         "speaker": "zephyra",
-        "text": "New contact on our six — wait, it's broadcasting Ark codes! The Vexia Custom is ours?!",
+        "text": "New contact on our six \u2014 wait, it's broadcasting Ark codes! The Vexia Custom is ours?!",
         "voice": "c21_j0"
       },
       {
@@ -698,7 +698,7 @@
       },
       {
         "speaker": "arielis",
-        "text": "The dock ring's flood barriers work like a strait — one choke point in.",
+        "text": "The dock ring's flood barriers work like a strait \u2014 one choke point in.",
         "voice": "c21_l0"
       },
       {
@@ -713,12 +713,12 @@
       },
       {
         "speaker": "valstray",
-        "text": "Take the strait, raise the banner. XYZ — landfall!",
+        "text": "Take the strait, raise the banner. XYZ \u2014 landfall!",
         "voice": "c21_l3"
       },
       {
         "speaker": "arielis",
-        "text": "Defense force inbound — they know exactly where we must land!",
+        "text": "Defense force inbound \u2014 they know exactly where we must land!",
         "voice": "c21_l4"
       }
     ]
@@ -731,7 +731,7 @@
     "theme": "fortress",
     "lvl": 22,
     "count": 9,
-    "objective": "Hold the breachhead for 9 turns — the fleet needs the wall open.",
+    "objective": "Hold the breachhead for 9 turns \u2014 the fleet needs the wall open.",
     "lines": [
       {
         "speaker": "gruntborg",
@@ -743,11 +743,11 @@
       },
       {
         "speaker": "arielis",
-        "text": "Elite defenders on the parapet — this is the throne's best."
+        "text": "Elite defenders on the parapet \u2014 this is the throne's best."
       },
       {
         "speaker": "valstray",
-        "text": "Wall, throne, emperor — one by one they fall. Charge!"
+        "text": "Wall, throne, emperor \u2014 one by one they fall. Charge!"
       },
       {
         "speaker": "gruntborg",
@@ -762,10 +762,10 @@
     "name": "The Furnace Level",
     "subtitle": "Steel Throne, Interior",
     "act": 3,
-    "theme": "fortress",
+    "theme": "volcano",
     "lvl": 23,
     "count": 9,
-    "objective": "Fight through the fortress furnace level — the heart of its war machine.",
+    "objective": "Fight through the fortress furnace level \u2014 the heart of its war machine.",
     "lines": [
       {
         "speaker": "arielis",
@@ -781,7 +781,7 @@
       },
       {
         "speaker": "valstray",
-        "text": "Then we shut it off. XYZ — into the fire!"
+        "text": "Then we shut it off. XYZ \u2014 into the fire!"
       },
       {
         "speaker": "arielis",
@@ -794,12 +794,12 @@
     "name": "Old Friends",
     "subtitle": "Steel Throne, Grand Hall",
     "act": 3,
-    "theme": "fortress",
+    "theme": "base",
     "lvl": 24,
     "count": 9,
     "boss": "kargan",
     "bossLevel": 25,
-    "objective": "Karg Draven stands rebuilt in the grand hall — settle the score from Port Nara.",
+    "objective": "Karg Draven stands rebuilt in the grand hall \u2014 settle the score from Port Nara.",
     "lines": [
       {
         "speaker": "kargan",
@@ -815,11 +815,11 @@
       },
       {
         "speaker": "zephyra",
-        "text": "His frame reads completely different — armor, output, everything upgraded."
+        "text": "His frame reads completely different \u2014 armor, output, everything upgraded."
       },
       {
         "speaker": "valstray",
-        "text": "Then we give him a new lesson. Squadron — engage!"
+        "text": "Then we give him a new lesson. Squadron \u2014 engage!"
       }
     ]
   },
@@ -870,7 +870,7 @@
     "lines": [
       {
         "speaker": "zephyra",
-        "text": "The royal guard — ten of the finest pilots the Empire ever made."
+        "text": "The royal guard \u2014 ten of the finest pilots the Empire ever made."
       },
       {
         "speaker": "gruntborg",
@@ -886,7 +886,7 @@
       },
       {
         "speaker": "zephyra",
-        "text": "Here they come — for the Emperor!"
+        "text": "Here they come \u2014 for the Emperor!"
       }
     ]
   },
@@ -902,7 +902,7 @@
     "lines": [
       {
         "speaker": "arielis",
-        "text": "Second wave inbound — they're fighting like there's no tomorrow."
+        "text": "Second wave inbound \u2014 they're fighting like there's no tomorrow."
       },
       {
         "speaker": "gruntborg",
@@ -914,11 +914,11 @@
       },
       {
         "speaker": "valstray",
-        "text": "Then desperation is what we give them back. XYZ — forward!"
+        "text": "Then desperation is what we give them back. XYZ \u2014 forward!"
       },
       {
         "speaker": "arielis",
-        "text": "For everyone we've lost — finish this wave!"
+        "text": "For everyone we've lost \u2014 finish this wave!"
       }
     ]
   },
@@ -927,16 +927,16 @@
     "name": "Draven's Final Duel",
     "subtitle": "Steel Throne, Sanctum Edge",
     "act": 3,
-    "theme": "fortress",
+    "theme": "desert",
     "lvl": 28,
     "count": 9,
     "boss": "kargan",
     "bossLevel": 28,
-    "objective": "Karg Draven fights his last duel — end it, once and for all.",
+    "objective": "Karg Draven fights his last duel \u2014 end it, once and for all.",
     "lines": [
       {
         "speaker": "kargan",
-        "text": "One more time, Ardent. Before the Emperor's door — just you and me."
+        "text": "One more time, Ardent. Before the Emperor's door \u2014 just you and me."
       },
       {
         "speaker": "valstray",
@@ -952,7 +952,7 @@
       },
       {
         "speaker": "valstray",
-        "text": "Then we honor him the only way warriors do. All units — attack!"
+        "text": "Then we honor him the only way warriors do. All units \u2014 attack!"
       }
     ]
   },
@@ -964,7 +964,7 @@
     "theme": "fortress",
     "lvl": 29,
     "count": 10,
-    "objective": "Clear the throne approach — the final defenders before Emperor Vael himself.",
+    "objective": "Clear the throne approach \u2014 the final defenders before Emperor Vael himself.",
     "lines": [
       {
         "speaker": "zephyra",
@@ -972,7 +972,7 @@
       },
       {
         "speaker": "arielis",
-        "text": "Final defenders — the Empire's last blade between us and Vael."
+        "text": "Final defenders \u2014 the Empire's last blade between us and Vael."
       },
       {
         "speaker": "gruntborg",
@@ -980,17 +980,17 @@
       },
       {
         "speaker": "valstray",
-        "text": "For Earth, for the colonies, for every friend we lost — clear the approach!"
+        "text": "For Earth, for the colonies, for every friend we lost \u2014 clear the approach!"
       },
       {
         "speaker": "zephyra",
-        "text": "All units — final charge! The throne is ours!"
+        "text": "All units \u2014 final charge! The throne is ours!"
       }
     ]
   },
   {
     "id": 30,
-    "name": "Emperor Vael — Final Battle",
+    "name": "Emperor Vael \u2014 Final Battle",
     "subtitle": "Steel Throne, Throne Room",
     "act": 3,
     "theme": "fortress",
@@ -1018,7 +1018,7 @@
       },
       {
         "speaker": "valstray",
-        "text": "Squadron XYZ — for every world he burned, strike him down! FINAL MISSION — GO!"
+        "text": "Squadron XYZ \u2014 for every world he burned, strike him down! FINAL MISSION \u2014 GO!"
       }
     ],
     "objectiveType": "boss"

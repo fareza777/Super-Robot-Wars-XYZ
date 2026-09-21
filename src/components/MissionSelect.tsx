@@ -44,7 +44,7 @@ export function MissionSelect() {
         <View style={[styles.col, { flex: 1.35 }]}>
           <Text style={styles.colTitle}>SIDE QUESTS</Text>
           <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 10 }}>
-            {SIDE_MISSIONS.map((m) => {
+            {[...SIDE_MISSIONS].sort((a, b) => a.unlockCh - b.unlockCh).map((m) => {
               const cleared = s.sideCleared.includes(m.id);
               const locked = s.chapter < m.unlockCh;
               const sch = sideAsChapter(m);

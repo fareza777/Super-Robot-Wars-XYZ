@@ -62,16 +62,33 @@ export const UNITS: Record<string, UnitDef> = {
 
 // ---------- Terrain table ----------
 
-export const TERRAIN_INFO: Record<Terrain, { name: string; def: number; eva: number; moveCost: { land: number; air: number }; passable: { land: boolean; air: boolean }; color: string; glyph: string }> = {
+export interface TerrainInfo {
+  name: string;
+  def: number;
+  eva: number;
+  moveCost: { land: number; air: number };
+  passable: { land: boolean; air: boolean };
+  hpRegen?: number; // fraction of maxHp restored at phase start
+  enRegen?: number; // extra EN restored at phase start
+  hpDmg?: number; // fraction of maxHp lost per phase while standing on it
+  color: string;
+  glyph: string;
+}
+
+export const TERRAIN_INFO: Record<Terrain, TerrainInfo> = {
   plain: { name: 'Plains', def: 0, eva: 0, moveCost: { land: 1, air: 1 }, passable: { land: true, air: true }, color: '#3d5a3d', glyph: '' },
   road: { name: 'Road', def: 0, eva: -5, moveCost: { land: 1, air: 1 }, passable: { land: true, air: true }, color: '#5a5348', glyph: '═' },
   forest: { name: 'Forest', def: 100, eva: 15, moveCost: { land: 2, air: 1 }, passable: { land: true, air: true }, color: '#1f4d2a', glyph: '♣' },
   mountain: { name: 'Mountain', def: 150, eva: 20, moveCost: { land: 3, air: 1 }, passable: { land: true, air: true }, color: '#5c4a3a', glyph: '▲' },
   water: { name: 'Water', def: 0, eva: 0, moveCost: { land: 99, air: 1 }, passable: { land: false, air: true }, color: '#1e3f66', glyph: '≈' },
-  city: { name: 'City', def: 200, eva: -10, moveCost: { land: 1, air: 1 }, passable: { land: true, air: true }, color: '#4a4a58', glyph: '▦' },
-  base: { name: 'Base', def: 250, eva: 0, moveCost: { land: 1, air: 1 }, passable: { land: true, air: true }, color: '#584a6e', glyph: '⌂' },
+  city: { name: 'City', def: 200, eva: -10, moveCost: { land: 1, air: 1 }, passable: { land: true, air: true }, hpRegen: 0.08, enRegen: 8, color: '#4a4a58', glyph: '▦' },
+  base: { name: 'Base', def: 250, eva: 0, moveCost: { land: 1, air: 1 }, passable: { land: true, air: true }, hpRegen: 0.12, enRegen: 10, color: '#584a6e', glyph: '⌂' },
   void: { name: 'Void', def: 0, eva: 10, moveCost: { land: 1, air: 1 }, passable: { land: true, air: true }, color: '#141428', glyph: '·' },
   moon: { name: 'Moon Surface', def: 50, eva: 5, moveCost: { land: 2, air: 1 }, passable: { land: true, air: true }, color: '#555560', glyph: '◌' },
+  desert: { name: 'Desert', def: -50, eva: -10, moveCost: { land: 2, air: 1 }, passable: { land: true, air: true }, color: '#8a7a4a', glyph: '∴' },
+  snow: { name: 'Snowfield', def: 30, eva: 5, moveCost: { land: 2, air: 1 }, passable: { land: true, air: true }, color: '#b8c4d0', glyph: '❄' },
+  lava: { name: 'Lava Field', def: 0, eva: 0, moveCost: { land: 3, air: 1 }, passable: { land: true, air: true }, hpDmg: 0.08, color: '#8a2a12', glyph: '♨' },
+  ruins: { name: 'Ruins', def: 180, eva: 10, moveCost: { land: 2, air: 1 }, passable: { land: true, air: true }, color: '#4a4456', glyph: '▤' },
 };
 
 // ---------- Mission SSS: "Steel Sky Siege" ----------

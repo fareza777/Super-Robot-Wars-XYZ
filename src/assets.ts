@@ -53,6 +53,10 @@ export const TERRAIN_ART: Record<string, number> = {
   base: require('../assets/art/ter_base.jpg'),
   void: require('../assets/art/ter_void.jpg'),
   moon: require('../assets/art/ter_moon.jpg'),
+  desert: require('../assets/art/ter_desert.jpg'),
+  snow: require('../assets/art/ter_snow.jpg'),
+  lava: require('../assets/art/ter_lava.jpg'),
+  ruins: require('../assets/art/ter_ruins.jpg'),
 };
 
 export const PILOT_ART: Record<string, number> = {
@@ -74,6 +78,12 @@ export const PILOT_ART: Record<string, number> = {
   emperor: require('../assets/art/pilot_vael.jpg'),
   raxdenR: require('../assets/art/pilot_rax.jpg'),
   vexiaX: require('../assets/art/pilot_vee.jpg'),
+};
+
+// Bond event backdrops — romance events get the CG, friendship stays on mess/hangar
+export const BOND_BG: Record<string, number> = {
+  stars: require('../assets/art/bond_stars.jpg'),
+  mess: require('../assets/art/bond_mess.jpg'),
 };
 
 export const NPC_ART: Record<string, number> = {
