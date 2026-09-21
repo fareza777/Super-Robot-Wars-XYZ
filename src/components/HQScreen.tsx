@@ -4,7 +4,7 @@ import { Image as ExpoImage } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART, AudioKey, MECH_ART, NPC_ART } from '../assets';
 import { play } from '../audio';
-import { ALL_UNITS, CHAPTERS_COUNT, ITEMS, PLAYER_DEF_IDS, UPGRADE_STATS, chapterOf } from '../game/campaign';
+import { ALL_UNITS, CHAPTERS_COUNT, ITEMS, MAX_WEAPON_UPG, PLAYER_DEF_IDS, UPGRADE_STATS, WEAPON_UPG_POWER, chapterOf, rosterFor, weaponUpgCost } from '../game/campaign';
 import { useGame } from '../game/store';
 
 type Tab = 'main' | 'merchant' | 'workshop' | 'chat';
@@ -40,6 +40,7 @@ export function HQScreen() {
   const { width, height } = useWindowDimensions();
   const s = useGame();
   const [tab, setTab] = useState<Tab>('main');
+  const [wsTab, setWsTab] = useState<'frame' | 'weap'>('frame');
   const [selUnit, setSelUnit] = useState<string>(PLAYER_DEF_IDS[0]);
   const [chatIdx, setChatIdx] = useState(0);
   const [chatLine, setChatLine] = useState(0);
@@ -116,9 +117,9 @@ export function HQScreen() {
       {/* WORKSHOP */}
       {tab === 'workshop' && (
         <HqPanel npc={NPCS.mechanic} onBack={() => setTab('main')} npcImgH={npcImgH} bob={npcBob}>
-          <Text style={styles.panelTitle}>WORKSHOP — BENGkel TEKNISI</Text>
+          <Text style={styles.panelTitle}>WORKSHOP — BENGKEL TEKNISI</Text>
           <View style={styles.unitRow}>
-            {PLAYER_DEF_IDS.map((id) => (
+            {rosterFor(ch).map((id) => (
               <Pressable key={id} style={[styles.unitChip, selUnit === id && { borderColor: '#6fe0ff' }]} onPress={() => setSelUnit(id)}>
                 <Image source={MECH_ART[id]} style={{ width: 34, height: 34, borderRadius: 6 }} />
                 <Text style={styles.unitChipTxt} numberOfLines={1}>
@@ -127,29 +128,66 @@ export function HQScreen() {
               </Pressable>
             ))}
           </View>
-          {UPGRADE_STATS.map((stat) => {
-            const lvl = s.upgrades[selUnit]?.[stat.id] ?? 0;
-            const maxed = lvl >= 8;
-            const cost = maxed ? 0 : stat.cost(lvl);
-            const afford = s.credits >= cost;
-            return (
-              <View key={stat.id} style={styles.shopRow}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.shopName}>
-                    {stat.name} <Text style={styles.shopOwned}>Lv {lvl}/8</Text>
-                  </Text>
-                  <View style={styles.lvlBarTrack}>
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <View key={i} style={[styles.lvlSeg, i < lvl && { backgroundColor: '#6fe0ff' }]} />
-                    ))}
+          <View style={styles.wsTabs}>
+            {(['frame', 'weap'] as const).map((t) => (
+              <Pressable key={t} style={[styles.wsTab, wsTab === t && styles.wsTabOn]} onPress={() => setWsTab(t)}>
+                <Text style={[styles.wsTabTxt, wsTab === t && { color: '#6fe0ff' }]}>{t === 'frame' ? 'FRAME' : 'WEAPONS'}</Text>
+              </Pressable>
+            ))}
+          </View>
+          {wsTab === 'frame' &&
+            UPGRADE_STATS.map((stat) => {
+              const lvl = s.upgrades[selUnit]?.[stat.id] ?? 0;
+              const maxed = lvl >= 8;
+              const cost = maxed ? 0 : stat.cost(lvl);
+              const afford = s.credits >= cost;
+              return (
+                <View key={stat.id} style={styles.shopRow}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.shopName}>
+                      {stat.name} <Text style={styles.shopOwned}>Lv {lvl}/8</Text>
+                    </Text>
+                    <View style={styles.lvlBarTrack}>
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <View key={i} style={[styles.lvlSeg, i < lvl && { backgroundColor: '#6fe0ff' }]} />
+                      ))}
+                    </View>
                   </View>
+                  <Pressable style={[styles.buyBtn, (!afford || maxed) && { opacity: 0.35 }]} onPress={() => s.upgradeStat(selUnit, stat.id)} disabled={!afford || maxed}>
+                    <Text style={styles.buyTxt}>{maxed ? 'MAX' : `${cost} CR`}</Text>
+                  </Pressable>
                 </View>
-                <Pressable style={[styles.buyBtn, (!afford || maxed) && { opacity: 0.35 }]} onPress={() => s.upgradeStat(selUnit, stat.id)} disabled={!afford || maxed}>
-                  <Text style={styles.buyTxt}>{maxed ? 'MAX' : `${cost} CR`}</Text>
-                </Pressable>
-              </View>
-            );
-          })}
+              );
+            })}
+          {wsTab === 'weap' &&
+            ALL_UNITS[selUnit].weapons.map((w) => {
+              const lvl = s.weaponUpg[selUnit]?.[w.id] ?? 0;
+              const maxed = lvl >= MAX_WEAPON_UPG;
+              const cost = weaponUpgCost(lvl);
+              const afford = s.credits >= cost;
+              const pow = Math.round(w.power * (1 + WEAPON_UPG_POWER * lvl));
+              return (
+                <View key={w.id} style={styles.shopRow}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.shopName}>
+                      {w.name} <Text style={styles.shopOwned}>Lv {lvl}/{MAX_WEAPON_UPG}</Text>
+                    </Text>
+                    <Text style={styles.shopDesc}>
+                      POW {pow} (+{Math.round(WEAPON_UPG_POWER * 100)}%/lv) · R{w.rangeMin}-{w.rangeMax}
+                      {w.ammo != null ? ` · ×${w.ammo}` : ` · EN ${w.enCost}`}
+                    </Text>
+                    <View style={styles.lvlBarTrack}>
+                      {Array.from({ length: MAX_WEAPON_UPG }).map((_, i) => (
+                        <View key={i} style={[styles.lvlSeg, i < lvl && { backgroundColor: '#ffb84d' }]} />
+                      ))}
+                    </View>
+                  </View>
+                  <Pressable style={[styles.buyBtn, (!afford || maxed) && { opacity: 0.35 }]} onPress={() => s.upgradeWeapon(selUnit, w.id)} disabled={!afford || maxed}>
+                    <Text style={styles.buyTxt}>{maxed ? 'MAX' : `${cost} CR`}</Text>
+                  </Pressable>
+                </View>
+              );
+            })}
         </HqPanel>
       )}
 
@@ -255,6 +293,10 @@ const styles = StyleSheet.create({
   unitChipTxt: { color: '#fff', fontWeight: '700', fontSize: 10.5, flexShrink: 1 },
   lvlBarTrack: { flexDirection: 'row', gap: 3, marginTop: 6 },
   lvlSeg: { width: 18, height: 6, borderRadius: 2, backgroundColor: '#1c2440' },
+  wsTabs: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  wsTab: { flex: 1, borderWidth: 1, borderColor: '#3a4160', borderRadius: 7, paddingVertical: 6, alignItems: 'center', backgroundColor: '#0a0e1e' },
+  wsTabOn: { borderColor: '#6fe0ff', backgroundColor: '#10202e' },
+  wsTabTxt: { color: '#8fa0c8', fontWeight: '900', fontSize: 10.5, letterSpacing: 1.5 },
   backBtn: { alignSelf: 'flex-start', borderWidth: 1, borderColor: '#3a4160', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 7, marginTop: 8 },
   backTxt: { color: '#9fd0ff', fontWeight: '800', fontSize: 12, letterSpacing: 1 },
   chatWrap: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },

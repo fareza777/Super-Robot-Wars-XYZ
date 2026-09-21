@@ -1,31 +1,53 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
-import { CHAPTERS, CHAPTERS_COUNT, ITEMS, UPGRADE_STATS, UpgradeMap, chapterOf, enemyLevelOf, genMap, upgradedStat } from './campaign';
+import {
+  CHAPTERS,
+  CHAPTERS_COUNT,
+  ITEMS,
+  MAX_WEAPON_UPG,
+  UPGRADE_STATS,
+  UpgradeMap,
+  WEAPON_UPG_POWER,
+  WeaponUpgMap,
+  chapterOf,
+  enemyLevelOf,
+  genMap,
+  rosterFor,
+  upgradedStat,
+  weaponUpgCost,
+} from './campaign';
 import { MISSION_SSS, SPIRITS } from './data';
+import { setMusicEnabled, setSoundEnabled } from '../audio';
 import {
   applyAttack,
   applySpirit,
   checkEnd,
   clearTransientForOwnPhase,
+  dist,
   key,
   makeUnit,
   MoveRec,
   movementRange,
+  phaseRecovery,
   planEnemyActions,
   same,
   unitAt,
   usableWeapons,
   weaponsAgainst,
 } from './engine';
-import { AttackResult, BattleData, MapDef, Phase, Pos, SpiritId, UnitState, WeaponDef } from './types';
+import { AttackResult, BattleData, GameSettings, MapDef, Phase, Pos, SpiritId, UnitState, WeaponDef } from './types';
 
 const SAVE_KEY = 'srwxyz_save_v1';
+const SETTINGS_KEY = 'srwxyz_settings_v1';
+
+export const DEFAULT_SETTINGS: GameSettings = { battleMode: 'full', animSpeed: 1, sound: true, music: true };
 
 export interface SaveData {
   chapter: number;
   credits: number;
   inventory: Record<string, number>;
   upgrades: UpgradeMap;
+  weaponUpg: WeaponUpgMap;
   pilotProg: Record<string, { level: number; exp: number }>;
 }
 
@@ -47,8 +69,13 @@ interface Store {
   credits: number;
   inventory: Record<string, number>;
   upgrades: UpgradeMap;
+  weaponUpg: WeaponUpgMap;
   pilotProg: Record<string, { level: number; exp: number }>;
   hasSave: boolean;
+  settings: GameSettings;
+  deploySel: string[];
+  inspectUid: string | null;
+  threatTiles: Set<string>;
   kills: number; // enemies destroyed this mission
   cursor: Pos | null;
   selectedUid: string | null;
@@ -70,6 +97,12 @@ interface Store {
   finishOnboarding: () => void;
   gotoBriefing: () => void;
   replayStory: () => void;
+  gotoSettings: () => void;
+  setSetting: <K extends keyof GameSettings>(k: K, v: GameSettings[K]) => void;
+  resetSave: () => Promise<void>;
+  toggleDeploy: (defId: string) => void;
+  upgradeWeapon: (defId: string, weaponId: string) => void;
+  clearInspect: () => void;
   startMission: () => void;
   finishDialog: () => void;
   newCampaign: () => void;
@@ -94,33 +127,40 @@ interface Store {
 
 const push = (log: string[], line: string) => [line, ...log].slice(0, 30);
 
-function applyUpgrades(u: UnitState, up: UpgradeMap) {
+function applyUpgrades(u: UnitState, up: UpgradeMap, wupg: WeaponUpgMap) {
   const rec = up[u.def.id];
-  if (!rec) return;
-  u.def = {
-    ...u.def,
-    maxHp: u.def.maxHp + (rec.hp ?? 0) * 400,
-    maxEn: u.def.maxEn + (rec.en ?? 0) * 15,
-    armor: u.def.armor + (rec.armor ?? 0) * 90,
-    mobility: u.def.mobility + (rec.mobility ?? 0) * 6,
-  };
-  u.hp = u.def.maxHp;
-  u.en = u.def.maxEn;
+  const wrec = wupg[u.def.id];
+  u.def = { ...u.def };
+  if (rec) {
+    u.def.maxHp += (rec.hp ?? 0) * 400;
+    u.def.maxEn += (rec.en ?? 0) * 15;
+    u.def.armor += (rec.armor ?? 0) * 90;
+    u.def.mobility += (rec.mobility ?? 0) * 6;
+    u.hp = u.def.maxHp;
+    u.en = u.def.maxEn;
+  }
+  if (wrec) {
+    u.def.weapons = u.def.weapons.map((w) => {
+      const lvl = wrec[w.id] ?? 0;
+      return lvl > 0 ? { ...w, power: Math.round(w.power * (1 + WEAPON_UPG_POWER * lvl)) } : w;
+    });
+  }
 }
 
-function buildMission(chapterIdx: number, pilotProg: Store['pilotProg'], upgrades: UpgradeMap): { map: MapDef; units: UnitState[] } {
+function buildMission(chapterIdx: number, pilotProg: Store['pilotProg'], upgrades: UpgradeMap, wupg: WeaponUpgMap, deploySel: string[]): { map: MapDef; units: UnitState[] } {
   const ch = chapterOf(chapterIdx);
   const map = genMap(ch);
   const units: UnitState[] = [];
   let i = 0;
   for (const s of map.playerSpawns) {
+    if (deploySel.length && !deploySel.includes(s.defId)) continue;
     const u = makeUnit(s.defId, 'player', s.pos, `p${i++}`);
     const prog = pilotProg[s.defId];
     if (prog) {
       u.level = prog.level;
       u.exp = prog.exp;
     }
-    applyUpgrades(u, upgrades);
+    applyUpgrades(u, upgrades, wupg);
     units.push(u);
   }
   for (const s of map.enemySpawns) {
@@ -131,11 +171,34 @@ function buildMission(chapterIdx: number, pilotProg: Store['pilotProg'], upgrade
   return { map, units };
 }
 
-async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg'>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, pilotProg: s.pilotProg };
+async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg'>) {
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
+}
+
+async function persistSettings(s: GameSettings) {
+  try {
+    await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+  } catch {}
+}
+
+/** Tiles the unit threatens: move range + max weapon reach from each tile. */
+function threatTilesFor(map: MapDef, units: UnitState[], u: UnitState): Set<string> {
+  const out = new Set<string>();
+  for (const rec of movementRange(map, units, u).values()) {
+    const p = rec.pos;
+    out.add(key(p));
+    const maxR = Math.max(...usableWeapons(u).map((w) => w.rangeMax), 0);
+    const minR = Math.min(...usableWeapons(u).map((w) => w.rangeMin), 1);
+    for (let y = 0; y < map.rows; y++)
+      for (let x = 0; x < map.cols; x++) {
+        const d = dist(p, { x, y });
+        if (d >= minR && d <= maxR) out.add(`${x},${y}`);
+      }
+  }
+  return out;
 }
 
 export const useGame = create<Store>((set, get) => ({
@@ -162,17 +225,69 @@ export const useGame = create<Store>((set, get) => ({
   credits: 0,
   inventory: {},
   upgrades: {},
+  weaponUpg: {},
   pilotProg: {},
   hasSave: false,
+  settings: DEFAULT_SETTINGS,
+  deploySel: [],
+  inspectUid: null,
+  threatTiles: new Set<string>(),
   kills: 0,
 
   start: () => set({ phase: 'onboarding', units: [], log: [] }),
   finishOnboarding: () => set({ phase: 'home' }),
-  gotoBriefing: () => set({ phase: 'briefing' }),
+  gotoBriefing: () => {
+    const s = get();
+    set({ phase: 'briefing', deploySel: rosterFor(chapterOf(s.chapter)) });
+  },
   replayStory: () => set({ phase: 'onboarding' }),
+  gotoSettings: () => set({ phase: 'settings' }),
+
+  setSetting: (k, v) => {
+    const settings = { ...get().settings, [k]: v };
+    set({ settings });
+    if (k === 'sound') setSoundEnabled(v as boolean);
+    if (k === 'music') setMusicEnabled(v as boolean);
+    void persistSettings(settings);
+  },
+
+  resetSave: async () => {
+    try {
+      await AsyncStorage.removeItem(SAVE_KEY);
+    } catch {}
+    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {} });
+  },
+
+  toggleDeploy: (defId) => {
+    const s = get();
+    const has = s.deploySel.includes(defId);
+    if (has && s.deploySel.length <= 1) return; // keep at least one unit deployed
+    set({ deploySel: has ? s.deploySel.filter((d) => d !== defId) : [...s.deploySel, defId] });
+  },
+
+  upgradeWeapon: (defId, weaponId) => {
+    const s = get();
+    const cur = s.weaponUpg[defId]?.[weaponId] ?? 0;
+    if (cur >= MAX_WEAPON_UPG) return;
+    const cost = weaponUpgCost(cur);
+    if (s.credits < cost) return;
+    const weaponUpg: WeaponUpgMap = { ...s.weaponUpg, [defId]: { ...(s.weaponUpg[defId] ?? {}), [weaponId]: cur + 1 } };
+    const credits = s.credits - cost;
+    set({ credits, weaponUpg });
+    void persist({ chapter: s.chapter, credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg, pilotProg: s.pilotProg });
+  },
+
+  clearInspect: () => set({ inspectUid: null, threatTiles: new Set() }),
 
   newCampaign: () => {
-    const fresh = { chapter: 0, credits: 1200, inventory: { repairKit: 2, enCell: 1 } as Record<string, number>, upgrades: {} as UpgradeMap, pilotProg: {} as Store['pilotProg'] };
+    const fresh = {
+      chapter: 0,
+      credits: 1200,
+      inventory: { repairKit: 2, enCell: 1 } as Record<string, number>,
+      upgrades: {} as UpgradeMap,
+      weaponUpg: {} as WeaponUpgMap,
+      pilotProg: {} as Store['pilotProg'],
+    };
     set({ ...fresh, hasSave: true, kills: 0, phase: 'prologue' });
     void persist(fresh);
   },
@@ -184,7 +299,16 @@ export const useGame = create<Store>((set, get) => ({
       const raw = await AsyncStorage.getItem(SAVE_KEY);
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
-      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, pilotProg: d.pilotProg, hasSave: true });
+      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true });
+    } catch {}
+    try {
+      const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
+      if (sraw) {
+        const st = { ...DEFAULT_SETTINGS, ...(JSON.parse(sraw) as Partial<GameSettings>) };
+        set({ settings: st });
+        setSoundEnabled(st.sound);
+        setMusicEnabled(st.music);
+      }
     } catch {}
   },
 
@@ -197,7 +321,7 @@ export const useGame = create<Store>((set, get) => ({
     const inventory = { ...s.inventory, [itemId]: (s.inventory[itemId] ?? 0) + 1 };
     const credits = s.credits - item.price;
     set({ credits, inventory });
-    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, pilotProg: s.pilotProg });
+    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg });
   },
 
   upgradeStat: (defId, statId) => {
@@ -211,7 +335,7 @@ export const useGame = create<Store>((set, get) => ({
     const upgrades: UpgradeMap = { ...s.upgrades, [defId]: { ...(s.upgrades[defId] ?? {}), [statId]: cur + 1 } };
     const credits = s.credits - cost;
     set({ credits, upgrades });
-    void persist({ chapter: s.chapter, credits, inventory: s.inventory, upgrades, pilotProg: s.pilotProg });
+    void persist({ chapter: s.chapter, credits, inventory: s.inventory, upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg });
   },
 
   useItem: (uid, itemId) => {
@@ -253,14 +377,14 @@ export const useGame = create<Store>((set, get) => ({
       selectedUid: null,
       log: push(s.log, `${u.def.name} uses ${item.name}`),
     });
-    void persist({ chapter: s.chapter, credits: s.credits, inventory, upgrades: s.upgrades, pilotProg: s.pilotProg });
+    void persist({ chapter: s.chapter, credits: s.credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg });
   },
 
   startMission: () => {
     const s = get();
-    const { map, units } = buildMission(s.chapter, s.pilotProg, s.upgrades);
+    const { map, units } = buildMission(s.chapter, s.pilotProg, s.upgrades, s.weaponUpg, s.deploySel);
     const ch = chapterOf(s.chapter);
-    set({ phase: 'dialog', map, units, kills: 0, turn: 1, log: [`Chapter ${ch.id}: ${ch.name}`] });
+    set({ phase: 'dialog', map, units, kills: 0, turn: 1, log: [`Chapter ${ch.id}: ${ch.name}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set() });
   },
   finishDialog: () => set({ phase: 'player' }),
 
@@ -281,6 +405,8 @@ export const useGame = create<Store>((set, get) => ({
       battle: null,
       log: [],
       enemyBusy: false,
+      inspectUid: null,
+      threatTiles: new Set(),
     }),
 
   tapTile: (p) => {
@@ -301,6 +427,13 @@ export const useGame = create<Store>((set, get) => ({
 
     const u = unitAt(s.units, p);
 
+    // tap an enemy: inspect card + threat-range overlay
+    if (u && u.side === 'enemy' && !s.selectedUid) {
+      const threat = threatTilesFor(s.map, s.units, u);
+      set({ cursor: p, inspectUid: u.uid, threatTiles: threat });
+      return;
+    }
+
     if (s.selectedUid) {
       const sel = s.units.find((x) => x.uid === s.selectedUid);
       if (sel && s.moveTiles.has(key(p)) && !unitAt(s.units, p)) {
@@ -319,6 +452,12 @@ export const useGame = create<Store>((set, get) => ({
         return;
       }
       get().cancel();
+      return;
+    }
+
+    if (u && u.side === 'player' && u.acted && s.inspectUid) {
+      get().clearInspect();
+      set({ cursor: p });
       return;
     }
 
@@ -365,6 +504,8 @@ export const useGame = create<Store>((set, get) => ({
       pendingWeapon: null,
       menuForUid: null,
       spiritForUid: null,
+      inspectUid: null,
+      threatTiles: new Set(),
     });
   },
 
@@ -404,17 +545,30 @@ export const useGame = create<Store>((set, get) => ({
         )
       : log;
     for (const e of result.expEvents) log2 = push(log2, e);
-    set({
+    const common = {
       units: state.units,
       log: log2,
       kills: s.kills + (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0),
-      battle: { attacker: { ...att }, defender: { ...def }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: s.pendingWeapon, result },
-      phase: 'battle',
       pendingWeapon: null,
-      attackTiles: new Set(),
+      attackTiles: new Set<string>(),
       menuForUid: null,
       pendingMove: null,
       selectedUid: null,
+    };
+    if (s.settings.battleMode === 'off') {
+      const end = checkEnd(state.units, chapterOf(s.chapter), s.turn);
+      if (end === 'victory') {
+        set(common);
+        applyVictory(set, get);
+        return;
+      }
+      set({ ...common, battle: null, phase: end === 'defeat' ? 'defeat' : 'player' });
+      return;
+    }
+    set({
+      ...common,
+      battle: { attacker: { ...att }, defender: { ...def }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: s.pendingWeapon, result },
+      phase: 'battle',
     });
   },
 
@@ -423,17 +577,21 @@ export const useGame = create<Store>((set, get) => ({
     if (!s.menuForUid) return;
     const uid = s.menuForUid;
     const units = s.units.map((u) => (u.uid === uid ? { ...u, acted: true, moved: true } : u));
-    set({ units, menuForUid: null, pendingMove: null, selectedUid: null, moveTiles: new Map() });
+    set({ units, menuForUid: null, pendingMove: null, selectedUid: null, moveTiles: new Map(), inspectUid: null, threatTiles: new Set() });
   },
 
   openSpirits: (uid) => set({ spiritForUid: uid }),
 
   castSpirit: (uid, sp) => {
     const s = get();
+    const target = s.units.find((x) => x.uid === uid);
+    if (!target || target.sp < SPIRITS[sp].cost) {
+      set({ spiritForUid: null });
+      return;
+    }
     const units = s.units.map((u) => {
       if (u.uid !== uid) return u;
       const c = { ...u };
-      if (c.sp < SPIRITS[sp].cost) return c;
       applySpirit(c, sp);
       return c;
     });
@@ -449,7 +607,7 @@ export const useGame = create<Store>((set, get) => ({
 
   finishBattle: () => {
     const s = get();
-    const end = checkEnd(s.units);
+    const end = checkEnd(s.units, chapterOf(s.chapter), s.turn);
     if (end === 'victory') {
       applyVictory(set, get);
       return;
@@ -461,7 +619,17 @@ export const useGame = create<Store>((set, get) => ({
     const s = get();
     if (s.phase !== 'player' || s.enemyBusy) return;
     get().cancel();
-    set({ phase: 'enemy', enemyBusy: true, log: push(s.log, `— Turn ${s.turn} enemy phase —`) });
+    const healed: string[] = [];
+    const units = s.units.map((u) => {
+      if (u.side !== 'enemy' || !u.alive) return u;
+      const c = { ...u };
+      const r = phaseRecovery(c, s.map);
+      if (r.hpGain > 0) healed.push(`${c.def.name} +${r.hpGain} HP`);
+      return c;
+    });
+    let log = push(s.log, `— Turn ${s.turn} enemy phase —`);
+    for (const l of healed) log = push(log, l);
+    set({ phase: 'enemy', enemyBusy: true, units, log, inspectUid: null, threatTiles: new Set() });
     void runEnemyPhase(set, get);
   },
 }));
@@ -511,7 +679,7 @@ function applyVictory(set: SetFn, get: Get) {
     chapter,
     log: push(s.log, `Mission complete! +${800 + ch.id * 150 + s.kills * 150} credits`),
   });
-  void persist({ chapter, credits, inventory: s.inventory, upgrades: s.upgrades, pilotProg });
+  void persist({ chapter, credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg });
 }
 
 async function runEnemyPhase(set: SetFn, get: Get) {
@@ -545,29 +713,42 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       const { state, result } = applyAttack({ map: cur.map, units: cur.units, turn: cur.turn }, att.uid, def.uid, plan.weapon.id);
       const attAfter = state.units.find((u) => u.uid === att.uid)!;
       const defAfter = state.units.find((u) => u.uid === def.uid)!;
-      set((st) => ({
-        units: state.units,
-        phase: 'battle',
-        kills: st.kills + (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0),
-        log: result.expEvents.reduce(
-          (l, e) => push(l, e),
+      const mkLog = (l: string[]) =>
+        result.expEvents.reduce(
+          (ll, e) => push(ll, e),
           result.counter
             ? push(
-                st.log,
+                l,
                 `${att.def.name} hits ${def.def.name} for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''} · ${def.def.name} counters for ${result.counter.damage}${result.counter.destroyed ? ' — DESTROYED' : ''}`,
               )
             : push(
-                st.log,
+                l,
                 result.hit
                   ? `${att.def.name} hits ${def.def.name} for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''}`
                   : `${att.def.name} missed ${def.def.name}`,
               ),
-        ),
+        );
+      if (cur.settings.battleMode === 'off') {
+        set((st) => ({ units: state.units, kills: st.kills + (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0), log: mkLog(st.log) }));
+        const end = checkEnd(get().units, chapterOf(get().chapter), get().turn);
+        if (end) {
+          if (end === 'victory') applyVictory(set, get);
+          else set({ phase: end, enemyBusy: false });
+          return;
+        }
+        await sleep(120);
+        continue;
+      }
+      set((st) => ({
+        units: state.units,
+        phase: 'battle',
+        kills: st.kills + (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0),
+        log: mkLog(st.log),
         battle: { attacker: { ...att }, defender: { ...def }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: plan.weapon!, result },
       }));
       // wait for player-visible battle anim to finish (finishBattle returns phase to 'enemy' since enemyBusy)
       await waitFor(() => get().battle === null);
-      const end = checkEnd(get().units);
+      const end = checkEnd(get().units, chapterOf(get().chapter), get().turn);
       if (end) {
         if (end === 'victory') {
           applyVictory(set, get);
@@ -583,22 +764,35 @@ async function runEnemyPhase(set: SetFn, get: Get) {
     }
   }
 
-  // new player turn
-  set((st) => ({
-    units: st.units.map((u) => {
+  // new player turn — clear flags + EN regen / base-city heal
+  let pendingVictory = false;
+  set((st) => {
+    const units = st.units.map((u) => {
       const c = { ...u };
       if (c.side === 'player') clearTransientForOwnPhase(c);
       else {
         c.moved = false;
         c.acted = false;
       }
+      if (c.alive) phaseRecovery(c, st.map);
       return c;
-    }),
-    phase: checkEnd(st.units) ?? 'player',
-    enemyBusy: false,
-    turn: st.turn + 1,
-    log: push(st.log, `— Turn ${st.turn + 1} player phase —`),
-  }));
+    });
+    const nextTurn = st.turn + 1;
+    const end = checkEnd(units, chapterOf(st.chapter), nextTurn);
+    if (end === 'victory') {
+      // survive-objective reached its turn limit — resolve outside this updater
+      pendingVictory = true;
+      return { units, turn: nextTurn };
+    }
+    return {
+      units,
+      phase: end === 'defeat' ? 'defeat' : 'player',
+      enemyBusy: false,
+      turn: nextTurn,
+      log: push(st.log, `— Turn ${nextTurn} player phase —`),
+    };
+  });
+  if (pendingVictory) applyVictory(set, get);
 }
 
 function waitFor(cond: () => boolean): Promise<void> {

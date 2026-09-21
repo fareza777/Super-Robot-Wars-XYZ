@@ -3,7 +3,7 @@ import { Animated, Pressable, StyleSheet, Text, useWindowDimensions, View } from
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART } from '../assets';
-import { play, setSoundEnabled } from '../audio';
+import { play } from '../audio';
 import { CHAPTERS_COUNT, chapterOf } from '../game/campaign';
 import { useGame } from '../game/store';
 
@@ -43,7 +43,7 @@ export function HomeMenu() {
   const chapter = useGame((s) => s.chapter);
   const nextCh = chapterOf(chapter);
   const { width, height } = useWindowDimensions();
-  const [sound, setSound] = useState(true);
+
   const titleFs = Math.round(Math.min(30, height * 0.07));
   const xyzFs = Math.round(Math.min(64, height * 0.115));
   const xyzLs = Math.round(Math.min(22, height * 0.05));
@@ -79,19 +79,10 @@ export function HomeMenu() {
           <MenuItem label="STORY CAMPAIGN" sub="30 chapters — the XYZ war begins" accent="#ffd34d" delay={150} onPress={newCampaign} />
         )}
         <MenuItem label="REPLAY STORY" sub="Watch the intro again" accent="#7ee7ff" delay={280} onPress={replayStory} />
-        <MenuItem
-          label={sound ? 'SOUND: ON' : 'SOUND: OFF'}
-          sub="Voice lines & battle SFX"
-          accent="#9dffa0"
-          delay={410}
-          onPress={() => {
-            setSound(!sound);
-            setSoundEnabled(!sound);
-          }}
-        />
+        <MenuItem label="SETTINGS" sub="Battle animation · speed · sound · music" accent="#9dffa0" delay={410} onPress={useGame.getState().gotoSettings} />
       </View>
 
-      <Text style={styles.foot}>v0.7.0 · original mecha tactics · not affiliated with Bandai Namco</Text>
+      <Text style={styles.foot}>v0.8.0 · original mecha tactics · not affiliated with Bandai Namco</Text>
     </View>
   );
 }

@@ -8,8 +8,11 @@ import { HQScreen } from './src/components/HQScreen';
 import { MapGrid } from './src/components/MapGrid';
 import { PrologueScreen } from './src/components/PrologueScreen';
 import { BriefingScreen, EndScreen, TitleScreen } from './src/components/Screens';
+import { SettingsScreen } from './src/components/SettingsScreen';
 import { SidePanel } from './src/components/SidePanel';
 import { StoryIntro } from './src/components/StoryIntro';
+import { bgm } from './src/audio';
+import { chapterOf } from './src/game/campaign';
 import { useGame } from './src/game/store';
 
 function EnemyBanner() {
@@ -33,6 +36,20 @@ export default function App() {
     void loadSave();
   }, []);
 
+  // BGM follows the current phase
+  const chapter = useGame((s) => s.chapter);
+  const units = useGame((s) => s.units);
+  const music = useGame((s) => s.settings.music);
+  useEffect(() => {
+    if (!music) return;
+    const ch = chapterOf(chapter);
+    if (phase === 'battle') return bgm('bgm_battle');
+    if (phase === 'player' || phase === 'enemy') return bgm(ch.boss ? 'bgm_boss' : 'bgm_map');
+    if (phase === 'victory' || phase === 'defeat') return bgm('bgm_title');
+    if (phase === 'title' || phase === 'onboarding' || phase === 'prologue') return bgm('bgm_title');
+    return bgm('bgm_hq');
+  }, [phase, music, chapter, units]);
+
   return (
     <View style={styles.root}>
       {phase === 'title' && <TitleScreen />}
@@ -41,6 +58,7 @@ export default function App() {
       {phase === 'briefing' && <BriefingScreen />}
       {phase === 'prologue' && <PrologueScreen />}
       {phase === 'hq' && <HQScreen />}
+      {phase === 'settings' && <SettingsScreen />}
       {phase === 'dialog' && <ChapterDialog />}
       {(phase === 'player' || phase === 'enemy' || phase === 'battle') && (
         <View style={styles.gameRow}>

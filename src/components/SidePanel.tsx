@@ -35,6 +35,7 @@ export function SidePanel() {
   const s = useGame();
   const unit = s.menuForUid ? s.units.find((u) => u.uid === s.menuForUid) : s.selectedUid ? s.units.find((u) => u.uid === s.selectedUid) : undefined;
   const spiritUnit = s.spiritForUid ? s.units.find((u) => u.uid === s.spiritForUid) : undefined;
+  const inspect = s.inspectUid ? s.units.find((u) => u.uid === s.inspectUid) : undefined;
 
   return (
     <View style={styles.panel}>
@@ -154,7 +155,39 @@ export function SidePanel() {
           </View>
         )}
 
-        {!s.menuForUid && !s.pendingWeapon && !s.spiritForUid && (
+        {/* enemy inspect card — shown after tapping a foe */}
+        {inspect && !s.menuForUid && !s.pendingWeapon && (
+          <View style={[styles.unitCard, styles.inspectCard]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+              <Image source={PILOT_ART[inspect.def.id]} style={[styles.face, { borderColor: '#ff6b6b' }]} contentFit="cover" />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.unitName} numberOfLines={1}>
+                  {inspect.def.name} {inspect.def.boss ? '★' : ''}
+                </Text>
+                <Text style={styles.pilotName} numberOfLines={1}>
+                  {inspect.def.pilot.name} · Lv{inspect.level}
+                </Text>
+              </View>
+            </View>
+            <Bar label="HP" val={inspect.hp} max={inspect.def.maxHp} color="#ff5a5a" />
+            <Bar label="EN" val={inspect.en} max={inspect.def.maxEn} color="#4db4ff" />
+            <View style={styles.statRow}>
+              <Text style={styles.statTxt}>ARM {inspect.def.armor}</Text>
+              <Text style={styles.statTxt}>MOB {inspect.def.mobility}</Text>
+              <Text style={styles.statTxt}>MOV {inspect.def.moveRange}</Text>
+            </View>
+            {inspect.def.weapons.map((w) => (
+              <Text key={w.id} style={styles.weapLine} numberOfLines={1}>
+                ⚔ {w.name} · POW {w.power} · R{w.rangeMin}-{w.rangeMax}
+                {w.ammo != null ? ` · ×${inspect.ammo[w.id] ?? 0}` : ` · EN ${w.enCost}`}
+              </Text>
+            ))}
+            <Text style={styles.threatNote}>Orange = its move + weapon range</Text>
+            <Btn label="CLOSE" onPress={s.clearInspect} accent="#666" />
+          </View>
+        )}
+
+        {!s.menuForUid && !s.pendingWeapon && !s.spiritForUid && !inspect && (
           <View style={styles.logBox}>
             {s.log.map((l, i) => (
               <Text key={i} style={styles.logLine}>
@@ -209,4 +242,9 @@ const styles = StyleSheet.create({
   logLine: { color: '#9fb0d0', fontSize: 9, marginBottom: 2 },
   endTurn: { marginTop: 6, borderWidth: 1, borderColor: '#ffd34d', borderRadius: 6, paddingVertical: 7, alignItems: 'center', backgroundColor: '#26251a' },
   endTurnTxt: { color: '#ffd34d', fontWeight: '900', fontSize: 11, letterSpacing: 1 },
+  inspectCard: { borderWidth: 1, borderColor: '#ff6b6b' },
+  statRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 },
+  statTxt: { color: '#c9a0ff', fontSize: 9, fontWeight: '700' },
+  weapLine: { color: '#b8c4e0', fontSize: 9, marginTop: 3 },
+  threatNote: { color: '#ff9632', fontSize: 8.5, marginTop: 6, marginBottom: 4 },
 });

@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART, PILOT_ART } from '../assets';
 import { play } from '../audio';
-import { CHAPTERS_COUNT, PLAYER_DEF_IDS, chapterOf, ALL_UNITS } from '../game/campaign';
+import { CHAPTERS_COUNT, chapterOf, rosterFor, ALL_UNITS } from '../game/campaign';
 import { useGame } from '../game/store';
 
 export function TitleScreen() {
@@ -49,7 +49,10 @@ export function BriefingScreen() {
   const gotoHq = useGame((s) => s.gotoHq);
   const chapter = useGame((s) => s.chapter);
   const pilotProg = useGame((s) => s.pilotProg);
+  const deploySel = useGame((s) => s.deploySel);
+  const toggleDeploy = useGame((s) => s.toggleDeploy);
   const ch = chapterOf(chapter);
+  const roster = rosterFor(ch);
   return (
     <View style={styles.center}>
       <Image source={ART.story[4]} style={StyleSheet.absoluteFill} contentFit="cover" />
@@ -60,21 +63,24 @@ export function BriefingScreen() {
 
       <View style={styles.briefBox}>
         <Text style={styles.briefTxt}>{ch.objective}</Text>
+        <Text style={styles.deployLbl}>DEPLOY SQUAD — tap to toggle ({deploySel.length}/{roster.length})</Text>
         <View style={styles.squadRow}>
-          {PLAYER_DEF_IDS.map((id) => {
+          {roster.map((id) => {
             const d = ALL_UNITS[id];
             const prog = pilotProg[id];
+            const on = deploySel.includes(id);
             return (
-              <View key={id} style={styles.squadCard}>
-                <Image source={PILOT_ART[id]} style={styles.squadFace} contentFit="cover" />
-                <Text style={styles.squadName}>{d.pilot.callsign} · Lv{prog?.level ?? 1}</Text>
+              <Pressable key={id} style={[styles.squadCard, !on && { opacity: 0.35 }]} onPress={() => toggleDeploy(id)}>
+                <Image source={PILOT_ART[id]} style={[styles.squadFace, on && { borderColor: '#4dff7a', borderWidth: 2 }]} contentFit="cover" />
+                <Text style={[styles.squadName, !on && { color: '#667' }]}>{d.pilot.callsign} · Lv{prog?.level ?? d.level ?? 1}</Text>
                 <Text style={styles.squadUnit} numberOfLines={1}>{d.name}</Text>
-              </View>
+                <Text style={styles.deployMark}>{on ? '▣ IN' : '▢ OUT'}</Text>
+              </Pressable>
             );
           })}
         </View>
         <Text style={styles.briefTxtSmall}>
-          Tap a unit for move range · tap again for actions · red tiles are targets{'\n'}Terrain gives DEF/EVA bonuses · weapons marked [No P] can't fire after moving · ITEMS consume the unit's turn
+          Tap a unit for move range · tap again for actions · red tiles are targets{'\n'}Tap an enemy for intel + its threat range · base/city tiles heal each turn · ITEMS consume the unit's turn
         </Text>
       </View>
 
@@ -138,7 +144,9 @@ const styles = StyleSheet.create({
   briefBox: { backgroundColor: 'rgba(14,17,28,0.88)', borderWidth: 1, borderColor: '#2a2f42', borderRadius: 12, padding: 18, margin: 18, maxWidth: 560 },
   briefTxt: { color: '#e6ecff', fontSize: 13, lineHeight: 20 },
   briefTxtSmall: { color: '#8fa1c7', fontSize: 11, lineHeight: 18, marginTop: 10 },
-  squadRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
+  squadRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
+  deployLbl: { color: '#9fd0ff', fontSize: 10, fontWeight: '800', letterSpacing: 1.5, marginTop: 12 },
+  deployMark: { color: '#4dff7a', fontSize: 8.5, fontWeight: '800', marginTop: 2 },
   squadCard: { alignItems: 'center', width: 76 },
   squadFace: { width: 64, height: 64, borderRadius: 10, borderWidth: 1, borderColor: '#3a4160' },
   squadName: { color: '#ffd34d', fontSize: 11, fontWeight: '800', marginTop: 4 },

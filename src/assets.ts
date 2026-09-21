@@ -38,6 +38,8 @@ export const MECH_ART: Record<string, number> = {
   empress: require('../assets/art/mech_empress.jpg'),
   warden: require('../assets/art/mech_warden.jpg'),
   emperor: require('../assets/art/mech_emperor.jpg'),
+  raxdenR: require('../assets/art/mech_raxden.jpg'),
+  vexiaX: require('../assets/art/mech_vexia.jpg'),
 };
 
 // Keyed by terrain id — generated top-down map tiles
@@ -70,6 +72,8 @@ export const PILOT_ART: Record<string, number> = {
   empress: require('../assets/art/pilot_serka.jpg'),
   warden: require('../assets/art/pilot_bram.jpg'),
   emperor: require('../assets/art/pilot_vael.jpg'),
+  raxdenR: require('../assets/art/pilot_rax.jpg'),
+  vexiaX: require('../assets/art/pilot_vee.jpg'),
 };
 
 export const NPC_ART: Record<string, number> = {
@@ -101,6 +105,11 @@ export const AUDIO = {
   sfx_missiles: require('../assets/audio/sfx_missiles.mp3'),
   sfx_hit: require('../assets/audio/sfx_hit.mp3'),
   ui_confirm: require('../assets/audio/ui_confirm.mp3'),
+  bgm_title: require('../assets/audio/bgm_title.mp3'),
+  bgm_hq: require('../assets/audio/bgm_hq.mp3'),
+  bgm_map: require('../assets/audio/bgm_map.mp3'),
+  bgm_boss: require('../assets/audio/bgm_boss.mp3'),
+  bgm_battle: require('../assets/audio/bgm_battle.mp3'),
   // chapter 1 pre-mission dialogue
   d_ray_1: require('../assets/audio/d_ray_1.mp3'),
   d_mira_1: require('../assets/audio/d_mira_1.mp3'),
@@ -162,6 +171,8 @@ export const UNIT_VOICE: Record<string, AudioKey[]> = {
   kargan: ['karg_1', 'karg_2'],
   zolda: ['grunt_1'],
   zolda_air: ['grunt_1'],
+  raxdenR: ['raxv_1', 'raxv_2'],
+  vexiaX: ['veev_1', 'veev_2'],
 };
 
 export const KIND_SFX: Record<string, AudioKey> = {
@@ -184,6 +195,10 @@ export const SUBTITLES: Partial<Record<AudioKey, string>> = {
   karg_1: 'Insects. Kargan will crush you.',
   karg_2: 'Witness Imperial might!',
   grunt_1: 'For the Empire!',
+  raxv_1: 'You took me in. Now watch a Crimson Fang fight for the Ark.',
+  raxv_2: 'Crimson Fang — full output!',
+  veev_1: 'Vexia Custom, on your wing. Falcons never miss.',
+  veev_2: 'Too slow for a Falcon!',
 };
 
 // Text-only barks used when a unit has no voice clip (new campaign units)
@@ -200,4 +215,6 @@ export const UNIT_BARK: Record<string, string> = {
   warden: 'None pass the gate.',
   emperor: 'Perish, insects.',
   kargan: 'Witness Imperial might!',
+  raxdenR: 'The Crimson Fang fights for the Ark now.',
+  vexiaX: 'Falcons never miss.',
 };

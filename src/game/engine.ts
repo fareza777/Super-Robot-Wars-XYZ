@@ -312,8 +312,33 @@ export function planEnemyActions(state: GameState): AiPlan[] {
   return plans;
 }
 
-export function checkEnd(units: UnitState[]): 'victory' | 'defeat' | null {
-  if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
+export interface EndObjective {
+  objectiveType?: 'rout' | 'survive' | 'boss';
+  surviveTurns?: number;
+}
+
+export function checkEnd(units: UnitState[], obj?: EndObjective | null, turn?: number): 'victory' | 'defeat' | null {
   if (!units.some((u) => u.alive && u.side === 'player')) return 'defeat';
+  const type = obj?.objectiveType ?? 'rout';
+  if (type === 'boss') {
+    // win as soon as the boss unit falls, regardless of remaining grunts
+    if (!units.some((u) => u.alive && u.side === 'enemy' && u.def.boss)) return 'victory';
+    return null;
+  }
+  if (type === 'survive') {
+    if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
+    return (turn ?? 0) > (obj?.surviveTurns ?? 8) ? 'victory' : null;
+  }
+  if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
   return null;
+}
+
+/** Start-of-own-phase recovery: EN regen + heal on base/city tiles (SRW style). */
+export function phaseRecovery(u: UnitState, map: MapDef): { hpGain: number; enGain: number } {
+  const onBase = terrainAt(map, u.pos) === 'base' || terrainAt(map, u.pos) === 'city';
+  const enGain = Math.min(u.def.maxEn - u.en, 5 + (onBase ? 10 : 0));
+  const hpGain = onBase ? Math.min(u.def.maxHp - u.hp, Math.round(u.def.maxHp * 0.1)) : 0;
+  u.en += enGain;
+  u.hp += hpGain;
+  return { hpGain, enGain };
 }

@@ -17,8 +17,52 @@ export function setSoundEnabled(v: boolean) {
   enabled = v;
 }
 
+// ---------- BGM (looping music channel, independent of SFX) ----------
+
+let bgmPlayer: AudioPlayer | null = null;
+let bgmKey: string | null = null;
+let musicEnabled = true;
+let bgmVol = 0.45;
+
+export function setMusicEnabled(v: boolean) {
+  musicEnabled = v;
+  if (!v) stopBgm();
+}
+
+export function setBgmVolume(v: number) {
+  bgmVol = v;
+  try {
+    if (bgmPlayer) bgmPlayer.volume = v;
+  } catch {}
+}
+
+export function stopBgm() {
+  try {
+    bgmPlayer?.pause();
+    bgmPlayer?.remove();
+  } catch {}
+  bgmPlayer = null;
+  bgmKey = null;
+}
+
+/** Switch the looping music track; no-op if already playing this key or music is off. */
+export function bgm(key: AudioKey) {
+  if (!musicEnabled) return;
+  if (bgmKey === key && bgmPlayer) return;
+  stopBgm();
+  try {
+    void ensureMode();
+    const p = createAudioPlayer(AUDIO[key]);
+    p.loop = true;
+    p.volume = bgmVol;
+    p.play();
+    bgmPlayer = p;
+    bgmKey = key;
+  } catch {}
+}
+
 export function play(key: AudioKey) {
-  if (!enabled) return;
+  if (!enabled || !(key in AUDIO)) return;
   try {
     void ensureMode();
     const p = createAudioPlayer(AUDIO[key]);

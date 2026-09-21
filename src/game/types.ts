@@ -103,11 +103,23 @@ export type Phase =
   | 'dialog'
   | 'prologue'
   | 'hq'
+  | 'settings'
   | 'player'
   | 'enemy'
   | 'battle'
   | 'victory'
   | 'defeat';
+
+export type BattleMode = 'full' | 'short' | 'off';
+
+export interface GameSettings {
+  battleMode: BattleMode;
+  animSpeed: 1 | 2;
+  sound: boolean;
+  music: boolean;
+}
+
+export type ObjectiveType = 'rout' | 'survive' | 'boss';
 
 export interface AttackResult {
   hit: boolean;

@@ -61,6 +61,7 @@ export const CAMPAIGN_PILOTS = {
   raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike'], faceColor: '#ff7a7a' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel'], faceColor: '#8ef0e8' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878' }),
   vaelp: P({ name: 'Emperor Vael', callsign: 'THRONE', melee: 82, ranged: 84, defense: 76, evade: 72, maxSp: 90, spirits: ['strike', 'valor', 'focus', 'guard'], faceColor: '#ffe08a' }),
 };
@@ -76,11 +77,31 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   empress: U({ id: 'empress', name: 'Empress Ascendant', title: 'True Void Form', color: '#7a3f8e', accent: '#ffe0ff', maxHp: 11000, maxEn: 220, armor: 1250, mobility: 146, moveRange: 7, moveType: 'air', weapons: [WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.chestBlaster], pilot: CAMPAIGN_PILOTS.serkap, boss: true }),
   warden: U({ id: 'warden', name: 'Gate Warden', title: 'Ancient Guardian', color: '#7a5a30', accent: '#ffe0a8', maxHp: 12000, maxEn: 140, armor: 1600, mobility: 90, moveRange: 4, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.bramp, boss: true }),
   emperor: U({ id: 'emperor', name: 'Throne of Vael', title: 'The Emperor', color: '#e8d8a0', accent: '#fff8d8', maxHp: 15000, maxEn: 240, armor: 1500, mobility: 130, moveRange: 6, moveType: 'air', weapons: [WEAPONS.chestBlaster, WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.vaelp, boss: true }),
+  // --- player reinforcements (join at arc boundaries) ---
+  raxdenR: U({ id: 'raxdenR', name: 'Raxden Crimson', title: 'Defected Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.plasmaEdge, WEAPONS.railgun, WEAPONS.vulcan], pilot: CAMPAIGN_PILOTS.raxp, level: 5 }),
+  vexiaX: U({ id: 'vexiaX', name: 'Vexia Custom', title: 'Ark Interceptor', color: '#2a8a9a', accent: '#a0f0ff', maxHp: 5200, maxEn: 150, armor: 880, mobility: 142, moveRange: 7, moveType: 'air', weapons: [WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.vulcan], pilot: CAMPAIGN_PILOTS.veep, level: 7 }),
 };
 
 export const ALL_UNITS: Record<string, UnitDef> = { ...UNITS, ...CAMPAIGN_UNITS };
 
 export const PLAYER_DEF_IDS = ['valstray', 'gruntborg', 'arielis', 'zephyra'];
+
+/** Units the player owns at a given chapter — reinforcements join at arc boundaries. */
+export function rosterFor(ch: ChapterDef): string[] {
+  const r = [...PLAYER_DEF_IDS];
+  if (ch.id >= 11) r.push('raxdenR');
+  if (ch.id >= 21) r.push('vexiaX');
+  return r;
+}
+
+export const MAX_SQUAD = 6;
+
+// ---------- Weapon upgrades (workshop tab) ----------
+
+export const MAX_WEAPON_UPG = 5;
+export const WEAPON_UPG_POWER = 0.08; // +8% per level
+export const weaponUpgCost = (lvl: number) => 400 + lvl * 350;
+export type WeaponUpgMap = Record<string, Record<string, number>>; // defId -> weaponId -> level
 
 // ---------- Chapters ----------
 
@@ -94,6 +115,8 @@ export interface ChapterDef {
   count: number;
   boss?: string;
   bossLevel?: number;
+  objectiveType?: 'rout' | 'survive' | 'boss';
+  surviveTurns?: number;
   objective: string;
   lines: { speaker: string; text: string }[];
 }
@@ -143,11 +166,14 @@ function pickTerrain(r: () => number, theme: string): Terrain {
 }
 
 const PLAYER_SPAWNS: Pos[] = [
-  { x: 1, y: 8 }, { x: 3, y: 9 }, { x: 4, y: 8 }, { x: 2, y: 9 },
+  { x: 1, y: 8 }, { x: 3, y: 9 }, { x: 4, y: 8 }, { x: 2, y: 9 }, { x: 0, y: 7 }, { x: 5, y: 9 },
 ];
 
 export function genMap(ch: ChapterDef): MapDef {
-  if (ch.theme === 'custom') return MISSION_SSS;
+  if (ch.theme === 'custom') {
+    const roster = rosterFor(ch);
+    return { ...MISSION_SSS, playerSpawns: MISSION_SSS.playerSpawns.slice(0, 4).map((s, i) => ({ defId: roster[i] ?? s.defId, pos: s.pos })) };
+  }
   const r = rng(ch.id * 7919);
   const terrain: Terrain[][] = [];
   for (let y = 0; y < 10; y++) {
@@ -199,7 +225,7 @@ export function genMap(ch: ChapterDef): MapDef {
     rows: 10,
     terrain: terrain2,
     objective: ch.objective,
-    playerSpawns: PLAYER_SPAWNS.map((p, i) => ({ defId: ['valstray', 'gruntborg', 'arielis', 'zephyra'][i], pos: p })),
+    playerSpawns: PLAYER_SPAWNS.slice(0, rosterFor(ch).length).map((p, i) => ({ defId: rosterFor(ch)[i], pos: p })),
     enemySpawns,
   };
 }

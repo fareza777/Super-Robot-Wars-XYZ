@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART, KIND_SFX, MECH_ART, PILOT_ART, SUBTITLES, UNIT_BARK, UNIT_VOICE } from '../assets';
@@ -13,11 +13,19 @@ import { UnitState, WeaponDef } from '../game/types';
  * -> 3 counter anim -> 4 counter impact -> 5 outro -> finishBattle()
  */
 
-const DUR = { intro: 820, banner: 800, attack: 2100, impact: 1700, outro: 700 };
+const DUR_BASE = { intro: 820, banner: 800, attack: 2100, impact: 1700, outro: 700 };
+const DUR = { ...DUR_BASE };
+
+/** Scale every scene duration. Runs synchronously in render so child anims read scaled values. */
+function scaleDur(mult: number) {
+  for (const k of Object.keys(DUR) as (keyof typeof DUR)[]) DUR[k] = Math.round(DUR_BASE[k] / mult);
+}
 
 export function BattleScene() {
   const battle = useGame((s) => s.battle);
   const finishBattle = useGame((s) => s.finishBattle);
+  const settings = useGame((s) => s.settings);
+  scaleDur(settings.animSpeed * (settings.battleMode === 'short' ? 1.75 : 1));
   const { width, height } = useWindowDimensions();
   const [stage, setStage] = useState(0);
   const [dmgShown, setDmgShown] = useState(0);
@@ -76,7 +84,7 @@ export function BattleScene() {
     go(t, 6); // outro
     timers.push(setTimeout(() => finishBattle(), t + DUR.outro));
     return () => timers.forEach(clearTimeout);
-  }, [battle, hasCounter, finishBattle]);
+  }, [battle, hasCounter, finishBattle, settings.animSpeed, settings.battleMode]);
 
   // audio + cut-ins + motion on attack stages
   useEffect(() => {
@@ -138,7 +146,8 @@ export function BattleScene() {
   const attHpShown = Math.max(0, Math.min(atk.hp, Math.max(battle.attackerAfter.hp, atk.hp - counterDmgShown)));
 
   return (
-    <Animated.View style={[styles.root, { opacity: fade }]}>
+    <Pressable style={StyleSheet.absoluteFill} onPress={finishBattle}>
+      <Animated.View style={[styles.root, { opacity: fade }]}>
       {/* bg */}
       <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ scale: bgZoom.interpolate({ inputRange: [0, 1], outputRange: [1.05, 1.22] }) }] }]}>
         <Image source={ART.battleBg} style={StyleSheet.absoluteFill} contentFit="cover" />
@@ -240,7 +249,11 @@ export function BattleScene() {
           {battle.weapon.name} · HIT {battle.result.hitChance}% · POW {battle.weapon.power}
         </Text>
       </View>
-    </Animated.View>
+      <View style={styles.skipHint} pointerEvents="none">
+        <Text style={styles.skipTxt}>TAP TO SKIP ▸▸</Text>
+      </View>
+      </Animated.View>
+    </Pressable>
   );
 }
 
@@ -737,4 +750,6 @@ const styles = StyleSheet.create({
   impactSub: { color: '#ffd34d', fontSize: 18, fontWeight: '900', letterSpacing: 5, marginTop: 2 },
   footer: { position: 'absolute', bottom: 8, alignSelf: 'center' },
   footerTxt: { color: 'rgba(200,214,255,0.7)', fontSize: 11, letterSpacing: 2 },
+  skipHint: { position: 'absolute', top: 10, right: 14, backgroundColor: 'rgba(8,12,28,0.55)', borderWidth: 1, borderColor: 'rgba(126,231,255,0.4)', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
+  skipTxt: { color: 'rgba(200,214,255,0.75)', fontSize: 10, fontWeight: '800', letterSpacing: 1.5 },
 });

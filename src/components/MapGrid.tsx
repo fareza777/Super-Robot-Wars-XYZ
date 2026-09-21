@@ -15,6 +15,7 @@ export function MapGrid() {
   const map = useGame((s) => s.map);
   const moveTiles = useGame((s) => s.moveTiles);
   const attackTiles = useGame((s) => s.attackTiles);
+  const threatTiles = useGame((s) => s.threatTiles);
   const selectedUid = useGame((s) => s.selectedUid);
   const pendingMove = useGame((s) => s.pendingMove);
   const walk = useGame((s) => s.walk);
@@ -39,10 +40,12 @@ export function MapGrid() {
       {tiles.map((p) => {
         const inMove = moveTiles.has(key(p));
         const inAtk = attackTiles.has(key(p));
+        const inThreat = threatTiles.has(key(p));
         return (
           <Pressable key={key(p)} onPress={() => tapTile(p)} style={[styles.tile, { left: p.x * tw, top: p.y * th, width: tw, height: th }]}>
             <Image source={TERRAIN_ART[map.terrain[p.y][p.x]]} style={StyleSheet.absoluteFill} contentFit="cover" />
             <View style={styles.gridLine} pointerEvents="none" />
+            {inThreat && !inMove && !inAtk && <View style={[styles.overlay, styles.threatOv]} pointerEvents="none" />}
             {inMove && <View style={[styles.overlay, styles.moveOv]} pointerEvents="none" />}
             {inAtk && <View style={[styles.overlay, styles.atkOv]} pointerEvents="none" />}
           </Pressable>
@@ -128,6 +131,7 @@ const styles = StyleSheet.create({
   overlay: { ...StyleSheet.absoluteFill },
   moveOv: { backgroundColor: 'rgba(70,140,255,0.4)' },
   atkOv: { backgroundColor: 'rgba(255,60,60,0.45)' },
+  threatOv: { backgroundColor: 'rgba(255,150,40,0.26)', borderWidth: 1, borderColor: 'rgba(255,150,40,0.35)' },
   unitWrap: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
   chip: { borderRadius: 6, overflow: 'hidden', borderWidth: 1.5, backgroundColor: '#0a0e1e' },
   hpBarBg: { position: 'absolute', bottom: 0, height: 3, backgroundColor: '#111', borderRadius: 1 },
