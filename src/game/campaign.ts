@@ -118,7 +118,7 @@ export interface ChapterDef {
   objectiveType?: 'rout' | 'survive' | 'boss';
   surviveTurns?: number;
   objective: string;
-  lines: { speaker: string; text: string }[];
+  lines: { speaker: string; text: string; voice?: string }[];
 }
 
 export const CHAPTERS: ChapterDef[] = chaptersJson as unknown as ChapterDef[];

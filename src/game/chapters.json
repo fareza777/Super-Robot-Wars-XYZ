@@ -345,31 +345,38 @@
     "lines": [
       {
         "speaker": "valstray",
-        "text": "Commander — a Crimson frame just broke formation. It's Rax Daver. He's requesting a berth."
+        "text": "Commander — a Crimson frame just broke formation. It's Rax Daver. He's requesting a berth.",
+        "voice": "c11_j0"
       },
       {
         "speaker": "raxdenR",
-        "text": "I fought you at Kharon Pass and saw what you protect. My blade serves the Ark now — Crimson Fang, reporting for duty."
+        "text": "I fought you at Kharon Pass and saw what you protect. My blade serves the Ark now — Crimson Fang, reporting for duty.",
+        "voice": "c11_j1"
       },
       {
         "speaker": "arielis",
-        "text": "The elevator cable reaches all the way to the ring station. Our road to space."
+        "text": "The elevator cable reaches all the way to the ring station. Our road to space.",
+        "voice": "c11_l0"
       },
       {
         "speaker": "gruntborg",
-        "text": "A fifty-thousand-kilometer elevator. And I thought the bridge was big."
+        "text": "A fifty-thousand-kilometer elevator. And I thought the bridge was big.",
+        "voice": "c11_l1"
       },
       {
         "speaker": "zephyra",
-        "text": "Platform defenders on approach vector — they're not giving it up cheap."
+        "text": "Platform defenders on approach vector — they're not giving it up cheap.",
+        "voice": "c11_l2"
       },
       {
         "speaker": "valstray",
-        "text": "Take the platform. From here on, we bring the fight to the Emperor."
+        "text": "Take the platform. From here on, we bring the fight to the Emperor.",
+        "voice": "c11_l3"
       },
       {
         "speaker": "arielis",
-        "text": "Hold on to your stomachs, everyone. Next stop — the heavens."
+        "text": "Hold on to your stomachs, everyone. Next stop — the heavens.",
+        "voice": "c11_l4"
       }
     ]
   },
@@ -681,31 +688,38 @@
     "lines": [
       {
         "speaker": "zephyra",
-        "text": "New contact on our six — wait, it's broadcasting Ark codes! The Vexia Custom is ours?!"
+        "text": "New contact on our six — wait, it's broadcasting Ark codes! The Vexia Custom is ours?!",
+        "voice": "c21_j0"
       },
       {
         "speaker": "vexiaX",
-        "text": "Lt. Vee Corrin, Ark interceptor wing. I stole this frame back from the dock ring. Let me cover your approach."
+        "text": "Lt. Vee Corrin, Ark interceptor wing. I stole this frame back from the dock ring. Let me cover your approach.",
+        "voice": "c21_j1"
       },
       {
         "speaker": "arielis",
-        "text": "The dock ring's flood barriers work like a strait — one choke point in."
+        "text": "The dock ring's flood barriers work like a strait — one choke point in.",
+        "voice": "c21_l0"
       },
       {
         "speaker": "gruntborg",
-        "text": "Then it's a storming-the-beach mission. My favorite."
+        "text": "Then it's a storming-the-beach mission. My favorite.",
+        "voice": "c21_l1"
       },
       {
         "speaker": "zephyra",
-        "text": "Fleet's holding back until we clear the guns. It's all on us."
+        "text": "Fleet's holding back until we clear the guns. It's all on us.",
+        "voice": "c21_l2"
       },
       {
         "speaker": "valstray",
-        "text": "Take the strait, raise the banner. XYZ — landfall!"
+        "text": "Take the strait, raise the banner. XYZ — landfall!",
+        "voice": "c21_l3"
       },
       {
         "speaker": "arielis",
-        "text": "Defense force inbound — they know exactly where we must land!"
+        "text": "Defense force inbound — they know exactly where we must land!",
+        "voice": "c21_l4"
       }
     ]
   },

@@ -62,7 +62,12 @@ export function bgm(key: AudioKey) {
 }
 
 export function play(key: AudioKey) {
-  if (!enabled || !(key in AUDIO)) return;
+  playEx(key);
+}
+
+/** Play a sound and return the player so callers can read duration or stop it early. */
+export function playEx(key: AudioKey): AudioPlayer | null {
+  if (!enabled || !(key in AUDIO)) return null;
   try {
     void ensureMode();
     const p = createAudioPlayer(AUDIO[key]);
@@ -73,8 +78,19 @@ export function play(key: AudioKey) {
       if (p.currentTime >= p.duration - 0.1 || !p.playing) {
         clearInterval(id);
         live.delete(p);
-        p.remove();
+        try { p.remove(); } catch {}
       }
     }, 250);
-  } catch {}
+    return p;
+  } catch {
+    return null;
+  }
+}
+
+/** Stop a player early (e.g. user skips a voice line). */
+export function stop(p: AudioPlayer | null) {
+  if (!p) return;
+  try { p.pause(); } catch {}
+  try { p.remove(); } catch {}
+  live.delete(p);
 }

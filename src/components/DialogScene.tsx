@@ -3,7 +3,8 @@ import { Animated, Easing, ImageSourcePropType, Pressable, StyleSheet, Text, use
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AudioKey, NPC_ART, PILOT_ART } from '../assets';
-import { play } from '../audio';
+import { playEx, stop as stopVo } from '../audio';
+import { AudioPlayer } from 'expo-audio';
 import { ALL_UNITS } from '../game/campaign';
 
 export interface DialogLine {
@@ -51,18 +52,34 @@ export function DialogScene({ lines, tag, bg, onDone }: { lines: DialogLine[]; t
     Animated.timing(boxIn, { toValue: 1, duration: 500, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
   }, []);
 
+  const voRef = useRef<AudioPlayer | null>(null);
+  const cpsRef = useRef(66); // chars per second — rebased to VO length once loaded
+
   useEffect(() => {
     setChars(0);
+    cpsRef.current = 66;
     portIn.setValue(0);
-    play(line.voice);
+    stopVo(voRef.current);
+    const p = playEx(line.voice);
+    voRef.current = p;
     Animated.spring(portIn, { toValue: 1, useNativeDriver: true, friction: 7 }).start();
-    // elapsed-time driven so starved timers on slow devices still finish on schedule
+    // elapsed-time driven so starved timers on slow devices still finish on schedule;
+    // pace follows the voice clip's real duration once the player reports it
     const t0 = Date.now();
     const t = setInterval(() => {
-      setChars(Math.floor((Date.now() - t0) / 15));
-    }, 32);
+      if (p && p.isLoaded && p.duration > 0) {
+        const cps = line.text.length / Math.max(p.duration, 0.8);
+        if (Math.abs(cps - cpsRef.current) > 2) cpsRef.current = cps;
+      }
+      setChars(Math.floor(((Date.now() - t0) / 1000) * cpsRef.current));
+    }, 40);
     return () => clearInterval(t);
   }, [idx]);
+
+  const quit = () => {
+    stopVo(voRef.current);
+    onDone();
+  };
 
   const next = () => {
     if (!done) {
@@ -70,7 +87,7 @@ export function DialogScene({ lines, tag, bg, onDone }: { lines: DialogLine[]; t
       return;
     }
     if (idx >= lines.length - 1) {
-      onDone();
+      quit();
       return;
     }
     setIdx((i) => i + 1);
@@ -133,7 +150,7 @@ export function DialogScene({ lines, tag, bg, onDone }: { lines: DialogLine[]; t
         <Text style={styles.next}>{done ? 'TAP ▸' : ' '}</Text>
       </Animated.View>
 
-      <Pressable style={styles.skip} onPress={onDone} hitSlop={14}>
+      <Pressable style={styles.skip} onPress={quit} hitSlop={14}>
         <Text style={styles.skipTxt}>SKIP ▸▸</Text>
       </Pressable>
     </Pressable>

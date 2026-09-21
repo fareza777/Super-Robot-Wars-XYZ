@@ -2,11 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { AudioPlayer } from 'expo-audio';
 import { ART, CAPTIONS, NARRATION } from '../assets';
-import { play } from '../audio';
+import { playEx, stop as stopVo } from '../audio';
 import { useGame } from '../game/store';
 
-const PANEL_MS = 7200;
+const PANEL_MS = 7200; // fallback when a panel has no narration
+const MIN_MS = 2600;
 
 export function StoryIntro() {
   const finish = useGame((s) => s.finishOnboarding);
@@ -16,19 +18,33 @@ export function StoryIntro() {
   const fade = useRef(new Animated.Value(1)).current;
   const kb = useRef(new Animated.Value(0)).current; // ken burns
   const capOp = useRef(new Animated.Value(0)).current;
+  const voRef = useRef<AudioPlayer | null>(null);
 
   useEffect(() => {
     kb.setValue(0);
     capOp.setValue(0);
-    Animated.timing(kb, { toValue: 1, duration: PANEL_MS + 1200, easing: Easing.out(Easing.quad), useNativeDriver: true }).start();
+    Animated.timing(kb, { toValue: 1, duration: PANEL_MS + 2200, easing: Easing.out(Easing.quad), useNativeDriver: true }).start();
     Animated.timing(capOp, { toValue: 1, duration: 900, delay: 400, useNativeDriver: true }).start();
-    play(NARRATION[idx]);
-    const t = setTimeout(() => setTapped((v) => v + 1), PANEL_MS);
-    return () => clearTimeout(t);
+    stopVo(voRef.current);
+    voRef.current = playEx(NARRATION[idx]);
+    const p = voRef.current;
+    const t0 = Date.now();
+    // advance when the narration ends (fallback: fixed panel time if no audio)
+    const t = setInterval(() => {
+      const el = Date.now() - t0;
+      let hold = PANEL_MS;
+      if (p && p.isLoaded && p.duration > 0) hold = Math.max(MIN_MS, (p.duration + 0.7) * 1000);
+      if (el >= hold) {
+        clearInterval(t);
+        setTapped((v) => v + 1);
+      }
+    }, 200);
+    return () => clearInterval(t);
   }, [idx]);
 
   useEffect(() => {
     if (tapped === 0) return;
+    stopVo(voRef.current);
     if (idx >= ART.story.length - 1) {
       Animated.timing(fade, { toValue: 0, duration: 400, useNativeDriver: true }).start(() => finish());
       return;
