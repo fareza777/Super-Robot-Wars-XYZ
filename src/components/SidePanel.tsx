@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { PILOT_ART } from '../assets';
 import { ITEMS } from '../game/campaign';
 import { SPIRITS } from '../game/data';
+import { bondMods } from '../game/bonds';
 import { damageOf, hitChance, key, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, useGame } from '../game/store';
 import { SpiritId } from '../game/types';
@@ -118,8 +119,9 @@ export function SidePanel() {
             {s.units
               .filter((e) => e.alive && e.side === 'enemy' && s.attackTiles.has(key(e.pos)))
               .map((e) => {
-                const hc = hitChance(unit, e, s.pendingWeapon!, s.map);
-                const dmg = damageOf(unit, e, s.pendingWeapon!, s.map, false);
+                const bm = bondMods(s.bonds, s.units, unit);
+                const hc = hitChance(unit, e, s.pendingWeapon!, s.map, bm.hitBonus);
+                const dmg = damageOf(unit, e, s.pendingWeapon!, s.map, false, bm.dmgMult);
                 const kill = e.hp - dmg <= 0;
                 return (
                   <TouchableOpacity key={e.uid} onPress={() => s.chooseTarget(e.uid)} style={[styles.tgtRow, kill && styles.tgtRowKill]}>

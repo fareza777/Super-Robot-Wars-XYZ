@@ -103,6 +103,8 @@ export type Phase =
   | 'dialog'
   | 'prologue'
   | 'hq'
+  | 'missions'
+  | 'bond'
   | 'settings'
   | 'player'
   | 'enemy'

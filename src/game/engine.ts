@@ -119,19 +119,25 @@ function statFor(u: UnitState, w: WeaponDef): number {
   return (w.kind === 'melee' ? u.def.pilot.melee : u.def.pilot.ranged) + (u.level - 1) * 3;
 }
 
-export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef): number {
+export interface CombatMods {
+  hitBonus: number; // percentage points added to hit chance
+  dmgMult: number; // damage multiplier
+}
+export const NO_MODS: CombatMods = { hitBonus: 0, dmgMult: 1 };
+
+export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, hitBonus = 0): number {
   if (att.strikeForNextAttack) return 100;
-  const raw = 65 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 - evadeOf(def, map) * 0.55;
+  const raw = 65 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus - evadeOf(def, map) * 0.55;
   return Math.max(10, Math.min(100, Math.round(raw)));
 }
 
-export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, crit: boolean): number {
+export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, crit: boolean, dmgMult = 1): number {
   const raw = w.power + statFor(att, w) * 10 - armorOf(def, map);
   let dmg = Math.max(120, Math.round(raw));
   if (crit) dmg = Math.round(dmg * 1.3);
   if (att.valorForNextAttack) dmg = Math.round(dmg * 1.5);
   if (def.guardUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.5);
-  return dmg;
+  return Math.round(dmg * dmgMult);
 }
 
 const rnd = () => Math.random() * 100;
@@ -145,12 +151,12 @@ interface SimAttack {
   destroyed: boolean;
 }
 
-function resolveHit(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef): SimAttack {
-  const hc = hitChance(att, def, w, map);
+function resolveHit(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, mods: CombatMods = NO_MODS): SimAttack {
+  const hc = hitChance(att, def, w, map, mods.hitBonus);
   const hit = rnd() < hc;
   if (!hit) return { hit: false, crit: false, damage: 0, hitChance: hc, destroyed: false };
   const crit = critRoll(att, def);
-  const damage = damageOf(att, def, w, map, crit);
+  const damage = damageOf(att, def, w, map, crit, mods.dmgMult);
   return { hit, crit, damage, hitChance: hc, destroyed: def.hp - damage <= 0 };
 }
 
@@ -161,14 +167,14 @@ function bestCounterWeapon(def: UnitState, attPos: Pos): WeaponDef | undefined {
 }
 
 /** Resolve a full attack including a possible single counter-attack. Pure-ish: mutates nothing, returns result. */
-export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef): AttackResult {
-  const first = resolveHit(att, def, w, map);
+export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, attMods: CombatMods = NO_MODS, defMods: CombatMods = NO_MODS): AttackResult {
+  const first = resolveHit(att, def, w, map, attMods);
   let counter: AttackResult['counter'] = null;
   if (!first.destroyed) {
     // defender counter with its strongest in-range weapon (even if it "acted")
     const cw = bestCounterWeapon(def, att.pos);
     if (cw) {
-      const c = resolveHit(def, att, cw, map);
+      const c = resolveHit(def, att, cw, map, defMods);
       counter = { weapon: cw, ...c };
     }
   }
@@ -183,12 +189,12 @@ export interface GameState {
   turn: number;
 }
 
-export function applyAttack(state: GameState, attackerUid: string, defenderUid: string, weaponId: string): { state: GameState; result: AttackResult } {
+export function applyAttack(state: GameState, attackerUid: string, defenderUid: string, weaponId: string, mods?: (u: UnitState) => CombatMods): { state: GameState; result: AttackResult } {
   const units = state.units.map((u) => ({ ...u, ammo: { ...u.ammo } }));
   const att = units.find((u) => u.uid === attackerUid)!;
   const def = units.find((u) => u.uid === defenderUid)!;
   const w = att.def.weapons.find((x) => x.id === weaponId)!;
-  const result = simulateAttack(att, def, w, state.map);
+  const result = simulateAttack(att, def, w, state.map, mods ? mods(att) : NO_MODS, mods ? mods(def) : NO_MODS);
 
   att.en = Math.max(0, att.en - w.enCost);
   if (w.ammo != null) att.ammo[w.id] = (att.ammo[w.id] ?? 0) - 1;

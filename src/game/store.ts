@@ -9,13 +9,17 @@ import {
   UpgradeMap,
   WEAPON_UPG_POWER,
   WeaponUpgMap,
+  ChapterDef,
+  SIDE_MISSIONS,
   chapterOf,
   enemyLevelOf,
   genMap,
   rosterFor,
+  sideAsChapter,
   upgradedStat,
   weaponUpgCost,
 } from './campaign';
+import { BOND_EVENTS, MAX_BOND, bondKey, bondLevel, bondMods } from './bonds';
 import { MISSION_SSS, SPIRITS } from './data';
 import { setMusicEnabled, setSoundEnabled } from '../audio';
 import {
@@ -49,6 +53,9 @@ export interface SaveData {
   upgrades: UpgradeMap;
   weaponUpg: WeaponUpgMap;
   pilotProg: Record<string, { level: number; exp: number }>;
+  bonds?: Record<string, number>;
+  bondSeen?: string[];
+  sideCleared?: string[];
 }
 
 export interface BattleAnim {
@@ -71,6 +78,12 @@ interface Store {
   upgrades: UpgradeMap;
   weaponUpg: WeaponUpgMap;
   pilotProg: Record<string, { level: number; exp: number }>;
+  bonds: Record<string, number>; // pairKey -> bond level 0..3
+  bondSeen: string[]; // bond event ids already viewed
+  sideCleared: string[]; // cleared side mission ids
+  sideId: string | null; // active side mission id (null = campaign chapter)
+  bondEventId: string | null; // bond event currently playing
+  missionCh: ChapterDef; // objective/map source for current mission (chapter or side)
   hasSave: boolean;
   settings: GameSettings;
   deploySel: string[];
@@ -96,6 +109,10 @@ interface Store {
   start: () => void;
   finishOnboarding: () => void;
   gotoBriefing: () => void;
+  gotoMissions: () => void;
+  openBondEvent: (id: string) => void;
+  finishBondEvent: () => void;
+  startSideMission: (id: string) => void;
   replayStory: () => void;
   gotoSettings: () => void;
   setSetting: <K extends keyof GameSettings>(k: K, v: GameSettings[K]) => void;
@@ -147,8 +164,7 @@ function applyUpgrades(u: UnitState, up: UpgradeMap, wupg: WeaponUpgMap) {
   }
 }
 
-function buildMission(chapterIdx: number, pilotProg: Store['pilotProg'], upgrades: UpgradeMap, wupg: WeaponUpgMap, deploySel: string[]): { map: MapDef; units: UnitState[] } {
-  const ch = chapterOf(chapterIdx);
+function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: UpgradeMap, wupg: WeaponUpgMap, deploySel: string[]): { map: MapDef; units: UnitState[] } {
   const map = genMap(ch);
   const units: UnitState[] = [];
   let i = 0;
@@ -171,8 +187,8 @@ function buildMission(chapterIdx: number, pilotProg: Store['pilotProg'], upgrade
   return { map, units };
 }
 
-async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg'>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg };
+async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared'>) {
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -229,6 +245,12 @@ export const useGame = create<Store>((set, get) => ({
   pilotProg: {},
   hasSave: false,
   settings: DEFAULT_SETTINGS,
+  bonds: {},
+  bondSeen: [],
+  sideCleared: [],
+  sideId: null,
+  bondEventId: null,
+  missionCh: CHAPTERS[0],
   deploySel: [],
   inspectUid: null,
   threatTiles: new Set<string>(),
@@ -239,6 +261,33 @@ export const useGame = create<Store>((set, get) => ({
   gotoBriefing: () => {
     const s = get();
     set({ phase: 'briefing', deploySel: rosterFor(chapterOf(s.chapter)) });
+  },
+
+  gotoMissions: () => set({ phase: 'missions' }),
+
+  openBondEvent: (id) => set({ phase: 'bond', bondEventId: id }),
+
+  finishBondEvent: () => {
+    const s = get();
+    const ev = BOND_EVENTS.find((e) => e.id === s.bondEventId);
+    if (!ev) {
+      set({ phase: 'hq', bondEventId: null });
+      return;
+    }
+    const seen = s.bondSeen.includes(ev.id);
+    const bonds = seen ? s.bonds : { ...s.bonds, [bondKey(ev.a, ev.b)]: Math.min(MAX_BOND, bondLevel(s.bonds, ev.a, ev.b) + 1) };
+    const bondSeen = seen ? s.bondSeen : [...s.bondSeen, ev.id];
+    set({ phase: 'hq', bondEventId: null, bonds, bondSeen });
+    void persist({ chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, bonds, bondSeen, sideCleared: s.sideCleared });
+  },
+
+  startSideMission: (id) => {
+    const s = get();
+    const m = SIDE_MISSIONS.find((x) => x.id === id);
+    if (!m || s.chapter < m.unlockCh || s.sideCleared.includes(id)) return;
+    const ch = sideAsChapter(m);
+    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, []);
+    set({ phase: 'player', sideId: id, missionCh: ch, map, units, kills: 0, turn: 1, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set() });
   },
   replayStory: () => set({ phase: 'onboarding' }),
   gotoSettings: () => set({ phase: 'settings' }),
@@ -274,7 +323,7 @@ export const useGame = create<Store>((set, get) => ({
     const weaponUpg: WeaponUpgMap = { ...s.weaponUpg, [defId]: { ...(s.weaponUpg[defId] ?? {}), [weaponId]: cur + 1 } };
     const credits = s.credits - cost;
     set({ credits, weaponUpg });
-    void persist({ chapter: s.chapter, credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg, pilotProg: s.pilotProg });
+    void persist({ ...s, credits, weaponUpg });
   },
 
   clearInspect: () => set({ inspectUid: null, threatTiles: new Set() }),
@@ -287,9 +336,12 @@ export const useGame = create<Store>((set, get) => ({
       upgrades: {} as UpgradeMap,
       weaponUpg: {} as WeaponUpgMap,
       pilotProg: {} as Store['pilotProg'],
+      bonds: {} as Record<string, number>,
+      bondSeen: [] as string[],
+      sideCleared: [] as string[],
     };
     set({ ...fresh, hasSave: true, kills: 0, phase: 'prologue' });
-    void persist(fresh);
+    void persist({ ...fresh, bonds: fresh.bonds, bondSeen: fresh.bondSeen, sideCleared: fresh.sideCleared });
   },
 
   finishPrologue: () => set({ phase: 'hq' }),
@@ -299,7 +351,7 @@ export const useGame = create<Store>((set, get) => ({
       const raw = await AsyncStorage.getItem(SAVE_KEY);
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
-      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true });
+      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [] });
     } catch {}
     try {
       const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
@@ -321,7 +373,7 @@ export const useGame = create<Store>((set, get) => ({
     const inventory = { ...s.inventory, [itemId]: (s.inventory[itemId] ?? 0) + 1 };
     const credits = s.credits - item.price;
     set({ credits, inventory });
-    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg });
+    void persist({ ...s, credits, inventory });
   },
 
   upgradeStat: (defId, statId) => {
@@ -335,7 +387,7 @@ export const useGame = create<Store>((set, get) => ({
     const upgrades: UpgradeMap = { ...s.upgrades, [defId]: { ...(s.upgrades[defId] ?? {}), [statId]: cur + 1 } };
     const credits = s.credits - cost;
     set({ credits, upgrades });
-    void persist({ chapter: s.chapter, credits, inventory: s.inventory, upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg });
+    void persist({ ...s, credits, upgrades });
   },
 
   useItem: (uid, itemId) => {
@@ -377,14 +429,14 @@ export const useGame = create<Store>((set, get) => ({
       selectedUid: null,
       log: push(s.log, `${u.def.name} uses ${item.name}`),
     });
-    void persist({ chapter: s.chapter, credits: s.credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg });
+    void persist({ ...s, inventory });
   },
 
   startMission: () => {
     const s = get();
-    const { map, units } = buildMission(s.chapter, s.pilotProg, s.upgrades, s.weaponUpg, s.deploySel);
     const ch = chapterOf(s.chapter);
-    set({ phase: 'dialog', map, units, kills: 0, turn: 1, log: [`Chapter ${ch.id}: ${ch.name}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set() });
+    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, s.deploySel);
+    set({ phase: 'dialog', sideId: null, missionCh: ch, map, units, kills: 0, turn: 1, log: [`Chapter ${ch.id}: ${ch.name}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set() });
   },
   finishDialog: () => set({ phase: 'player' }),
 
@@ -527,7 +579,7 @@ export const useGame = create<Store>((set, get) => ({
     if (!s.pendingWeapon || !s.menuForUid) return;
     const att = s.units.find((x) => x.uid === s.menuForUid)!;
     const def = s.units.find((x) => x.uid === uid)!;
-    const { state, result } = applyAttack({ map: s.map, units: s.units, turn: s.turn }, att.uid, uid, s.pendingWeapon.id);
+    const { state, result } = applyAttack({ map: s.map, units: s.units, turn: s.turn }, att.uid, uid, s.pendingWeapon.id, (u) => bondMods(s.bonds, s.units, u));
     const attAfter = state.units.find((u) => u.uid === att.uid)!;
     const defAfter = state.units.find((u) => u.uid === uid)!;
     const log = push(
@@ -556,7 +608,7 @@ export const useGame = create<Store>((set, get) => ({
       selectedUid: null,
     };
     if (s.settings.battleMode === 'off') {
-      const end = checkEnd(state.units, chapterOf(s.chapter), s.turn);
+      const end = checkEnd(state.units, s.missionCh, s.turn);
       if (end === 'victory') {
         set(common);
         applyVictory(set, get);
@@ -607,7 +659,7 @@ export const useGame = create<Store>((set, get) => ({
 
   finishBattle: () => {
     const s = get();
-    const end = checkEnd(s.units, chapterOf(s.chapter), s.turn);
+    const end = checkEnd(s.units, s.missionCh, s.turn);
     if (end === 'victory') {
       applyVictory(set, get);
       return;
@@ -664,12 +716,31 @@ function scheduleWalkClear(set: SetFn, get: Get, uid: string, len: number) {
 // award credits + persist pilot levels when a mission is won
 function applyVictory(set: SetFn, get: Get) {
   const s = get();
-  const ch = chapterOf(s.chapter);
-  const credits = s.credits + 800 + ch.id * 150 + s.kills * 150;
   const pilotProg = { ...s.pilotProg };
   for (const u of s.units) {
     if (u.side === 'player') pilotProg[u.def.id] = { level: u.level, exp: u.exp };
   }
+  const side = s.sideId ? SIDE_MISSIONS.find((m) => m.id === s.sideId) : undefined;
+  if (side) {
+    const reward = side.rewardCr + s.kills * 150;
+    const credits = s.credits + reward;
+    const inventory = side.rewardItem ? { ...s.inventory, [side.rewardItem]: (s.inventory[side.rewardItem] ?? 0) + 1 } : s.inventory;
+    const sideCleared = [...s.sideCleared, side.id];
+    set({
+      battle: null,
+      phase: 'victory',
+      credits,
+      inventory,
+      sideCleared,
+      pilotProg,
+      sideId: null,
+      log: push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''}`),
+    });
+    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared });
+    return;
+  }
+  const ch = s.missionCh;
+  const credits = s.credits + 800 + ch.id * 150 + s.kills * 150;
   const chapter = s.chapter + 1;
   set({
     battle: null,
@@ -677,9 +748,10 @@ function applyVictory(set: SetFn, get: Get) {
     credits,
     pilotProg,
     chapter,
+    sideId: null,
     log: push(s.log, `Mission complete! +${800 + ch.id * 150 + s.kills * 150} credits`),
   });
-  void persist({ chapter, credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg });
+  void persist({ chapter, credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared });
 }
 
 async function runEnemyPhase(set: SetFn, get: Get) {
@@ -710,7 +782,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       const cur = get();
       const att = cur.units.find((u) => u.uid === plan.unit.uid)!;
       const def = cur.units.find((u) => u.uid === plan.target!.uid)!;
-      const { state, result } = applyAttack({ map: cur.map, units: cur.units, turn: cur.turn }, att.uid, def.uid, plan.weapon.id);
+      const { state, result } = applyAttack({ map: cur.map, units: cur.units, turn: cur.turn }, att.uid, def.uid, plan.weapon.id, (u) => bondMods(cur.bonds, cur.units, u));
       const attAfter = state.units.find((u) => u.uid === att.uid)!;
       const defAfter = state.units.find((u) => u.uid === def.uid)!;
       const mkLog = (l: string[]) =>
@@ -730,7 +802,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         );
       if (cur.settings.battleMode === 'off') {
         set((st) => ({ units: state.units, kills: st.kills + (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0), log: mkLog(st.log) }));
-        const end = checkEnd(get().units, chapterOf(get().chapter), get().turn);
+        const end = checkEnd(get().units, get().missionCh, get().turn);
         if (end) {
           if (end === 'victory') applyVictory(set, get);
           else set({ phase: end, enemyBusy: false });
@@ -748,7 +820,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       }));
       // wait for player-visible battle anim to finish (finishBattle returns phase to 'enemy' since enemyBusy)
       await waitFor(() => get().battle === null);
-      const end = checkEnd(get().units, chapterOf(get().chapter), get().turn);
+      const end = checkEnd(get().units, get().missionCh, get().turn);
       if (end) {
         if (end === 'victory') {
           applyVictory(set, get);
@@ -778,7 +850,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       return c;
     });
     const nextTurn = st.turn + 1;
-    const end = checkEnd(units, chapterOf(st.chapter), nextTurn);
+    const end = checkEnd(units, st.missionCh, nextTurn);
     if (end === 'victory') {
       // survive-objective reached its turn limit — resolve outside this updater
       pendingVictory = true;

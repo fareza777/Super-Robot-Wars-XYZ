@@ -2,8 +2,10 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { BattleScene } from './src/components/BattleScene';
+import { BondDialog } from './src/components/BondDialog';
 import { ChapterDialog } from './src/components/ChapterDialog';
 import { HomeMenu } from './src/components/HomeMenu';
+import { MissionSelect } from './src/components/MissionSelect';
 import { HQScreen } from './src/components/HQScreen';
 import { MapGrid } from './src/components/MapGrid';
 import { PrologueScreen } from './src/components/PrologueScreen';
@@ -12,7 +14,6 @@ import { SettingsScreen } from './src/components/SettingsScreen';
 import { SidePanel } from './src/components/SidePanel';
 import { StoryIntro } from './src/components/StoryIntro';
 import { bgm } from './src/audio';
-import { chapterOf } from './src/game/campaign';
 import { useGame } from './src/game/store';
 
 function EnemyBanner() {
@@ -37,18 +38,17 @@ export default function App() {
   }, []);
 
   // BGM follows the current phase
-  const chapter = useGame((s) => s.chapter);
+  const missionCh = useGame((s) => s.missionCh);
   const units = useGame((s) => s.units);
   const music = useGame((s) => s.settings.music);
   useEffect(() => {
     if (!music) return;
-    const ch = chapterOf(chapter);
     if (phase === 'battle') return bgm('bgm_battle');
-    if (phase === 'player' || phase === 'enemy') return bgm(ch.boss ? 'bgm_boss' : 'bgm_map');
+    if (phase === 'player' || phase === 'enemy') return bgm(missionCh.boss ? 'bgm_boss' : 'bgm_map');
     if (phase === 'victory' || phase === 'defeat') return bgm('bgm_title');
     if (phase === 'title' || phase === 'onboarding' || phase === 'prologue') return bgm('bgm_title');
     return bgm('bgm_hq');
-  }, [phase, music, chapter, units]);
+  }, [phase, music, missionCh, units]);
 
   return (
     <View style={styles.root}>
@@ -58,6 +58,8 @@ export default function App() {
       {phase === 'briefing' && <BriefingScreen />}
       {phase === 'prologue' && <PrologueScreen />}
       {phase === 'hq' && <HQScreen />}
+      {phase === 'missions' && <MissionSelect />}
+      {phase === 'bond' && <BondDialog />}
       {phase === 'settings' && <SettingsScreen />}
       {phase === 'dialog' && <ChapterDialog />}
       {(phase === 'player' || phase === 'enemy' || phase === 'battle') && (

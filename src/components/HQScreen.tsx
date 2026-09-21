@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Image, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ART, AudioKey, MECH_ART, NPC_ART } from '../assets';
+import { ART, AudioKey, MECH_ART, NPC_ART, PILOT_ART } from '../assets';
 import { play } from '../audio';
 import { ALL_UNITS, CHAPTERS_COUNT, ITEMS, MAX_WEAPON_UPG, PLAYER_DEF_IDS, UPGRADE_STATS, WEAPON_UPG_POWER, chapterOf, rosterFor, weaponUpgCost } from '../game/campaign';
+import { BOND_EVENTS, MAX_BOND, bondLevel } from '../game/bonds';
 import { useGame } from '../game/store';
 
-type Tab = 'main' | 'merchant' | 'workshop' | 'chat';
+type Tab = 'main' | 'merchant' | 'workshop' | 'chat' | 'mess';
 
 const NPCS = {
   merchant: { name: 'Mira Volkoff', role: 'MERCHANT', art: NPC_ART.merchant, accent: '#ffd34d', voices: ['hq_merch_1', 'hq_merch_2', 'hq_merch_3'] },
@@ -83,9 +84,10 @@ export function HQScreen() {
           <HqCard title="MERCHANT" sub="Buy battle items" art={NPC_ART.merchant} accent="#ffd34d" onPress={() => setTab('merchant')} />
           <HqCard title="WORKSHOP" sub="Upgrade your mechs" art={NPC_ART.mechanic} accent="#6fe0ff" onPress={() => setTab('workshop')} />
           <HqCard title="BRIEF ROOM" sub="Talk with the crew" art={NPC_ART.captain} accent="#9fd0ff" onPress={goChat} />
-          <Pressable style={styles.deployBtn} onPress={() => s.gotoBriefing()}>
-            <Text style={styles.deployTxt}>▶ DEPLOY — CHAPTER {ch.id}</Text>
-            <Text style={styles.deploySub}>{ch.subtitle}</Text>
+          <HqCard title="MESS HALL" sub="Bonds & stories" art={PILOT_ART.valstray} accent="#ff9fd0" onPress={() => setTab('mess')} />
+          <Pressable style={styles.deployBtn} onPress={() => s.gotoMissions()}>
+            <Text style={styles.deployTxt}>▶ MISSIONS</Text>
+            <Text style={styles.deploySub}>CH.{ch.id} · {s.sideCleared.length} side cleared</Text>
           </Pressable>
         </View>
       )}
@@ -189,6 +191,58 @@ export function HQScreen() {
               );
             })}
         </HqPanel>
+      )}
+
+      {/* MESS HALL — bond events */}
+      {tab === 'mess' && (
+        <View style={styles.panelWrap}>
+          <View style={styles.panelLeft}>
+            <Animated.Image source={PILOT_ART.arielis} style={{ width: '100%', height: npcImgH, transform: [{ translateY: npcBob.interpolate({ inputRange: [0, 1], outputRange: [0, -8] }) }] }} resizeMode="contain" />
+            <Text style={[styles.npcName, { color: '#ff9fd0' }]}>MESS HALL</Text>
+            <Text style={styles.npcRole}>PILOT BONDS</Text>
+          </View>
+          <View style={styles.panelRight}>
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 12 }}>
+              <Text style={styles.panelTitle}>BOND EVENTS — hearts grow beside you</Text>
+              <Text style={styles.bondHint}>Bonded pilots within 2 tiles in battle: +4% hit & +6% damage per level.</Text>
+              {BOND_EVENTS.map((ev) => {
+                const lvl = bondLevel(s.bonds, ev.a, ev.b);
+                const seen = s.bondSeen.includes(ev.id);
+                const locked = s.chapter < ev.chapter;
+                return (
+                  <View key={ev.id} style={styles.bondRow}>
+                    <View style={styles.bondFaces}>
+                      <ExpoImage source={PILOT_ART[ev.a]} style={styles.bondFace} contentFit="cover" />
+                      <Text style={styles.bondHeart}>{ev.romance ? '♥' : '✦'}</Text>
+                      <ExpoImage source={PILOT_ART[ev.b]} style={styles.bondFace} contentFit="cover" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.shopName}>{locked ? '???' : ev.title}</Text>
+                      <Text style={styles.shopDesc}>
+                        {locked
+                          ? `Unlocks after Chapter ${ev.chapter}`
+                          : `${ALL_UNITS[ev.a].pilot.name.split(' ').pop()} & ${ALL_UNITS[ev.b].pilot.name.split(' ').pop()}${ev.romance ? ' · romance' : ''}`}
+                      </Text>
+                      <View style={styles.lvlBarTrack}>
+                        {Array.from({ length: MAX_BOND }).map((_, i) => (
+                          <View key={i} style={[styles.lvlSeg, i < lvl && { backgroundColor: ev.romance ? '#ff9fd0' : '#9fd0ff' }]} />
+                        ))}
+                      </View>
+                    </View>
+                    {!locked && (
+                      <Pressable style={styles.buyBtn} onPress={() => s.openBondEvent(ev.id)}>
+                        <Text style={styles.buyTxt}>{seen ? 'REPLAY' : 'WATCH ▸'}</Text>
+                      </Pressable>
+                    )}
+                  </View>
+                );
+              })}
+            </ScrollView>
+            <Pressable style={styles.backBtn} onPress={() => setTab('main')}>
+              <Text style={styles.backTxt}>◂ BACK TO HQ</Text>
+            </Pressable>
+          </View>
+        </View>
       )}
 
       {/* CHAT */}
@@ -307,4 +361,9 @@ const styles = StyleSheet.create({
   chatNext: { alignSelf: 'flex-end', marginTop: 8, backgroundColor: '#16324a', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 6 },
   chatNextTxt: { color: '#6fe0ff', fontWeight: '900', fontSize: 12 },
   backCorner: { position: 'absolute', top: 60, right: 16, backgroundColor: 'rgba(8,12,26,0.85)', borderWidth: 1, borderColor: '#3a4160', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 7 },
+  bondHint: { color: '#8fa0c8', fontSize: 10.5, marginBottom: 8 },
+  bondRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: '#1c2440' },
+  bondFaces: { flexDirection: 'row', alignItems: 'center' },
+  bondFace: { width: 40, height: 40, borderRadius: 20, borderWidth: 1.5, borderColor: '#3a4160' },
+  bondHeart: { color: '#ff9fd0', fontSize: 13, fontWeight: '900', marginHorizontal: 4 },
 });

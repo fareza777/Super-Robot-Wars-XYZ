@@ -19,7 +19,7 @@ const NPC_INFO: Record<string, { name: string; color: string; accent: string }> 
   npc_mechanic: { name: 'Bram Okoye · Chief Engineer', color: '#4a3018', accent: '#ffb84d' },
 };
 
-const PLAYER_IDS = ['valstray', 'arielis', 'gruntborg', 'zephyra'];
+const PLAYER_IDS = ['valstray', 'arielis', 'gruntborg', 'zephyra', 'raxdenR', 'vexiaX'];
 
 function speakerInfo(id: string): { img: ImageSourcePropType; name: string; color: string; accent: string; left: boolean } {
   const npc = NPC_INFO[id];

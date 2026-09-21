@@ -88,9 +88,10 @@ export const PLAYER_DEF_IDS = ['valstray', 'gruntborg', 'arielis', 'zephyra'];
 
 /** Units the player owns at a given chapter — reinforcements join at arc boundaries. */
 export function rosterFor(ch: ChapterDef): string[] {
+  const n = ch.rosterCh ?? ch.id;
   const r = [...PLAYER_DEF_IDS];
-  if (ch.id >= 11) r.push('raxdenR');
-  if (ch.id >= 21) r.push('vexiaX');
+  if (n >= 11) r.push('raxdenR');
+  if (n >= 21) r.push('vexiaX');
   return r;
 }
 
@@ -119,6 +120,8 @@ export interface ChapterDef {
   surviveTurns?: number;
   objective: string;
   lines: { speaker: string; text: string; voice?: string }[];
+  /** overrides roster gating (used by side missions whose ids are off-chapter) */
+  rosterCh?: number;
 }
 
 export const CHAPTERS: ChapterDef[] = chaptersJson as unknown as ChapterDef[];
@@ -245,3 +248,86 @@ export function enemyLevelOf(ch: ChapterDef, defId: string): number {
 }
 
 export const CHAPTERS_COUNT = CHAPTERS.length;
+
+// ---------- Side missions (optional, unlocked by chapter progress) ----------
+
+export interface SideMissionDef {
+  id: string;
+  name: string;
+  desc: string;
+  unlockCh: number; // chapter count reached (1-based) required to unlock
+  theme: string;
+  lvl: number;
+  count: number;
+  boss?: string;
+  rewardCr: number;
+  rewardItem?: ItemId;
+}
+
+export const SIDE_MISSIONS: SideMissionDef[] = [
+  {
+    id: 's1',
+    name: 'Pirates of Kharon Pass',
+    desc: 'Raiders are stripping a refugee convoy. Intercept them.',
+    unlockCh: 4,
+    theme: 'mountain',
+    lvl: 5,
+    count: 5,
+    rewardCr: 1400,
+    rewardItem: 'ammoBox',
+  },
+  {
+    id: 's2',
+    name: 'Signals in the Drift',
+    desc: 'A derelict emitter is broadcasting Ark codes in the void belt.',
+    unlockCh: 9,
+    theme: 'void',
+    lvl: 9,
+    count: 7,
+    rewardCr: 2000,
+    rewardItem: 'enCell',
+  },
+  {
+    id: 's3',
+    name: 'The Lost Convoy',
+    desc: 'Escort fragments hold beyond the lunar shadow — go get them.',
+    unlockCh: 14,
+    theme: 'moon',
+    lvl: 13,
+    count: 6,
+    boss: 'moorin',
+    rewardCr: 2600,
+    rewardItem: 'megaKit',
+  },
+  {
+    id: 's4',
+    name: "Falcon's Errand",
+    desc: 'Vee found a weapons cache inside a dead colony. Quietly.',
+    unlockCh: 21,
+    theme: 'colony',
+    lvl: 18,
+    count: 7,
+    boss: 'serka',
+    rewardCr: 3400,
+    rewardItem: 'spiritWing',
+  },
+];
+
+/** Fabricate a ChapterDef view of a side mission for genMap/enemyLevelOf/checkEnd. */
+export function sideAsChapter(m: SideMissionDef): ChapterDef {
+  return {
+    id: 1000 + SIDE_MISSIONS.indexOf(m),
+    name: m.name,
+    subtitle: 'SIDE QUEST',
+    act: m.lvl >= 15 ? 3 : m.lvl >= 8 ? 2 : 1,
+    theme: m.theme,
+    lvl: m.lvl,
+    count: m.count,
+    boss: m.boss,
+    bossLevel: m.boss ? m.lvl + 2 : undefined,
+    objectiveType: m.boss ? 'boss' : 'rout',
+    objective: m.boss ? 'Destroy the marked commander unit' : 'Rout all hostiles',
+    lines: [],
+    rosterCh: m.unlockCh,
+  };
+}
