@@ -2,7 +2,7 @@
   "expo": {
     "name": "Super Robot Wars XYZ",
     "slug": "super-robot-wars-xyz",
-    "version": "0.6.0",
+    "version": "0.7.0",
     "orientation": "landscape",
     "icon": "./assets/art/icon.png",
     "userInterfaceStyle": "dark",

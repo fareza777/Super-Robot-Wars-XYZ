@@ -37,6 +37,9 @@ Start a new segment before each major phase; pull before the 240s limit or kill 
 - **Caveat**: `screenrecord` heavily starves the JS thread under swiftshader. During multi-battle enemy phases the app can appear frozen 60-90s on one frame — kill screenrecord (`kill -2 $(pidof screenrecord)`) and the app usually resumes on its own. Prefer screencap polling for long phases; record only short single battles.
 - If the RN red box appears (`TypeError ...` full-screen), DISMISS sits ~device (1014,927); the app may soft-lock black afterwards — recover via `am force-stop com.fareza777.srwxyz` + relaunch (save persists).
 
+- **In-flight attack visuals last ~1-2s** — screencap cadence (~1.5-3s under battle load) keeps missing them; the only reliable capture is frame-diffing a `screenrecord` of a non-frozen battle (short single-battle clips only).
+- **The emulator process can die entirely under sustained load** (screencap+screenrecord storm) — check `adb devices`; if empty, relaunch with the documented command. Save data persists across the relaunch.
+
 ## App-specific notes (com.fareza777.srwxyz)
 - First-boot image decode is slow — wait ~20-30s before asserting missing art.
 - Useful device-px coords (2400x1080): title TOUCH TO START ~(1200,1000); intro/dialog SKIP top-right ~(2220,95); home menu items ~(605,490); HQ DEPLOY tile ~(2036,597); briefing DEPLOY ▸ ~(1033,1002); END TURN ~(2014,997); side panel scroll region x≈2280.

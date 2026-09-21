@@ -101,6 +101,7 @@ export type Phase =
   | 'home'
   | 'briefing'
   | 'dialog'
+  | 'prologue'
   | 'hq'
   | 'player'
   | 'enemy'

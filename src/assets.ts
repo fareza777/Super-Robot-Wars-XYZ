@@ -120,11 +120,24 @@ export const NARRATION: AudioKey[] = ['nar_1', 'nar_2', 'nar_3', 'nar_4', 'nar_5
 
 // Story captions — identical to the narrated lines so text and VO always match.
 export const CAPTIONS = [
-  "Year 2199. War has reached the heavens. Above a burning Earth, the Imperial fleet clashes with the last of humanity's defenders.",
-  "On the surface, the Empire's machine legions march unopposed. City after city falls beneath their black steel.",
-  "But in a hidden hangar, one pilot waits with humanity's final answer — the XYZ Frame. The Valstray.",
-  'At dawn, the counterattack begins. Squadron XYZ launches — four machines against an empire.',
-  "And waiting at Sector Triple-S — the Emperor's ace, Colonel Karg Draven. This is where the war turns.",
+  "Year 2199. War has reached the heavens. Above a burning Earth, the last Federation fleet falls beneath Imperial guns.",
+  "On the ground, the Empire's walkers march through burning streets. The world surrenders, city by city.",
+  "In a hidden hangar, one pilot waits beside humanity's last hope — the prototype XYZ Frame. Valstray.",
+  'At dawn, the counterattack begins. Four machines — Squadron XYZ — launch into the fire.',
+  "And waiting at Sector Triple-S: Colonel Karg Draven, the Emperor's ace. This is where the war turns.",
+];
+
+// First-boot prologue — crew introduced one at a time (npc_* speakers use NPC_ART).
+export const PROLOGUE: { speaker: string; voice: AudioKey; text: string }[] = [
+  { speaker: 'npc_captain', voice: 'pro_1' as AudioKey, text: "Welcome aboard the Ark Raider, Commander. She's old, but she's the last free deck in the sky." },
+  { speaker: 'valstray', voice: 'pro_2' as AudioKey, text: "Captain Vale. The squad's ready — Valstray just needs a launch window." },
+  { speaker: 'npc_captain', voice: 'pro_3' as AudioKey, text: 'Before you fly, meet your crew. Bram Okoye, chief engineer — if it has a reactor, he can tune it.' },
+  { speaker: 'npc_mechanic', voice: 'pro_4' as AudioKey, text: 'Commander. Bring me credits and salvage, and your frames will hit twice as hard. My workshop is always open.' },
+  { speaker: 'npc_captain', voice: 'pro_5' as AudioKey, text: "And Mira Volkoff runs the quartermaster's store — the best salvage broker left in the fleet." },
+  { speaker: 'npc_merchant', voice: 'pro_6' as AudioKey, text: 'A pleasure, Commander. Repair kits, energy cells — everything to keep you breathing out there. Special price for heroes.' },
+  { speaker: 'npc_captain', voice: 'pro_7' as AudioKey, text: 'Spend your credits wisely — upgrade the frames, stock the racks. War is expensive.' },
+  { speaker: 'valstray', voice: 'pro_8' as AudioKey, text: "Understood. Squadron XYZ doesn't plan on losing." },
+  { speaker: 'npc_captain', voice: 'pro_9' as AudioKey, text: "Sector Triple-S. Karg Draven holds the gate. When you're ready — deploy, and make the Empire regret this war." },
 ];
 
 // Chapter 1 pre-mission dialogue. speaker = unit defId (portrait + pilot name).

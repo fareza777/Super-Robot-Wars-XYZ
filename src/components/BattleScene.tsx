@@ -86,8 +86,9 @@ export function BattleScene() {
       if (vk) play(vk);
       play(KIND_SFX[battle.weapon.kind] ?? 'sfx_beam');
       Animated.sequence([
-        Animated.timing(attLunge, { toValue: 1, duration: 620, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-        Animated.timing(attLunge, { toValue: 0, duration: 780, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(attLunge, { toValue: -0.2, duration: 200, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(attLunge, { toValue: 1, duration: 400, easing: Easing.in(Easing.cubic), useNativeDriver: true }),
+        Animated.timing(attLunge, { toValue: 0, duration: 620, easing: Easing.out(Easing.quad), useNativeDriver: true }),
       ]).start();
     }
     if (stage === 4 && battle.result.counter) {
@@ -95,8 +96,9 @@ export function BattleScene() {
       if (vk) play(vk);
       play(KIND_SFX[battle.result.counter.weapon.kind] ?? 'sfx_beam');
       Animated.sequence([
-        Animated.timing(defLunge, { toValue: 1, duration: 620, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-        Animated.timing(defLunge, { toValue: 0, duration: 780, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(defLunge, { toValue: -0.2, duration: 200, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(defLunge, { toValue: 1, duration: 400, easing: Easing.in(Easing.cubic), useNativeDriver: true }),
+        Animated.timing(defLunge, { toValue: 0, duration: 620, easing: Easing.out(Easing.quad), useNativeDriver: true }),
       ]).start();
     }
   }, [stage]);
@@ -195,6 +197,8 @@ export function BattleScene() {
         {/* attack VFX overlays */}
         {(stage === 2 || stage === 3) && <AttackAnim weapon={battle.weapon} side="attacker" w={width} h={height} />}
         {counterActive && <AttackAnim weapon={battle.result.counter!.weapon} side="defender" w={width} h={height} />}
+        {stage === 2 && <SpeedLines fromLeft />}
+        {counterActive && <SpeedLines fromLeft={false} />}
 
         {/* pilot cut-in — mounted for the whole attack+impact window */}
         {(stage === 2 || stage === 3) && <PilotCutIn key="atk" unit={atk} side="left" />}
@@ -433,68 +437,175 @@ function AttackAnim({ weapon, side, w, h }: { weapon: WeaponDef; side: 'attacker
 
   switch (weapon.kind) {
     case 'melee': {
+      // two crossing blade streaks that sweep through the target + contact spark
       return (
-        <Animated.View
-          style={{
-            position: 'absolute',
-            left: sx,
-            top: sy,
-            width: 9,
-            height: 120,
-            backgroundColor: '#aef3ff',
-            borderRadius: 5,
-            shadowColor: '#7ee7ff',
-            shadowRadius: 14,
-            shadowOpacity: 1,
-            opacity: v.interpolate({ inputRange: [0, 0.55, 1], outputRange: [0, 1, 0] }),
-            transform: [
-              { translateX: v.interpolate({ inputRange: [0, 1], outputRange: [0, dir] }) },
-              { translateY: v.interpolate({ inputRange: [0, 1], outputRange: [0, dy] }) },
-              { rotate: '38deg' },
-              { scaleY: v.interpolate({ inputRange: [0, 0.7, 1], outputRange: [0.3, 1.5, 0.4] }) },
-            ],
-          }}
-        />
+        <>
+          {[0, 1].map((i) => (
+            <Animated.View
+              key={i}
+              style={{
+                position: 'absolute',
+                left: Math.min(sx, tx) - 30,
+                top: ty - 8,
+                width: Math.abs(dir) + 60,
+                height: 15,
+                opacity: v.interpolate({ inputRange: [0.08 + i * 0.16, 0.2 + i * 0.16, 0.42 + i * 0.16, 0.56 + i * 0.16, 1], outputRange: [0, 0, 1, 0, 0], extrapolate: 'clamp' }),
+                transform: [
+                  { rotate: `${(dir < 0 ? -1 : 1) * (i ? -27 : 37)}deg` },
+                  { scaleX: v.interpolate({ inputRange: [0.08 + i * 0.16, 0.42 + i * 0.16], outputRange: [0.04, 1], extrapolate: 'clamp' }) },
+                ],
+              }}
+            >
+              <LinearGradient colors={['rgba(174,243,255,0)', '#aef3ff', '#ffffff', '#aef3ff', 'rgba(174,243,255,0)']} start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }} style={{ flex: 1, borderRadius: 8 }} />
+            </Animated.View>
+          ))}
+          {/* contact spark at the blade crossing point */}
+          <Animated.View
+            style={{
+              position: 'absolute',
+              left: tx - 24,
+              top: ty - 24,
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              backgroundColor: '#fff',
+              opacity: v.interpolate({ inputRange: [0, 0.5, 0.62, 0.78, 1], outputRange: [0, 0, 1, 0, 0] }),
+              transform: [{ scale: v.interpolate({ inputRange: [0.5, 0.68], outputRange: [0.3, 1.9], extrapolate: 'clamp' }) }],
+            }}
+          />
+        </>
       );
     }
     case 'beam': {
+      const bx = Math.min(sx, tx);
       return (
         <>
+          {/* charge orb at muzzle */}
           <Animated.View
             style={{
               position: 'absolute',
-              left: sx - 18,
-              top: sy - 18,
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              backgroundColor: '#9fd0ff',
-              opacity: v.interpolate({ inputRange: [0, 0.3, 0.55, 1], outputRange: [0, 0.9, 0.9, 0] }),
-              transform: [{ scale: v.interpolate({ inputRange: [0, 0.3], outputRange: [0.2, 1.5] }) }],
+              left: sx - 19,
+              top: sy - 19,
+              width: 38,
+              height: 38,
+              borderRadius: 19,
+              opacity: v.interpolate({ inputRange: [0, 0.26, 0.38, 1], outputRange: [0, 1, 0.85, 0] }),
+              transform: [{ scale: v.interpolate({ inputRange: [0, 0.3], outputRange: [0.2, 1.45], extrapolate: 'clamp' }) }],
+            }}
+          >
+            <LinearGradient colors={['#ffffff', '#8ee9ff', 'rgba(126,231,255,0.15)']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={{ flex: 1, borderRadius: 19 }} />
+          </Animated.View>
+          {/* outer glow beam — vertical gradient gives soft edges */}
+          <Animated.View
+            style={{
+              position: 'absolute',
+              left: bx,
+              top: sy - 14,
+              width: Math.abs(dir),
+              height: 30,
+              opacity: v.interpolate({ inputRange: [0.36, 0.48, 0.92, 1], outputRange: [0, 0.9, 0.9, 0], extrapolate: 'clamp' }),
+              transform: [
+                { scaleX: v.interpolate({ inputRange: [0.4, 0.74], outputRange: [0.03, 1], extrapolate: 'clamp' }) },
+                { scaleY: v.interpolate({ inputRange: [0.5, 0.6, 0.85, 1], outputRange: [0.75, 1.3, 0.95, 0.6], extrapolate: 'clamp' }) },
+              ],
+            }}
+          >
+            <LinearGradient colors={['rgba(126,231,255,0)', '#7ee7ff', '#ffffff', '#7ee7ff', 'rgba(126,231,255,0)']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={{ flex: 1, borderRadius: 15 }} />
+          </Animated.View>
+          {/* white-hot core */}
+          <Animated.View
+            style={{
+              position: 'absolute',
+              left: bx,
+              top: sy - 2,
+              width: Math.abs(dir),
+              height: 9,
+              borderRadius: 5,
+              backgroundColor: '#fff',
+              opacity: v.interpolate({ inputRange: [0.38, 0.5, 0.9, 1], outputRange: [0, 1, 1, 0], extrapolate: 'clamp' }),
+              transform: [{ scaleX: v.interpolate({ inputRange: [0.42, 0.72], outputRange: [0.02, 1], extrapolate: 'clamp' }) }],
             }}
           />
+          {/* bloom where the beam lands */}
           <Animated.View
             style={{
               position: 'absolute',
-              left: sx,
-              top: sy,
-              width: Math.abs(dir),
-              height: 12,
-              borderRadius: 6,
-              backgroundColor: '#8ee9ff',
-              shadowColor: '#7ee7ff',
-              shadowRadius: 16,
-              shadowOpacity: 1,
-              opacity: v.interpolate({ inputRange: [0, 0.35, 0.42, 0.95, 1], outputRange: [0, 0, 1, 1, 0] }),
-              transform: [{ translateX: dir < 0 ? dir : 0 }, { scaleX: v.interpolate({ inputRange: [0.4, 0.75], outputRange: [0.02, 1], extrapolate: 'clamp' }) }],
+              left: tx - 16,
+              top: ty - 16,
+              width: 32,
+              height: 32,
+              borderRadius: 16,
+              backgroundColor: '#dffaff',
+              opacity: v.interpolate({ inputRange: [0.55, 0.7, 0.85, 1], outputRange: [0, 1, 0.6, 0] }),
+              transform: [{ scale: v.interpolate({ inputRange: [0.55, 0.85], outputRange: [0.4, 2.2], extrapolate: 'clamp' }) }],
             }}
           />
         </>
       );
     }
     case 'missile': {
+      // arcing volley: body + flame trail per missile
       return (
         <>
+          {Array.from({ length: 6 }, (_, i) => {
+            const t0 = 0.05 + i * 0.075;
+            const arc = -55 - (i % 3) * 22;
+            return (
+              <Animated.View
+                key={i}
+                style={{
+                  position: 'absolute',
+                  left: sx,
+                  top: sy,
+                  opacity: v.interpolate({ inputRange: [0, t0, 0.9, 1], outputRange: [0, 1, 1, 0] }),
+                  transform: [
+                    { translateX: v.interpolate({ inputRange: [t0, 0.92], outputRange: [0, dir], extrapolate: 'clamp' }) },
+                    { translateY: v.interpolate({ inputRange: [t0, t0 + 0.42, 0.92], outputRange: [0, dy + arc, dy], extrapolate: 'clamp' }) },
+                    { rotate: v.interpolate({ inputRange: [t0, 0.92], outputRange: dir < 0 ? ['150deg', '185deg'] : ['30deg', '-5deg'] }) },
+                  ],
+                }}
+              >
+                <View style={{ width: 17, height: 7, borderRadius: 3.5, overflow: 'hidden' }}>
+                  <LinearGradient colors={['#f2f5fb', '#c9d2e4', '#7d879c']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={{ flex: 1 }} />
+                </View>
+                <View style={{ position: 'absolute', left: -12, top: 1.5, width: 12, height: 4, borderRadius: 2, backgroundColor: '#ffb84d' }} />
+              </Animated.View>
+            );
+          })}
+          {/* impact sparks */}
+          <Animated.View
+            style={{
+              position: 'absolute',
+              left: tx - 18,
+              top: ty - 18,
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              backgroundColor: '#ffd9a0',
+              opacity: v.interpolate({ inputRange: [0.8, 0.9, 1], outputRange: [0, 1, 0] }),
+              transform: [{ scale: v.interpolate({ inputRange: [0.8, 1], outputRange: [0.4, 1.9] }) }],
+            }}
+          />
+        </>
+      );
+    }
+    case 'gun': {
+      return (
+        <>
+          {/* muzzle flash */}
+          <Animated.View
+            style={{
+              position: 'absolute',
+              left: sx - 13,
+              top: sy - 13,
+              width: 26,
+              height: 26,
+              opacity: v.interpolate({ inputRange: [0, 0.07, 0.18, 0.3, 1], outputRange: [0, 1, 0.85, 0, 0] }),
+              transform: [{ rotate: '45deg' }, { scale: v.interpolate({ inputRange: [0.05, 0.24], outputRange: [0.4, 1.7], extrapolate: 'clamp' }) }],
+            }}
+          >
+            <LinearGradient colors={['#fff', '#ffe28a']} style={{ flex: 1, borderRadius: 4 }} />
+          </Animated.View>
           {Array.from({ length: 5 }, (_, i) => (
             <Animated.View
               key={i}
@@ -502,84 +613,105 @@ function AttackAnim({ weapon, side, w, h }: { weapon: WeaponDef; side: 'attacker
                 position: 'absolute',
                 left: sx,
                 top: sy,
-                width: 14,
-                height: 7,
-                borderRadius: 4,
-                backgroundColor: '#ffd0a0',
-                shadowColor: '#ffb84d',
-                shadowRadius: 8,
-                shadowOpacity: 0.9,
-                opacity: v.interpolate({ inputRange: [0, 0.12 + i * 0.09, 0.9, 1], outputRange: [0, 1, 1, 0] }),
+                width: 24,
+                height: 4,
+                opacity: v.interpolate({ inputRange: [0, 0.1 + i * 0.1, 0.18 + i * 0.1, 0.62, 1], outputRange: [0, 0, 1, 1, 0] }),
                 transform: [
-                  { translateX: v.interpolate({ inputRange: [0.08 + i * 0.09, 0.95], outputRange: [0, dir], extrapolate: 'clamp' }) },
-                  { translateY: v.interpolate({ inputRange: [0.08 + i * 0.09, 0.5, 0.95], outputRange: [0, dy - 70 - i * 9, dy], extrapolate: 'clamp' }) },
-                  { rotate: v.interpolate({ inputRange: [0, 1], outputRange: ['-30deg', '10deg'] }) },
+                  { translateX: v.interpolate({ inputRange: [0.12 + i * 0.1, 0.55 + i * 0.1], outputRange: [0, dir], extrapolate: 'clamp' }) },
+                  { translateY: dy * 0.85 + (i - 2) * 4 },
                 ],
               }}
-            />
-          ))}
-        </>
-      );
-    }
-    case 'gun': {
-      return (
-        <>
-          {Array.from({ length: 4 }, (_, i) => (
-            <Animated.View
-              key={i}
-              style={{
-                position: 'absolute',
-                left: sx,
-                top: sy,
-                width: 20,
-                height: 5,
-                borderRadius: 3,
-                backgroundColor: '#ffe28a',
-                shadowColor: '#ffd34d',
-                shadowRadius: 8,
-                shadowOpacity: 1,
-                opacity: v.interpolate({ inputRange: [0, 0.18 + i * 0.12, 0.28 + i * 0.12, 1], outputRange: [0, 0, 1, 0] }),
-                transform: [{ translateX: v.interpolate({ inputRange: [0.18 + i * 0.12, 0.6 + i * 0.12], outputRange: [0, dir], extrapolate: 'clamp' }) }, { translateY: dy * 0.9 }],
-              }}
-            />
+            >
+              <LinearGradient colors={['rgba(255,226,138,0)', '#ffe28a', '#fff']} start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }} style={{ flex: 1, borderRadius: 2 }} />
+            </Animated.View>
           ))}
         </>
       );
     }
     case 'funnel': {
+      // drones launch, spread, converge on the target, then each fires a thin beam
       return (
         <>
-          {Array.from({ length: 4 }, (_, i) => {
-            const off = (i - 1.5) * 30;
+          {Array.from({ length: 6 }, (_, i) => {
+            const a = (i / 6) * Math.PI * 2;
+            const ox = Math.cos(a) * 64;
+            const oy = Math.sin(a) * 38;
             return (
               <Animated.View
                 key={i}
                 style={{
                   position: 'absolute',
                   left: sx,
-                  top: sy + off,
-                  width: 15,
+                  top: sy,
+                  width: 14,
                   height: 8,
                   borderRadius: 4,
-                  backgroundColor: '#d0a0ff',
+                  backgroundColor: '#e8d0ff',
                   shadowColor: '#b06cff',
-                  shadowRadius: 10,
+                  shadowRadius: 9,
                   shadowOpacity: 1,
-                  opacity: v.interpolate({ inputRange: [0, 0.12, 0.9, 1], outputRange: [0, 1, 1, 0] }),
+                  opacity: v.interpolate({ inputRange: [0, 0.1, 0.92, 1], outputRange: [0, 1, 1, 0] }),
                   transform: [
-                    { translateX: v.interpolate({ inputRange: [0.12, 0.85], outputRange: [0, dir], extrapolate: 'clamp' }) },
-                    { translateY: v.interpolate({ inputRange: [0.12, 0.5, 0.85], outputRange: [0, -70 - off, dy - off], extrapolate: 'clamp' }) },
+                    { translateX: v.interpolate({ inputRange: [0.1, 0.45, 0.78, 0.95], outputRange: [0, ox, dir * 0.8 + ox * 0.3, dir], extrapolate: 'clamp' }) },
+                    { translateY: v.interpolate({ inputRange: [0.1, 0.45, 0.78, 0.95], outputRange: [0, oy, dy * 0.8 + oy * 0.3, dy], extrapolate: 'clamp' }) },
                   ],
                 }}
               />
             );
           })}
+          {Array.from({ length: 6 }, (_, i) => (
+            <Animated.View
+              key={`b${i}`}
+              style={{
+                position: 'absolute',
+                left: tx - 20,
+                top: ty - 44 + i * 15,
+                width: 46,
+                height: 3,
+                opacity: v.interpolate({ inputRange: [0.78, 0.85, 0.95, 1], outputRange: [0, 1, 1, 0] }),
+                transform: [{ rotate: dir < 0 ? '168deg' : '-12deg' }],
+              }}
+            >
+              <LinearGradient colors={['rgba(208,160,255,0)', '#d0a0ff', '#fff']} start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }} style={{ flex: 1, borderRadius: 2 }} />
+            </Animated.View>
+          ))}
         </>
       );
     }
     default:
       return null;
   }
+}
+
+/** diagonal speedline streaks sweeping behind the attack */
+function SpeedLines({ fromLeft }: { fromLeft: boolean }) {
+  const v = useRef(new Animated.Value(0)).current;
+  const { width, height } = useWindowDimensions();
+  useEffect(() => {
+    Animated.timing(v, { toValue: 1, duration: DUR.attack, easing: Easing.linear, useNativeDriver: true }).start();
+  }, []);
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      {Array.from({ length: 7 }, (_, i) => (
+        <Animated.View
+          key={i}
+          style={{
+            position: 'absolute',
+            top: height * (0.1 + i * 0.11),
+            left: 0,
+            width: width * 0.45,
+            height: 2,
+            backgroundColor: 'rgba(255,255,255,0.4)',
+            opacity: v.interpolate({ inputRange: [0, 0.12, 0.8, 1], outputRange: [0, 0.55, 0.55, 0] }),
+            transform: [
+              { translateX: v.interpolate({ inputRange: [0, 1], outputRange: fromLeft ? [-width * 0.5, width * 1.05] : [width * 1.05, -width * 0.5] }) },
+              { skewX: '-16deg' },
+            ],
+          }}
+        />
+      ))}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

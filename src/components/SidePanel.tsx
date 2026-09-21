@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { PILOT_ART } from '../assets';
 import { ITEMS } from '../game/campaign';
 import { SPIRITS } from '../game/data';
-import { weaponsAgainst } from '../game/engine';
+import { damageOf, hitChance, key, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, useGame } from '../game/store';
 import { SpiritId } from '../game/types';
 
@@ -108,10 +108,35 @@ export function SidePanel() {
           </View>
         )}
 
-        {s.pendingWeapon && (
+        {s.pendingWeapon && unit && s.pendingMove && (
           <View style={styles.menu}>
-            <Text style={styles.menuTitle}>{s.pendingWeapon.name}</Text>
-            <Text style={styles.hint}>Tap a red-highlighted enemy to attack</Text>
+            <Text style={styles.menuTitle}>
+              {s.pendingWeapon.name} · POW {s.pendingWeapon.power}
+            </Text>
+            <Text style={styles.hint}>Pick a target — or tap one on the map</Text>
+            {s.units
+              .filter((e) => e.alive && e.side === 'enemy' && s.attackTiles.has(key(e.pos)))
+              .map((e) => {
+                const hc = hitChance(unit, e, s.pendingWeapon!, s.map);
+                const dmg = damageOf(unit, e, s.pendingWeapon!, s.map, false);
+                const kill = e.hp - dmg <= 0;
+                return (
+                  <TouchableOpacity key={e.uid} onPress={() => s.chooseTarget(e.uid)} style={[styles.tgtRow, kill && styles.tgtRowKill]}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.tgtName} numberOfLines={1}>
+                        {e.def.name} {e.def.boss ? '★' : ''}
+                      </Text>
+                      <Text style={styles.tgtHp}>
+                        HP {e.hp}/{e.def.maxHp}
+                      </Text>
+                    </View>
+                    <View style={styles.tgtHitBox}>
+                      <Text style={[styles.tgtHit, hc >= 80 ? { color: '#4dff7a' } : hc >= 55 ? { color: '#ffd34d' } : { color: '#ff8a5a' }]}>{hc}%</Text>
+                      <Text style={styles.tgtDmg}>{kill ? 'DESTROY' : `~${dmg}`}</Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
             <Btn label="BACK" onPress={() => useGame.setState({ pendingWeapon: null, attackTiles: new Set() })} accent="#666" />
           </View>
         )}
@@ -173,6 +198,13 @@ const styles = StyleSheet.create({
   btnText: { color: '#e6ecff', fontSize: 10.5, fontWeight: '700' },
   btnTextOff: { color: '#666f8c' },
   btnSub: { color: '#7f8db0', fontSize: 8.5, marginTop: 1 },
+  tgtRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#ff6b6b', borderRadius: 6, paddingVertical: 6, paddingHorizontal: 7, backgroundColor: '#221622', gap: 6 },
+  tgtRowKill: { borderColor: '#ffd34d', backgroundColor: '#2a2214' },
+  tgtName: { color: '#ffe2e2', fontSize: 10.5, fontWeight: '800' },
+  tgtHp: { color: '#8fa1c7', fontSize: 8.5, marginTop: 1 },
+  tgtHitBox: { alignItems: 'flex-end' },
+  tgtHit: { fontSize: 15, fontWeight: '900' },
+  tgtDmg: { color: '#9fb0d0', fontSize: 8.5, fontWeight: '700' },
   logBox: { marginTop: 7, backgroundColor: '#0c0e16', borderRadius: 6, padding: 6, minHeight: 60 },
   logLine: { color: '#9fb0d0', fontSize: 9, marginBottom: 2 },
   endTurn: { marginTop: 6, borderWidth: 1, borderColor: '#ffd34d', borderRadius: 6, paddingVertical: 7, alignItems: 'center', backgroundColor: '#26251a' },

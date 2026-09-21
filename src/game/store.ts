@@ -73,6 +73,7 @@ interface Store {
   startMission: () => void;
   finishDialog: () => void;
   newCampaign: () => void;
+  finishPrologue: () => void;
   loadSave: () => Promise<void>;
   gotoHq: () => void;
   buyItem: (itemId: string) => void;
@@ -172,9 +173,11 @@ export const useGame = create<Store>((set, get) => ({
 
   newCampaign: () => {
     const fresh = { chapter: 0, credits: 1200, inventory: { repairKit: 2, enCell: 1 } as Record<string, number>, upgrades: {} as UpgradeMap, pilotProg: {} as Store['pilotProg'] };
-    set({ ...fresh, hasSave: true, kills: 0, phase: 'hq' });
+    set({ ...fresh, hasSave: true, kills: 0, phase: 'prologue' });
     void persist(fresh);
   },
+
+  finishPrologue: () => set({ phase: 'hq' }),
 
   loadSave: async () => {
     try {

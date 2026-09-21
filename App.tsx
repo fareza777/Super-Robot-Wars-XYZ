@@ -6,6 +6,7 @@ import { ChapterDialog } from './src/components/ChapterDialog';
 import { HomeMenu } from './src/components/HomeMenu';
 import { HQScreen } from './src/components/HQScreen';
 import { MapGrid } from './src/components/MapGrid';
+import { PrologueScreen } from './src/components/PrologueScreen';
 import { BriefingScreen, EndScreen, TitleScreen } from './src/components/Screens';
 import { SidePanel } from './src/components/SidePanel';
 import { StoryIntro } from './src/components/StoryIntro';
@@ -38,6 +39,7 @@ export default function App() {
       {phase === 'onboarding' && <StoryIntro />}
       {phase === 'home' && <HomeMenu />}
       {phase === 'briefing' && <BriefingScreen />}
+      {phase === 'prologue' && <PrologueScreen />}
       {phase === 'hq' && <HQScreen />}
       {phase === 'dialog' && <ChapterDialog />}
       {(phase === 'player' || phase === 'enemy' || phase === 'battle') && (
