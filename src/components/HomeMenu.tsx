@@ -82,22 +82,22 @@ export function HomeMenu() {
         <MenuItem label="SETTINGS" sub="Battle animation · speed · sound · music" accent="#9dffa0" delay={410} onPress={useGame.getState().gotoSettings} />
       </View>
 
-      <Text style={styles.foot}>v1.0.2 · original mecha tactics · not affiliated with Bandai Namco</Text>
+      <Text style={styles.foot}>v1.0.3 · original mecha tactics · not affiliated with Bandai Namco</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { ...StyleSheet.absoluteFill, backgroundColor: '#03050e', zIndex: 40 },
-  brand: { position: 'absolute', top: '6%', left: 40 },
+  brand: { position: 'absolute', top: '4%', left: 40 },
   brandTitle: { color: '#dbe8ff', fontSize: 30, fontWeight: '900', letterSpacing: 8, fontStyle: 'italic', textShadowColor: '#4d7cff', textShadowRadius: 14 },
   brandXyz: { color: '#ffd34d', fontSize: 64, fontWeight: '900', letterSpacing: 22, fontStyle: 'italic', marginTop: -6, textShadowColor: '#8a5c00', textShadowRadius: 16 },
   brandRule: { height: 2, width: 240, backgroundColor: '#ffd34d', marginTop: 10, opacity: 0.8 },
-  menu: { position: 'absolute', left: 40, bottom: 44, gap: 10 },
-  item: { flexDirection: 'row', alignItems: 'center', gap: 14, borderWidth: 1, borderColor: '#3a4160', borderRadius: 10, paddingVertical: 11, paddingHorizontal: 16, backgroundColor: 'rgba(12,16,32,0.72)' },
+  menu: { position: 'absolute', left: 40, bottom: 42, gap: 8 },
+  item: { flexDirection: 'row', alignItems: 'center', gap: 14, borderWidth: 1, borderColor: '#3a4160', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 16, backgroundColor: 'rgba(12,16,32,0.72)' },
   itemBar: { width: 4, alignSelf: 'stretch', borderRadius: 2 },
   itemTxt: { color: '#eef2ff', fontWeight: '900', fontSize: 16, letterSpacing: 2.5 },
   itemSub: { color: '#8fa1c7', fontSize: 11, marginTop: 2, letterSpacing: 0.6 },
   itemArrow: { marginLeft: 'auto', fontSize: 18, fontWeight: '900' },
-  foot: { position: 'absolute', bottom: 16, alignSelf: 'center', color: '#55618a', fontSize: 10, letterSpacing: 1.5 },
+  foot: { position: 'absolute', bottom: 32, alignSelf: 'center', color: '#55618a', fontSize: 10, letterSpacing: 1.5 },
 });

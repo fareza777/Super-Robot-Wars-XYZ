@@ -82,10 +82,10 @@ export function StoryIntro() {
 const styles = StyleSheet.create({
   root: { ...StyleSheet.absoluteFill, backgroundColor: '#03050e', zIndex: 45 },
   captionBg: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 190 },
-  captionWrap: { position: 'absolute', bottom: 42, alignSelf: 'center' },
+  captionWrap: { position: 'absolute', bottom: 56, alignSelf: 'center' },
   epBar: { height: 3, width: 54, backgroundColor: '#ffd34d', marginBottom: 10 },
   caption: { color: '#eef2ff', fontSize: 17, lineHeight: 26, fontWeight: '600', letterSpacing: 0.4, textShadowColor: '#000', textShadowRadius: 6 },
-  dots: { position: 'absolute', bottom: 22, alignSelf: 'center', flexDirection: 'row', gap: 7 },
+  dots: { position: 'absolute', bottom: 34, alignSelf: 'center', flexDirection: 'row', gap: 7 },
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.28)' },
   dotOn: { backgroundColor: '#ffd34d' },
   skip: { position: 'absolute', top: 20, right: 24, padding: 8 },

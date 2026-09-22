@@ -358,7 +358,7 @@ function NamePlate({ unit, hp, side }: { unit: UnitState; hp?: number; side: 'le
   const shown = hp ?? unit.hp;
   const pct = Math.max(0, shown / unit.def.maxHp);
   return (
-    <View style={[styles.plate, side === 'left' ? { left: 14, bottom: 10 } : { right: 14, top: height * 0.68 }]}>
+    <View style={[styles.plate, side === 'left' ? { left: 14, bottom: 26 } : { right: 14, top: height * 0.68 }]}>
       <Image source={PILOT_ART[unit.def.id]} style={styles.plateFace} contentFit="cover" />
       <View style={{ flex: 1 }}>
         <Text style={styles.plateName} numberOfLines={1}>
@@ -773,7 +773,7 @@ const styles = StyleSheet.create({
   impactWrap: { position: 'absolute', top: '30%', left: 0, right: 0, alignItems: 'center' },
   impactTxt: { fontSize: 58, fontWeight: '900', fontStyle: 'italic', textShadowColor: '#000', textShadowRadius: 10 },
   impactSub: { color: '#ffd34d', fontSize: 18, fontWeight: '900', letterSpacing: 5, marginTop: 2 },
-  footer: { position: 'absolute', bottom: 8, alignSelf: 'center' },
+  footer: { position: 'absolute', bottom: 24, alignSelf: 'center' },
   footerTxt: { color: 'rgba(200,214,255,0.7)', fontSize: 11, letterSpacing: 2 },
   skipHint: { position: 'absolute', top: 10, right: 14, backgroundColor: 'rgba(8,12,28,0.55)', borderWidth: 1, borderColor: 'rgba(126,231,255,0.4)', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
   skipTxt: { color: 'rgba(200,214,255,0.75)', fontSize: 10, fontWeight: '800', letterSpacing: 1.5 },

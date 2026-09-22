@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Animated, Easing, PanResponder, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
 import { MECH_ART, TERRAIN_ART } from '../assets';
 import { key, same } from '../game/engine';
@@ -9,6 +9,7 @@ import { Pos, UnitState } from '../game/types';
 const COLS = 14;
 const ROWS = 10;
 const PANEL_W = 237;
+const ZOOM = 1.5; // board rendered larger than viewport so it can be panned by finger
 
 /** One board tile — memoized so the 140-cell grid doesn't re-render on every unit/walk update. */
 const Tile = React.memo(function Tile({
@@ -81,10 +82,39 @@ export function MapGrid() {
   const tapTile = useGame((s) => s.tapTile);
   const { width, height } = useWindowDimensions();
 
-  // grid fills the board area edge-to-edge, no wallpaper behind it
-  const tw = (width - PANEL_W) / COLS;
-  const th = height / ROWS;
+  // viewport is the left area; the board renders ZOOM× bigger and pans on drag
+  const vw = width - PANEL_W;
+  const vh = height;
+  const tw = (vw / COLS) * ZOOM;
+  const th = (vh / ROWS) * ZOOM;
+  const bw = tw * COLS;
+  const bh = th * ROWS;
   const chip = Math.min(tw, th) * 0.9;
+  const maxX = Math.max(0, bw - vw);
+  const maxY = Math.max(0, bh - vh);
+
+  const pan = useRef(new Animated.ValueXY({ x: -maxX / 2, y: -maxY / 2 })).current;
+  const last = useRef({ x: -maxX / 2, y: -maxY / 2 });
+  // re-center when the board/viewport size changes (rotation, resize)
+  useEffect(() => {
+    const c = { x: -maxX / 2, y: -maxY / 2 };
+    last.current = c;
+    pan.setValue(c);
+  }, [maxX, maxY, pan]);
+
+  const clamp = (v: number, m: number) => Math.max(-m, Math.min(0, v));
+  const responder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 8 || Math.abs(g.dy) > 8,
+      onPanResponderMove: (_, g) => {
+        pan.setValue({ x: clamp(last.current.x + g.dx, maxX), y: clamp(last.current.y + g.dy, maxY) });
+      },
+      onPanResponderRelease: (_, g) => {
+        last.current = { x: clamp(last.current.x + g.dx, maxX), y: clamp(last.current.y + g.dy, maxY) };
+        pan.setValue(last.current);
+      },
+    }),
+  ).current;
 
   const tiles = useMemo(() => {
     const t: Pos[] = [];
@@ -95,38 +125,40 @@ export function MapGrid() {
   const ghost = pendingMove && selectedUid ? units.find((u) => u.uid === selectedUid) : undefined;
 
   return (
-    <View style={[styles.board, { width: width - PANEL_W, height }]}>
-      {tiles.map((p) => (
-        <Tile
-          key={key(p)}
-          p={p}
-          tw={tw}
-          th={th}
-          terrain={map.terrain[p.y][p.x]}
-          inMove={moveTiles.has(key(p))}
-          inAtk={attackTiles.has(key(p))}
-          inThreat={threatTiles.has(key(p))}
-          onTap={tapTile}
-        />
-      ))}
-      {units
-        .filter((u) => u.alive)
-        .map((u) => {
-          const walking = walk && walk.uid === u.uid && walk.path.length > 1;
-          if (walking) return <WalkingChip key={u.uid} path={walk!.path} tw={tw} th={th} cell={<UnitCell u={u} chip={chip} ghosting={false} />} />;
-          return (
-            <View key={u.uid} pointerEvents="none" style={[styles.unitWrap, { left: u.pos.x * tw, top: u.pos.y * th, width: tw, height: th }]}>
-              <UnitCell u={u} chip={chip} ghosting={!!ghost && u.uid === ghost.uid} />
+    <View style={[styles.viewPort, { width: vw, height: vh }]} {...responder.panHandlers}>
+      <Animated.View style={{ width: bw, height: bh, transform: pan.getTranslateTransform() }}>
+        {tiles.map((p) => (
+          <Tile
+            key={key(p)}
+            p={p}
+            tw={tw}
+            th={th}
+            terrain={map.terrain[p.y][p.x]}
+            inMove={moveTiles.has(key(p))}
+            inAtk={attackTiles.has(key(p))}
+            inThreat={threatTiles.has(key(p))}
+            onTap={tapTile}
+          />
+        ))}
+        {units
+          .filter((u) => u.alive)
+          .map((u) => {
+            const walking = walk && walk.uid === u.uid && walk.path.length > 1;
+            if (walking) return <WalkingChip key={u.uid} path={walk!.path} tw={tw} th={th} cell={<UnitCell u={u} chip={chip} ghosting={false} />} />;
+            return (
+              <View key={u.uid} pointerEvents="none" style={[styles.unitWrap, { left: u.pos.x * tw, top: u.pos.y * th, width: tw, height: th }]}>
+                <UnitCell u={u} chip={chip} ghosting={!!ghost && u.uid === ghost.uid} />
+              </View>
+            );
+          })}
+        {ghost && pendingMove && !same(ghost.pos, pendingMove) && (
+          <View pointerEvents="none" style={[styles.unitWrap, { left: pendingMove.x * tw, top: pendingMove.y * th, width: tw, height: th, opacity: 0.65 }]}>
+            <View style={[styles.chip, { width: chip, height: chip, borderColor: '#6db4ff' }]}>
+              <Image source={MECH_ART[ghost.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" />
             </View>
-          );
-        })}
-      {ghost && pendingMove && !same(ghost.pos, pendingMove) && (
-        <View pointerEvents="none" style={[styles.unitWrap, { left: pendingMove.x * tw, top: pendingMove.y * th, width: tw, height: th, opacity: 0.65 }]}>
-          <View style={[styles.chip, { width: chip, height: chip, borderColor: '#6db4ff' }]}>
-            <Image source={MECH_ART[ghost.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" />
           </View>
-        </View>
-      )}
+        )}
+      </Animated.View>
     </View>
   );
 }
@@ -158,7 +190,7 @@ function WalkingChip({ path, tw, th, cell }: { path: Pos[]; tw: number; th: numb
 }
 
 const styles = StyleSheet.create({
-  board: { backgroundColor: '#0a0e1a', alignSelf: 'stretch' },
+  viewPort: { backgroundColor: '#0a0e1a', overflow: 'hidden', alignSelf: 'stretch' },
   tile: { position: 'absolute', overflow: 'hidden' },
   gridLine: { ...StyleSheet.absoluteFill, borderWidth: 0.5, borderColor: 'rgba(8,12,24,0.45)' },
   overlay: { ...StyleSheet.absoluteFill },

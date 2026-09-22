@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   sub: { color: '#9fd0ff', fontSize: 10.5, letterSpacing: 1.5, marginTop: 2 },
   back: { position: 'absolute', top: 12, right: 18, zIndex: 5, borderWidth: 1, borderColor: '#3a4160', borderRadius: 8, backgroundColor: 'rgba(8,12,26,0.85)', paddingHorizontal: 12, paddingVertical: 7 },
   backTxt: { color: '#9fd0ff', fontWeight: '800', fontSize: 12, letterSpacing: 1 },
-  cols: { position: 'absolute', top: 56, left: 18, right: 18, bottom: 14, flexDirection: 'row', gap: 14 },
+  cols: { position: 'absolute', top: 56, left: 18, right: 18, bottom: 30, flexDirection: 'row', gap: 14 },
   col: { flex: 1 },
   colTitle: { color: '#8fa0c8', fontWeight: '900', fontSize: 11, letterSpacing: 2.5, marginBottom: 8 },
   mainCard: { borderRadius: 12, borderWidth: 2, borderColor: '#4dff7a', overflow: 'hidden', padding: 16, minHeight: 220 },

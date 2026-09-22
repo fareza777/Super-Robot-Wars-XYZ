@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   chapterTag: { position: 'absolute', top: 18, alignSelf: 'center', borderWidth: 1, borderColor: 'rgba(255,211,77,0.5)', paddingHorizontal: 14, paddingVertical: 4, backgroundColor: 'rgba(5,8,18,0.7)' },
   chapterTxt: { color: '#ffd34d', fontSize: 11, fontWeight: '800', letterSpacing: 3 },
   portrait: { position: 'absolute', borderRadius: 12, overflow: 'hidden', borderWidth: 2, backgroundColor: '#0a0e1e' },
-  box: { position: 'absolute', bottom: 26, alignSelf: 'center', backgroundColor: 'rgba(7,10,22,0.92)', borderWidth: 1.5, borderRadius: 12, padding: 16, paddingTop: 20, minHeight: 110 },
+  box: { position: 'absolute', bottom: 40, alignSelf: 'center', backgroundColor: 'rgba(7,10,22,0.92)', borderWidth: 1.5, borderRadius: 12, padding: 16, paddingTop: 20, minHeight: 110 },
   nameTag: { position: 'absolute', top: -13, left: 14, borderWidth: 1, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 3 },
   nameTxt: { color: '#fff', fontWeight: '900', fontSize: 12, letterSpacing: 1.5 },
   lineTxt: { color: '#eef2ff', fontSize: 16.5, lineHeight: 25, fontWeight: '500' },

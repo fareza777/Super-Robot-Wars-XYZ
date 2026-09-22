@@ -143,6 +143,6 @@ const styles = StyleSheet.create({
   segTxt: { color: '#8fa0c8', fontWeight: '900', fontSize: 11, letterSpacing: 1 },
   danger: { borderWidth: 1.5, borderColor: '#ff5a5a', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 7, backgroundColor: 'rgba(60,10,14,0.6)' },
   dangerTxt: { color: '#ff8a8a', fontWeight: '900', fontSize: 11, letterSpacing: 1.5 },
-  back: { position: 'absolute', bottom: 18, left: 18, borderWidth: 1, borderColor: '#3a4160', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8, backgroundColor: 'rgba(8,12,26,0.9)' },
+  back: { position: 'absolute', bottom: 34, left: 18, borderWidth: 1, borderColor: '#3a4160', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 8, backgroundColor: 'rgba(8,12,26,0.9)' },
   backTxt: { color: '#9fd0ff', fontWeight: '800', fontSize: 12, letterSpacing: 1 },
 });

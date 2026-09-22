@@ -212,7 +212,7 @@ export function SidePanel() {
 }
 
 const styles = StyleSheet.create({
-  panel: { width: 236, backgroundColor: '#12141c', borderLeftWidth: 1, borderLeftColor: '#2a2f42', padding: 7, paddingBottom: 7 },
+  panel: { width: 236, backgroundColor: '#12141c', borderLeftWidth: 1, borderLeftColor: '#2a2f42', padding: 7, paddingBottom: 30 },
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   phaseTxt: { color: '#ffd34d', fontWeight: '800', fontSize: 11.5, letterSpacing: 1 },
   turnTxt: { color: '#9fb0d0', fontWeight: '700', fontSize: 11.5 },
