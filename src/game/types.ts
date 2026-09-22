@@ -18,6 +18,10 @@ export interface WeaponDef {
   hitMod: number; // percentage points
   postMove: boolean; // usable after moving (P weapons)
   animSeed: number; // slight visual variation
+  /** SRW kiai: minimum will required to fire this weapon */
+  willReq?: number;
+  /** MAP weapon: radius in tiles around the aimed tile; hits every unit in the blast (no counters) */
+  mapRange?: number;
 }
 
 export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard';
@@ -80,6 +84,10 @@ export interface UnitState {
   strikeForNextAttack?: boolean;
   valorForNextAttack?: boolean;
   accelThisTurn?: number; // bonus move squares
+  /** SRW kiai/will — 100 base, rises in combat; gates strong weapons, buffs stats */
+  will: number;
+  /** enemies destroyed by this unit this mission (ace tracking) */
+  kills: number;
 }
 
 export interface MapDef {
@@ -95,6 +103,8 @@ export interface MapDef {
   objective: string;
   /** boss units hold position (can still attack in place) until this turn number. */
   bossHoldUntil?: number;
+  /** enemy reinforcement wave: at the start of player turn `turn`, `comp` units spawn on the enemy edge */
+  reinforce?: { turn: number; comp: string[] };
 }
 
 export type Phase =
@@ -125,6 +135,8 @@ export interface GameSettings {
 
 export type ObjectiveType = 'rout' | 'survive' | 'boss';
 
+export type Reaction = 'counter' | 'defend' | 'evade';
+
 export interface AttackResult {
   hit: boolean;
   crit: boolean;
@@ -133,6 +145,10 @@ export interface AttackResult {
   hitChance: number;
   // counter-attack performed by defender, if any
   counter: CounterResult | null;
+  // the defender's chosen reaction (none for MAP weapons)
+  reaction?: Reaction;
+  // extra units hit when the weapon is a MAP weapon (primary target is `defender`)
+  splash?: { uid: string; name: string; hit: boolean; damage: number; destroyed: boolean; hitChance: number }[];
   // human-readable EXP/level-up events for the log
   expEvents: string[];
 }

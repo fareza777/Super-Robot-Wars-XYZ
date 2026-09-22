@@ -1,6 +1,6 @@
 import { ALL_UNITS } from './campaign';
 import { SPIRITS, TERRAIN_INFO } from './data';
-import { AttackResult, MapDef, Pos, SpiritId, Terrain, UnitState, WeaponDef } from './types';
+import { AttackResult, MapDef, Pos, Reaction, SpiritId, Terrain, UnitState, WeaponDef } from './types';
 
 export const key = (p: Pos) => `${p.x},${p.y}`;
 export const same = (a: Pos, b: Pos) => a.x === b.x && a.y === b.y;
@@ -24,6 +24,8 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     moved: false,
     acted: false,
     alive: true,
+    will: 100,
+    kills: 0,
   };
 }
 
@@ -83,8 +85,18 @@ export function movementRange(map: MapDef, units: UnitState[], u: UnitState): Ma
 }
 
 export function usableWeapons(u: UnitState): WeaponDef[] {
-  return u.def.weapons.filter((w) => u.en >= w.enCost && (w.ammo == null || (u.ammo[w.id] ?? 0) > 0));
+  return u.def.weapons.filter((w) => u.en >= w.enCost && (w.ammo == null || (u.ammo[w.id] ?? 0) > 0) && u.will >= (w.willReq ?? 0));
 }
+
+/** Will (kiai) scaling — every point above 100 fights harder. */
+export const MAX_WILL = 150;
+export const willDmgMult = (u: UnitState) => 1 + Math.max(0, u.will - 100) * 0.001; // +5% at 150
+export const willHitBonus = (u: UnitState) => Math.max(0, u.will - 100) * 0.1; // +5% at 150
+export const willEvade = (u: UnitState) => Math.max(0, u.will - 100) * 0.2; // +10 evade at 150
+export const willArmor = (u: UnitState) => Math.max(0, u.will - 100) * 8; // +400 armor at 150
+export const willGain = (u: UnitState, n: number) => {
+  u.will = Math.max(100, Math.min(MAX_WILL, u.will + n));
+};
 
 /** Weapons that can attack `target` from `from`. postMove=false weapons require !moved. */
 export function weaponsAgainst(u: UnitState, from: Pos, target: UnitState, moved: boolean): WeaponDef[] {
@@ -107,12 +119,12 @@ export function attackTiles(map: MapDef, from: Pos, w: WeaponDef): Pos[] {
 
 function evadeOf(u: UnitState, map: MapDef): number {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
-  return u.def.mobility + u.def.pilot.evade + (u.level - 1) * 2 + t.eva + (u.focusUntilEndOfEnemyPhase ? 30 : 0);
+  return u.def.mobility + u.def.pilot.evade + (u.level - 1) * 2 + t.eva + (u.focusUntilEndOfEnemyPhase ? 30 : 0) + willEvade(u);
 }
 
 function armorOf(u: UnitState, map: MapDef): number {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
-  return u.def.armor + (u.level - 1) * 40 + t.def + (u.gritUntilEndOfEnemyPhase ? 400 : 0);
+  return u.def.armor + (u.level - 1) * 40 + t.def + (u.gritUntilEndOfEnemyPhase ? 400 : 0) + willArmor(u);
 }
 
 function statFor(u: UnitState, w: WeaponDef): number {
@@ -127,7 +139,7 @@ export const NO_MODS: CombatMods = { hitBonus: 0, dmgMult: 1 };
 
 export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, hitBonus = 0): number {
   if (att.strikeForNextAttack) return 100;
-  const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus - evadeOf(def, map) * 0.55;
+  const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus + willHitBonus(att) - evadeOf(def, map) * 0.55;
   return Math.max(10, Math.min(100, Math.round(raw)));
 }
 
@@ -137,7 +149,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (crit) dmg = Math.round(dmg * 1.3);
   if (att.valorForNextAttack) dmg = Math.round(dmg * 1.5);
   if (def.guardUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.5);
-  return Math.round(dmg * dmgMult);
+  return Math.round(dmg * dmgMult * willDmgMult(att));
 }
 
 const rnd = () => Math.random() * 100;
@@ -160,17 +172,32 @@ function resolveHit(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, m
   return { hit, crit, damage, hitChance: hc, destroyed: def.hp - damage <= 0 };
 }
 
-function bestCounterWeapon(def: UnitState, attPos: Pos): WeaponDef | undefined {
-  const opts = usableWeapons(def).filter((w) => dist(def.pos, attPos) >= w.rangeMin && dist(def.pos, attPos) <= w.rangeMax);
+export function bestCounterWeapon(def: UnitState, attPos: Pos): WeaponDef | undefined {
+  const opts = usableWeapons(def).filter((w) => dist(def.pos, attPos) >= w.rangeMin && dist(def.pos, attPos) <= w.rangeMax && !w.mapRange);
   opts.sort((a, b) => b.power - a.power);
   return opts[0];
 }
 
+/** The AI's defender reaction: defend when a hit would destroy it (unless its counter would kill first), else counter. */
+export function aiPickReaction(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef): Reaction {
+  const hc = hitChance(att, def, w, map);
+  const dmg = damageOf(att, def, w, map, false);
+  const wouldDie = def.hp - Math.round(dmg) <= 0;
+  const cw = bestCounterWeapon(def, att.pos);
+  if (wouldDie) {
+    const counterKills = cw && def.hp - 0 >= 0 ? damageOf(def, att, cw, map, false) >= att.hp : false;
+    if (counterKills) return 'counter';
+    return hc >= 45 ? 'defend' : 'evade';
+  }
+  return cw ? 'counter' : 'evade';
+}
+
 /** Resolve a full attack including a possible single counter-attack. Pure-ish: mutates nothing, returns result. */
-export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, attMods: CombatMods = NO_MODS, defMods: CombatMods = NO_MODS): AttackResult {
-  const first = resolveHit(att, def, w, map, attMods);
+export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, attMods: CombatMods = NO_MODS, defMods: CombatMods = NO_MODS, reaction: Reaction = 'counter'): AttackResult {
+  const first = resolveHit(att, def, w, map, reaction === 'evade' ? { ...attMods, hitBonus: attMods.hitBonus - 30 } : attMods);
+  if (reaction === 'defend' && first.hit) first.damage = Math.round(first.damage * 0.5);
   let counter: AttackResult['counter'] = null;
-  if (!first.destroyed) {
+  if (!first.destroyed && reaction === 'counter') {
     // defender counter with its strongest in-range weapon (even if it "acted")
     const cw = bestCounterWeapon(def, att.pos);
     if (cw) {
@@ -178,7 +205,36 @@ export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map
       counter = { weapon: cw, ...c };
     }
   }
-  return { hit: first.hit, crit: first.crit, damage: first.damage, destroyed: first.destroyed, hitChance: first.hitChance, counter, expEvents: [] };
+  return { hit: first.hit, crit: first.crit, damage: first.damage, destroyed: first.destroyed, hitChance: first.hitChance, counter, reaction, expEvents: [] };
+}
+
+/** Tiles inside a MAP weapon's blast centered at `center`. */
+export function mapBlastTiles(map: MapDef, center: Pos, radius: number): Pos[] {
+  const out: Pos[] = [];
+  for (let y = Math.max(0, center.y - radius); y <= Math.min(map.rows - 1, center.y + radius); y++)
+    for (let x = Math.max(0, center.x - radius); x <= Math.min(map.cols - 1, center.x + radius); x++)
+      if (dist(center, { x, y }) <= radius) out.push({ x, y });
+  return out;
+}
+
+/** Resolve a MAP weapon: every unit in the blast takes an independent hit roll; nobody counters. */
+export function simulateMapAttack(att: UnitState, targets: UnitState[], w: WeaponDef, map: MapDef, attMods: CombatMods = NO_MODS): AttackResult {
+  const result: AttackResult = { hit: false, crit: false, damage: 0, destroyed: false, hitChance: 0, counter: null, splash: [], expEvents: [] };
+  if (!targets.length) return result;
+  // primary target = the first (store picks the closest/most damaged one as scene's defender)
+  targets.forEach((t, i) => {
+    const r = resolveHit(att, t, w, map, attMods);
+    if (i === 0) {
+      result.hit = r.hit;
+      result.crit = r.crit;
+      result.damage = r.damage;
+      result.destroyed = r.destroyed;
+      result.hitChance = r.hitChance;
+    } else {
+      result.splash!.push({ uid: t.uid, name: t.def.name, hit: r.hit, damage: r.damage, destroyed: r.destroyed, hitChance: r.hitChance });
+    }
+  });
+  return result;
 }
 
 // ---------- Store-level actions (pure functions on state slices) ----------
@@ -189,24 +245,30 @@ export interface GameState {
   turn: number;
 }
 
-export function applyAttack(state: GameState, attackerUid: string, defenderUid: string, weaponId: string, mods?: (u: UnitState) => CombatMods): { state: GameState; result: AttackResult } {
+export function applyAttack(state: GameState, attackerUid: string, defenderUid: string, weaponId: string, mods?: (u: UnitState) => CombatMods, reaction: Reaction = 'counter'): { state: GameState; result: AttackResult } {
   const units = state.units.map((u) => ({ ...u, ammo: { ...u.ammo } }));
   const att = units.find((u) => u.uid === attackerUid)!;
   const def = units.find((u) => u.uid === defenderUid)!;
   const w = att.def.weapons.find((x) => x.id === weaponId)!;
-  const result = simulateAttack(att, def, w, state.map, mods ? mods(att) : NO_MODS, mods ? mods(def) : NO_MODS);
+  const result = simulateAttack(att, def, w, state.map, mods ? mods(att) : NO_MODS, mods ? mods(def) : NO_MODS, reaction);
 
   att.en = Math.max(0, att.en - w.enCost);
   if (w.ammo != null) att.ammo[w.id] = (att.ammo[w.id] ?? 0) - 1;
   if (result.hit) def.hp = Math.max(0, def.hp - result.damage);
-  if (result.destroyed) def.alive = false;
+  if (result.destroyed) {
+    def.alive = false;
+    att.kills += 1;
+  }
 
   if (result.counter) {
     const cw = result.counter.weapon;
     def.en = Math.max(0, def.en - cw.enCost);
     if (cw.ammo != null) def.ammo[cw.id] = (def.ammo[cw.id] ?? 0) - 1;
     if (result.counter.hit) att.hp = Math.max(0, att.hp - result.counter.damage);
-    if (result.counter.destroyed) att.alive = false;
+    if (result.counter.destroyed) {
+      att.alive = false;
+      def.kills += 1;
+    }
   }
 
   att.moved = true;
@@ -214,10 +276,52 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   att.strikeForNextAttack = false;
   att.valorForNextAttack = false;
 
+  // Will: +1 for engaging, +1 for taking a hit, +4 per kill
+  willGain(att, 1 + (result.counter?.hit ? 1 : 0) + (result.destroyed ? 4 : 0));
+  willGain(def, (result.hit ? 1 : 0) + (result.counter?.hit ? 1 : 0) + (result.counter?.destroyed ? 4 : 0));
+
   // EXP: +30 for a landed hit, +70 for a kill (counter kills award the countering unit)
   result.expEvents = [];
   if (result.hit) awardExp(att, result.destroyed ? 70 : 30, result.expEvents);
   if (result.counter?.hit) awardExp(def, result.counter.destroyed ? 70 : 25, result.expEvents);
+  return { state: { ...state, units }, result };
+}
+
+/** Apply a MAP weapon blast — same bookkeeping as applyAttack but across every unit in the blast. */
+export function applyMapAttack(state: GameState, attackerUid: string, targetTile: Pos, weaponId: string, mods?: (u: UnitState) => CombatMods): { state: GameState; result: AttackResult } {
+  const units = state.units.map((u) => ({ ...u, ammo: { ...u.ammo } }));
+  const att = units.find((u) => u.uid === attackerUid)!;
+  const w = att.def.weapons.find((x) => x.id === weaponId)!;
+  const inBlast = units.filter((u) => u.alive && u.uid !== att.uid && dist(u.pos, targetTile) <= (w.mapRange ?? 0));
+  // primary target = the unit closest to the aim point (the scene shows it as the defender)
+  inBlast.sort((a, b) => dist(a.pos, targetTile) - dist(b.pos, targetTile));
+  const result = simulateMapAttack(att, inBlast, w, state.map, mods ? mods(att) : NO_MODS);
+
+  att.en = Math.max(0, att.en - w.enCost);
+  if (w.ammo != null) att.ammo[w.id] = (att.ammo[w.id] ?? 0) - 1;
+  att.moved = true;
+  att.acted = true;
+  att.strikeForNextAttack = false;
+  att.valorForNextAttack = false;
+
+  let hits = 0;
+  let kills = 0;
+  inBlast.forEach((t, i) => {
+    const r = i === 0 ? { hit: result.hit, damage: result.damage, destroyed: result.destroyed } : result.splash![i - 1];
+    if (r.hit) {
+      t.hp = Math.max(0, t.hp - r.damage);
+      willGain(t, 1);
+      hits++;
+      if (r.destroyed) {
+        t.alive = false;
+        att.kills += 1;
+        kills++;
+      }
+    }
+  });
+  willGain(att, 1 + kills * 4);
+  result.expEvents = [];
+  if (hits > 0) awardExp(att, 30 + kills * 40 + (hits - 1) * 15, result.expEvents);
   return { state: { ...state, units }, result };
 }
 

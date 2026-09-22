@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ITEMS } from '../game/campaign';
 import { SPIRITS } from '../game/data';
 import { bondMods } from '../game/bonds';
-import { damageOf, hitChance, key, terrainDesc, weaponsAgainst } from '../game/engine';
+import { bestCounterWeapon, damageOf, hitChance, key, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, useGame } from '../game/store';
 import { SpiritId } from '../game/types';
 
@@ -65,7 +65,9 @@ export function SidePanel() {
             <Bar label="HP" val={unit.hp} max={unit.def.maxHp} color="#4dff7a" />
             <Bar label="EN" val={unit.en} max={unit.def.maxEn} color="#4db4ff" />
             <Bar label="SP" val={unit.sp} max={unit.def.pilot.maxSp} color="#ffb84d" />
+            <Bar label="WILL" val={unit.will} max={150} color="#ff7a9d" />
             <Bar label="EXP" val={unit.exp} max={100} color="#c9a0ff" />
+            <Text style={styles.killsLine}>KILLS {unit.kills} · WILL {unit.will > 100 ? `+${unit.will - 100}% spirit` : 'calm'}</Text>
             <Text style={styles.terrainLine}>{terrainDesc(s.map, unit.pos)}</Text>
           </View>
         )}
@@ -79,12 +81,14 @@ export function SidePanel() {
               const noEn = unit.en < w.enCost;
               const noAmmo = ammoLeft != null && ammoLeft <= 0;
               const noPost = !w.postMove && s.pendingMovedFlag;
-              const hitsAny = s.units.some(
-                (e) => e.alive && e.side === 'enemy' && weaponsAgainst(unit, s.pendingMove!, e, s.pendingMovedFlag).some((x) => x.id === w.id),
-              );
-              const disabled = noEn || noAmmo || noPost || !hitsAny;
-              const reason = noEn ? 'NEED EN' : noAmmo ? 'NO AMMO' : noPost ? 'CAN\'T AFTER MOVE' : !hitsAny ? 'NO TARGET' : null;
-              const stat = `POW ${w.power} · R${w.rangeMin}-${w.rangeMax}${w.ammo != null ? ` · ×${ammoLeft}` : ` · EN ${w.enCost}`}`;
+              const noWill = (w.willReq ?? 0) > unit.will;
+              const hitsAny =
+                w.mapRange != null
+                  ? true // any tile in range is aim-able; the blast may still catch foes
+                  : s.units.some((e) => e.alive && e.side === 'enemy' && weaponsAgainst(unit, s.pendingMove!, e, s.pendingMovedFlag).some((x) => x.id === w.id));
+              const disabled = noEn || noAmmo || noPost || noWill || !hitsAny;
+              const reason = noEn ? 'NEED EN' : noAmmo ? 'NO AMMO' : noPost ? 'CAN\'T AFTER MOVE' : noWill ? `NEED WILL ${w.willReq}` : !hitsAny ? 'NO TARGET' : null;
+              const stat = `POW ${w.power} · R${w.rangeMin}-${w.rangeMax}${w.mapRange != null ? ` · AREA ${w.mapRange}` : ''}${w.willReq ? ` · W${w.willReq}` : ''}${w.ammo != null ? ` · ×${ammoLeft}` : ` · EN ${w.enCost}`}`;
               return (
                 <Btn
                   key={w.id}
@@ -116,31 +120,43 @@ export function SidePanel() {
             <Text style={styles.menuTitle}>
               {s.pendingWeapon.name} · POW {s.pendingWeapon.power}
             </Text>
-            <Text style={styles.hint}>Pick a target — or tap one on the map</Text>
-            {s.units
-              .filter((e) => e.alive && e.side === 'enemy' && s.attackTiles.has(key(e.pos)))
-              .map((e) => {
-                const bm = bondMods(s.bonds, s.units, unit);
-                const hc = hitChance(unit, e, s.pendingWeapon!, s.map, bm.hitBonus);
-                const dmg = damageOf(unit, e, s.pendingWeapon!, s.map, false, bm.dmgMult);
-                const kill = e.hp - dmg <= 0;
-                return (
-                  <TouchableOpacity key={e.uid} onPress={() => s.chooseTarget(e.uid)} style={[styles.tgtRow, kill && styles.tgtRowKill]}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.tgtName} numberOfLines={1}>
-                        {e.def.name} {e.def.boss ? '★' : ''}
-                      </Text>
-                      <Text style={styles.tgtHp}>
-                        HP {e.hp}/{e.def.maxHp}
-                      </Text>
-                    </View>
-                    <View style={styles.tgtHitBox}>
-                      <Text style={[styles.tgtHit, hc >= 80 ? { color: '#4dff7a' } : hc >= 55 ? { color: '#ffd34d' } : { color: '#ff8a5a' }]}>{hc}%</Text>
-                      <Text style={styles.tgtDmg}>{kill ? 'DESTROY' : `~${dmg}`}</Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
+            {s.pendingWeapon.mapRange != null ? (
+              <Text style={styles.hint}>AREA WEAPON — tap a highlighted tile to drop the blast (hits every unit in radius {s.pendingWeapon.mapRange}, allies included!)</Text>
+            ) : (
+              <>
+                <Text style={styles.hint}>Pick a target — or tap one on the map</Text>
+                {s.units
+                  .filter((e) => e.alive && e.side === 'enemy' && s.attackTiles.has(key(e.pos)))
+                  .map((e) => {
+                    const bm = bondMods(s.bonds, s.units, unit);
+                    const hc = hitChance(unit, e, s.pendingWeapon!, s.map, bm.hitBonus);
+                    const dmg = damageOf(unit, e, s.pendingWeapon!, s.map, false, bm.dmgMult);
+                    const kill = e.hp - dmg <= 0;
+                    const cw = bestCounterWeapon(e, s.pendingMove!);
+                    const cDmg = cw ? damageOf(e, unit, cw, s.map, false) : 0;
+                    const cHc = cw ? hitChance(e, unit, cw, s.map) : 0;
+                    return (
+                      <TouchableOpacity key={e.uid} onPress={() => s.chooseTarget(e.uid)} style={[styles.tgtRow, kill && styles.tgtRowKill]}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.tgtName} numberOfLines={1}>
+                            {e.def.name} {e.def.boss ? '★' : ''}
+                          </Text>
+                          <Text style={styles.tgtHp}>
+                            HP {e.hp}/{e.def.maxHp} · WILL {e.will}
+                          </Text>
+                          <Text style={styles.tgtCnt} numberOfLines={1}>
+                            {cw ? `↩ CNT ~${cDmg} (${cHc}%)` : '↩ no counter in range'}
+                          </Text>
+                        </View>
+                        <View style={styles.tgtHitBox}>
+                          <Text style={[styles.tgtHit, hc >= 80 ? { color: '#4dff7a' } : hc >= 55 ? { color: '#ffd34d' } : { color: '#ff8a5a' }]}>{hc}%</Text>
+                          <Text style={styles.tgtDmg}>{kill ? 'DESTROY' : `~${dmg}`}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+              </>
+            )}
             <Btn label="BACK" onPress={() => useGame.setState({ pendingWeapon: null, attackTiles: new Set() })} accent="#666" />
           </View>
         )}
@@ -174,6 +190,7 @@ export function SidePanel() {
             </View>
             <Bar label="HP" val={inspect.hp} max={inspect.def.maxHp} color="#ff5a5a" />
             <Bar label="EN" val={inspect.en} max={inspect.def.maxEn} color="#4db4ff" />
+            <Bar label="WILL" val={inspect.will} max={150} color="#ff7a9d" />
             <View style={styles.statRow}>
               <Text style={styles.statTxt}>ARM {inspect.def.armor}</Text>
               <Text style={styles.statTxt}>MOB {inspect.def.mobility}</Text>
@@ -182,6 +199,8 @@ export function SidePanel() {
             {inspect.def.weapons.map((w) => (
               <Text key={w.id} style={styles.weapLine} numberOfLines={1}>
                 ⚔ {w.name} · POW {w.power} · R{w.rangeMin}-{w.rangeMax}
+                {w.mapRange != null ? ` · AREA ${w.mapRange}` : ''}
+                {w.willReq ? ` · W${w.willReq}` : ''}
                 {w.ammo != null ? ` · ×${inspect.ammo[w.id] ?? 0}` : ` · EN ${w.enCost}`}
               </Text>
             ))}
@@ -247,6 +266,8 @@ const styles = StyleSheet.create({
   endTurn: { marginTop: 6, borderWidth: 1, borderColor: '#ffd34d', borderRadius: 6, paddingVertical: 7, alignItems: 'center', backgroundColor: '#26251a' },
   endTurnTxt: { color: '#ffd34d', fontWeight: '900', fontSize: 11, letterSpacing: 1 },
   terrainLine: { color: '#7fd4a8', fontSize: 8.5, marginTop: 4, fontWeight: '700' },
+  killsLine: { color: '#ff9dbb', fontSize: 8.5, marginTop: 3, fontWeight: '700' },
+  tgtCnt: { color: '#ff9d8a', fontSize: 8.5, marginTop: 1, fontWeight: '700' },
   inspectCard: { borderWidth: 1, borderColor: '#ff6b6b' },
   statRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 },
   statTxt: { color: '#c9a0ff', fontSize: 9, fontWeight: '700' },

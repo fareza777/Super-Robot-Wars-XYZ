@@ -31,6 +31,7 @@ function EnemyBanner() {
 export default function App() {
   const phase = useGame((s) => s.phase);
   const battle = useGame((s) => s.battle);
+  const notice = useGame((s) => s.notice);
   const loadSave = useGame((s) => s.loadSave);
 
   useEffect(() => {
@@ -67,6 +68,7 @@ export default function App() {
           <MapGrid />
           <SidePanel />
           {phase === 'enemy' && <EnemyBanner />}
+          {!!notice && <NoticeBanner text={notice} />}
         </View>
       )}
       {phase === 'victory' && <EndScreen victory />}
@@ -77,7 +79,26 @@ export default function App() {
   );
 }
 
+/** Transient map banner — reinforcement arrivals and other events. */
+function NoticeBanner({ text }: { text: string }) {
+  const v = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.sequence([
+      Animated.timing(v, { toValue: 1, duration: 260, useNativeDriver: true }),
+      Animated.timing(v, { toValue: 1, duration: 1900, useNativeDriver: true }),
+      Animated.timing(v, { toValue: 0, duration: 400, useNativeDriver: true }),
+    ]).start();
+  }, []);
+  return (
+    <Animated.View style={[styles.noticeBanner, { opacity: v, transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [-18, 0] }) }] }]}>
+      <Text style={styles.noticeTxt}>{text}</Text>
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
+  noticeBanner: { position: 'absolute', top: '12%', left: 0, right: 240, alignItems: 'center', backgroundColor: 'rgba(150,50,10,0.72)', borderTopWidth: 1, borderBottomWidth: 1, borderColor: '#ff8a3a', paddingVertical: 10, zIndex: 45 },
+  noticeTxt: { color: '#ffd8b0', fontSize: 20, fontWeight: '900', letterSpacing: 5, fontStyle: 'italic' },
   root: { flex: 1, backgroundColor: '#05070f' },
   gameRow: { flex: 1, flexDirection: 'row' },
   enemyBanner: {

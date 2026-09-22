@@ -41,6 +41,7 @@ export function HomeMenu() {
   const replayStory = useGame((s) => s.replayStory);
   const hasSave = useGame((s) => s.hasSave);
   const chapter = useGame((s) => s.chapter);
+  const ngPlus = useGame((s) => s.ngPlus);
   const nextCh = chapterOf(chapter);
   const { width, height } = useWindowDimensions();
 
@@ -72,7 +73,7 @@ export function HomeMenu() {
       <View style={[styles.menu, { width: menuW }]}>
         {hasSave ? (
           <>
-            <MenuItem label="CONTINUE CAMPAIGN" sub={chapter >= CHAPTERS_COUNT ? 'Campaign complete' : `Chapter ${nextCh.id} — ${nextCh.name}`} accent="#4dff7a" delay={150} onPress={gotoHq} />
+            <MenuItem label="CONTINUE CAMPAIGN" sub={chapter >= CHAPTERS_COUNT ? 'Campaign complete' : `Chapter ${nextCh.id} — ${nextCh.name}${ngPlus ? ` · NG+ ${ngPlus}` : ''}`} accent="#4dff7a" delay={150} onPress={gotoHq} />
             <MenuItem label="NEW CAMPAIGN" sub="Restart from Chapter 1 (erases save)" accent="#ff8a5c" delay={200} onPress={newCampaign} />
           </>
         ) : (
@@ -82,7 +83,7 @@ export function HomeMenu() {
         <MenuItem label="SETTINGS" sub="Battle animation · speed · sound · music" accent="#9dffa0" delay={410} onPress={useGame.getState().gotoSettings} />
       </View>
 
-      <Text style={styles.foot}>v1.1.0 · original mecha tactics · not affiliated with Bandai Namco</Text>
+      <Text style={styles.foot}>v1.3.0 · original mecha tactics · not affiliated with Bandai Namco</Text>
     </View>
   );
 }

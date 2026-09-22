@@ -21,14 +21,15 @@ export const WEAPONS = {
   missilePods: W({ id: 'missile_pods', name: 'Missile Pods', kind: 'missile', power: 1500, rangeMin: 2, rangeMax: 6, enCost: 0, ammo: 8, hitMod: -5, postMove: true, animSeed: 3 }),
   gatling: W({ id: 'gatling', name: 'Arm Gatling', kind: 'gun', power: 1200, rangeMin: 1, rangeMax: 3, enCost: 0, ammo: 20, hitMod: 10, postMove: true, animSeed: 4 }),
   plasmaEdge: W({ id: 'plasma_edge', name: 'Plasma Edge', kind: 'melee', power: 2900, rangeMin: 1, rangeMax: 2, enCost: 15, ammo: null, hitMod: 10, postMove: true, animSeed: 5 }),
-  megaBeam: W({ id: 'mega_beam', name: 'Mega Beam Launcher', kind: 'beam', power: 3400, rangeMin: 3, rangeMax: 7, enCost: 40, ammo: null, hitMod: -15, postMove: false, animSeed: 6 }),
+  megaBeam: W({ id: 'mega_beam', name: 'Mega Beam Launcher', kind: 'beam', power: 3400, rangeMin: 3, rangeMax: 7, enCost: 40, ammo: null, hitMod: -15, postMove: false, animSeed: 6, willReq: 115 }),
   vulcan: W({ id: 'vulcan', name: 'Head Vulcan', kind: 'gun', power: 800, rangeMin: 1, rangeMax: 2, enCost: 0, ammo: 30, hitMod: 25, postMove: true, animSeed: 7 }),
   railgun: W({ id: 'railgun', name: 'Linear Railgun', kind: 'gun', power: 2600, rangeMin: 2, rangeMax: 6, enCost: 20, ammo: 10, hitMod: 0, postMove: true, animSeed: 8 }),
   heatRod: W({ id: 'heat_rod', name: 'Heat Rod', kind: 'melee', power: 2100, rangeMin: 1, rangeMax: 2, enCost: 8, ammo: null, hitMod: 10, postMove: true, animSeed: 9 }),
-  chestBlaster: W({ id: 'chest_blaster', name: 'Chest Blaster', kind: 'beam', power: 3100, rangeMin: 1, rangeMax: 4, enCost: 30, ammo: null, hitMod: -5, postMove: false, animSeed: 10 }),
+  chestBlaster: W({ id: 'chest_blaster', name: 'Chest Blaster', kind: 'beam', power: 3100, rangeMin: 1, rangeMax: 4, enCost: 30, ammo: null, hitMod: -5, postMove: false, animSeed: 10, willReq: 115 }),
+  mapBuster: W({ id: 'map_buster', name: 'MAP: Buster Mortar', kind: 'missile', power: 2200, rangeMin: 2, rangeMax: 5, enCost: 0, ammo: 3, hitMod: -10, postMove: false, animSeed: 14, willReq: 110, mapRange: 1 }),
   punch: W({ id: 'punch', name: 'Rocket Punch', kind: 'melee', power: 1900, rangeMin: 1, rangeMax: 3, enCost: 10, ammo: null, hitMod: 10, postMove: true, animSeed: 11 }),
   drillLancer: W({ id: 'drill_lancer', name: 'Drill Lancer', kind: 'melee', power: 2700, rangeMin: 1, rangeMax: 1, enCost: 12, ammo: null, hitMod: 5, postMove: true, animSeed: 12 }),
-  funnelArray: W({ id: 'funnel_array', name: 'Funnel Array', kind: 'funnel', power: 2800, rangeMin: 2, rangeMax: 6, enCost: 25, ammo: null, hitMod: 10, postMove: false, animSeed: 13 }),
+  funnelArray: W({ id: 'funnel_array', name: 'Funnel Array', kind: 'funnel', power: 2800, rangeMin: 2, rangeMax: 6, enCost: 25, ammo: null, hitMod: 10, postMove: false, animSeed: 13, willReq: 115 }),
 };
 
 // ---------- Pilots ----------
@@ -52,7 +53,7 @@ export const UNITS: Record<string, UnitDef> = {
   // --- player squad ---
   valstray: U({ id: 'valstray', name: 'Valstray', title: 'X-Face Vanguard', color: '#2f6fd0', accent: '#9fd0ff', maxHp: 5800, maxEn: 140, armor: 1050, mobility: 118, moveRange: 6, moveType: 'land', weapons: [WEAPONS.beamSaber, WEAPONS.photonRifle, WEAPONS.missilePods], pilot: PILOTS.ray }),
   arielis: U({ id: 'arielis', name: 'Arielis', title: 'X-Face Sniper', color: '#38b6c9', accent: '#c8f6ff', maxHp: 4600, maxEn: 160, armor: 900, mobility: 132, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.photonRifle, WEAPONS.vulcan], pilot: PILOTS.mira }),
-  gruntborg: U({ id: 'gruntborg', name: 'Grunborg', title: 'Y-Face Heavy', color: '#c94f4f', accent: '#ffd0c0', maxHp: 7200, maxEn: 110, armor: 1400, mobility: 92, moveRange: 5, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.railgun, WEAPONS.gatling], pilot: PILOTS.gara }),
+  gruntborg: U({ id: 'gruntborg', name: 'Grunborg', title: 'Y-Face Heavy', color: '#c94f4f', accent: '#ffd0c0', maxHp: 7200, maxEn: 110, armor: 1400, mobility: 92, moveRange: 5, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.railgun, WEAPONS.gatling, WEAPONS.mapBuster], pilot: PILOTS.gara }),
   zephyra: U({ id: 'zephyra', name: 'Zephyra', title: 'Z-Face Duelist', color: '#5fbf62', accent: '#d8ffd8', maxHp: 5400, maxEn: 150, armor: 1000, mobility: 126, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.chestBlaster, WEAPONS.vulcan], pilot: PILOTS.orin }),
   // --- enemy ---
   zolda: U({ id: 'zolda', name: 'Zolda', title: 'Imperial Mass Unit', color: '#6b6f7a', accent: '#c9ccd6', maxHp: 3800, maxEn: 100, armor: 850, mobility: 88, moveRange: 5, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod], pilot: PILOTS.grunt }),
@@ -131,4 +132,5 @@ export const MISSION_SSS: MapDef = {
     { defId: 'kargan', pos: { x: 12, y: 1 } }, // far corner + boss hold: not attackable turn 1
   ],
   bossHoldUntil: 3, // Kargan Rex holds position until turn 3
+  reinforce: { turn: 4, comp: ['zolda', 'zolda', 'zoldaAir'] },
 };

@@ -4,6 +4,8 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART, DEFEAT_BARK, KIND_SFX, MECH_ART, PILOT_ART, SUBTITLES, UNIT_BARK, UNIT_DEFEAT_VOICE, UNIT_VOICE } from '../assets';
 import { play } from '../audio';
+import { bondMods } from '../game/bonds';
+import { bestCounterWeapon, damageOf, hitChance } from '../game/engine';
 import { useGame } from '../game/store';
 import { AttackResult, CounterResult, UnitState, WeaponDef } from '../game/types';
 
@@ -44,6 +46,7 @@ export function BattleScene() {
   const atk = battle?.attacker;
   const def = battle?.defender;
   const hasCounter = !!battle?.result.counter && !battle.result.destroyed;
+  const needsReaction = !!battle?.needsReaction;
 
   // stage driver
   useEffect(() => {
@@ -64,7 +67,7 @@ export function BattleScene() {
   }, [battle]);
 
   useEffect(() => {
-    if (!battle) return;
+    if (!battle || battle.needsReaction) return; // wait for the player's defender reaction pick
     const timers: ReturnType<typeof setTimeout>[] = [];
     const go = (ms: number, st: number) => timers.push(setTimeout(() => setStage(st), ms));
     go(DUR.intro, 1);
@@ -84,7 +87,7 @@ export function BattleScene() {
 
   // audio + cut-ins + motion on attack stages
   useEffect(() => {
-    if (!battle) return;
+    if (!battle || battle.needsReaction) return;
     if (stage === 2) {
       const vk = UNIT_VOICE[battle.attacker.def.id]?.[0];
       if (vk) play(vk);
@@ -109,7 +112,7 @@ export function BattleScene() {
 
   // damage counter + shake + flash on impact stages
   useEffect(() => {
-    if (!battle) return;
+    if (!battle || battle.needsReaction) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
     if (stage === 3) {
       const r = battle.result;
@@ -213,6 +216,28 @@ export function BattleScene() {
         {counterActive && <PilotCutIn key="def" unit={def} side="right" />}
       </Animated.View>
 
+      {/* SRW boss WARNING card — first engagement this mission */}
+      {!!battle.warning && (battle.needsReaction || stage <= 1) && <WarningCard text={battle.warning} />}
+
+      {/* defender reaction prompt — the player picks how to answer the incoming attack */}
+      {battle.needsReaction && <ReactionBar attacker={atk} defender={def} weapon={battle.weapon} />}
+
+      {/* reaction banners for AI-chosen defend/evade */}
+      {!battle.needsReaction && stage <= 2 && battle.result.reaction === 'defend' && <Banner text="DEFEND" color="#7ee7ff" />}
+      {!battle.needsReaction && stage <= 2 && battle.result.reaction === 'evade' && <Banner text="EVADE" color="#b6ff9d" />}
+
+      {/* MAP weapon blast list */}
+      {!!battle.result.splash?.length && stage >= 2 && stage <= 4 && (
+        <View style={styles.splashBox} pointerEvents="none">
+          <Text style={styles.splashTitle}>MAP BLAST — {battle.result.splash.length + 1} HIT ZONES</Text>
+          {battle.result.splash.map((sp) => (
+            <Text key={sp.uid} style={styles.splashLine} numberOfLines={1}>
+              {sp.name} · {sp.hit ? `${sp.damage}${sp.destroyed ? ' DESTROYED' : ''}` : 'MISSED'}
+            </Text>
+          ))}
+        </View>
+      )}
+
       {/* name plates — own their damage count-up state so ticks don't re-render the scene */}
       <HitPlate unit={def} after={battle.defenderAfter} side="right" active={stage === 3} result={battle.result} />
       <CounterPlate unit={atk} after={battle.attackerAfter} side="left" active={stage === 5} result={battle.result.counter} />
@@ -226,13 +251,15 @@ export function BattleScene() {
       {stage === 5 && battle.result.counter?.hit && battle.result.counter.destroyed && <Explosion w={width} h={height} />}
 
       {/* footer */}
-      <View style={styles.footer}>
-        <Text style={styles.footerTxt}>
-          {battle.weapon.name} · HIT {battle.result.hitChance}% · POW {battle.weapon.power}
-        </Text>
-      </View>
+      {!battle.needsReaction && (
+        <View style={styles.footer}>
+          <Text style={styles.footerTxt}>
+            {battle.weapon.name} · HIT {battle.result.hitChance}% · POW {battle.weapon.power}
+          </Text>
+        </View>
+      )}
       <View style={styles.skipHint} pointerEvents="none">
-        <Text style={styles.skipTxt}>TAP TO SKIP ▸▸</Text>
+        <Text style={styles.skipTxt}>{battle.needsReaction ? 'CHOOSE YOUR REACTION' : 'TAP TO SKIP ▸▸'}</Text>
       </View>
       </Animated.View>
     </Pressable>
@@ -798,8 +825,85 @@ function SpeedLines({ fromLeft }: { fromLeft: boolean }) {
   );
 }
 
+/** SRW boss encounter WARNING — flashes over the intro before the first exchange. */
+function WarningCard({ text }: { text: string }) {
+  const { width } = useWindowDimensions();
+  const blink = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    Animated.loop(Animated.sequence([Animated.timing(blink, { toValue: 0.35, duration: 320, useNativeDriver: true }), Animated.timing(blink, { toValue: 1, duration: 320, useNativeDriver: true })]), { iterations: 4 }).start();
+  }, []);
+  const W = Math.min(430, width * 0.5);
+  return (
+    <View pointerEvents="none" style={{ position: 'absolute', left: (width - W) / 2, top: '34%', width: W, zIndex: 80 }}>
+      <Animated.View style={{ opacity: blink, borderWidth: 2, borderColor: '#ff3a3a', borderRadius: 10, backgroundColor: 'rgba(40,4,8,0.88)', paddingVertical: 14, alignItems: 'center' }}>
+        <Text style={{ color: '#ff5a5a', fontSize: 26, fontWeight: '900', letterSpacing: 8 }}>⚠ WARNING ⚠</Text>
+        <Text style={{ color: '#ffd0d0', fontSize: 12.5, fontWeight: '800', marginTop: 6, letterSpacing: 1.5 }} numberOfLines={1}>
+          {text}
+        </Text>
+      </Animated.View>
+    </View>
+  );
+}
+
+/** Defender reaction pick — COUNTER / DEFEND / EVADE with a live auto-counter countdown. */
+function ReactionBar({ attacker, defender, weapon }: { attacker: UnitState; defender: UnitState; weapon: WeaponDef }) {
+  const { width } = useWindowDimensions();
+  const setReaction = useGame((s) => s.setReaction);
+  const battle = useGame((s) => s.battle);
+  const map = useGame((s) => s.map);
+  const units = useGame((s) => s.units);
+  const countdown = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    countdown.setValue(1);
+    Animated.timing(countdown, { toValue: 0, duration: 5200, easing: Easing.linear, useNativeDriver: false }).start();
+  }, []);
+
+  // live forecast: use CURRENT states for accurate numbers
+  const attNow = units.find((u) => u.uid === attacker.uid) ?? attacker;
+  const defNow = units.find((u) => u.uid === defender.uid) ?? defender;
+  const bmA = bondMods(useGame.getState().bonds, units, attNow);
+  const bmD = bondMods(useGame.getState().bonds, units, defNow);
+  const inHc = hitChance(attNow, defNow, weapon, map, bmA.hitBonus);
+  const inDmg = damageOf(attNow, defNow, weapon, map, false, bmA.dmgMult);
+  const cw = bestCounterWeapon(defNow, attNow.pos);
+  const cDmg = cw ? damageOf(defNow, attNow, cw, map, false, bmD.dmgMult) : 0;
+  const cHc = cw ? hitChance(defNow, attNow, cw, map, bmD.hitBonus) : 0;
+
+  const W = Math.min(620, width * 0.78);
+  const Btn2 = ({ label, sub, color, onPress }: { label: string; sub: string; color: string; onPress: () => void }) => (
+    <Pressable onPress={onPress} style={{ flex: 1, borderWidth: 1.5, borderColor: color, borderRadius: 10, backgroundColor: 'rgba(10,14,30,0.9)', paddingVertical: 9, alignItems: 'center' }}>
+      <Text style={{ color, fontSize: 15, fontWeight: '900', letterSpacing: 2 }}>{label}</Text>
+      <Text style={{ color: '#9fb0d0', fontSize: 9.5, marginTop: 3 }} numberOfLines={1}>
+        {sub}
+      </Text>
+    </Pressable>
+  );
+  return (
+    <View style={{ position: 'absolute', bottom: '6%', left: (width - W) / 2, width: W, zIndex: 90 }}>
+      <View style={{ borderWidth: 1.5, borderColor: '#ffd34d', borderRadius: 12, backgroundColor: 'rgba(8,10,24,0.92)', padding: 10 }}>
+        <Text style={{ color: '#ffd34d', fontSize: 12, fontWeight: '900', letterSpacing: 2, textAlign: 'center' }}>
+          INCOMING — {weapon.name} · {inHc}% · ~{inDmg} DMG
+        </Text>
+        <Text style={{ color: '#8fa1c7', fontSize: 10, textAlign: 'center', marginTop: 2 }}>How should {defNow.def.pilot.name} answer?</Text>
+        <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+          <Btn2 label="COUNTER" sub={cw ? `${cw.name} · ~${cDmg} (${cHc}%)` : 'no weapon in range'} color="#ff8a5c" onPress={() => setReaction('counter')} />
+          <Btn2 label="DEFEND" sub="damage halved · no counter" color="#7ee7ff" onPress={() => setReaction('defend')} />
+          <Btn2 label="EVADE" sub="-30% enemy hit · no counter" color="#b6ff9d" onPress={() => setReaction('evade')} />
+        </View>
+        <View style={{ height: 3, backgroundColor: '#141828', borderRadius: 2, marginTop: 9, overflow: 'hidden' }}>
+          <Animated.View style={{ height: 3, width: countdown.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }), backgroundColor: '#ffd34d' }} />
+        </View>
+        <Text style={{ color: '#5a6484', fontSize: 8.5, textAlign: 'center', marginTop: 3 }}>auto-COUNTER when the bar empties</Text>
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   root: { ...StyleSheet.absoluteFill, backgroundColor: '#04060f', zIndex: 50, elevation: 50 },
+  splashBox: { position: 'absolute', top: '12%', left: '30%', right: '30%', alignItems: 'center', backgroundColor: 'rgba(10,12,26,0.85)', borderWidth: 1, borderColor: '#ffb84d', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12, zIndex: 75 },
+  splashTitle: { color: '#ffb84d', fontSize: 11, fontWeight: '900', letterSpacing: 2, marginBottom: 4 },
+  splashLine: { color: '#e6ecff', fontSize: 10.5, fontWeight: '700', marginTop: 2 },
   panel: { position: 'absolute', borderRadius: 14, overflow: 'hidden', borderWidth: 2, backgroundColor: '#0a0e1e' },
   cutIn: { position: 'absolute', zIndex: 70 },
   cutInImgWrap: { borderRadius: 12, overflow: 'hidden', borderWidth: 2, backgroundColor: '#0a0e1e' },

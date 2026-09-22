@@ -58,7 +58,7 @@ export function BriefingScreen() {
       <Image cachePolicy="memory" source={ART.story[4]} style={StyleSheet.absoluteFill} contentFit="cover" />
       <LinearGradient colors={['rgba(3,5,14,0.5)', 'rgba(3,5,14,0.95)']} style={StyleSheet.absoluteFill} />
 
-      <Text style={styles.briefTitle}>CHAPTER {ch.id}: {ch.name}</Text>
+      <Text style={styles.briefTitle}>CHAPTER {ch.id}: {ch.name}{useGame.getState().ngPlus > 0 ? ` · NG+ ${useGame.getState().ngPlus}` : ''}</Text>
       <Text style={styles.briefSub}>— {ch.subtitle} —</Text>
 
       <View style={styles.briefBox}>
@@ -107,15 +107,34 @@ export function EndScreen({ victory }: { victory: boolean }) {
   const gotoBriefing = useGame((s) => s.gotoBriefing);
   const turn = useGame((s) => s.turn);
   const chapter = useGame((s) => s.chapter);
-  const campaignDone = victory && chapter >= CHAPTERS_COUNT;
+  const kills = useGame((s) => s.kills);
+  const lastReward = useGame((s) => s.lastReward);
+  const ngPlus = useGame((s) => s.ngPlus);
+  const units = useGame((s) => s.units);
+  // after the final chapter the save wraps to ch.0 — ngPlus>0 + chapter===0 means we just rolled NG+
+  const justUnlockedNg = victory && ngPlus > 0 && chapter === 0;
+  const aces = units.filter((u) => u.side === 'player' && u.kills >= 5).sort((a, b) => b.kills - a.kills);
   return (
     <View style={styles.center}>
       <Image cachePolicy="memory" source={victory ? ART.titleKey : ART.story[1]} style={StyleSheet.absoluteFill} contentFit="cover" />
       <LinearGradient colors={['rgba(3,5,14,0.55)', 'rgba(3,5,14,0.94)']} style={StyleSheet.absoluteFill} />
-      <Text style={[styles.title, { color: victory ? '#ffd34d' : '#ff5a5a', fontSize: 40 }]}>{campaignDone ? 'CAMPAIGN COMPLETE' : victory ? 'MISSION COMPLETE' : 'MISSION FAILED'}</Text>
+      <Text style={[styles.title, { color: victory ? '#ffd34d' : '#ff5a5a', fontSize: 40 }]}>{justUnlockedNg ? 'CAMPAIGN COMPLETE' : victory ? 'MISSION COMPLETE' : 'MISSION FAILED'}</Text>
       <Text style={styles.briefSub}>
-        {campaignDone ? 'The Steel Throne has fallen — the skies are free. (All 30 chapters cleared!)' : victory ? `Cleared in ${turn} turns` : 'Your squad was wiped out'}
+        {justUnlockedNg ? 'The Steel Throne has fallen — the skies are free.' : victory ? `Cleared in ${turn} turns` : 'Your squad was wiped out'}
       </Text>
+      {victory && (
+        <View style={styles.resultsBox}>
+          <Text style={styles.resultsRow}>TURNS  {turn}</Text>
+          <Text style={styles.resultsRow}>ENEMY UNITS DESTROYED  {kills}</Text>
+          <Text style={styles.resultsRow}>CREDITS EARNED  +{lastReward}</Text>
+          {aces.slice(0, 3).map((u) => (
+            <Text key={u.uid} style={styles.resultsAce}>
+              ★ {u.def.pilot.name} — {u.kills} kills this mission
+            </Text>
+          ))}
+          {justUnlockedNg && <Text style={styles.resultsNg}>NEW GAME+ {ngPlus} — restart at Ch.1, keep everything, enemies +{Math.round(18 * ngPlus)}% HP</Text>}
+        </View>
+      )}
       <TouchableOpacity
         style={styles.bigBtn}
         onPress={() => {
@@ -151,4 +170,8 @@ const styles = StyleSheet.create({
   squadFace: { width: 56, height: 56, borderRadius: 10, borderWidth: 1, borderColor: '#3a4160' },
   squadName: { color: '#ffd34d', fontSize: 11, fontWeight: '800', marginTop: 4 },
   squadUnit: { color: '#9fb0d0', fontSize: 9, marginTop: 1 },
+  resultsBox: { backgroundColor: 'rgba(14,17,28,0.88)', borderWidth: 1, borderColor: '#ffd34d', borderRadius: 12, padding: 12, marginTop: 12, minWidth: 340 },
+  resultsRow: { color: '#e6ecff', fontSize: 12.5, fontWeight: '800', letterSpacing: 1.5, marginTop: 4 },
+  resultsAce: { color: '#ff9dbb', fontSize: 11, fontWeight: '700', marginTop: 4 },
+  resultsNg: { color: '#ffd34d', fontSize: 12, fontWeight: '900', marginTop: 8, letterSpacing: 1 },
 });

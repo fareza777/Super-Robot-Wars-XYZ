@@ -66,6 +66,11 @@ const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitSt
         <Text style={styles.lvTxt}>Lv{u.level}</Text>
       </View>
       {u.def.boss && <Text style={styles.bossTag}>ACE</Text>}
+      {u.will > 100 && (
+        <View style={[styles.willTag, u.will >= 130 && { borderColor: '#ffd34d' }]}>
+          <Text style={[styles.willTxt, u.will >= 130 && { color: '#ffd34d' }]}>◈{u.will}</Text>
+        </View>
+      )}
     </>
   );
 });
@@ -213,4 +218,6 @@ const styles = StyleSheet.create({
   },
   lvTxt: { color: '#fff', fontSize: 7, fontWeight: '800' },
   bossTag: { position: 'absolute', top: -6, fontSize: 8, color: '#ffd34d', fontWeight: '800' },
+  willTag: { position: 'absolute', top: 1, right: 1, paddingHorizontal: 2, borderRadius: 3, borderWidth: 1, borderColor: '#ff7a9d', backgroundColor: 'rgba(20,8,16,0.85)' },
+  willTxt: { color: '#ff7a9d', fontSize: 7, fontWeight: '800' },
 });

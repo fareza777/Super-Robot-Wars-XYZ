@@ -176,6 +176,17 @@ const PLAYER_SPAWNS: Pos[] = [
   { x: 1, y: 8 }, { x: 3, y: 9 }, { x: 4, y: 8 }, { x: 2, y: 9 }, { x: 0, y: 7 }, { x: 5, y: 9 },
 ];
 
+/** Mid-battle enemy reinforcement waves keyed by chapter id — extra units storm in from the right edge. */
+const REINFORCE: Record<number, { turn: number; comp: string[] }> = {
+  7: { turn: 3, comp: ['zolda', 'zoldaAir', 'zolda'] },
+  12: { turn: 3, comp: ['vexia', 'nightmare'] },
+  14: { turn: 4, comp: ['vexia', 'vexia', 'nightmare'] },
+  19: { turn: 3, comp: ['nightmare', 'zoldaTank'] },
+  22: { turn: 4, comp: ['nightmare', 'nightmare'] },
+  26: { turn: 3, comp: ['nightmare', 'zoldaTank', 'nightmare'] },
+  30: { turn: 2, comp: ['nightmare', 'nightmare'] },
+};
+
 export function genMap(ch: ChapterDef): MapDef {
   if (ch.theme === 'custom') {
     const roster = rosterFor(ch);
@@ -252,6 +263,7 @@ export function genMap(ch: ChapterDef): MapDef {
     playerSpawns: PLAYER_SPAWNS.slice(0, rosterFor(ch).length).map((p, i) => ({ defId: rosterFor(ch)[i], pos: p })),
     enemySpawns,
     bossHoldUntil: ch.boss ? 3 : undefined,
+    reinforce: REINFORCE[ch.id],
   };
 }
 
