@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Image } from 'expo-image';
 import { PILOT_ART } from '../assets';
-import { ITEMS } from '../game/campaign';
+import { ITEMS, PARTS } from '../game/campaign';
 import { SPIRITS } from '../game/data';
 import { bondMods } from '../game/bonds';
 import { bestCounterWeapon, damageOf, hitChance, key, terrainDesc, weaponsAgainst } from '../game/engine';
@@ -68,6 +68,11 @@ export function SidePanel() {
             <Bar label="WILL" val={unit.will} max={150} color="#ff7a9d" />
             <Bar label="EXP" val={unit.exp} max={100} color="#c9a0ff" />
             <Text style={styles.killsLine}>KILLS {unit.kills} · WILL {unit.will > 100 ? `+${unit.will - 100}% spirit` : 'calm'}</Text>
+            {!!unit.parts?.length && (
+              <Text style={styles.killsLine} numberOfLines={1}>
+                PARTS {unit.parts.map((p) => PARTS[p]?.name ?? p).join(' + ')}
+              </Text>
+            )}
             <Text style={styles.terrainLine}>{terrainDesc(s.map, unit.pos)}</Text>
           </View>
         )}

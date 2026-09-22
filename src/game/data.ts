@@ -9,6 +9,8 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   grit: { id: 'grit', name: 'Grit', cost: 15, desc: 'Armor +400 until end of enemy phase' },
   guard: { id: 'guard', name: 'Guard', cost: 20, desc: 'Incoming damage halved until end of enemy phase' },
   accel: { id: 'accel', name: 'Accel', cost: 10, desc: 'Move +3 this turn' },
+  flash: { id: 'flash', name: 'Flash', cost: 25, desc: 'Auto-dodge the next enemy attack' },
+  snipe: { id: 'snipe', name: 'Snipe', cost: 20, desc: 'Next attack range +2' },
 };
 
 // ---------- Weapons ----------
@@ -38,9 +40,9 @@ const P = (p: PilotDef) => p;
 
 export const PILOTS = {
   ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel'], faceColor: '#ffb347' }),
-  mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel'], faceColor: '#7ee7ff' }),
+  mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe'], faceColor: '#7ee7ff' }),
   gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard'], faceColor: '#ff9d9d' }),
-  orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor'], faceColor: '#b6ff9d' }),
+  orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash'], faceColor: '#b6ff9d' }),
   karg: P({ name: 'Col. Karg Draven', callsign: 'BOSS', melee: 75, ranged: 75, defense: 70, evade: 65, maxSp: 70, spirits: ['valor', 'strike'], faceColor: '#d0a0ff' }),
   grunt: P({ name: 'Soldier', callsign: 'GR', melee: 56, ranged: 56, defense: 52, evade: 52, maxSp: 30, spirits: [], faceColor: '#bbbbbb' }),
 };

@@ -4,7 +4,7 @@ import { Image as ExpoImage } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART, AudioKey, MECH_ART, NPC_ART, PILOT_ART } from '../assets';
 import { play } from '../audio';
-import { ALL_UNITS, CHAPTERS_COUNT, ITEMS, MAX_WEAPON_UPG, PLAYER_DEF_IDS, UPGRADE_STATS, WEAPON_UPG_POWER, chapterOf, rosterFor, weaponUpgCost } from '../game/campaign';
+import { ALL_UNITS, CHAPTERS_COUNT, ITEMS, MAX_PART_SLOTS, MAX_PILOT_SKILL, MAX_WEAPON_UPG, PARTS, PILOT_STATS, PLAYER_DEF_IDS, UPGRADE_STATS, WEAPON_UPG_POWER, chapterOf, rosterFor, weaponUpgCost } from '../game/campaign';
 import { BOND_EVENTS, MAX_BOND, bondLevel } from '../game/bonds';
 import { useGame } from '../game/store';
 
@@ -41,7 +41,7 @@ export function HQScreen() {
   const { width, height } = useWindowDimensions();
   const s = useGame();
   const [tab, setTab] = useState<Tab>('main');
-  const [wsTab, setWsTab] = useState<'frame' | 'weap'>('frame');
+  const [wsTab, setWsTab] = useState<'frame' | 'weap' | 'parts' | 'pilots'>('frame');
   const [selUnit, setSelUnit] = useState<string>(PLAYER_DEF_IDS[0]);
   const [chatIdx, setChatIdx] = useState(0);
   const [chatLine, setChatLine] = useState(0);
@@ -133,9 +133,9 @@ export function HQScreen() {
             </View>
           </ScrollView>
           <View style={styles.wsTabs}>
-            {(['frame', 'weap'] as const).map((t) => (
+            {(['frame', 'weap', 'parts', 'pilots'] as const).map((t) => (
               <Pressable key={t} style={[styles.wsTab, wsTab === t && styles.wsTabOn]} onPress={() => setWsTab(t)}>
-                <Text style={[styles.wsTabTxt, wsTab === t && { color: '#6fe0ff' }]}>{t === 'frame' ? 'FRAME' : 'WEAPONS'}</Text>
+                <Text style={[styles.wsTabTxt, wsTab === t && { color: '#6fe0ff' }]}>{t === 'frame' ? 'FRAME' : t === 'weap' ? 'WEAPONS' : t === 'parts' ? 'PARTS' : 'PILOT'}</Text>
               </Pressable>
             ))}
           </View>
@@ -163,6 +163,77 @@ export function HQScreen() {
                 </View>
               );
             })}
+          {wsTab === 'parts' && (
+            <>
+              <View style={styles.slotRow}>
+                <Text style={styles.slotLbl}>SLOTS:</Text>
+                {Array.from({ length: MAX_PART_SLOTS }).map((_, i) => {
+                  const pid = (s.parts[selUnit] ?? [])[i];
+                  return (
+                    <Pressable key={i} style={[styles.slotChip, pid ? { borderColor: '#ffd34d' } : null]} onPress={() => pid && s.equipPart(selUnit, pid)}>
+                      <Text style={styles.slotTxt} numberOfLines={1}>
+                        {pid ? PARTS[pid].name : '— empty —'}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              {Object.values(PARTS).map((p) => {
+                const owned = s.partsOwned.includes(p.id);
+                const equipped = (s.parts[selUnit] ?? []).includes(p.id);
+                const afford = s.credits >= p.price;
+                return (
+                  <View key={p.id} style={styles.shopRow}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.shopName}>
+                        {p.name} {equipped && <Text style={styles.shopOwned}>· EQUIPPED</Text>}
+                      </Text>
+                      <Text style={styles.shopDesc}>{p.desc}</Text>
+                    </View>
+                    {owned ? (
+                      <Pressable style={[styles.buyBtn, equipped && { borderColor: '#ffd34d' }]} onPress={() => s.equipPart(selUnit, p.id)}>
+                        <Text style={styles.buyTxt}>{equipped ? 'REMOVE' : 'EQUIP'}</Text>
+                      </Pressable>
+                    ) : (
+                      <Pressable style={[styles.buyBtn, !afford && { opacity: 0.35 }]} onPress={() => s.buyPart(p.id)} disabled={!afford}>
+                        <Text style={styles.buyTxt}>{p.price} CR</Text>
+                      </Pressable>
+                    )}
+                  </View>
+                );
+              })}
+            </>
+          )}
+          {wsTab === 'pilots' && (
+            <>
+              <Text style={styles.pilotLine}>
+                {ALL_UNITS[selUnit].pilot.name} · PP {s.pilotProg[selUnit]?.pp ?? 0}
+              </Text>
+              {PILOT_STATS.map((st) => {
+                const lvl = s.pilotProg[selUnit]?.skills?.[st.id] ?? 0;
+                const pp = s.pilotProg[selUnit]?.pp ?? 0;
+                const maxed = lvl >= MAX_PILOT_SKILL;
+                return (
+                  <View key={st.id} style={styles.shopRow}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.shopName}>
+                        {st.name} <Text style={styles.shopOwned}>Lv {lvl}/{MAX_PILOT_SKILL}</Text>
+                      </Text>
+                      <Text style={styles.shopDesc}>{st.desc}</Text>
+                      <View style={styles.lvlBarTrack}>
+                        {Array.from({ length: MAX_PILOT_SKILL }).map((_, i) => (
+                          <View key={i} style={[styles.lvlSeg, i < lvl && { backgroundColor: '#ff9fd0' }]} />
+                        ))}
+                      </View>
+                    </View>
+                    <Pressable style={[styles.buyBtn, (pp < 1 || maxed) && { opacity: 0.35 }]} onPress={() => s.allocPP(selUnit, st.id)} disabled={pp < 1 || maxed}>
+                      <Text style={styles.buyTxt}>{maxed ? 'MAX' : '+1 (1PP)'}</Text>
+                    </Pressable>
+                  </View>
+                );
+              })}
+            </>
+          )}
           {wsTab === 'weap' &&
             ALL_UNITS[selUnit].weapons.map((w) => {
               const lvl = s.weaponUpg[selUnit]?.[w.id] ?? 0;
@@ -347,7 +418,12 @@ const styles = StyleSheet.create({
   unitRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
   unitChip: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1.5, borderColor: '#3a4160', borderRadius: 8, padding: 5, backgroundColor: '#0a0e1e', maxWidth: 130 },
   unitChipTxt: { color: '#fff', fontWeight: '700', fontSize: 10.5, flexShrink: 1 },
-  lvlBarTrack: { flexDirection: 'row', gap: 3, marginTop: 6 },
+  lvlBarTrack: { flexDirection: 'row', gap: 3, marginTop: 6, flexWrap: 'wrap' },
+  slotRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
+  slotLbl: { color: '#8fa0c8', fontSize: 10, fontWeight: '900', letterSpacing: 2 },
+  slotChip: { flex: 1, borderWidth: 1.5, borderColor: '#3a4160', borderRadius: 8, paddingVertical: 7, paddingHorizontal: 8, backgroundColor: '#0a0e1e' },
+  slotTxt: { color: '#ffd34d', fontSize: 10.5, fontWeight: '800' },
+  pilotLine: { color: '#ff9fd0', fontSize: 12, fontWeight: '900', letterSpacing: 1.5, marginBottom: 8 },
   lvlSeg: { width: 18, height: 6, borderRadius: 2, backgroundColor: '#1c2440' },
   wsTabs: { flexDirection: 'row', gap: 8, marginBottom: 8 },
   wsTab: { flex: 1, borderWidth: 1, borderColor: '#3a4160', borderRadius: 7, paddingVertical: 6, alignItems: 'center', backgroundColor: '#0a0e1e' },

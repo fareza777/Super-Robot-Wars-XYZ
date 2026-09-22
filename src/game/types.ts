@@ -24,7 +24,7 @@ export interface WeaponDef {
   mapRange?: number;
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -84,10 +84,37 @@ export interface UnitState {
   strikeForNextAttack?: boolean;
   valorForNextAttack?: boolean;
   accelThisTurn?: number; // bonus move squares
+  flashUntilEndOfEnemyPhase?: boolean; // auto-dodge the next incoming attack
+  snipeForNextAttack?: boolean; // next attack +2 range
   /** SRW kiai/will — 100 base, rises in combat; gates strong weapons, buffs stats */
   will: number;
   /** enemies destroyed by this unit this mission (ace tracking) */
   kills: number;
+  /** equipped enhancement part ids (max MAX_PART_SLOTS) */
+  parts: string[];
+  /** pilot points — earned on kills/level-ups, spent on pilot skills in the workshop */
+  pp: number;
+  /** pilot skill allocation (persisted per pilot defId) */
+  skills: PilotSkills;
+}
+
+export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def';
+export type PilotSkills = Record<PilotSkillId, number>;
+
+/** SRW-style enhancement parts equippable on a mecha. */
+export interface PartDef {
+  id: string;
+  name: string;
+  desc: string;
+  price: number;
+  armor?: number;
+  mobility?: number;
+  move?: number;
+  hit?: number; // +% hit chance
+  dmg?: number; // +% outgoing damage
+  hp?: number; // +max HP
+  en?: number; // +max EN
+  evade?: number; // +% evade
 }
 
 export interface MapDef {
@@ -149,6 +176,8 @@ export interface AttackResult {
   reaction?: Reaction;
   // extra units hit when the weapon is a MAP weapon (primary target is `defender`)
   splash?: { uid: string; name: string; hit: boolean; damage: number; destroyed: boolean; hitChance: number }[];
+  // SRW support attack — an adjacent ally chips in after the main strike (55% dmg, no counter)
+  support?: { name: string; hit: boolean; damage: number; destroyed: boolean; hitChance: number };
   // human-readable EXP/level-up events for the log
   expEvents: string[];
 }

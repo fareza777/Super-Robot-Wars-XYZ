@@ -1,6 +1,6 @@
 import chaptersJson from './chapters.json';
 import { PILOTS, UNITS, WEAPONS, TERRAIN_INFO, MISSION_SSS } from './data';
-import { MapDef, PilotDef, Pos, Terrain, UnitDef } from './types';
+import { MapDef, PartDef, PilotDef, PilotSkillId, Pos, Terrain, UnitDef } from './types';
 
 // ---------- Items (usable in battle, bought at merchant) ----------
 
@@ -23,6 +23,40 @@ export const ITEMS: Record<string, ItemDef> = {
 };
 
 export type ItemId = keyof typeof ITEMS;
+
+// ---------- Enhancement parts (workshop — equip up to MAX_PART_SLOTS per mecha) ----------
+
+export const MAX_PART_SLOTS = 2;
+
+export const PARTS: Record<string, PartDef> = {
+  sparePlate: { id: 'sparePlate', name: 'Spare Plating', desc: '+800 max HP', price: 600, hp: 800 },
+  servoArm: { id: 'servoArm', name: 'Servo Armor', desc: '+80 armor', price: 800, armor: 80 },
+  vernier: { id: 'vernier', name: 'Vernier Thrusters', desc: '+8 mobility', price: 700, mobility: 8 },
+  teslaDrive: { id: 'teslaDrive', name: 'Tesla Drive', desc: '+1 move range', price: 1500, move: 1 },
+  aimScope: { id: 'aimScope', name: 'Targeting Scope', desc: '+8% hit chance', price: 900, hit: 8 },
+  reflexChip: { id: 'reflexChip', name: 'Reflex Chip', desc: '+6% evade', price: 850, evade: 6 },
+  overcharger: { id: 'overcharger', name: 'Overcharger', desc: '+8% weapon damage', price: 1200, dmg: 8 },
+  batteryPack: { id: 'batteryPack', name: 'Battery Pack', desc: '+30 max EN', price: 550, en: 30 },
+};
+
+export type PartId = keyof typeof PARTS;
+
+// ---------- Pilot skill points (PP — earned per kill/level, spent in workshop PILOTS tab) ----------
+
+export interface PilotStatDef {
+  id: PilotSkillId;
+  name: string;
+  desc: string;
+}
+
+export const PILOT_STATS: PilotStatDef[] = [
+  { id: 'hit', name: 'Precision', desc: '+1% hit chance per point' },
+  { id: 'evade', name: 'Reflexes', desc: '+1% evade per point' },
+  { id: 'dmg', name: 'Firepower', desc: '+1.5% damage per point' },
+  { id: 'def', name: 'Endurance', desc: '-1.5% damage taken per point' },
+];
+
+export const MAX_PILOT_SKILL = 20;
 
 // ---------- Upgrades (hangar; per unit defId, per stat level) ----------
 

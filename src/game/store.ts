@@ -4,7 +4,11 @@ import {
   CHAPTERS,
   CHAPTERS_COUNT,
   ITEMS,
+  MAX_PART_SLOTS,
+  MAX_PILOT_SKILL,
   MAX_WEAPON_UPG,
+  PARTS,
+  PILOT_STATS,
   UPGRADE_STATS,
   UpgradeMap,
   WEAPON_UPG_POWER,
@@ -27,14 +31,17 @@ import {
   applyAttack,
   applyMapAttack,
   applySpirit,
+  applySupportStrike,
   attackTiles as attackTilesFor,
   checkEnd,
   clearTransientForOwnPhase,
   dist,
+  findSupport,
   key,
   makeUnit,
   MoveRec,
   movementRange,
+  partBonus,
   phaseRecovery,
   planEnemyActions,
   same,
@@ -42,7 +49,7 @@ import {
   usableWeapons,
   weaponsAgainst,
 } from './engine';
-import { AttackResult, GameSettings, MapDef, Phase, Pos, Reaction, SpiritId, UnitState, WeaponDef } from './types';
+import { AttackResult, GameSettings, MapDef, Phase, PilotSkillId, PilotSkills, Pos, Reaction, SpiritId, UnitState, WeaponDef } from './types';
 
 const SAVE_KEY = 'srwxyz_save_v1';
 const SETTINGS_KEY = 'srwxyz_settings_v1';
@@ -55,7 +62,9 @@ export interface SaveData {
   inventory: Record<string, number>;
   upgrades: UpgradeMap;
   weaponUpg: WeaponUpgMap;
-  pilotProg: Record<string, { level: number; exp: number; kills?: number }>;
+  pilotProg: Record<string, { level: number; exp: number; kills?: number; pp?: number; skills?: PilotSkills }>;
+  parts?: Record<string, string[]>; // defId -> equipped part ids
+  partsOwned?: string[]; // part ids purchased once, freely equippable
   bonds?: Record<string, number>;
   bondSeen?: string[];
   sideCleared?: string[];
@@ -88,7 +97,9 @@ interface Store {
   inventory: Record<string, number>;
   upgrades: UpgradeMap;
   weaponUpg: WeaponUpgMap;
-  pilotProg: Record<string, { level: number; exp: number; kills?: number }>;
+  pilotProg: Record<string, { level: number; exp: number; kills?: number; pp?: number; skills?: PilotSkills }>;
+  parts: Record<string, string[]>; // defId -> equipped part ids (max MAX_PART_SLOTS)
+  partsOwned: string[];
   ngPlus: number; // New Game+ cycle count — enemies scale up, progression kept
   bonds: Record<string, number>; // pairKey -> bond level 0..3
   bondSeen: string[]; // bond event ids already viewed
@@ -135,6 +146,9 @@ interface Store {
   resetSave: () => Promise<void>;
   toggleDeploy: (defId: string) => void;
   upgradeWeapon: (defId: string, weaponId: string) => void;
+  buyPart: (partId: string) => void;
+  equipPart: (defId: string, partId: string) => void;
+  allocPP: (defId: string, statId: PilotSkillId) => void;
   clearInspect: () => void;
   startMission: () => void;
   finishDialog: () => void;
@@ -190,7 +204,7 @@ function ngEnemy(u: UnitState, ngPlus: number) {
   u.level += ngPlus * 2;
 }
 
-function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: UpgradeMap, wupg: WeaponUpgMap, deploySel: string[], ngPlus: number): { map: MapDef; units: UnitState[] } {
+function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: UpgradeMap, wupg: WeaponUpgMap, deploySel: string[], ngPlus: number, parts: Record<string, string[]>): { map: MapDef; units: UnitState[] } {
   const map = genMap(ch);
   const units: UnitState[] = [];
   let i = 0;
@@ -201,9 +215,20 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
     if (prog) {
       u.level = prog.level;
       u.exp = prog.exp;
+      u.pp = prog.pp ?? 0;
+      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, ...(prog.skills ?? {}) };
       if ((prog.kills ?? 0) >= ACE_KILLS) u.will = 130; // ace pilots start hot
     }
+    u.parts = (parts[s.defId] ?? []).slice(0, MAX_PART_SLOTS);
     applyUpgrades(u, upgrades, wupg);
+    // flat stat parts raise the frame itself
+    const hpB = partBonus(u, 'hp');
+    const enB = partBonus(u, 'en');
+    if (hpB || enB) {
+      u.def = { ...u.def, maxHp: u.def.maxHp + hpB, maxEn: u.def.maxEn + enB };
+      u.hp = u.def.maxHp;
+      u.en = u.def.maxEn;
+    }
     units.push(u);
   }
   for (const s of map.enemySpawns) {
@@ -215,8 +240,8 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
   return { map, units };
 }
 
-async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus'>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus };
+async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'>) {
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -271,6 +296,8 @@ export const useGame = create<Store>((set, get) => ({
   upgrades: {},
   weaponUpg: {},
   pilotProg: {},
+  parts: {},
+  partsOwned: [],
   hasSave: false,
   settings: DEFAULT_SETTINGS,
   bonds: {},
@@ -311,7 +338,7 @@ export const useGame = create<Store>((set, get) => ({
     const bonds = seen ? s.bonds : { ...s.bonds, [bondKey(ev.a, ev.b)]: Math.min(MAX_BOND, bondLevel(s.bonds, ev.a, ev.b) + 1) };
     const bondSeen = seen ? s.bondSeen : [...s.bondSeen, ev.id];
     set({ phase: 'hq', bondEventId: null, bonds, bondSeen });
-    void persist({ chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, bonds, bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus });
+    void persist({ chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds, bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus });
   },
 
   startSideMission: (id) => {
@@ -319,7 +346,7 @@ export const useGame = create<Store>((set, get) => ({
     const m = SIDE_MISSIONS.find((x) => x.id === id);
     if (!m || s.chapter < m.unlockCh || s.sideCleared.includes(id)) return;
     const ch = sideAsChapter(m);
-    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus);
+    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts);
     set({ phase: 'player', sideId: id, missionCh: ch, map, units, kills: 0, turn: 1, bossWarned: false, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set() });
   },
   replayStory: () => set({ phase: 'onboarding' }),
@@ -337,7 +364,7 @@ export const useGame = create<Store>((set, get) => ({
     try {
       await AsyncStorage.removeItem(SAVE_KEY);
     } catch {}
-    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0 });
+    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [] });
   },
 
   toggleDeploy: (defId) => {
@@ -369,6 +396,8 @@ export const useGame = create<Store>((set, get) => ({
       upgrades: {} as UpgradeMap,
       weaponUpg: {} as WeaponUpgMap,
       pilotProg: {} as Store['pilotProg'],
+      parts: {} as Record<string, string[]>,
+      partsOwned: [] as string[],
       bonds: {} as Record<string, number>,
       bondSeen: [] as string[],
       sideCleared: [] as string[],
@@ -385,7 +414,7 @@ export const useGame = create<Store>((set, get) => ({
       const raw = await AsyncStorage.getItem(SAVE_KEY);
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
-      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0 });
+      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [] });
     } catch {}
     try {
       const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
@@ -408,6 +437,43 @@ export const useGame = create<Store>((set, get) => ({
     const credits = s.credits - item.price;
     set({ credits, inventory });
     void persist({ ...s, credits, inventory });
+  },
+
+  buyPart: (partId) => {
+    const s = get();
+    const part = PARTS[partId];
+    if (!part || s.credits < part.price || s.partsOwned.includes(partId)) return;
+    const partsOwned = [...s.partsOwned, partId];
+    const credits = s.credits - part.price;
+    set({ credits, partsOwned });
+    void persist({ ...s, credits, partsOwned });
+  },
+
+  equipPart: (defId, partId) => {
+    const s = get();
+    if (!s.partsOwned.includes(partId)) return;
+    const cur = s.parts[defId] ?? [];
+    let next: string[];
+    if (cur.includes(partId)) next = cur.filter((p) => p !== partId); // unequip
+    else if (cur.length < MAX_PART_SLOTS) next = [...cur, partId];
+    else next = [cur[1], partId]; // swap out the oldest slot
+    // a part can't be equipped on two mechas at once
+    const parts = { ...s.parts, [defId]: next };
+    for (const [k, v] of Object.entries(parts)) if (k !== defId && v.includes(partId)) parts[k] = v.filter((p) => p !== partId);
+    set({ parts });
+    void persist({ ...s, parts });
+  },
+
+  allocPP: (defId, statId) => {
+    const s = get();
+    const prog = s.pilotProg[defId];
+    if (!prog || (prog.pp ?? 0) < 1) return;
+    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, ...(prog.skills ?? {}) };
+    if (skills[statId] >= MAX_PILOT_SKILL) return;
+    skills[statId] += 1;
+    const pilotProg = { ...s.pilotProg, [defId]: { ...prog, pp: (prog.pp ?? 0) - 1, skills } };
+    set({ pilotProg });
+    void persist({ ...s, pilotProg });
   },
 
   upgradeStat: (defId, statId) => {
@@ -469,7 +535,7 @@ export const useGame = create<Store>((set, get) => ({
   startMission: () => {
     const s = get();
     const ch = chapterOf(s.chapter);
-    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, s.deploySel, s.ngPlus);
+    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, s.deploySel, s.ngPlus, s.parts);
     set({ phase: 'dialog', sideId: null, missionCh: ch, map, units, kills: 0, turn: 1, bossWarned: false, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set() });
   },
   finishDialog: () => set({ phase: 'player' }),
@@ -609,7 +675,7 @@ export const useGame = create<Store>((set, get) => ({
     const tiles = new Set<string>();
     if (w.mapRange != null) {
       // MAP weapon: every tile in firing range is a valid blast aim point
-      for (const p of attackTilesFor(s.map, s.pendingMove, w)) tiles.add(key(p));
+      for (const p of attackTilesFor(s.map, s.pendingMove, w, u)) tiles.add(key(p));
     } else {
       for (const e of s.units) {
         if (!e.alive || e.side !== 'enemy') continue;
@@ -625,7 +691,19 @@ export const useGame = create<Store>((set, get) => ({
     const att = s.units.find((x) => x.uid === s.menuForUid)!;
     const def = s.units.find((x) => x.uid === uid)!;
     const reaction = aiPickReaction(att, def, s.pendingWeapon, s.map);
-    const { state, result } = applyAttack({ map: s.map, units: s.units, turn: s.turn }, att.uid, uid, s.pendingWeapon.id, (u) => bondMods(s.bonds, s.units, u), reaction);
+    let { state, result } = applyAttack({ map: s.map, units: s.units, turn: s.turn }, att.uid, uid, s.pendingWeapon.id, (u) => bondMods(s.bonds, s.units, u), reaction);
+    // SRW support attack — an ally beside the shooter chips in at reduced damage
+    if (def.side === 'enemy' && state.units.find((u) => u.uid === uid)!.alive) {
+      const sup = findSupport(state.units, att.uid, state.units.find((u) => u.uid === uid)!);
+      if (sup) {
+        const out = applySupportStrike(state, sup.uid, uid, (u) => bondMods(s.bonds, s.units, u));
+        if (out) {
+          state = out.state;
+          result = { ...result, support: { name: sup.def.name, hit: out.result.hit, damage: out.result.damage, destroyed: out.result.destroyed, hitChance: out.result.hitChance } };
+          result.expEvents = [...result.expEvents, ...out.result.expEvents];
+        }
+      }
+    }
     const attAfter = state.units.find((u) => u.uid === att.uid)!;
     const defAfter = state.units.find((u) => u.uid === uid)!;
     const warning = def.def.boss && !s.bossWarned ? `${def.def.name} — ${def.def.pilot.name}` : undefined;
@@ -645,11 +723,12 @@ export const useGame = create<Store>((set, get) => ({
             : `${def.def.name}'s counter missed`,
         )
       : log;
+    if (result.support) log2 = push(log2, `⇒ ${result.support.name} support fire: ${result.support.hit ? `${result.support.damage}${result.support.destroyed ? ' — DESTROYED' : ''}` : 'missed'}`);
     for (const e of result.expEvents) log2 = push(log2, e);
     const common = {
       units: state.units,
       log: log2,
-      kills: s.kills + (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0),
+      kills: s.kills + (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0) + (result.support?.destroyed ? 1 : 0),
       pendingWeapon: null,
       attackTiles: new Set<string>(),
       menuForUid: null,
@@ -825,7 +904,7 @@ function applyVictory(set: SetFn, get: Get) {
   const s = get();
   const pilotProg = { ...s.pilotProg };
   for (const u of s.units) {
-    if (u.side === 'player') pilotProg[u.def.id] = { level: u.level, exp: u.exp, kills: (pilotProg[u.def.id]?.kills ?? 0) + u.kills };
+    if (u.side === 'player') pilotProg[u.def.id] = { level: u.level, exp: u.exp, kills: (pilotProg[u.def.id]?.kills ?? 0) + u.kills, pp: u.pp, skills: u.skills };
   }
   const side = s.sideId ? SIDE_MISSIONS.find((m) => m.id === s.sideId) : undefined;
   if (side) {
@@ -844,7 +923,7 @@ function applyVictory(set: SetFn, get: Get) {
       lastReward: reward,
       log: push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''}`),
     });
-    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus });
+    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus });
     return;
   }
   const ch = s.missionCh;
@@ -866,7 +945,7 @@ function applyVictory(set: SetFn, get: Get) {
     lastReward: reward + (clearedFinal ? 5000 : 0),
     log: push(s.log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + 5000} credits` : `Mission complete! +${reward} credits`),
   });
-  void persist({ chapter, credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus });
+  void persist({ chapter, credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus });
 }
 
 async function runEnemyPhase(set: SetFn, get: Get) {

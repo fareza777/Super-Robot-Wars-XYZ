@@ -238,6 +238,15 @@ export function BattleScene() {
         </View>
       )}
 
+      {/* SRW support attack — ally chips in after the main strike */}
+      {!!battle.result.support && stage >= 3 && stage <= 4 && (
+        <View style={styles.supportBox} pointerEvents="none">
+          <Text style={styles.supportTxt}>
+            ⇒ {battle.result.support.name} SUPPORT FIRE · {battle.result.support.hit ? `${battle.result.support.damage}${battle.result.support.destroyed ? ' DESTROYED' : ''}` : 'MISSED'}
+          </Text>
+        </View>
+      )}
+
       {/* name plates — own their damage count-up state so ticks don't re-render the scene */}
       <HitPlate unit={def} after={battle.defenderAfter} side="right" active={stage === 3} result={battle.result} />
       <CounterPlate unit={atk} after={battle.attackerAfter} side="left" active={stage === 5} result={battle.result.counter} />
@@ -901,6 +910,8 @@ function ReactionBar({ attacker, defender, weapon }: { attacker: UnitState; defe
 
 const styles = StyleSheet.create({
   root: { ...StyleSheet.absoluteFill, backgroundColor: '#04060f', zIndex: 50, elevation: 50 },
+  supportBox: { position: 'absolute', left: '6%', top: '12%', backgroundColor: 'rgba(10,20,14,0.85)', borderWidth: 1, borderColor: '#7ee0a0', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 },
+  supportTxt: { color: '#7ee0a0', fontSize: 12, fontWeight: '900', letterSpacing: 1 },
   splashBox: { position: 'absolute', top: '12%', left: '30%', right: '30%', alignItems: 'center', backgroundColor: 'rgba(10,12,26,0.85)', borderWidth: 1, borderColor: '#ffb84d', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12, zIndex: 75 },
   splashTitle: { color: '#ffb84d', fontSize: 11, fontWeight: '900', letterSpacing: 2, marginBottom: 4 },
   splashLine: { color: '#e6ecff', fontSize: 10.5, fontWeight: '700', marginTop: 2 },
