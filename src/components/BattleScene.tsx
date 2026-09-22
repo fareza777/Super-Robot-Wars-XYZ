@@ -149,7 +149,7 @@ export function BattleScene() {
       <Animated.View style={[styles.root, { opacity: fade }]}>
       {/* bg */}
       <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ scale: bgZoom.interpolate({ inputRange: [0, 1], outputRange: [1.05, 1.22] }) }] }]}>
-        <Image source={ART.battleBg} style={StyleSheet.absoluteFill} contentFit="cover" />
+        <Image cachePolicy="memory" source={ART.battleBg} style={StyleSheet.absoluteFill} contentFit="cover" />
       </Animated.View>
       <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(4,6,16,0.35)' }]} />
 
@@ -173,7 +173,7 @@ export function BattleScene() {
             },
           ]}
         >
-          <Image source={MECH_ART[atk.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" />
+          <Image cachePolicy="memory" source={MECH_ART[atk.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" contentPosition="top" />
           <LinearGradient colors={['transparent', 'rgba(0,0,0,0.55)']} style={StyleSheet.absoluteFill} />
           <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#fff', opacity: attFlash }]} />
         </Animated.View>
@@ -197,7 +197,7 @@ export function BattleScene() {
             },
           ]}
         >
-          <Image source={MECH_ART[def.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" />
+          <Image cachePolicy="memory" source={MECH_ART[def.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" contentPosition="top" />
           <LinearGradient colors={['transparent', 'rgba(0,0,0,0.55)']} style={StyleSheet.absoluteFill} />
           <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#fff', opacity: defFlash }]} />
         </Animated.View>
@@ -341,7 +341,7 @@ function PilotCutIn({ unit, side }: { unit: UnitState; side: 'left' | 'right' })
       ]}
     >
       <View style={[styles.cutInImgWrap, { borderColor: unit.def.accent }]}>
-        <Image source={PILOT_ART[unit.def.id]} style={{ width: IMG, height: IMG }} contentFit="cover" />
+        <Image cachePolicy="memory" source={PILOT_ART[unit.def.id]} style={{ width: IMG, height: IMG }} contentFit="cover" />
       </View>
       <View style={{ flex: 1, marginLeft: fromLeft ? 6 : 0, marginRight: fromLeft ? 0 : 6 }}>
         <View style={[styles.cutInNameBar, { borderColor: unit.def.accent }]}>
@@ -386,7 +386,7 @@ function DefeatBar({ unit, flip }: { unit: UnitState; flip?: boolean }) {
         padding: 7,
       }}
     >
-      <Image source={PILOT_ART[unit.def.id]} style={{ width: IMG, height: IMG, borderRadius: 8 }} contentFit="cover" />
+      <Image cachePolicy="memory" source={PILOT_ART[unit.def.id]} style={{ width: IMG, height: IMG, borderRadius: 8 }} contentFit="cover" />
       <View style={{ flex: 1 }}>
         <Text style={{ color: unit.def.accent, fontSize: 10, fontWeight: '800', letterSpacing: 1 }} numberOfLines={1}>
           {unit.def.pilot.name} — UNIT LOST
@@ -405,7 +405,7 @@ function NamePlate({ unit, hp, side }: { unit: UnitState; hp?: number; side: 'le
   const pct = Math.max(0, shown / unit.def.maxHp);
   return (
     <View style={[styles.plate, side === 'left' ? { left: 14, bottom: 26 } : { right: 14, top: height * 0.68 }]}>
-      <Image source={PILOT_ART[unit.def.id]} style={styles.plateFace} contentFit="cover" />
+      <Image cachePolicy="memory" source={PILOT_ART[unit.def.id]} style={styles.plateFace} contentFit="cover" />
       <View style={{ flex: 1 }}>
         <Text style={styles.plateName} numberOfLines={1}>
           {unit.def.name} · {unit.def.pilot.callsign} · Lv{unit.level}

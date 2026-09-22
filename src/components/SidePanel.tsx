@@ -52,7 +52,7 @@ export function SidePanel() {
         {unit && (
           <View style={styles.unitCard}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
-              <Image source={PILOT_ART[unit.def.id]} style={styles.face} contentFit="cover" />
+              <Image cachePolicy="memory" source={PILOT_ART[unit.def.id]} style={styles.face} contentFit="cover" />
               <View style={{ flex: 1 }}>
                 <Text style={styles.unitName} numberOfLines={1}>
                   {unit.def.name}
@@ -162,7 +162,7 @@ export function SidePanel() {
         {inspect && !s.menuForUid && !s.pendingWeapon && (
           <View style={[styles.unitCard, styles.inspectCard]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
-              <Image source={PILOT_ART[inspect.def.id]} style={[styles.face, { borderColor: '#ff6b6b' }]} contentFit="cover" />
+              <Image cachePolicy="memory" source={PILOT_ART[inspect.def.id]} style={[styles.face, { borderColor: '#ff6b6b' }]} contentFit="cover" />
               <View style={{ flex: 1 }}>
                 <Text style={styles.unitName} numberOfLines={1}>
                   {inspect.def.name} {inspect.def.boss ? '★' : ''}

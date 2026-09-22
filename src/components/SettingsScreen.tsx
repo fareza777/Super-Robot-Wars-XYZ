@@ -50,7 +50,7 @@ export function SettingsScreen() {
   const st = s.settings;
   return (
     <Animated.View style={[styles.root, { opacity: fade }]}>
-      <Image source={ART.hangarBg} style={StyleSheet.absoluteFill} contentFit="cover" />
+      <Image cachePolicy="memory" source={ART.hangarBg} style={StyleSheet.absoluteFill} contentFit="cover" />
       <LinearGradient colors={['rgba(3,5,14,0.7)', 'rgba(3,5,14,0.92)']} style={StyleSheet.absoluteFill} />
 
       <View style={styles.card}>

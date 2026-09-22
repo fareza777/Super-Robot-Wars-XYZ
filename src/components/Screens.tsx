@@ -25,7 +25,7 @@ export function TitleScreen() {
       }}
     >
       <Animated.View style={[StyleSheet.absoluteFill, { opacity: rise, transform: [{ scale: rise.interpolate({ inputRange: [0, 1], outputRange: [1.14, 1] }) }] }]}>
-        <Image source={ART.titleKey} style={StyleSheet.absoluteFill} contentFit="cover" transition={500} />
+        <Image cachePolicy="memory" source={ART.titleKey} style={StyleSheet.absoluteFill} contentFit="cover" transition={500} />
       </Animated.View>
       <LinearGradient colors={['rgba(3,5,14,0.1)', 'rgba(3,5,14,0.35)', 'rgba(3,5,14,0.9)']} style={StyleSheet.absoluteFill} />
 
@@ -55,7 +55,7 @@ export function BriefingScreen() {
   const roster = rosterFor(ch);
   return (
     <View style={styles.center}>
-      <Image source={ART.story[4]} style={StyleSheet.absoluteFill} contentFit="cover" />
+      <Image cachePolicy="memory" source={ART.story[4]} style={StyleSheet.absoluteFill} contentFit="cover" />
       <LinearGradient colors={['rgba(3,5,14,0.5)', 'rgba(3,5,14,0.95)']} style={StyleSheet.absoluteFill} />
 
       <Text style={styles.briefTitle}>CHAPTER {ch.id}: {ch.name}</Text>
@@ -71,7 +71,7 @@ export function BriefingScreen() {
             const on = deploySel.includes(id);
             return (
               <Pressable key={id} style={[styles.squadCard, !on && { opacity: 0.35 }]} onPress={() => toggleDeploy(id)}>
-                <Image source={PILOT_ART[id]} style={[styles.squadFace, on && { borderColor: '#4dff7a', borderWidth: 2 }]} contentFit="cover" />
+                <Image cachePolicy="memory" source={PILOT_ART[id]} style={[styles.squadFace, on && { borderColor: '#4dff7a', borderWidth: 2 }]} contentFit="cover" />
                 <Text style={[styles.squadName, !on && { color: '#667' }]}>{d.pilot.callsign} · Lv{prog?.level ?? d.level ?? 1}</Text>
                 <Text style={styles.squadUnit} numberOfLines={1}>{d.name}</Text>
                 <Text style={styles.deployMark}>{on ? '▣ IN' : '▢ OUT'}</Text>
@@ -110,7 +110,7 @@ export function EndScreen({ victory }: { victory: boolean }) {
   const campaignDone = victory && chapter >= CHAPTERS_COUNT;
   return (
     <View style={styles.center}>
-      <Image source={victory ? ART.titleKey : ART.story[1]} style={StyleSheet.absoluteFill} contentFit="cover" />
+      <Image cachePolicy="memory" source={victory ? ART.titleKey : ART.story[1]} style={StyleSheet.absoluteFill} contentFit="cover" />
       <LinearGradient colors={['rgba(3,5,14,0.55)', 'rgba(3,5,14,0.94)']} style={StyleSheet.absoluteFill} />
       <Text style={[styles.title, { color: victory ? '#ffd34d' : '#ff5a5a', fontSize: 40 }]}>{campaignDone ? 'CAMPAIGN COMPLETE' : victory ? 'MISSION COMPLETE' : 'MISSION FAILED'}</Text>
       <Text style={styles.briefSub}>

@@ -214,9 +214,9 @@ export function HQScreen() {
                 return (
                   <View key={ev.id} style={styles.bondRow}>
                     <View style={styles.bondFaces}>
-                      <ExpoImage source={PILOT_ART[ev.a]} style={styles.bondFace} contentFit="cover" />
+                      <ExpoImage cachePolicy="memory" source={PILOT_ART[ev.a]} style={styles.bondFace} contentFit="cover" />
                       <Text style={styles.bondHeart}>{ev.romance ? '♥' : '✦'}</Text>
-                      <ExpoImage source={PILOT_ART[ev.b]} style={styles.bondFace} contentFit="cover" />
+                      <ExpoImage cachePolicy="memory" source={PILOT_ART[ev.b]} style={styles.bondFace} contentFit="cover" />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.shopName}>{locked ? '???' : ev.title}</Text>
@@ -283,7 +283,7 @@ function HqCard({ title, sub, art, accent, onPress }: { title: string; sub: stri
   return (
     <Pressable style={styles.hqCard} onPress={onPress}>
       <Animated.View style={[styles.hqCardImg, { transform: [{ translateY: bob.interpolate({ inputRange: [0, 1], outputRange: [0, -6] }) }] }]}>
-        <ExpoImage source={art} style={StyleSheet.absoluteFill} contentFit="cover" contentPosition="top center" />
+        <ExpoImage cachePolicy="memory" source={art} style={StyleSheet.absoluteFill} contentFit="cover" contentPosition="top center" />
       </Animated.View>
       <LinearGradient colors={['transparent', 'rgba(3,5,14,0.94)']} style={styles.cardGrad} pointerEvents="none" />
       <View style={styles.hqCardLabel}>

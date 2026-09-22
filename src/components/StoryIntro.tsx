@@ -59,7 +59,7 @@ export function StoryIntro() {
     <Pressable style={styles.root} onPress={() => setTapped((v) => v + 1)}>
       <Animated.View key={idx} style={[StyleSheet.absoluteFill, { opacity: fade }]}>
         <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ scale }, { translateX: tx }] }]}>
-          <Image source={ART.story[idx]} style={StyleSheet.absoluteFill} contentFit="cover" transition={600} />
+          <Image cachePolicy="memory" source={ART.story[idx]} style={StyleSheet.absoluteFill} contentFit="cover" transition={600} />
         </Animated.View>
       </Animated.View>
       <LinearGradient colors={['transparent', 'rgba(3,5,14,0.92)']} style={styles.captionBg} pointerEvents="none" />

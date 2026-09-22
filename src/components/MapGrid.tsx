@@ -33,7 +33,7 @@ const Tile = React.memo(function Tile({
 }) {
   return (
     <Pressable onPress={() => onTap(p)} style={[styles.tile, { left: p.x * tw, top: p.y * th, width: tw, height: th }]}>
-      <Image source={TERRAIN_ART[terrain]} style={StyleSheet.absoluteFill} contentFit="cover" />
+      <Image cachePolicy="memory" source={TERRAIN_ART[terrain]} style={StyleSheet.absoluteFill} contentFit="cover" />
       <View style={styles.gridLine} pointerEvents="none" />
       {inThreat && !inMove && !inAtk && <View style={[styles.overlay, styles.threatOv]} pointerEvents="none" />}
       {inMove && <View style={[styles.overlay, styles.moveOv]} pointerEvents="none" />}
@@ -57,7 +57,7 @@ const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitSt
           },
         ]}
       >
-        <Image source={MECH_ART[u.def.id]} style={[StyleSheet.absoluteFill, u.side === 'enemy' && { transform: [{ scaleX: -1 }] }]} contentFit="cover" />
+        <Image cachePolicy="memory" source={MECH_ART[u.def.id]} style={[StyleSheet.absoluteFill, u.side === 'enemy' && { transform: [{ scaleX: -1 }] }]} contentFit="cover" />
       </View>
       <View style={[styles.hpBarBg, { width: chip * 0.9 }]}>
         <View style={[styles.hpBar, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.side === 'player' ? '#4dff7a' : '#ff5a5a' }]} />
@@ -154,7 +154,7 @@ export function MapGrid() {
         {ghost && pendingMove && !same(ghost.pos, pendingMove) && (
           <View pointerEvents="none" style={[styles.unitWrap, { left: pendingMove.x * tw, top: pendingMove.y * th, width: tw, height: th, opacity: 0.65 }]}>
             <View style={[styles.chip, { width: chip, height: chip, borderColor: '#6db4ff' }]}>
-              <Image source={MECH_ART[ghost.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" />
+              <Image cachePolicy="memory" source={MECH_ART[ghost.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" />
             </View>
           </View>
         )}

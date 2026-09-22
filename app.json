@@ -14,7 +14,7 @@
       "package": "com.fareza777.srwxyz",
       "adaptiveIcon": {
         "backgroundColor": "#0a0f1e",
-        "foregroundImage": "./assets/art/icon_fg.png"
+        "foregroundImage": "./assets/art/icon_fg2.png"
       },
       "predictiveBackGestureEnabled": false
     },

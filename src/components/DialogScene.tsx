@@ -100,7 +100,7 @@ export function DialogScene({ lines, tag, bg, onDone }: { lines: DialogLine[]; t
   return (
     <Pressable style={styles.root} onPress={next}>
       <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ scale: bgZoom.interpolate({ inputRange: [0, 1], outputRange: [1.02, 1.16] }) }] }]}>
-        <Image source={bg} style={StyleSheet.absoluteFill} contentFit="cover" />
+        <Image cachePolicy="memory" source={bg} style={StyleSheet.absoluteFill} contentFit="cover" />
       </Animated.View>
       <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(3,5,14,0.5)' }]} />
       <LinearGradient colors={['rgba(3,5,14,0.65)', 'transparent', 'rgba(3,5,14,0.9)']} style={StyleSheet.absoluteFill} pointerEvents="none" />
@@ -126,7 +126,7 @@ export function DialogScene({ lines, tag, bg, onDone }: { lines: DialogLine[]; t
           },
         ]}
       >
-        <Image source={sp.img} style={StyleSheet.absoluteFill} contentFit="cover" />
+        <Image cachePolicy="memory" source={sp.img} style={StyleSheet.absoluteFill} contentFit="cover" />
       </Animated.View>
 
       <Animated.View

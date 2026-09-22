@@ -59,7 +59,7 @@ export function HomeMenu() {
   return (
     <View style={styles.root}>
       <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ scale: 1.12 }, { translateX: drift.interpolate({ inputRange: [0, 1], outputRange: [-18, 18] }) }] }]}>
-        <Image source={ART.homeBg} style={StyleSheet.absoluteFill} contentFit="cover" />
+        <Image cachePolicy="memory" source={ART.homeBg} style={StyleSheet.absoluteFill} contentFit="cover" />
       </Animated.View>
       <LinearGradient colors={['rgba(3,5,14,0.25)', 'rgba(3,5,14,0.55)', 'rgba(3,5,14,0.94)']} style={StyleSheet.absoluteFill} />
 
