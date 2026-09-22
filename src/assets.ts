@@ -60,24 +60,24 @@ export const TERRAIN_ART: Record<string, number> = {
 };
 
 export const PILOT_ART: Record<string, number> = {
-  valstray: require('../assets/art/pilot_ray.jpg'),
-  arielis: require('../assets/art/pilot_mira.jpg'),
-  gruntborg: require('../assets/art/pilot_gara.jpg'),
-  zephyra: require('../assets/art/pilot_orin.jpg'),
-  kargan: require('../assets/art/pilot_karg.jpg'),
-  zolda: require('../assets/art/pilot_grunt.jpg'),
-  zolda_air: require('../assets/art/pilot_grunt.jpg'),
-  zoldaTank: require('../assets/art/pilot_grunt.jpg'),
-  vexia: require('../assets/art/pilot_grunt.jpg'),
-  nightmare: require('../assets/art/pilot_grunt.jpg'),
-  raxden: require('../assets/art/pilot_rax.jpg'),
-  moorin: require('../assets/art/pilot_moorin.jpg'),
-  serka: require('../assets/art/pilot_serka.jpg'),
-  empress: require('../assets/art/pilot_serka.jpg'),
-  warden: require('../assets/art/pilot_bram.jpg'),
-  emperor: require('../assets/art/pilot_vael.jpg'),
-  raxdenR: require('../assets/art/pilot_rax.jpg'),
-  vexiaX: require('../assets/art/pilot_vee.jpg'),
+  valstray: require('../assets/art/face_ray.jpg'),
+  arielis: require('../assets/art/face_mira.jpg'),
+  gruntborg: require('../assets/art/face_gara.jpg'),
+  zephyra: require('../assets/art/face_orin.jpg'),
+  kargan: require('../assets/art/face_karg.jpg'),
+  zolda: require('../assets/art/face_grunt.jpg'),
+  zolda_air: require('../assets/art/face_grunt.jpg'),
+  zoldaTank: require('../assets/art/face_grunt.jpg'),
+  vexia: require('../assets/art/face_grunt.jpg'),
+  nightmare: require('../assets/art/face_grunt.jpg'),
+  raxden: require('../assets/art/face_rax.jpg'),
+  moorin: require('../assets/art/face_moorin.jpg'),
+  serka: require('../assets/art/face_serka.jpg'),
+  empress: require('../assets/art/face_serka.jpg'),
+  warden: require('../assets/art/face_bram.jpg'),
+  emperor: require('../assets/art/face_vael.jpg'),
+  raxdenR: require('../assets/art/face_rax.jpg'),
+  vexiaX: require('../assets/art/face_vee.jpg'),
 };
 
 // Bond event backdrops — romance events get the CG, friendship stays on mess/hangar
@@ -87,9 +87,9 @@ export const BOND_BG: Record<string, number> = {
 };
 
 export const NPC_ART: Record<string, number> = {
-  merchant: require('../assets/art/npc_merchant.jpg'),
-  mechanic: require('../assets/art/npc_mechanic.jpg'),
-  captain: require('../assets/art/npc_captain.jpg'),
+  merchant: require('../assets/art/npcface_merchant.jpg'),
+  mechanic: require('../assets/art/npcface_mechanic.jpg'),
+  captain: require('../assets/art/npcface_captain.jpg'),
 };
 
 export const AUDIO = {

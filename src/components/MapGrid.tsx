@@ -4,11 +4,70 @@ import { Image } from 'expo-image';
 import { MECH_ART, TERRAIN_ART } from '../assets';
 import { key, same } from '../game/engine';
 import { useGame } from '../game/store';
-import { Pos } from '../game/types';
+import { Pos, UnitState } from '../game/types';
 
 const COLS = 14;
 const ROWS = 10;
 const PANEL_W = 237;
+
+/** One board tile — memoized so the 140-cell grid doesn't re-render on every unit/walk update. */
+const Tile = React.memo(function Tile({
+  p,
+  tw,
+  th,
+  terrain,
+  inMove,
+  inAtk,
+  inThreat,
+  onTap,
+}: {
+  p: Pos;
+  tw: number;
+  th: number;
+  terrain: keyof typeof TERRAIN_ART;
+  inMove: boolean;
+  inAtk: boolean;
+  inThreat: boolean;
+  onTap: (p: Pos) => void;
+}) {
+  return (
+    <Pressable onPress={() => onTap(p)} style={[styles.tile, { left: p.x * tw, top: p.y * th, width: tw, height: th }]}>
+      <Image source={TERRAIN_ART[terrain]} style={StyleSheet.absoluteFill} contentFit="cover" />
+      <View style={styles.gridLine} pointerEvents="none" />
+      {inThreat && !inMove && !inAtk && <View style={[styles.overlay, styles.threatOv]} pointerEvents="none" />}
+      {inMove && <View style={[styles.overlay, styles.moveOv]} pointerEvents="none" />}
+      {inAtk && <View style={[styles.overlay, styles.atkOv]} pointerEvents="none" />}
+    </Pressable>
+  );
+});
+
+/** Unit chip (mech art + hp bar + level) — memoized; only re-renders when its own unit state changes. */
+const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitState; chip: number; ghosting: boolean }) {
+  return (
+    <>
+      <View
+        style={[
+          styles.chip,
+          {
+            width: chip,
+            height: chip,
+            borderColor: u.def.boss ? '#ffd34d' : u.side === 'player' ? '#6db4ff' : '#ff6b6b',
+            opacity: u.acted || ghosting ? 0.45 : 1,
+          },
+        ]}
+      >
+        <Image source={MECH_ART[u.def.id]} style={[StyleSheet.absoluteFill, u.side === 'enemy' && { transform: [{ scaleX: -1 }] }]} contentFit="cover" />
+      </View>
+      <View style={[styles.hpBarBg, { width: chip * 0.9 }]}>
+        <View style={[styles.hpBar, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.side === 'player' ? '#4dff7a' : '#ff5a5a' }]} />
+      </View>
+      <View style={[styles.lvTag, { borderColor: u.side === 'player' ? '#6db4ff' : '#ff6b6b' }]}>
+        <Text style={styles.lvTxt}>Lv{u.level}</Text>
+      </View>
+      {u.def.boss && <Text style={styles.bossTag}>ACE</Text>}
+    </>
+  );
+});
 
 export function MapGrid() {
   const units = useGame((s) => s.units);
@@ -37,53 +96,27 @@ export function MapGrid() {
 
   return (
     <View style={[styles.board, { width: width - PANEL_W, height }]}>
-      {tiles.map((p) => {
-        const inMove = moveTiles.has(key(p));
-        const inAtk = attackTiles.has(key(p));
-        const inThreat = threatTiles.has(key(p));
-        return (
-          <Pressable key={key(p)} onPress={() => tapTile(p)} style={[styles.tile, { left: p.x * tw, top: p.y * th, width: tw, height: th }]}>
-            <Image source={TERRAIN_ART[map.terrain[p.y][p.x]]} style={StyleSheet.absoluteFill} contentFit="cover" />
-            <View style={styles.gridLine} pointerEvents="none" />
-            {inThreat && !inMove && !inAtk && <View style={[styles.overlay, styles.threatOv]} pointerEvents="none" />}
-            {inMove && <View style={[styles.overlay, styles.moveOv]} pointerEvents="none" />}
-            {inAtk && <View style={[styles.overlay, styles.atkOv]} pointerEvents="none" />}
-          </Pressable>
-        );
-      })}
+      {tiles.map((p) => (
+        <Tile
+          key={key(p)}
+          p={p}
+          tw={tw}
+          th={th}
+          terrain={map.terrain[p.y][p.x]}
+          inMove={moveTiles.has(key(p))}
+          inAtk={attackTiles.has(key(p))}
+          inThreat={threatTiles.has(key(p))}
+          onTap={tapTile}
+        />
+      ))}
       {units
         .filter((u) => u.alive)
         .map((u) => {
-          const ghosting = ghost && u.uid === ghost.uid;
           const walking = walk && walk.uid === u.uid && walk.path.length > 1;
-          const cell = (
-            <>
-              <View
-                style={[
-                  styles.chip,
-                  {
-                    width: chip,
-                    height: chip,
-                    borderColor: u.def.boss ? '#ffd34d' : u.side === 'player' ? '#6db4ff' : '#ff6b6b',
-                    opacity: u.acted || ghosting ? 0.45 : 1,
-                  },
-                ]}
-              >
-                <Image source={MECH_ART[u.def.id]} style={[StyleSheet.absoluteFill, u.side === 'enemy' && { transform: [{ scaleX: -1 }] }]} contentFit="cover" />
-              </View>
-              <View style={[styles.hpBarBg, { width: chip * 0.9 }]}>
-                <View style={[styles.hpBar, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.side === 'player' ? '#4dff7a' : '#ff5a5a' }]} />
-              </View>
-              <View style={[styles.lvTag, { borderColor: u.side === 'player' ? '#6db4ff' : '#ff6b6b' }]}>
-                <Text style={styles.lvTxt}>Lv{u.level}</Text>
-              </View>
-              {u.def.boss && <Text style={styles.bossTag}>ACE</Text>}
-            </>
-          );
-          if (walking) return <WalkingChip key={u.uid} path={walk!.path} tw={tw} th={th} cell={cell} />;
+          if (walking) return <WalkingChip key={u.uid} path={walk!.path} tw={tw} th={th} cell={<UnitCell u={u} chip={chip} ghosting={false} />} />;
           return (
             <View key={u.uid} pointerEvents="none" style={[styles.unitWrap, { left: u.pos.x * tw, top: u.pos.y * th, width: tw, height: th }]}>
-              {cell}
+              <UnitCell u={u} chip={chip} ghosting={!!ghost && u.uid === ghost.uid} />
             </View>
           );
         })}

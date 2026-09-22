@@ -65,6 +65,25 @@ export function play(key: AudioKey) {
   playEx(key);
 }
 
+let reaper: ReturnType<typeof setInterval> | null = null;
+/** One shared interval reaps finished players — avoids one timer per sound. */
+function ensureReaper() {
+  if (reaper) return;
+  reaper = setInterval(() => {
+    for (const p of live) {
+      if (!p.isLoaded || p.duration <= 0) continue;
+      if (p.currentTime >= p.duration - 0.1 || !p.playing) {
+        live.delete(p);
+        try { p.remove(); } catch {}
+      }
+    }
+    if (live.size === 0 && reaper) {
+      clearInterval(reaper);
+      reaper = null;
+    }
+  }, 300);
+}
+
 /** Play a sound and return the player so callers can read duration or stop it early. */
 export function playEx(key: AudioKey): AudioPlayer | null {
   if (!enabled || !(key in AUDIO)) return null;
@@ -72,15 +91,8 @@ export function playEx(key: AudioKey): AudioPlayer | null {
     void ensureMode();
     const p = createAudioPlayer(AUDIO[key]);
     live.add(p);
+    ensureReaper();
     p.play();
-    const id = setInterval(() => {
-      if (!p.isLoaded || p.duration <= 0) return;
-      if (p.currentTime >= p.duration - 0.1 || !p.playing) {
-        clearInterval(id);
-        live.delete(p);
-        try { p.remove(); } catch {}
-      }
-    }, 250);
     return p;
   } catch {
     return null;

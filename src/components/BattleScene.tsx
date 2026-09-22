@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ART, KIND_SFX, MECH_ART, PILOT_ART, SUBTITLES, UNIT_BARK, UNIT_VOICE } from '../assets';
 import { play } from '../audio';
 import { useGame } from '../game/store';
-import { UnitState, WeaponDef } from '../game/types';
+import { AttackResult, CounterResult, UnitState, WeaponDef } from '../game/types';
 
 /**
  * SRW-style battle cut-in with generated anime art:
@@ -28,8 +28,6 @@ export function BattleScene() {
   scaleDur(settings.animSpeed * (settings.battleMode === 'short' ? 1.75 : 1));
   const { width, height } = useWindowDimensions();
   const [stage, setStage] = useState(0);
-  const [dmgShown, setDmgShown] = useState(0);
-  const [counterDmgShown, setCounterDmgShown] = useState(0);
 
   const bgZoom = useRef(new Animated.Value(0)).current;
   const fade = useRef(new Animated.Value(0)).current;
@@ -51,8 +49,6 @@ export function BattleScene() {
   useEffect(() => {
     if (!battle) return;
     setStage(0);
-    setDmgShown(0);
-    setCounterDmgShown(0);
     fade.setValue(0);
     attEnter.setValue(0);
     defEnter.setValue(0);
@@ -119,7 +115,6 @@ export function BattleScene() {
       if (r.hit) {
         play(r.destroyed ? 'sfx_explosion' : 'sfx_hit');
         pulse(defFlash, shakeX);
-        countUp(r.damage, setDmgShown, 1000);
         if (r.destroyed)
           Animated.timing(defFall, { toValue: 1, duration: 950, delay: 500, easing: Easing.in(Easing.quad), useNativeDriver: true }).start();
       }
@@ -129,7 +124,6 @@ export function BattleScene() {
       if (c.hit) {
         play(c.destroyed ? 'sfx_explosion' : 'sfx_hit');
         pulse(attFlash, shakeX);
-        countUp(c.damage, setCounterDmgShown, 1000);
         if (c.destroyed)
           Animated.timing(attFall, { toValue: 1, duration: 950, delay: 500, easing: Easing.in(Easing.quad), useNativeDriver: true }).start();
       }
@@ -141,9 +135,6 @@ export function BattleScene() {
   const PW = width * 0.415; // mech panel width — sized so both cards never overlap
   const PH = height * 0.58;
   const counterActive = stage >= 4 && !!battle.result.counter;
-  // HP shown drains live during the impact stage (post-attack states stored on battle)
-  const defHpShown = Math.max(0, Math.min(def.hp, Math.max(battle.defenderAfter.hp, def.hp - dmgShown)));
-  const attHpShown = Math.max(0, Math.min(atk.hp, Math.max(battle.attackerAfter.hp, atk.hp - counterDmgShown)));
 
   return (
     <Pressable style={StyleSheet.absoluteFill} onPress={finishBattle}>
@@ -214,33 +205,16 @@ export function BattleScene() {
         {counterActive && <PilotCutIn key="def" unit={def} side="right" />}
       </Animated.View>
 
-      {/* name plates */}
-      <NamePlate unit={atk} hp={attHpShown} side="left" />
-      <NamePlate unit={def} hp={defHpShown} side="right" />
+      {/* name plates — own their damage count-up state so ticks don't re-render the scene */}
+      <HitPlate unit={def} after={battle.defenderAfter} side="right" active={stage === 3} result={battle.result} />
+      <CounterPlate unit={atk} after={battle.attackerAfter} side="left" active={stage === 5} result={battle.result.counter} />
 
       {/* weapon banner */}
       {stage === 1 && <Banner text={battle.weapon.name} color="#ffd34d" />}
       {stage === 4 && !!battle.result.counter && <Banner text={battle.result.counter!.weapon.name} color="#ff8a5c" />}
 
       {/* impact feedback */}
-      {stage === 3 &&
-        (battle.result.hit ? (
-          <ImpactText
-            text={`${dmgShown}`}
-            sub={battle.result.crit ? 'CRITICAL!' : battle.result.destroyed ? 'DESTROYED!' : `${battle.result.hitChance}%`}
-            color={battle.result.crit ? '#ffd34d' : '#fff'}
-          />
-        ) : (
-          <ImpactText text="MISS" sub={`${battle.result.hitChance}%`} color="#9fd0ff" />
-        ))}
       {stage === 3 && battle.result.hit && battle.result.destroyed && <Explosion right w={width} h={height} />}
-      {stage === 5 &&
-        battle.result.counter &&
-        (battle.result.counter.hit ? (
-          <ImpactText text={`${counterDmgShown}`} sub={battle.result.counter.crit ? 'CRITICAL!' : battle.result.counter.destroyed ? 'DESTROYED!' : 'COUNTER'} color="#ff8a5c" />
-        ) : (
-          <ImpactText text="MISS" sub="counter" color="#9fd0ff" />
-        ))}
       {stage === 5 && battle.result.counter?.hit && battle.result.counter.destroyed && <Explosion w={width} h={height} />}
 
       {/* footer */}
@@ -284,6 +258,57 @@ function countUp(to: number, set: (n: number) => void, ms: number) {
     set(Math.round((to * i) / steps));
     if (i >= steps) clearInterval(t);
   }, iv);
+  return t;
+}
+
+/** Name plate + impact text that owns its damage count-up — its ~10 state ticks re-render only this small subtree. */
+function HitPlate({ unit, after, side, active, result }: { unit: UnitState; after: UnitState; side: 'left' | 'right'; active: boolean; result: AttackResult }) {
+  const [dmg, setDmg] = useState(0);
+  useEffect(() => {
+    if (!active || !result.hit) return;
+    setDmg(0);
+    const iv = countUp(result.damage, setDmg, 1000);
+    return () => clearInterval(iv);
+  }, [active]);
+  const hpShown = Math.max(0, Math.min(unit.hp, Math.max(after.hp, unit.hp - dmg)));
+  return (
+    <>
+      <NamePlate unit={unit} hp={hpShown} side={side} />
+      {active &&
+        (result.hit ? (
+          <ImpactText
+            text={`${dmg}`}
+            sub={result.crit ? 'CRITICAL!' : result.destroyed ? 'DESTROYED!' : `${result.hitChance}%`}
+            color={result.crit ? '#ffd34d' : '#fff'}
+          />
+        ) : (
+          <ImpactText text="MISS" sub={`${result.hitChance}%`} color="#9fd0ff" />
+        ))}
+    </>
+  );
+}
+
+function CounterPlate({ unit, after, side, active, result }: { unit: UnitState; after: UnitState; side: 'left' | 'right'; active: boolean; result: CounterResult | null }) {
+  const [dmg, setDmg] = useState(0);
+  useEffect(() => {
+    if (!active || !result?.hit) return;
+    setDmg(0);
+    const iv = countUp(result.damage, setDmg, 1000);
+    return () => clearInterval(iv);
+  }, [active]);
+  const hpShown = Math.max(0, Math.min(unit.hp, Math.max(after.hp, unit.hp - dmg)));
+  return (
+    <>
+      <NamePlate unit={unit} hp={hpShown} side={side} />
+      {active &&
+        result &&
+        (result.hit ? (
+          <ImpactText text={`${dmg}`} sub={result.crit ? 'CRITICAL!' : result.destroyed ? 'DESTROYED!' : 'COUNTER'} color="#ff8a5c" />
+        ) : (
+          <ImpactText text="MISS" sub="counter" color="#9fd0ff" />
+        ))}
+    </>
+  );
 }
 
 // ---------- sub-visuals ----------
