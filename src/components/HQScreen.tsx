@@ -120,7 +120,8 @@ export function HQScreen() {
       {tab === 'workshop' && (
         <HqPanel npc={NPCS.mechanic} onBack={() => setTab('main')} npcImgH={npcImgH} bob={npcBob}>
           <Text style={styles.panelTitle}>WORKSHOP — BENGKEL TEKNISI</Text>
-          <View style={styles.unitRow}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, flexShrink: 0 }}>
+            <View style={styles.unitRow}>
             {rosterFor(ch).map((id) => (
               <Pressable key={id} style={[styles.unitChip, selUnit === id && { borderColor: '#6fe0ff' }]} onPress={() => setSelUnit(id)}>
                 <Image source={MECH_ART[id]} style={{ width: 34, height: 34, borderRadius: 6 }} />
@@ -129,7 +130,8 @@ export function HQScreen() {
                 </Text>
               </Pressable>
             ))}
-          </View>
+            </View>
+          </ScrollView>
           <View style={styles.wsTabs}>
             {(['frame', 'weap'] as const).map((t) => (
               <Pressable key={t} style={[styles.wsTab, wsTab === t && styles.wsTabOn]} onPress={() => setWsTab(t)}>

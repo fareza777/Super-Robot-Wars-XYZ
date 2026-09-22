@@ -82,7 +82,7 @@ export function HomeMenu() {
         <MenuItem label="SETTINGS" sub="Battle animation · speed · sound · music" accent="#9dffa0" delay={410} onPress={useGame.getState().gotoSettings} />
       </View>
 
-      <Text style={styles.foot}>v1.0.0 · original mecha tactics · not affiliated with Bandai Namco</Text>
+      <Text style={styles.foot}>v1.0.1 · original mecha tactics · not affiliated with Bandai Namco</Text>
     </View>
   );
 }

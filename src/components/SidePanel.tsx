@@ -88,7 +88,7 @@ export function SidePanel() {
               return (
                 <Btn
                   key={w.id}
-                  label={`⚔ ${w.name}${reason ? `  · ${reason}` : ''}`}
+                  label={`⚔ ${w.name}${reason ? ` · ${reason}` : ''}`}
                   sub={stat}
                   accent={hitsAny && !disabled ? '#ff6b6b' : undefined}
                   disabled={disabled}

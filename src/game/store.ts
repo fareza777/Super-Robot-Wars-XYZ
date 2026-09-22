@@ -875,10 +875,11 @@ async function runEnemyPhase(set: SetFn, get: Get) {
   if (pendingVictory) applyVictory(set, get);
 }
 
-function waitFor(cond: () => boolean): Promise<void> {
+function waitFor(cond: () => boolean, timeoutMs = 20000): Promise<void> {
   return new Promise((resolve) => {
+    const t0 = Date.now();
     const t = setInterval(() => {
-      if (cond()) {
+      if (cond() || Date.now() - t0 > timeoutMs) {
         clearInterval(t);
         resolve();
       }
