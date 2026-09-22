@@ -127,7 +127,7 @@ export const NO_MODS: CombatMods = { hitBonus: 0, dmgMult: 1 };
 
 export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, hitBonus = 0): number {
   if (att.strikeForNextAttack) return 100;
-  const raw = 65 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus - evadeOf(def, map) * 0.55;
+  const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus - evadeOf(def, map) * 0.55;
   return Math.max(10, Math.min(100, Math.round(raw)));
 }
 
@@ -287,13 +287,16 @@ export function planEnemyActions(state: GameState): AiPlan[] {
   const claimed = new Set<string>(); // tiles other AI units plan to occupy
 
   for (const e of enemies) {
+    // bosses hold position until the map's hold turn (commanding from the back line)
+    const holding = !!e.def.boss && state.turn < (map.bossHoldUntil ?? 0);
     const moveTiles = [...movementRange(map, units, e).values()].map((v) => v.pos).filter((p) => {
       const occ = unitAt(units, p);
       return (!occ || occ.uid === e.uid) && !claimed.has(key(p));
     });
+    const tiles = holding ? moveTiles.filter((p) => same(p, e.pos)) : moveTiles;
     let best: { pos: Pos; target: UnitState; weapon: WeaponDef; score: number } | null = null;
     const willMove = (p: Pos) => !same(p, e.pos);
-    for (const tile of moveTiles) {
+    for (const tile of tiles) {
       for (const p of players) {
         for (const w of weaponsAgainst(e, tile, p, willMove(tile))) {
           const hc = hitChance(e, p, w, map);

@@ -64,7 +64,7 @@ export function HomeMenu() {
       <LinearGradient colors={['rgba(3,5,14,0.25)', 'rgba(3,5,14,0.55)', 'rgba(3,5,14,0.94)']} style={StyleSheet.absoluteFill} />
 
       <View style={styles.brand}>
-        <Animated.Text style={[styles.brandTitle, { fontSize: titleFs, opacity: glow.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }]}>SUPER ROBOT WARS</Animated.Text>
+        <Animated.Text style={[styles.brandTitle, { fontSize: titleFs, opacity: glow.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }]}>STEEL ARK</Animated.Text>
         <Text style={[styles.brandXyz, { fontSize: xyzFs, letterSpacing: xyzLs }]}>X Y Z</Text>
         <View style={styles.brandRule} />
       </View>
@@ -76,13 +76,13 @@ export function HomeMenu() {
             <MenuItem label="NEW CAMPAIGN" sub="Restart from Chapter 1 (erases save)" accent="#ff8a5c" delay={200} onPress={newCampaign} />
           </>
         ) : (
-          <MenuItem label="STORY CAMPAIGN" sub="30 chapters — the XYZ war begins" accent="#ffd34d" delay={150} onPress={newCampaign} />
+          <MenuItem label="STORY CAMPAIGN" sub="30 chapters — the Squadron XYZ war begins" accent="#ffd34d" delay={150} onPress={newCampaign} />
         )}
         <MenuItem label="REPLAY STORY" sub="Watch the intro again" accent="#7ee7ff" delay={280} onPress={replayStory} />
         <MenuItem label="SETTINGS" sub="Battle animation · speed · sound · music" accent="#9dffa0" delay={410} onPress={useGame.getState().gotoSettings} />
       </View>
 
-      <Text style={styles.foot}>v1.0.3 · original mecha tactics · not affiliated with Bandai Namco</Text>
+      <Text style={styles.foot}>v1.1.0 · original mecha tactics · not affiliated with Bandai Namco</Text>
     </View>
   );
 }

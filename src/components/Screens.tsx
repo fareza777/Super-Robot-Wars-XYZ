@@ -31,7 +31,7 @@ export function TitleScreen() {
 
       <View style={styles.titleBlock}>
         <Animated.Text style={[styles.title, { opacity: rise, transform: [{ translateY: rise.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }] }]}>
-          SUPER ROBOT WARS
+          STEEL ARK
         </Animated.Text>
         <Animated.Text style={[styles.titleXyz, { opacity: rise }]}>X Y Z</Animated.Text>
       </View>
@@ -39,7 +39,7 @@ export function TitleScreen() {
       <Animated.View style={{ opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.35, 1] }), position: 'absolute', bottom: '12%' }}>
         <Text style={styles.touch}>— TOUCH TO START —</Text>
       </Animated.View>
-      <Text style={styles.small}>original mecha tactics · Mission SSS</Text>
+      <Text style={styles.small}>original mecha tactics · Squadron XYZ</Text>
     </Pressable>
   );
 }

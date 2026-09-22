@@ -41,7 +41,7 @@ export const PILOTS = {
   gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard'], faceColor: '#ff9d9d' }),
   orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor'], faceColor: '#b6ff9d' }),
   karg: P({ name: 'Col. Karg Draven', callsign: 'BOSS', melee: 75, ranged: 75, defense: 70, evade: 65, maxSp: 70, spirits: ['valor', 'strike'], faceColor: '#d0a0ff' }),
-  grunt: P({ name: 'Soldier', callsign: 'GR', melee: 50, ranged: 50, defense: 50, evade: 48, maxSp: 30, spirits: [], faceColor: '#bbbbbb' }),
+  grunt: P({ name: 'Soldier', callsign: 'GR', melee: 56, ranged: 56, defense: 52, evade: 52, maxSp: 30, spirits: [], faceColor: '#bbbbbb' }),
 };
 
 // ---------- Units (original mecha, 3 factions X / Y / Z) ----------
@@ -128,6 +128,7 @@ export const MISSION_SSS: MapDef = {
     { defId: 'zoldaAir', pos: { x: 10, y: 1 } },
     { defId: 'zoldaAir', pos: { x: 12, y: 5 } },
     { defId: 'zolda', pos: { x: 11, y: 4 } },
-    { defId: 'kargan', pos: { x: 12, y: 8 } },
+    { defId: 'kargan', pos: { x: 12, y: 1 } }, // far corner + boss hold: not attackable turn 1
   ],
+  bossHoldUntil: 3, // Kargan Rex holds position until turn 3
 };

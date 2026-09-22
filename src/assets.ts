@@ -212,6 +212,49 @@ export const SUBTITLES: Partial<Record<AudioKey, string>> = {
 };
 
 // Text-only barks used when a unit has no voice clip (new campaign units)
+// Last-words voice per unit (played when the unit is destroyed in battle)
+export const UNIT_DEFEAT_VOICE: Record<string, AudioKey> = {
+  valstray: 'die_valstray',
+  arielis: 'die_arielis',
+  gruntborg: 'die_gruntborg',
+  zephyra: 'die_zephyra',
+  raxdenR: 'die_raxdenR',
+  vexiaX: 'die_vexiaX',
+  kargan: 'die_kargan',
+  raxden: 'die_raxden',
+  moorin: 'die_moorin',
+  serka: 'die_serka',
+  empress: 'die_empress',
+  warden: 'die_warden',
+  emperor: 'die_emperor',
+  nightmare: 'die_nightmare',
+  zolda: 'die_grunt',
+  zolda_air: 'die_grunt',
+  zoldaTank: 'die_grunt',
+  vexia: 'die_grunt',
+};
+
+export const DEFEAT_BARK: Record<string, string> = {
+  valstray: 'Damn it—! Ejecting! Sorry, everyone…',
+  arielis: "Systems failing… Ray, I'm sorry. Ejecting!",
+  gruntborg: "Tch—engine's dead! Go on without me!",
+  zephyra: "No no no—I'm going down—ejecting!",
+  raxdenR: 'The Crimson Fang falls… live on, Ark!',
+  vexiaX: "Vexia's hit—! Punching out—good luck, everyone!",
+  kargan: "Impossible…! My Kargan—! You'll regret this, boy!",
+  raxden: 'The Crimson Fang… broken?! Mark this day, Ark!',
+  moorin: 'The Anvil… falls?! Empire… forgive me…',
+  serka: 'The void… rejects me?! No—!',
+  empress: 'I ascend… no more… the void calls…',
+  warden: 'The gate… opens… at last…',
+  emperor: 'This cannot be—the Throne endures—!',
+  nightmare: 'Guard… falling… for the Throne—',
+  zolda: 'Aaaah—! Unit lost! Unit lo—',
+  zolda_air: 'Aaaah—! Unit lost! Unit lo—',
+  zoldaTank: 'Aaaah—! Unit lost! Unit lo—',
+  vexia: 'Aaaah—! Unit lost! Unit lo—',
+};
+
 export const UNIT_BARK: Record<string, string> = {
   zolda: 'For the Empire!',
   zolda_air: 'For the Empire!',

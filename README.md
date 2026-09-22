@@ -1,4 +1,4 @@
-# Super Robot Wars XYZ
+# Steel Ark XYZ
 
 Original-mecha tactical RPG (SRPG) inspired by Super Robot Wars. Turn-based grid combat, full battle cut-in animations, pilot spirit commands, terrain effects — built for Android/Google Play.
 

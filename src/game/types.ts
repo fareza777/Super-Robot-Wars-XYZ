@@ -93,6 +93,8 @@ export interface MapDef {
   playerSpawns: { defId: string; pos: Pos }[];
   enemySpawns: { defId: string; pos: Pos }[];
   objective: string;
+  /** boss units hold position (can still attack in place) until this turn number. */
+  bossHoldUntil?: number;
 }
 
 export type Phase =

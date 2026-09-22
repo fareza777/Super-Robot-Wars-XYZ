@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ART, KIND_SFX, MECH_ART, PILOT_ART, SUBTITLES, UNIT_BARK, UNIT_VOICE } from '../assets';
+import { ART, DEFEAT_BARK, KIND_SFX, MECH_ART, PILOT_ART, SUBTITLES, UNIT_BARK, UNIT_DEFEAT_VOICE, UNIT_VOICE } from '../assets';
 import { play } from '../audio';
 import { useGame } from '../game/store';
 import { AttackResult, CounterResult, UnitState, WeaponDef } from '../game/types';
@@ -110,13 +110,17 @@ export function BattleScene() {
   // damage counter + shake + flash on impact stages
   useEffect(() => {
     if (!battle) return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
     if (stage === 3) {
       const r = battle.result;
       if (r.hit) {
         play(r.destroyed ? 'sfx_explosion' : 'sfx_hit');
         pulse(defFlash, shakeX);
-        if (r.destroyed)
-          Animated.timing(defFall, { toValue: 1, duration: 950, delay: 500, easing: Easing.in(Easing.quad), useNativeDriver: true }).start();
+        if (r.destroyed) {
+          Animated.timing(defFall, { toValue: 1, duration: 1100, delay: 420, easing: Easing.in(Easing.cubic), useNativeDriver: true }).start();
+          const dv = UNIT_DEFEAT_VOICE[battle.defender.def.id];
+          if (dv) timers.push(setTimeout(() => play(dv), 650));
+        }
       }
     }
     if (stage === 5 && battle.result.counter) {
@@ -124,10 +128,14 @@ export function BattleScene() {
       if (c.hit) {
         play(c.destroyed ? 'sfx_explosion' : 'sfx_hit');
         pulse(attFlash, shakeX);
-        if (c.destroyed)
-          Animated.timing(attFall, { toValue: 1, duration: 950, delay: 500, easing: Easing.in(Easing.quad), useNativeDriver: true }).start();
+        if (c.destroyed) {
+          Animated.timing(attFall, { toValue: 1, duration: 1100, delay: 420, easing: Easing.in(Easing.cubic), useNativeDriver: true }).start();
+          const dv = UNIT_DEFEAT_VOICE[battle.attacker.def.id];
+          if (dv) timers.push(setTimeout(() => play(dv), 650));
+        }
       }
     }
+    return () => timers.forEach(clearTimeout);
   }, [stage]);
 
   if (!battle || !atk || !def) return null;
@@ -348,6 +356,44 @@ function PilotCutIn({ unit, side }: { unit: UnitState; side: 'left' | 'right' })
             </Text>
           </View>
         )}
+      </View>
+    </View>
+  );
+}
+
+/** Last-words banner — defeat quote + portrait in the top-center, over the impact. */
+function DefeatBar({ unit, flip }: { unit: UnitState; flip?: boolean }) {
+  const { width, height } = useWindowDimensions();
+  const line = DEFEAT_BARK[unit.def.id];
+  if (!line) return null;
+  const W = Math.min(420, width * 0.52);
+  const IMG = Math.min(56, height * 0.17);
+  return (
+    <View
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        left: (width - W) / 2,
+        top: height * 0.07,
+        width: W,
+        flexDirection: flip ? 'row-reverse' : 'row',
+        alignItems: 'center',
+        gap: 8,
+        backgroundColor: 'rgba(10,8,18,0.82)',
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: unit.def.accent,
+        padding: 7,
+      }}
+    >
+      <Image source={PILOT_ART[unit.def.id]} style={{ width: IMG, height: IMG, borderRadius: 8 }} contentFit="cover" />
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: unit.def.accent, fontSize: 10, fontWeight: '800', letterSpacing: 1 }} numberOfLines={1}>
+          {unit.def.pilot.name} — UNIT LOST
+        </Text>
+        <Text style={{ color: '#e8e8f0', fontSize: 11.5, fontStyle: 'italic', marginTop: 2 }} numberOfLines={2}>
+          "{line}"
+        </Text>
       </View>
     </View>
   );

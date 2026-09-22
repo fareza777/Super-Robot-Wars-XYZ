@@ -179,7 +179,7 @@ const PLAYER_SPAWNS: Pos[] = [
 export function genMap(ch: ChapterDef): MapDef {
   if (ch.theme === 'custom') {
     const roster = rosterFor(ch);
-    return { ...MISSION_SSS, playerSpawns: MISSION_SSS.playerSpawns.slice(0, 4).map((s, i) => ({ defId: roster[i] ?? s.defId, pos: s.pos })) };
+    return { ...MISSION_SSS, bossHoldUntil: 3, playerSpawns: MISSION_SSS.playerSpawns.slice(0, 4).map((s, i) => ({ defId: roster[i] ?? s.defId, pos: s.pos })) };
   }
   const r = rng(ch.id * 7919);
   const terrain: Terrain[][] = [];
@@ -212,9 +212,11 @@ export function genMap(ch: ChapterDef): MapDef {
   const comps = enemyComp(ch);
   const rSpawn = rng(ch.id * 4243);
   for (const defId of comps) {
+    const isBoss = !!ALL_UNITS[defId]?.boss;
     for (let tries = 0; tries < 40; tries++) {
-      const x = 9 + Math.floor(rSpawn() * 5);
-      const y = Math.floor(rSpawn() * 8);
+      // bosses always spawn in the far top-right corner — out of the player's turn-1 reach
+      const x = isBoss ? 12 + Math.floor(rSpawn() * 2) : 9 + Math.floor(rSpawn() * 5);
+      const y = isBoss ? Math.floor(rSpawn() * 2) : Math.floor(rSpawn() * 8);
       const k = `${x},${y}`;
       const ti = TERRAIN_INFO[terrain2[y][x]];
       // never spawn a unit on damaging terrain
@@ -224,6 +226,20 @@ export function genMap(ch: ChapterDef): MapDef {
         break;
       }
     }
+  }
+  // fallback: never silently drop a unit (a missing boss would auto-win a boss-objective map)
+  for (const defId of comps) {
+    if (enemySpawns.filter((s) => s.defId === defId).length >= comps.filter((c) => c === defId).length) continue;
+    outer: for (let x = 13; x >= 9; x--)
+      for (let y = 0; y < 8; y++) {
+        const k = `${x},${y}`;
+        const ti = TERRAIN_INFO[terrain2[y][x]];
+        if (!used.has(k) && ti.passable.land && !ti.hpDmg) {
+          used.add(k);
+          enemySpawns.push({ defId, pos: { x, y } });
+          break outer;
+        }
+      }
   }
   return {
     id: `c${ch.id}`,
@@ -235,6 +251,7 @@ export function genMap(ch: ChapterDef): MapDef {
     objective: ch.objective,
     playerSpawns: PLAYER_SPAWNS.slice(0, rosterFor(ch).length).map((p, i) => ({ defId: rosterFor(ch)[i], pos: p })),
     enemySpawns,
+    bossHoldUntil: ch.boss ? 3 : undefined,
   };
 }
 
