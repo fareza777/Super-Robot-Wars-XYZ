@@ -33,6 +33,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   wish: { id: 'wish', name: 'Wish', cost: 50, desc: 'The most drained ally within 3 tiles regains +30 SP' },
   gravity: { id: 'gravity', name: 'Gravity Well', cost: 50, desc: 'Enemies within 3 tiles are anchored — they cannot move next phase' },
   guts: { id: 'guts', name: 'Guts', cost: 40, desc: 'Berserker surge — next attack deals +75% damage while under half HP' },
+  expose: { id: 'expose', name: 'Expose', cost: 35, desc: 'Paint enemies within 3 tiles — next hit on each lands +20 hit, +25% damage' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
@@ -94,6 +95,7 @@ export const WEAPONS = {
   novaMortar: W({ id: 'nova_mortar', name: 'MAP: Nova Mortar', kind: 'missile', power: 3100, rangeMin: 2, rangeMax: 5, enCost: 0, ammo: 3, hitMod: -5, postMove: false, animSeed: 57, mapRange: 1, aceReq: 5 }),
   eclipseLance: W({ id: 'eclipse_lance', name: 'Eclipse Lance', kind: 'beam', power: 4900, rangeMin: 3, rangeMax: 8, enCost: 50, ammo: null, hitMod: 10, postMove: false, animSeed: 58, aceReq: 5, sniper: true, pierce: true }),
   wraithBloom: W({ id: 'wraith_bloom', name: 'Wraith Bloom', kind: 'funnel', power: 3800, rangeMin: 2, rangeMax: 6, enCost: 40, ammo: null, hitMod: 15, postMove: true, animSeed: 59, aceReq: 5 }),
+  arkBarrageW: W({ id: 'ark_barrage', name: 'MAP: Ark Barrage', kind: 'missile', power: 2400, rangeMin: 2, rangeMax: 8, enCost: 0, ammo: null, hitMod: 0, postMove: true, animSeed: 60, mapRange: 2 }),
   militiaRifle: W({ id: 'militia_rifle', name: 'Defense Rifle', kind: 'gun', power: 1500, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 12, hitMod: 8, postMove: true, animSeed: 21 }),
   voidLance: W({ id: 'void_lance', name: 'Void Lance', kind: 'beam', power: 3300, rangeMin: 2, rangeMax: 7, enCost: 32, ammo: null, hitMod: 0, critMod: 8, postMove: false, animSeed: 25, willReq: 115, pierce: true, sniper: true }),
 };
@@ -106,7 +108,7 @@ export const PILOTS = {
   ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul'], faceColor: '#ffb347', trait: 'ace_instinct' }),
   mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse', 'fortune', 'trust'], faceColor: '#7ee7ff', trait: 'deadeye' }),
   gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor', 'sunder', 'provoke'], faceColor: '#ff9d9d', trait: 'siege_breaker' }),
-  orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless', 'lucky', 'mercy', 'purge', 'cheer'], faceColor: '#b6ff9d', trait: 'field_medic' }),
+  orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless', 'lucky', 'mercy', 'purge', 'cheer', 'expose'], faceColor: '#b6ff9d', trait: 'field_medic' }),
   karg: P({ name: 'Col. Karg Draven', callsign: 'BOSS', melee: 75, ranged: 75, defense: 70, evade: 65, maxSp: 70, spirits: ['valor', 'strike'], faceColor: '#d0a0ff', lastWords: 'Rex is scrap... the Empire builds another. Always.', killQuip: 'Another Aegis relic for the pyre.' }),
   grunt: P({ name: 'Soldier', callsign: 'GR', melee: 56, ranged: 56, defense: 52, evade: 52, maxSp: 30, spirits: [], faceColor: '#bbbbbb' }),
   civ: P({ name: 'Convoy Crew', callsign: 'CVY', melee: 40, ranged: 40, defense: 40, evade: 40, maxSp: 0, spirits: [], faceColor: '#c8b090' }),

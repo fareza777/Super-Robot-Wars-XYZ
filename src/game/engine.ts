@@ -177,7 +177,7 @@ export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: Map
   if (att.strikeForNextAttack) return 100;
   const trait = att.def.pilot.trait;
   const traitHit = (trait === 'deadeye' ? 8 : 0) + (trait === 'falcon_wing' && def.def.moveType === 'air' ? 10 : 0) + (trait === 'crimson_fury' && att.hp < att.def.maxHp / 2 ? 8 : 0);
-  const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus + traitHit + willHitBonus(att) + partBonus(att, 'hit') + (att.skills?.hit ?? 0) + (att.aceMastery ? 5 : 0) - evadeOf(def, map) * 0.55;
+  const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus + traitHit + willHitBonus(att) + partBonus(att, 'hit') + (att.skills?.hit ?? 0) + (att.aceMastery ? 5 : 0) + (def.exposed ? 20 : 0) - evadeOf(def, map) * 0.55;
   return Math.max(10, Math.min(100, Math.round(raw * (att.wounded ? 0.85 : 1))));
 }
 
@@ -189,6 +189,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (att.valorForNextAttack) dmg = Math.round(dmg * 1.5);
   if (att.soulForNextAttack) dmg = Math.round(dmg * 2);
   if (att.gutsForNextAttack && att.hp < att.def.maxHp / 2) dmg = Math.round(dmg * 1.75);
+  if (def.exposed) dmg = Math.round(dmg * 1.25);
   if (def.guardUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.5);
   dmg = Math.round(dmg * (1 + partBonus(att, 'dmg') * 0.01 + (att.skills?.dmg ?? 0) * 0.015));
   dmg = Math.round(dmg * (1 - Math.min(0.5, (def.skills?.def ?? 0) * 0.015)));
@@ -406,6 +407,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   if (result.hit && w.drain) att.hp = Math.min(att.def.maxHp, att.hp + Math.round(result.damage * 0.25));
   if (result.hit && def.alive && w.status && !result.graze) applyStatus(def, w.status);
   if (result.hit && def.alive && w.breaker && !result.graze) def.sundered = true;
+  if (result.hit) def.exposed = false;
   if (result.destroyed) {
     def.alive = false;
     att.kills += 1;
@@ -443,6 +445,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
     if (result.counter.hit && cw.drain) def.hp = Math.min(def.def.maxHp, def.hp + Math.round(result.counter.damage * 0.25));
     if (result.counter.hit && att.alive && cw.status && !result.counter.graze) applyStatus(att, cw.status);
     if (result.counter.hit && att.alive && cw.breaker && !result.counter.graze) att.sundered = true;
+    if (result.counter.hit) att.exposed = false;
     if (result.counter.destroyed) {
       att.alive = false;
       def.kills += 1;
@@ -635,6 +638,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'guts':
       u.gutsForNextAttack = true;
       break;
+    case 'expose':
+      break; // enemies in radius are marked by the store pass
     case 'overdrive':
       u.againOnKill = true;
       break;

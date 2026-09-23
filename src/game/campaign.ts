@@ -9,7 +9,7 @@ export interface ItemDef {
   name: string;
   desc: string;
   price: number;
-  apply: 'hp' | 'en' | 'ammo' | 'sp' | 'valor' | 'willAll' | 'healArea' | 'purge';
+  apply: 'hp' | 'en' | 'ammo' | 'sp' | 'valor' | 'willAll' | 'healArea' | 'purge' | 'barrage';
   amount: number;
 }
 
@@ -23,6 +23,7 @@ export const ITEMS: Record<string, ItemDef> = {
   rallyBanner: { id: 'rallyBanner', name: 'Rally Banner', desc: '+10 Will to every ally', price: 900, apply: 'willAll', amount: 10 },
   repairDrone: { id: 'repairDrone', name: 'Repair Drone', desc: 'Heal 30% HP — unit + allies within 2 tiles', price: 750, apply: 'healArea', amount: 30 },
   ventKit: { id: 'ventKit', name: 'Emergency Vent', desc: 'Purge cripple and all status debuffs', price: 700, apply: 'purge', amount: 0 },
+  arkBarrage: { id: 'arkBarrage', name: 'Ark Barrage', desc: 'Call a shipboard strike — radius-2 blast on any tile within 2-8', price: 1200, apply: 'barrage', amount: 0 },
 };
 
 export type ItemId = keyof typeof ITEMS;
@@ -990,11 +991,12 @@ export const HONORS: HonorDef[] = [
   { id: 'h_forma', name: 'FORMA SHIFT', desc: 'Transform a frame mid-battle and win', rewardCr: 700 },
   { id: 'h_raw', name: 'RAW POWER', desc: 'Win a battle with no spirits and no items used', rewardCr: 900 },
   { id: 'h_ghost', name: 'GHOST HUNTER', desc: 'Destroy 3 Phantom Shade stealth units', rewardCr: 800 },
+  { id: 'h_ghostd', name: 'GHOSTDANCER', desc: 'Score a kill while in a transformed frame', rewardCr: 700 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -1055,6 +1057,8 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return s.usedSupport !== true;
     case 'h_ghost':
       return (s.killsByDef?.phantom ?? 0) >= 3;
+    case 'h_ghostd':
+      return s.altKill === true;
     default:
       return false;
   }
