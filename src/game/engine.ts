@@ -183,6 +183,9 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (trait === 'siege_breaker' && (def.def.boss || def.elite)) dmg = Math.round(dmg * 1.15);
   if (trait === 'crimson_fury' && att.hp < att.def.maxHp / 2) dmg = Math.round(dmg * 1.1);
   if (trait === 'sovereign') dmg = Math.round(dmg * 1.08);
+  // damage-type resistance — beam coats, phase armor, disperser fields
+  const res = def.def.resists?.[w.kind] ?? 0;
+  if (res > 0) dmg = Math.round(dmg * (1 - res));
   return Math.round(dmg * dmgMult * willDmgMult(att));
 }
 

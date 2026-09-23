@@ -165,6 +165,8 @@ interface Store {
   threatTiles: Set<string>;
   kills: number; // enemies destroyed this mission
   salvageCr: number; // sector income accrued this mission (units holding base/city tiles)
+  chainTurn: number; // turn the current kill-chain belongs to
+  chainCount: number; // kills so far in that chain — 2nd+ kill per turn pays bonus salvage
   cursor: Pos | null;
   selectedUid: string | null;
   moveTiles: Map<string, MoveRec>;
@@ -252,6 +254,7 @@ interface Store {
   castSpirit: (uid: string, s: SpiritId) => void;
   repairUnit: (uid: string, targetUid: string) => void;
   supplyUnit: (uid: string, targetUid: string) => void;
+  captureUnit: (uid: string, targetUid: string) => void;
   chooseRoute: (r: 'a' | 'b') => void;
   resumeBattle: () => void;
   retreatMission: () => void;
@@ -522,6 +525,8 @@ export const useGame = create<Store>((set, get) => ({
   hazardWarn: [],
   kills: 0,
   salvageCr: 0,
+  chainTurn: 0,
+  chainCount: 0,
   ngPlus: 0,
   battleReaction: null,
   bossWarned: false,
@@ -1000,6 +1005,45 @@ export const useGame = create<Store>((set, get) => ({
     void persistBattle(get());
   },
 
+  // CAPTURE: salvage crews secure a crippled adjacent enemy frame — bigger payout than a kill
+  captureUnit: (uid, targetUid) => {
+    const s = get();
+    const u = s.units.find((x) => x.uid === uid);
+    const t = s.units.find((x) => x.uid === targetUid);
+    if (!u || !t || u.side !== 'player' || t.side !== 'enemy' || !t.alive || t.def.boss) return;
+    if (dist(u.pos, t.pos) > 1 || t.hp > t.def.maxHp * 0.25) return;
+    const salvage = 60 * t.level + (t.elite ? 200 : 0);
+    const units = s.units.map((x) => {
+      if (x.uid === targetUid) return { ...x, alive: false, hp: 0 };
+      if (x.uid === uid) return { ...x, moved: true, acted: true, exp: Math.min(99, x.exp + 30) };
+      return x;
+    });
+    let inventory = s.inventory;
+    let salvageQueue = s.salvageQueue;
+    const drop = rollDrop();
+    if (drop) {
+      inventory = { ...inventory, [drop]: (inventory[drop] ?? 0) + 1 };
+      salvageQueue = [...salvageQueue, ITEMS[drop].name];
+    }
+    set({
+      units,
+      inventory,
+      salvageQueue,
+      salvageCr: s.salvageCr + salvage,
+      menuForUid: null,
+      pendingMove: null,
+      selectedUid: null,
+      moveTiles: new Map(),
+      log: push(
+        s.log,
+        `⛓ ${t.def.name} crippled & CAPTURED — crews haul the frame (+${salvage}cr salvage)${drop ? ` + ${ITEMS[drop].name}` : ''}`,
+      ),
+    });
+    void persistBattle(get());
+    const end = checkEnd(units, s.missionCh, s.turn);
+    if (end === 'victory') applyVictory(set, get);
+  },
+
   restart: () =>
     set({
       phase: 'home',
@@ -1240,6 +1284,10 @@ export const useGame = create<Store>((set, get) => ({
     for (const q of defeatQuotes(s.units, state.units)) log2 = push(log2, q);
     const dead = deadEnemies(s.units, state.units);
     const killCount = dead.length;
+    // kill-chain: every kill beyond the first on the same turn pays bonus salvage
+    const chain = killCount > 0 ? (s.turn === s.chainTurn ? s.chainCount + killCount : killCount) : s.chainCount;
+    const chainBonus = chain > 1 && killCount > 0 ? 30 * chain : 0;
+    if (chainBonus) log2 = push(log2, `⛓ CHAIN ×${chain} — +${chainBonus}cr bonus salvage`);
     const quip = bondQuip(s, att, dead);
     if (quip) log2 = push(log2, `♥ ${quip}`);
     let inventory = s.inventory;
@@ -1263,6 +1311,9 @@ export const useGame = create<Store>((set, get) => ({
       inventory,
       salvageQueue,
       kills: s.kills + killCount,
+      chainTurn: killCount > 0 ? s.turn : s.chainTurn,
+      chainCount: chain,
+      salvageCr: s.salvageCr + chainBonus,
       pendingWeapon: null,
       mapAim: null,
       attackTiles: new Set<string>(),
@@ -1316,6 +1367,10 @@ export const useGame = create<Store>((set, get) => ({
       log2 = push(log2, "Cpt. Vossen's wreck spills a cache — Mega Repair Kit acquired");
       salvageQueue = [...salvageQueue, ITEMS.megaKit.name];
     }
+    const mapKills = deadEnemies(s.units, state.units).length;
+    const mapChain = mapKills > 0 ? (s.turn === s.chainTurn ? s.chainCount + mapKills : mapKills) : s.chainCount;
+    const mapChainBonus = mapChain > 1 && mapKills > 0 ? 30 * mapChain : 0;
+    if (mapChainBonus) log2 = push(log2, `⛓ CHAIN ×${mapChain} — +${mapChainBonus}cr bonus salvage`);
     const common = {
       units: state.units,
       log: log2,
@@ -1324,6 +1379,9 @@ export const useGame = create<Store>((set, get) => ({
       vossenDefeated: s.vossenDefeated || vossenDowned(s.units, state.units),
       killsByDef: tallyKills(s.killsByDef, deadEnemies(s.units, state.units)),
       kills: s.kills + deadEnemies(s.units, state.units).length,
+      chainTurn: mapKills > 0 ? s.turn : s.chainTurn,
+      chainCount: mapChain,
+      salvageCr: s.salvageCr + mapChainBonus,
       pendingWeapon: null,
       mapAim: null,
       attackTiles: new Set<string>(),

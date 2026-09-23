@@ -87,6 +87,8 @@ export interface UnitDef {
   repairer?: boolean;
   /** supply frame: can RESUPPLY an ally within 3 tiles (EN + ammo, no heal) */
   supplier?: boolean;
+  /** damage-type resistance — fraction reduced per weapon kind (0.4 = -40% beam) */
+  resists?: Partial<Record<WeaponKind, number>>;
 }
 
 export interface UnitState {

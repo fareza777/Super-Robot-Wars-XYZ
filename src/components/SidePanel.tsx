@@ -232,6 +232,22 @@ export function SidePanel() {
                     ))}
                 </>
               )}
+            {s.units.some((t) => t.alive && t.side === 'enemy' && !t.def.boss && t.hp <= t.def.maxHp * 0.25 && dist(t.pos, unit.pos) <= 1) && (
+              <>
+                <Text style={styles.menuTitle}>CAPTURE</Text>
+                {s.units
+                  .filter((t) => t.alive && t.side === 'enemy' && !t.def.boss && t.hp <= t.def.maxHp * 0.25 && dist(t.pos, unit.pos) <= 1)
+                  .map((t) => (
+                    <Btn
+                      key={t.uid}
+                      label={`⛓ ${t.def.name}`}
+                      sub={`crippled ${t.hp}/${t.def.maxHp} HP — crews secure the frame: +${60 * t.level + (t.elite ? 200 : 0)}cr + item chance`}
+                      onPress={() => s.captureUnit(unit.uid, t.uid)}
+                      accent="#ffd34d"
+                    />
+                  ))}
+              </>
+            )}
             {unit.def.pilot.spirits.length > 0 && <Btn label="✦ SPIRIT COMMANDS" sub={`SP ${unit.sp}`} onPress={() => s.openSpirits(unit.uid)} accent="#c9a0ff" />}
             {Object.values(ITEMS).some((it) => (s.inventory[it.id] ?? 0) > 0) && (
               <>
@@ -312,6 +328,7 @@ export function SidePanel() {
                           </View>
                           <Text style={styles.tgtCnt} numberOfLines={1}>
                             {cw ? `↩ CNT ~${cDmg} (${cHc}%)` : '↩ no counter in range'} · CRIT {critChance(unit, e)}%{fb > 0 ? ` · ▣FORM +${fb}` : ''}
+                            {(e.def.resists?.[s.pendingWeapon!.kind] ?? 0) > 0 ? ` · 🛡RES −${Math.round((e.def.resists![s.pendingWeapon!.kind] ?? 0) * 100)}%` : ''}
                           </Text>
                         </View>
                         <View style={styles.tgtHitBox}>
@@ -428,6 +445,13 @@ export function SidePanel() {
             {buffNames(inspect).length > 0 && (
               <Text style={[styles.traitLine, { color: '#7de0ff' }]} numberOfLines={1}>
                 ✦ BUFFS: {buffNames(inspect).join(' · ')}
+              </Text>
+            )}
+            {inspect.def.resists && (
+              <Text style={[styles.traitLine, { color: '#ffd34d' }]} numberOfLines={1}>
+                🛡 RESIST: {Object.entries(inspect.def.resists)
+                  .map(([k, v]) => `${k.toUpperCase()} −${Math.round((v ?? 0) * 100)}%`)
+                  .join(' · ')}
               </Text>
             )}
             {inspect.def.weapons.map((w) => (
