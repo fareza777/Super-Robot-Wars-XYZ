@@ -110,6 +110,10 @@ export interface UnitState {
   fortuneForNextAttack?: boolean;
   /** Soul spirit: next attack deals 2x damage */
   soulForNextAttack?: boolean;
+  /** elite enemy: tougher stats, more EXP/credits on kill */
+  elite?: boolean;
+  /** NPC ally (side 'player') — uncontrollable, must be protected on protect missions */
+  npc?: boolean;
 }
 
 export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def';
@@ -140,7 +144,11 @@ export interface MapDef {
   // terrain[y][x]
   terrain: Terrain[][];
   playerSpawns: { defId: string; pos: Pos }[];
-  enemySpawns: { defId: string; pos: Pos }[];
+  enemySpawns: { defId: string; pos: Pos; elite?: boolean }[];
+  /** NPC ally units that spawn fixed on the map (protect objectives) */
+  allySpawns?: { defId: string; pos: Pos }[];
+  /** hidden salvage crates: a player unit moving onto the tile claims the item */
+  crates?: { pos: Pos; itemId: string }[];
   objective: string;
   /** boss units hold position (can still attack in place) until this turn number. */
   bossHoldUntil?: number;

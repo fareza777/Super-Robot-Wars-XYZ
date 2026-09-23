@@ -62,6 +62,7 @@ export const PILOTS = {
   orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless'], faceColor: '#b6ff9d' }),
   karg: P({ name: 'Col. Karg Draven', callsign: 'BOSS', melee: 75, ranged: 75, defense: 70, evade: 65, maxSp: 70, spirits: ['valor', 'strike'], faceColor: '#d0a0ff' }),
   grunt: P({ name: 'Soldier', callsign: 'GR', melee: 56, ranged: 56, defense: 52, evade: 52, maxSp: 30, spirits: [], faceColor: '#bbbbbb' }),
+  civ: P({ name: 'Convoy Crew', callsign: 'CVY', melee: 40, ranged: 40, defense: 40, evade: 40, maxSp: 0, spirits: [], faceColor: '#c8b090' }),
 };
 
 // ---------- Units (original mecha, 3 factions X / Y / Z) ----------

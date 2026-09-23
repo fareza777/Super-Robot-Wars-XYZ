@@ -309,8 +309,8 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
 
   // EXP: +30 for a landed hit, +70 for a kill (counter kills award the countering unit)
   result.expEvents = [];
-  if (result.hit) awardExp(att, result.destroyed ? 70 : 30, result.expEvents);
-  if (result.counter?.hit) awardExp(def, result.counter.destroyed ? 70 : 25, result.expEvents);
+  if (result.hit) awardExp(att, result.destroyed ? (def.elite ? 110 : 70) : 30, result.expEvents);
+  if (result.counter?.hit) awardExp(def, result.counter.destroyed ? (att.elite ? 110 : 70) : 25, result.expEvents);
   return { state: { ...state, units }, result };
 }
 
@@ -485,8 +485,9 @@ export function planEnemyActions(state: GameState): AiPlan[] {
 }
 
 export interface EndObjective {
-  objectiveType?: 'rout' | 'survive' | 'boss';
+  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect';
   surviveTurns?: number;
+  protectTurns?: number;
 }
 
 /** SRW support attack: an ally adjacent to the attacker and in range of the defender chips in (55% dmg, no counter, doesn't consume its turn). */
@@ -542,6 +543,12 @@ export function checkEnd(units: UnitState[], obj?: EndObjective | null, turn?: n
   if (type === 'survive') {
     if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
     return (turn ?? 0) > (obj?.surviveTurns ?? 8) ? 'victory' : null;
+  }
+  if (type === 'protect') {
+    // NPC ally destroyed is an instant loss; outlasting the turn limit (or routing the ambush) wins
+    if (!units.some((u) => u.alive && u.npc)) return 'defeat';
+    if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
+    return (turn ?? 0) > (obj?.protectTurns ?? 8) ? 'victory' : null;
   }
   if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
   return null;

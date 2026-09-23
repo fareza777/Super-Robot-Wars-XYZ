@@ -88,6 +88,7 @@ export interface BattleSave {
   eventsFired: string[];
   inventory: Record<string, number>;
   log: string[];
+  crates?: { pos: Pos; itemId: string }[];
 }
 
 /** Pilots with this many career kills deploy at raised will (ace bonus). */
@@ -114,6 +115,7 @@ interface Store {
   units: UnitState[];
   chapter: number; // index into CHAPTERS — next/current mission
   map: MapDef;
+  crates: { pos: Pos; itemId: string }[]; // unclaimed salvage crates on the map
   credits: number;
   inventory: Record<string, number>;
   upgrades: UpgradeMap;
@@ -132,6 +134,8 @@ interface Store {
   settings: GameSettings;
   deploySel: string[];
   inspectUid: string | null;
+  /** empty-tile tap -> show terrain info card */
+  tileInfo: Pos | null;
   threatTiles: Set<string>;
   kills: number; // enemies destroyed this mission
   cursor: Pos | null;
@@ -301,6 +305,23 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
     u.level = enemyLevelOf(ch, s.defId);
     ngEnemy(u, ngPlus);
     hardEnemy(u, difficulty);
+    if (s.elite) {
+      u.elite = true;
+      u.def = {
+        ...u.def,
+        name: `Elite ${u.def.name}`,
+        accent: '#ffd34d',
+        maxHp: Math.round(u.def.maxHp * 1.2),
+        armor: u.def.armor + 150,
+        mobility: u.def.mobility + 8,
+      };
+      u.hp = u.def.maxHp;
+    }
+    units.push(u);
+  }
+  for (const s of map.allySpawns ?? []) {
+    const u = makeUnit(s.defId, 'player', s.pos, `a${i++}`);
+    u.npc = true;
     units.push(u);
   }
   return { map, units };
@@ -328,6 +349,7 @@ async function persistBattle(s: Store) {
     eventsFired: s.eventsFired,
     inventory: s.inventory,
     log: s.log.slice(-30),
+    crates: s.crates,
   };
   try {
     await AsyncStorage.setItem(BATTLE_SAVE_KEY, JSON.stringify(data));
@@ -419,6 +441,7 @@ export const useGame = create<Store>((set, get) => ({
   screenShake: 0,
   chapter: 0,
   map: MISSION_SSS,
+  crates: [],
   credits: 0,
   inventory: {},
   upgrades: {},
@@ -436,6 +459,7 @@ export const useGame = create<Store>((set, get) => ({
   missionCh: CHAPTERS[0],
   deploySel: [],
   inspectUid: null,
+  tileInfo: null,
   threatTiles: new Set<string>(),
   kills: 0,
   ngPlus: 0,
@@ -501,7 +525,7 @@ export const useGame = create<Store>((set, get) => ({
     const ch = sideAsChapter(m);
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
     void clearBattleSave();
-    set({ phase: 'player', sideId: id, missionCh: ch, map, units, kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set(), midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
+    set({ phase: 'player', sideId: id, missionCh: ch, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, threatTiles: new Set(), midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
     setTimeout(() => set({ notice: null }), 2400);
     void persistBattle(get());
   },
@@ -708,7 +732,7 @@ export const useGame = create<Store>((set, get) => ({
       zoneTiles.set(k, { pos: { x, y }, cost: 0 });
     }
     void clearBattleSave();
-    set({ phase: 'deploy', sideId: null, missionCh: ch, map, units, kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set(), midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
+    set({ phase: 'deploy', sideId: null, missionCh: ch, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, threatTiles: new Set(), midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
   },
   finishDialog: () => {
     set({ phase: 'player', notice: 'PLAYER PHASE — TURN 1' });
@@ -738,6 +762,7 @@ export const useGame = create<Store>((set, get) => ({
       bossWarned: b.bossWarned,
       eventsFired: b.eventsFired,
       inventory: b.inventory,
+      crates: b.crates ?? [],
       log: b.log,
       cursor: null,
       selectedUid: null,
@@ -756,6 +781,7 @@ export const useGame = create<Store>((set, get) => ({
       midDialog: null,
       deployTiles: new Set(),
       inspectUid: null,
+      tileInfo: null,
       threatTiles: new Set(),
       enemyBusy: false,
     });
@@ -805,6 +831,7 @@ export const useGame = create<Store>((set, get) => ({
       log: [],
       enemyBusy: false,
       inspectUid: null,
+      tileInfo: null,
       threatTiles: new Set(),
     }),
 
@@ -844,9 +871,9 @@ export const useGame = create<Store>((set, get) => ({
     const u = unitAt(s.units, p);
 
     // tap an enemy: inspect card + threat-range overlay
-    if (u && u.side === 'enemy' && !s.selectedUid) {
+    if (u && (u.side === 'enemy' || u.npc) && !s.selectedUid) {
       const threat = threatTilesFor(s.map, s.units, u);
-      set({ cursor: p, inspectUid: u.uid, threatTiles: threat });
+      set({ cursor: p, inspectUid: u.uid, threatTiles: threat, tileInfo: null });
       return;
     }
 
@@ -863,7 +890,7 @@ export const useGame = create<Store>((set, get) => ({
         return;
       }
       // tapped elsewhere -> select that unit or deselect
-      if (u && u.side === 'player' && !u.acted) {
+      if (u && u.side === 'player' && !u.acted && !u.npc) {
         get().cancel();
         get().tapTile(p);
         return;
@@ -874,20 +901,21 @@ export const useGame = create<Store>((set, get) => ({
 
     if (u && u.side === 'player' && u.acted && s.inspectUid) {
       get().clearInspect();
-      set({ cursor: p });
+      set({ cursor: p, tileInfo: null });
       return;
     }
 
-    if (u && u.side === 'player' && !u.acted) {
+    if (u && u.side === 'player' && !u.acted && !u.npc) {
       const tiles = movementRange(s.map, s.units, u);
       set({
         selectedUid: u.uid,
         cursor: p,
         moveTiles: tiles,
+        tileInfo: null,
       });
       return;
     }
-    set({ cursor: p });
+    set({ cursor: p, tileInfo: p });
   },
 
   confirmMove: (p) => {
@@ -897,7 +925,19 @@ export const useGame = create<Store>((set, get) => ({
     const units = s.units.map((u) => (u.uid === sel.uid ? { ...u, pos: p, moved: true } : u));
     const path = pathTo(s.moveTiles, p);
     const walking = path.length > 1 ? { uid: sel.uid, path } : null;
-    set({ units, walk: walking, pendingMove: p, preMovePos: sel.pos, pendingMovedFlag: !same(sel.pos, p), menuForUid: sel.uid, moveTiles: new Map(), selectedUid: sel.uid });
+    // landing on a salvage crate claims it for the squad
+    const crateIdx = s.crates.findIndex((c) => c.pos.x === p.x && c.pos.y === p.y);
+    let inventory = s.inventory;
+    let crates = s.crates;
+    let salvageQueue = s.salvageQueue;
+    if (crateIdx >= 0) {
+      const itemId = s.crates[crateIdx].itemId;
+      inventory = { ...s.inventory, [itemId]: (s.inventory[itemId] ?? 0) + 1 };
+      crates = s.crates.filter((_, i) => i !== crateIdx);
+      salvageQueue = [...s.salvageQueue, ITEMS[itemId]?.name ?? itemId];
+    }
+    set({ units, walk: walking, pendingMove: p, preMovePos: sel.pos, pendingMovedFlag: !same(sel.pos, p), menuForUid: sel.uid, moveTiles: new Map(), selectedUid: sel.uid, inventory, crates, salvageQueue, tileInfo: null });
+    if (crateIdx >= 0) drainSalvage(set, get, walking ? path.length * 320 + 400 : 600);
     if (walking) scheduleWalkClear(set, get, sel.uid, path.length);
   },
 
@@ -922,6 +962,7 @@ export const useGame = create<Store>((set, get) => ({
       menuForUid: null,
       spiritForUid: null,
       inspectUid: null,
+      tileInfo: null,
       threatTiles: new Set(),
     });
   },
@@ -1185,7 +1226,7 @@ export const useGame = create<Store>((set, get) => ({
     });
     let log = push(s.log, `— Turn ${s.turn} enemy phase —`);
     for (const l of healed) log = push(log, l);
-    set({ phase: 'enemy', enemyBusy: true, units, log, inspectUid: null, threatTiles: new Set() });
+    set({ phase: 'enemy', enemyBusy: true, units, log, inspectUid: null, tileInfo: null, threatTiles: new Set() });
     get().showHint('phase', 'ENEMY PHASE — hostiles move and strike. Units that kept COUNTER answer back automatically.');
     void runEnemyPhase(set, get);
   },
@@ -1223,11 +1264,13 @@ function applyVictory(set: SetFn, get: Get) {
   const s = get();
   const pilotProg = { ...s.pilotProg };
   for (const u of s.units) {
-    if (u.side === 'player') pilotProg[u.def.id] = { level: u.level, exp: u.exp, kills: (pilotProg[u.def.id]?.kills ?? 0) + u.kills, pp: u.pp, skills: u.skills };
+    if (u.side === 'player' && !u.npc) pilotProg[u.def.id] = { level: u.level, exp: u.exp, kills: (pilotProg[u.def.id]?.kills ?? 0) + u.kills, pp: u.pp, skills: u.skills };
   }
+  // each elite destroyed pays a bounty on top of the standard kill credit
+  const eliteCr = s.units.filter((u) => u.side === 'enemy' && !u.alive && u.elite).length * 50;
   const side = s.sideId ? SIDE_MISSIONS.find((m) => m.id === s.sideId) : undefined;
   if (side) {
-    const reward = Math.round((side.rewardCr + s.kills * 150) * (s.settings.difficulty === 'hard' ? 1.25 : 1));
+    const reward = Math.round((side.rewardCr + s.kills * 150 + eliteCr) * (s.settings.difficulty === 'hard' ? 1.25 : 1));
     const credits = s.credits + reward;
     const inventory = side.rewardItem ? { ...s.inventory, [side.rewardItem]: (s.inventory[side.rewardItem] ?? 0) + 1 } : s.inventory;
     const sideCleared = [...s.sideCleared, side.id];
@@ -1248,7 +1291,7 @@ function applyVictory(set: SetFn, get: Get) {
     return;
   }
   const ch = s.missionCh;
-  const reward = Math.round((800 + ch.id * 150 + s.kills * 150) * (s.settings.difficulty === 'hard' ? 1.25 : 1));
+  const reward = Math.round((800 + ch.id * 150 + s.kills * 150 + eliteCr) * (s.settings.difficulty === 'hard' ? 1.25 : 1));
   const clearedFinal = s.chapter + 1 >= CHAPTERS_COUNT;
   // beating the final chapter rolls the campaign into New Game+: back to ch.1,
   // keeping levels/upgrades/bonds/items; enemy frames get +18% HP, +10% armor, +6 mobility, +2 lv per cycle
@@ -1349,7 +1392,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       if (def.side === 'player' && cur.settings.battleMode !== 'off') {
         // an adjacent ally that hasn't acted can intercept the blow (SRW cover)
         coverUid = cur.units
-          .filter((u) => u.alive && u.side === 'player' && !u.acted && u.uid !== def.uid && dist(u.pos, def.pos) === 1)
+          .filter((u) => u.alive && u.side === 'player' && !u.acted && !u.npc && u.uid !== def.uid && dist(u.pos, def.pos) === 1)
           .sort((a, b) => b.hp - a.hp)[0]?.uid;
         set((st) => ({
           phase: 'battle',
@@ -1560,6 +1603,7 @@ useGame.subscribe((s, prev) => {
     eventsFired: s.eventsFired,
     inventory: s.inventory,
     log: s.log.slice(-30),
+    crates: s.crates,
   };
   useGame.setState({ savedBattle: b });
   try {

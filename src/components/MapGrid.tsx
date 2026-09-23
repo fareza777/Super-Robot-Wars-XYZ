@@ -20,6 +20,7 @@ const Tile = React.memo(function Tile({
   inMove,
   inAtk,
   inThreat,
+  crate,
   onTap,
 }: {
   p: Pos;
@@ -29,12 +30,14 @@ const Tile = React.memo(function Tile({
   inMove: boolean;
   inAtk: boolean;
   inThreat: boolean;
+  crate: boolean;
   onTap: (p: Pos) => void;
 }) {
   return (
     <Pressable onPress={() => onTap(p)} style={[styles.tile, { left: p.x * tw, top: p.y * th, width: tw, height: th }]}>
       <Image cachePolicy="memory" source={TERRAIN_ART[terrain]} style={StyleSheet.absoluteFill} contentFit="cover" />
       <View style={styles.gridLine} pointerEvents="none" />
+      {crate && <Text style={styles.crateTag} pointerEvents="none">▣</Text>}
       {inThreat && !inMove && !inAtk && <View style={[styles.overlay, styles.threatOv]} pointerEvents="none" />}
       {inMove && <View style={[styles.overlay, styles.moveOv]} pointerEvents="none" />}
       {inAtk && <View style={[styles.overlay, styles.atkOv]} pointerEvents="none" />}
@@ -52,7 +55,7 @@ const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitSt
           {
             width: chip,
             height: chip,
-            borderColor: u.phase2 ? '#ff3030' : u.def.boss ? '#ffd34d' : u.side === 'player' ? '#6db4ff' : '#ff6b6b',
+            borderColor: u.phase2 ? '#ff3030' : u.def.boss || u.elite ? '#ffd34d' : u.side === 'player' ? (u.npc ? '#7dff9d' : '#6db4ff') : '#ff6b6b',
             borderWidth: u.phase2 ? 2.5 : 1.5,
             opacity: u.acted || ghosting ? 0.45 : 1,
           },
@@ -67,7 +70,7 @@ const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitSt
       <View style={[styles.lvTag, { borderColor: u.side === 'player' ? '#6db4ff' : '#ff6b6b' }]}>
         <Text style={styles.lvTxt}>Lv{u.level}</Text>
       </View>
-      {u.def.boss ? <Text style={[styles.bossTag, u.phase2 && { color: '#ff5050' }]}>{u.phase2 ? 'Ω ACE' : 'ACE'}</Text> : u.aceMastery ? <Text style={[styles.bossTag, { color: '#6fe0ff' }]}>★ACE</Text> : null}
+      {u.def.boss ? <Text style={[styles.bossTag, u.phase2 && { color: '#ff5050' }]}>{u.phase2 ? 'Ω ACE' : 'ACE'}</Text> : u.elite ? <Text style={[styles.bossTag, { color: '#ffd34d' }]}>★ELITE</Text> : u.npc ? <Text style={[styles.bossTag, { color: '#7dff9d' }]}>🛡ALLY</Text> : u.aceMastery ? <Text style={[styles.bossTag, { color: '#6fe0ff' }]}>★ACE</Text> : null}
       {u.will > 100 && (
         <View style={[styles.willTag, u.will >= 130 && { borderColor: '#ffd34d' }]}>
           <Text style={[styles.willTxt, u.will >= 130 && { color: '#ffd34d' }]}>◈{u.will}</Text>
@@ -83,6 +86,7 @@ export function MapGrid() {
   const moveTiles = useGame((s) => s.moveTiles);
   const attackTiles = useGame((s) => s.attackTiles);
   const threatTiles = useGame((s) => s.threatTiles);
+  const crates = useGame((s) => s.crates);
   const selectedUid = useGame((s) => s.selectedUid);
   const pendingMove = useGame((s) => s.pendingMove);
   const walk = useGame((s) => s.walk);
@@ -144,6 +148,7 @@ export function MapGrid() {
             inMove={moveTiles.has(key(p))}
             inAtk={attackTiles.has(key(p))}
             inThreat={threatTiles.has(key(p))}
+            crate={crates.some((c) => c.pos.x === p.x && c.pos.y === p.y)}
             onTap={tapTile}
           />
         ))}
@@ -204,6 +209,7 @@ const styles = StyleSheet.create({
   moveOv: { backgroundColor: 'rgba(70,140,255,0.4)' },
   atkOv: { backgroundColor: 'rgba(255,60,60,0.45)' },
   threatOv: { backgroundColor: 'rgba(255,150,40,0.26)', borderWidth: 1, borderColor: 'rgba(255,150,40,0.35)' },
+  crateTag: { position: 'absolute', top: 3, right: 3, color: '#ffd34d', fontSize: 15, fontWeight: '900', textShadowColor: 'rgba(255,190,40,0.9)', textShadowRadius: 5 },
   unitWrap: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
   chip: { borderRadius: 6, overflow: 'hidden', borderWidth: 1.5, backgroundColor: '#0a0e1e' },
   hpBarBg: { position: 'absolute', bottom: 0, height: 3, backgroundColor: '#111', borderRadius: 1 },

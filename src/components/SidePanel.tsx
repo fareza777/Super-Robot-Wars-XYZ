@@ -3,9 +3,9 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { Image } from 'expo-image';
 import { PILOT_ART } from '../assets';
 import { ITEMS, PARTS } from '../game/campaign';
-import { SPIRITS } from '../game/data';
+import { SPIRITS, TERRAIN_INFO } from '../game/data';
 import { bondMods } from '../game/bonds';
-import { bestCounterWeapon, critChance, damageOf, dist, hitChance, key, terrainDesc, weaponsAgainst } from '../game/engine';
+import { bestCounterWeapon, critChance, damageOf, dist, hitChance, key, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, useGame } from '../game/store';
 import { SpiritId } from '../game/types';
 
@@ -37,7 +37,11 @@ export function SidePanel() {
   const unit = s.menuForUid ? s.units.find((u) => u.uid === s.menuForUid) : s.selectedUid ? s.units.find((u) => u.uid === s.selectedUid) : undefined;
   const spiritUnit = s.spiritForUid ? s.units.find((u) => u.uid === s.spiritForUid) : undefined;
   const inspect = s.inspectUid ? s.units.find((u) => u.uid === s.inspectUid) : undefined;
-  const allActed = s.units.length > 0 && s.units.every((u) => u.side !== 'player' || !u.alive || u.acted);
+  const allActed = s.units.length > 0 && s.units.every((u) => u.side !== 'player' || !u.alive || u.acted || u.npc);
+  const [showRoster, setShowRoster] = React.useState(false);
+  const objType = s.missionCh.objectiveType ?? 'rout';
+  const npcU = s.units.find((u) => u.npc && u.alive);
+  const bossU = s.units.find((u) => u.side === 'enemy' && u.def.boss && u.alive);
 
   return (
     <View style={styles.panel}>
@@ -45,9 +49,28 @@ export function SidePanel() {
         <Text style={styles.phaseTxt}>{s.phase === 'enemy' ? 'ENEMY PHASE' : 'PLAYER PHASE'}</Text>
         <Text style={styles.turnTxt}>T{s.turn}</Text>
       </View>
-      <Text style={styles.counts}>
-        Ally {alivePlayers(s).length} · Enemy {aliveEnemies(s).length}
-      </Text>
+      <TouchableOpacity onPress={() => setShowRoster((v) => !v)}>
+        <Text style={styles.counts}>
+          Ally {alivePlayers(s).length} · Enemy {aliveEnemies(s).length}  {showRoster ? '▲' : '▼'}
+        </Text>
+      </TouchableOpacity>
+      {objType === 'protect' && npcU && (
+        <View style={styles.objCard}>
+          <Text style={styles.objTxt}>🛡 PROTECT CONVOY · T{s.turn}/{s.missionCh.protectTurns ?? 8}</Text>
+          <Bar label="CVY" val={npcU.hp} max={npcU.def.maxHp} color="#7dff9d" />
+        </View>
+      )}
+      {objType === 'survive' && (
+        <View style={styles.objCard}>
+          <Text style={styles.objTxt}>⏱ HOLD OUT · T{s.turn}/{s.missionCh.surviveTurns ?? 8}</Text>
+        </View>
+      )}
+      {objType === 'boss' && bossU && (
+        <View style={styles.objCard}>
+          <Text style={styles.objTxt} numberOfLines={1}>★ DEFEAT {bossU.def.name}</Text>
+          <Bar label="BOSS" val={bossU.hp} max={bossU.def.maxHp} color="#ff5a5a" />
+        </View>
+      )}
 
       <ScrollView style={styles.body} contentContainerStyle={{ paddingBottom: 6 }}>
         {unit && (
@@ -216,6 +239,56 @@ export function SidePanel() {
         )}
 
         {/* enemy inspect card — shown after tapping a foe */}
+        {/* empty-tile terrain info — tap a bare tile */}
+        {s.tileInfo && !s.menuForUid && !s.pendingWeapon && !s.spiritForUid && !inspect && (
+          <View style={[styles.unitCard, { borderWidth: 1, borderColor: '#3a5a48' }]}>
+            <Text style={styles.unitName}>{TERRAIN_INFO[terrainAt(s.map, s.tileInfo)]?.name ?? 'Field'}</Text>
+            <Text style={styles.tileCoords}>
+              ({s.tileInfo.x},{s.tileInfo.y})
+            </Text>
+            <Text style={styles.terrainLine}>{terrainDesc(s.map, s.tileInfo)}</Text>
+            {s.crates.some((c) => c.pos.x === s.tileInfo!.x && c.pos.y === s.tileInfo!.y) && <Text style={styles.crateHint}>▣ SALVAGE CRATE — land a unit here to claim it</Text>}
+          </View>
+        )}
+
+        {/* squad roster — toggle from the counts row */}
+        {showRoster && !s.menuForUid && !s.pendingWeapon && !s.spiritForUid && !inspect && (
+          <View style={styles.rosterBox}>
+            <Text style={styles.menuTitle}>SQUAD</Text>
+            {s.units
+              .filter((u) => u.side === 'player' && u.alive)
+              .map((u) => (
+                <View key={u.uid} style={styles.rosterRow}>
+                  <Text style={[styles.rosterName, u.acted && styles.rosterActed]} numberOfLines={1}>
+                    {u.npc ? '🛡 ' : ''}
+                    {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>
+                  </Text>
+                  <View style={styles.rosterBarTrack}>
+                    <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%` }]} />
+                  </View>
+                  <Text style={styles.rosterHp}>{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
+                </View>
+              ))}
+            <Text style={styles.menuTitle}>HOSTILES</Text>
+            <ScrollView style={{ maxHeight: 92 }} nestedScrollEnabled>
+              {s.units
+                .filter((u) => u.side === 'enemy' && u.alive)
+                .map((u) => (
+                  <View key={u.uid} style={styles.rosterRow}>
+                    <Text style={[styles.rosterName, { color: '#ffb0a0' }]} numberOfLines={1}>
+                      {u.def.boss || u.elite ? '★ ' : ''}
+                      {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>
+                    </Text>
+                    <View style={[styles.rosterBarTrack, { backgroundColor: '#2a1216' }]}>
+                      <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: '#ff5a5a' }]} />
+                    </View>
+                    <Text style={styles.rosterHp}>{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
+                  </View>
+                ))}
+            </ScrollView>
+          </View>
+        )}
+
         {inspect && !s.menuForUid && !s.pendingWeapon && (
           <View style={[styles.unitCard, styles.inspectCard]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
@@ -317,6 +390,17 @@ const styles = StyleSheet.create({
   retreat: { marginTop: 4, borderWidth: 1, borderColor: '#3a4160', borderRadius: 6, paddingVertical: 4, alignItems: 'center', backgroundColor: '#14171f' },
   retreatTxt: { color: '#8fa1c7', fontWeight: '800', fontSize: 9, letterSpacing: 1 },
   terrainLine: { color: '#7fd4a8', fontSize: 8.5, marginTop: 4, fontWeight: '700' },
+  objCard: { backgroundColor: '#1a2416', borderWidth: 1, borderColor: '#3a5a48', borderRadius: 6, padding: 5, marginTop: 4 },
+  objTxt: { color: '#7dff9d', fontSize: 9, fontWeight: '800', letterSpacing: 0.6 },
+  tileCoords: { color: '#6b7694', fontSize: 8.5, marginTop: 1 },
+  crateHint: { color: '#ffd34d', fontSize: 8.5, marginTop: 4, fontWeight: '700' },
+  rosterBox: { marginTop: 7, backgroundColor: '#0c0e16', borderRadius: 6, padding: 6 },
+  rosterRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
+  rosterName: { color: '#cfd8f0', fontSize: 9, fontWeight: '700', width: 78 },
+  rosterActed: { opacity: 0.4 },
+  rosterBarTrack: { flex: 1, height: 4, backgroundColor: '#141a12', borderRadius: 2, overflow: 'hidden' },
+  rosterBarFill: { height: 4, borderRadius: 2, backgroundColor: '#4dff7a' },
+  rosterHp: { color: '#8fa1c7', fontSize: 8, width: 26, textAlign: 'right' },
   killsLine: { color: '#ff9dbb', fontSize: 8.5, marginTop: 3, fontWeight: '700' },
   tgtCnt: { color: '#ff9d8a', fontSize: 8.5, marginTop: 1, fontWeight: '700' },
   inspectCard: { borderWidth: 1, borderColor: '#ff6b6b' },
