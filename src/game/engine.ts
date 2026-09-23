@@ -28,7 +28,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
@@ -323,6 +323,7 @@ export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map
     const cutRank = def.skills?.countercut ?? 0;
     if (cw && cutRank > 0 && Math.random() * 100 < cutRank * 4) {
       const c = resolveHit(def, att, cw, map, defMods);
+      if (def.skills?.riposte) c.damage = Math.round(c.damage * (1 + 0.08 * def.skills.riposte));
       counter = { weapon: cw, ...c };
       counterCut = true;
       if (c.destroyed) {
@@ -331,6 +332,7 @@ export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map
     }
     if (!counter && !first.destroyed) {
       const c = resolveHit(def, att, cw!, map, defMods);
+      if (def.skills?.riposte) c.damage = Math.round(c.damage * (1 + 0.08 * def.skills.riposte));
       counter = { weapon: cw!, ...c };
     }
   }
@@ -738,6 +740,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'relentless':
       u.relentlessUntilEndOfEnemyPhase = true;
       break;
+    case 'sanctuary':
+      break; // ally heal ring — applied by the store pass
     case 'reboot':
       u.statuses = [];
       u.hp = Math.min(u.def.maxHp, u.hp + Math.round(u.def.maxHp * 0.25));
@@ -848,7 +852,7 @@ export function planEnemyActions(state: GameState): AiPlan[] {
       const occ = unitAt(units, p);
       return (!occ || occ.uid === e.uid) && !claimed.has(key(p));
     });
-    const tiles = e.anchored ? moveTiles.filter((p) => same(p, e.pos)) : holding ? moveTiles.filter((p) => same(p, e.pos)) : guarding ? moveTiles.filter((p) => dist(p, bp!) <= 3) : moveTiles;
+    const tiles = (e.anchored || e.def.holdPos) ? moveTiles.filter((p) => same(p, e.pos)) : holding ? moveTiles.filter((p) => same(p, e.pos)) : guarding ? moveTiles.filter((p) => dist(p, bp!) <= 3) : moveTiles;
     // morale: a badly damaged line unit may break off and fall back instead of attacking
     if (!e.def.boss && !e.elite && !holding && e.hp <= e.def.maxHp * 0.25 && state.turn > 2 && Math.random() < 0.55) {
       const flee = (moveTiles.length ? moveTiles : [e.pos]).slice().sort((a, b) => {
