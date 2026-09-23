@@ -222,6 +222,13 @@ export function rallyBonus(units: UnitState[], u: UnitState): number {
   return units.some((a) => a.alive && a.side === u.side && a.uid !== u.uid && a.def.pilot.trait === 'rally' && dist(a.pos, u.pos) <= 2) ? 8 : 0;
 }
 
+/** Formation bonus: each adjacent same-side ally grants +5% hit, capped at +10. */
+export function formationBonus(units: UnitState[], u: UnitState): number {
+  let n = 0;
+  for (const a of units) if (a.alive && a.side === u.side && a.uid !== u.uid && dist(a.pos, u.pos) <= 1) n++;
+  return Math.min(n * 5, 10);
+}
+
 export function bestCounterWeapon(def: UnitState, attPos: Pos): WeaponDef | undefined {
   const opts = usableWeapons(def).filter((w) => dist(def.pos, attPos) >= w.rangeMin && dist(def.pos, attPos) <= rangeMaxOf(def, w) && !w.mapRange);
   opts.sort((a, b) => b.power - a.power);
@@ -525,7 +532,7 @@ export function planEnemyActions(state: GameState): AiPlan[] {
     for (const tile of tiles) {
       for (const p of players) {
         for (const w of weaponsAgainst(e, tile, p, willMove(tile))) {
-          const hc = hitChance(e, p, w, map, rallyBonus(units, e));
+          const hc = hitChance(e, p, w, map, rallyBonus(units, e) + formationBonus(units, e));
           const dmg = damageOf(e, p, w, map, false);
           // convoy priority: protect-mission NPCs are the AI's preferred prey
           const score = dmg * (hc / 100) + (p.hp - dmg <= 0 ? 5000 : 0) + (p.escort ? 800 : 0) + w.power * 0.01;
@@ -558,7 +565,7 @@ export function planEnemyActions(state: GameState): AiPlan[] {
     for (const tile of moveTiles) {
       for (const e of enemies) {
         for (const w of weaponsAgainst(a, tile, e, willMove(tile))) {
-          const hc = hitChance(a, e, w, map, rallyBonus(units, a));
+          const hc = hitChance(a, e, w, map, rallyBonus(units, a) + formationBonus(units, a));
           const dmg = damageOf(a, e, w, map, false);
           const score = dmg * (hc / 100) + (e.hp - dmg <= 0 ? 5000 : 0) + w.power * 0.01;
           if (!best || score > best.score) best = { pos: tile, target: e, weapon: w, score };

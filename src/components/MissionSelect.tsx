@@ -2,7 +2,7 @@ import React from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART } from '../assets';
-import { ALL_SIDE_MISSIONS, CHAPTERS_COUNT, missionOf } from '../game/campaign';
+import { ALL_SIDE_MISSIONS, CHAPTERS_COUNT, missionOf, sideAsChapter } from '../game/campaign';
 import { useGame } from '../game/store';
 
 /** Mission select — main campaign chapter + optional side quests. */
@@ -50,6 +50,7 @@ export function MissionSelect() {
             {ch.mastery && (
               <Text style={styles.masteryLine}>{s.masteryDone.includes(ch.id) ? '★' : '☆'} MASTERY: {ch.mastery.desc}{s.masteryDone.includes(ch.id) ? ' ✓' : ''}</Text>
             )}
+            {s.missionRank[ch.id] && <Text style={styles.rankTag}>RANK {s.missionRank[ch.id]}</Text>}
             <View style={styles.mainDeploy}>
               <Text style={styles.mainDeployTxt}>{done ? 'ALL CLEAR' : 'DEPLOY ▸'}</Text>
             </View>
@@ -63,11 +64,13 @@ export function MissionSelect() {
             {[...ALL_SIDE_MISSIONS].sort((a, b) => a.unlockCh - b.unlockCh).map((m) => {
               const cleared = !m.repeatable && s.sideCleared.includes(m.id);
               const locked = s.chapter < m.unlockCh;
+              const rank = s.missionRank[sideAsChapter({ ...m, lvl: m.lvl }).id];
               return (
                 <Pressable key={m.id} style={[styles.sideCard, locked && { opacity: 0.45 }, cleared && { borderColor: '#4dff7a' }, m.repeatable && { borderColor: '#6fe0ff' }]} onPress={() => !locked && !cleared && s.startSideMission(m.id)} disabled={locked || cleared}>
                   <View style={{ flex: 1 }}>
                     <View style={styles.sideTop}>
                       <Text style={styles.sideName}>{m.name.toUpperCase()}</Text>
+                      {rank && <Text style={styles.rankTag}>RANK {rank}</Text>}
                       {m.repeatable && <Text style={styles.repTag}>⟳ REPLAYABLE</Text>}
                       {cleared && <Text style={styles.clearedTag}>CLEARED</Text>}
                       {locked && <Text style={styles.lockTag}>CLEAR CH.{m.unlockCh}</Text>}
@@ -118,6 +121,7 @@ const styles = StyleSheet.create({
   lockTag: { color: '#8fa0c8', fontWeight: '900', fontSize: 9, letterSpacing: 1, borderWidth: 1, borderColor: '#3a4160', borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1 },
   sideDesc: { color: '#9fb0d8', fontSize: 10.5, marginTop: 4 },
   repTag: { color: '#6fe0ff', fontWeight: '900', fontSize: 9, letterSpacing: 1, borderWidth: 1, borderColor: '#6fe0ff', borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1 },
+  rankTag: { color: '#ffd34d', fontWeight: '900', fontSize: 9, letterSpacing: 1, borderWidth: 1, borderColor: '#ffd34d', borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1 },
   sideMeta: { color: '#ffd34d', fontSize: 9.5, marginTop: 5, letterSpacing: 0.5 },
   goBtn: { backgroundColor: '#16324a', borderWidth: 1, borderColor: '#6fe0ff', borderRadius: 7, paddingHorizontal: 12, paddingVertical: 8 },
   goTxt: { color: '#6fe0ff', fontWeight: '900', fontSize: 11.5 },

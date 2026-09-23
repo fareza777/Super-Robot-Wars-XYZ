@@ -120,6 +120,7 @@ export function EndScreen({ victory }: { victory: boolean }) {
   const kills = useGame((s) => s.kills);
   const lastReward = useGame((s) => s.lastReward);
   const lastMastery = useGame((s) => s.lastMastery);
+  const lastRank = useGame((s) => s.lastRank);
   const ngPlus = useGame((s) => s.ngPlus);
   const units = useGame((s) => s.units);
   // after the final chapter the save wraps to ch.0 — ngPlus>0 + chapter===0 means we just rolled NG+
@@ -139,6 +140,11 @@ export function EndScreen({ victory }: { victory: boolean }) {
           <Text style={styles.resultsRow}>TURNS  {turn}</Text>
           <Text style={styles.resultsRow}>ENEMY UNITS DESTROYED  {kills}</Text>
           <Text style={styles.resultsRow}>CREDITS EARNED  +{lastReward}</Text>
+          {lastRank && (
+            <Text style={[styles.resultsMastery, { color: lastRank === 'S' ? '#ffd34d' : lastRank === 'A' ? '#6fe0ff' : '#c8d4f0' }]}>
+              BATTLE RANK — {lastRank === 'S' ? '★ S' : lastRank}
+            </Text>
+          )}
           {lastMastery && <Text style={styles.resultsMastery}>★ MASTERY — {lastMastery}</Text>}
           {aces.slice(0, 3).map((u) => (
             <Text key={u.uid} style={styles.resultsAce}>

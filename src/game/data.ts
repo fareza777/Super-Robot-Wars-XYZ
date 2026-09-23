@@ -66,6 +66,7 @@ export const WEAPONS = {
   railVolley: W({ id: 'rail_volley', name: 'Railgun Volley', kind: 'gun', power: 2000, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 12, hitMod: 15, postMove: true, animSeed: 19, status: 'break' }),
   flareField: W({ id: 'flare_field', name: 'Flare Field', kind: 'funnel', power: 2400, rangeMin: 1, rangeMax: 4, enCost: 20, ammo: null, hitMod: 15, postMove: true, animSeed: 20, status: 'burn' }),
   militiaRifle: W({ id: 'militia_rifle', name: 'Defense Rifle', kind: 'gun', power: 1500, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 12, hitMod: 8, postMove: true, animSeed: 21 }),
+  voidLance: W({ id: 'void_lance', name: 'Void Lance', kind: 'beam', power: 3300, rangeMin: 2, rangeMax: 7, enCost: 32, ammo: null, hitMod: 0, postMove: false, animSeed: 25, willReq: 115, pierce: true }),
 };
 
 // ---------- Pilots ----------

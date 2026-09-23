@@ -30,10 +30,10 @@ import {
 } from './campaign';
 import { BOND_EVENTS, MAX_BOND, bondKey, bondLevel, bondMods } from './bonds';
 
-/** full attacker mods: bond bonus + rally aura (+8 hit from an allied 'rally' unit within 2 tiles) */
+/** full attacker mods: bond bonus + rally aura + formation adjacency (+5 hit per adjacent ally, max +10) */
 const modsFor = (bonds: Record<string, number>, units: UnitState[]) => (u: UnitState) => {
   const bm = bondMods(bonds, units, u);
-  return { hitBonus: bm.hitBonus + rallyBonus(units, u), dmgMult: bm.dmgMult };
+  return { hitBonus: bm.hitBonus + rallyBonus(units, u) + formationBonus(units, u), dmgMult: bm.dmgMult };
 };
 import { MISSION_SSS, SPIRITS, TERRAIN_INFO } from './data';
 import { bgm, setMusicEnabled, setSoundEnabled } from '../audio';
@@ -55,6 +55,7 @@ import {
   MoveRec,
   movementRange,
   partBonus,
+  formationBonus,
   phaseRecovery,
   planEnemyActions,
   rallyBonus,
@@ -87,7 +88,8 @@ export interface SaveData {
   masteryDone?: number[]; // chapter ids whose mastery challenge was achieved
   hintsSeen?: string[]; // one-time tutorial cards already dismissed
   route?: 'a' | 'b' | null; // route split chosen after ch.15
-  honorsClaimed?: string[]; // HONORS achievement ids whose credit bounty was claimed
+  honorsClaimed?: string[];
+  missionRank?: Record<string, 'S' | 'A' | 'B' | 'C'>; // HONORS achievement ids whose credit bounty was claimed
 }
 
 /** Serialized mid-battle snapshot — lets the player leave a mission and resume it later. */
@@ -185,6 +187,8 @@ interface Store {
   salvageQueue: string[]; // item names dropped on kills, toasted on the map
   route: 'a' | 'b' | null; // campaign route split chosen after ch.15 (affects ch.16-18)
   honorsClaimed: string[]; // HONORS ids already claimed
+  missionRank: Record<number, 'S' | 'A' | 'B' | 'C'>; // best battle rank per chapter id (side missions use 1000+idx)
+  lastRank: 'S' | 'A' | 'B' | 'C' | null; // rank earned on the mission just finished
   log: string[];
   enemyBusy: boolean;
   screenShake: number;
@@ -361,8 +365,8 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
 
 const BATTLE_SAVE_KEY = 'srwxyz_battle_v1';
 
-async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed'>>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed };
+async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank'>>) {
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -513,6 +517,8 @@ export const useGame = create<Store>((set, get) => ({
   salvageQueue: [],
   route: null,
   honorsClaimed: [],
+  missionRank: {} as Record<number, 'S' | 'A' | 'B' | 'C'>,
+  lastRank: null as 'S' | 'A' | 'B' | 'C' | null,
   hint: null,
   hintsSeen: [],
 
@@ -642,6 +648,8 @@ export const useGame = create<Store>((set, get) => ({
       savedBattle: null as BattleSave | null,
       route: null as 'a' | 'b' | null,
       honorsClaimed: [] as string[],
+      missionRank: {} as Record<number, 'S' | 'A' | 'B' | 'C'>,
+      lastRank: null as 'S' | 'A' | 'B' | 'C' | null,
     };
     void clearBattleSave();
     set({ ...fresh, hasSave: true, kills: 0, phase: 'prologue' });
@@ -666,7 +674,7 @@ export const useGame = create<Store>((set, get) => ({
       const raw = await AsyncStorage.getItem(SAVE_KEY);
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
-      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [] });
+      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {} });
     } catch {}
     try {
       const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
@@ -1376,9 +1384,22 @@ function scheduleWalkClear(set: SetFn, get: Get, uid: string, len: number) {
 }
 
 // award credits + persist pilot levels & kills when a mission is won
+/** Battle rank: 100 score, -20 per unit lost, -6 per turn over par, +10 for mastery. S>=95 A>=80 B>=60 else C. */
+const RANK_ORDER = { S: 4, A: 3, B: 2, C: 1 } as const;
+type Rank = keyof typeof RANK_ORDER;
+function battleRank(unitsLost: number, turn: number, parTurns: number, masteryEarned: boolean): Rank {
+  const over = Math.max(0, turn - 1 - parTurns);
+  const score = Math.max(0, Math.min(100, 100 - unitsLost * 20 - over * 6 + (masteryEarned ? 10 : 0)));
+  return score >= 95 ? 'S' : score >= 80 ? 'A' : score >= 60 ? 'B' : 'C';
+}
+function betterRank(prev: Rank | undefined, next: Rank): Rank {
+  return prev && RANK_ORDER[prev] >= RANK_ORDER[next] ? prev : next;
+}
+
 function applyVictory(set: SetFn, get: Get) {
   const s = get();
   const pilotProg = { ...s.pilotProg };
+  const unitsLost = s.units.filter((u) => u.side === 'player' && !u.alive).length;
   const aceLines: string[] = [];
   for (const u of s.units) {
     if (u.side === 'player' && !u.npc) {
@@ -1397,6 +1418,9 @@ function applyVictory(set: SetFn, get: Get) {
     const credits = s.credits + reward;
     const inventory = side.rewardItem ? { ...s.inventory, [side.rewardItem]: (s.inventory[side.rewardItem] ?? 0) + 1 } : s.inventory;
     const sideCleared = side.repeatable ? s.sideCleared : [...s.sideCleared, side.id];
+    const parS = side.surviveTurns ?? Math.max(6, Math.ceil(side.count * 1.2));
+    const rankS = battleRank(unitsLost, s.turn, parS, false);
+    const missionRank = { ...s.missionRank, [sideAsChapter({ ...side, lvl: 0 }).id]: betterRank(s.missionRank[sideAsChapter({ ...side, lvl: 0 }).id], rankS) };
     set({
       battle: null,
       phase: 'victory',
@@ -1406,11 +1430,13 @@ function applyVictory(set: SetFn, get: Get) {
       pilotProg,
       sideId: null,
       lastReward: reward,
+      lastRank: rankS,
+      missionRank,
       debrief: null,
       salvageQueue: [],
-      log: aceLines.reduce((l, line) => push(l, line), push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''}`)),
+      log: aceLines.reduce((l, line) => push(l, line), push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''} · RANK ${rankS}`)),
     });
-    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route });
+    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank });
     return;
   }
   const ch = s.missionCh;
@@ -1442,6 +1468,10 @@ function applyVictory(set: SetFn, get: Get) {
     }
   }
   const credits = s.credits + reward + masteryCr + (clearedFinal ? 5000 : 0);
+  const par = ch.surviveTurns ?? Math.max(6, Math.ceil((ch.count + (ch.boss ? 1 : 0)) * 1.1));
+  const rank = battleRank(unitsLost, s.turn, par, lastMastery != null);
+  const missionRank = { ...s.missionRank, [ch.id]: betterRank(s.missionRank[ch.id], rank) };
+  if (rank === 'S') log = push(log, `★ RANK S — flawless execution!`);
   for (const line of aceLines) log = push(log, line);
   set({
     battle: null,
@@ -1455,13 +1485,15 @@ function applyVictory(set: SetFn, get: Get) {
     masteryDone,
     savedBattle: null,
     lastMastery,
+    lastRank: rank,
+    missionRank,
     lastReward: reward + masteryCr + (clearedFinal ? 5000 : 0),
     debrief: DEBRIEFS[ch.id] ?? null,
     salvageQueue: [],
-    log: push(log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + masteryCr + 5000} credits` : `Mission complete! +${reward + masteryCr} credits`),
+    log: push(log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + masteryCr + 5000} credits` : `Mission complete! +${reward + masteryCr} credits · RANK ${rank}`),
   });
   void clearBattleSave();
-  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route });
+  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route, missionRank });
 }
 
 async function runEnemyPhase(set: SetFn, get: Get) {

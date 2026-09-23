@@ -119,7 +119,9 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   arklander: U({ id: 'arklander', name: 'Arklander Convoy', title: 'Civilian Transport', color: '#5a5148', accent: '#e0d0a8', maxHp: 3400, maxEn: 0, armor: 350, mobility: 40, moveRange: 0, moveType: 'land', weapons: [], pilot: PILOTS.civ }),
   // --- player reinforcements (join at arc boundaries) ---
   raxdenR: U({ id: 'raxdenR', name: 'Raxden Crimson', title: 'Defected Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.plasmaEdge, WEAPONS.railgun, WEAPONS.vulcan, WEAPONS.crimsonDuet], pilot: CAMPAIGN_PILOTS.raxp, level: 5 }),
-  vexiaX: U({ id: 'vexiaX', name: 'Vexia Custom', title: 'Ark Interceptor', color: '#2a8a9a', accent: '#a0f0ff', maxHp: 5200, maxEn: 150, armor: 880, mobility: 142, moveRange: 7, moveType: 'air', weapons: [WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.vulcan], pilot: CAMPAIGN_PILOTS.veep, level: 7 }),
+  vexiaX: U({ id: 'vexiaX', name: 'Vexia Custom', title: 'Ark Interceptor', color: '#2a8a9a', accent: '#a0f0ff', maxHp: 5200, maxEn: 150, armor: 880, mobility: 142, moveRange: 7, moveType: 'air', weapons: [WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.vulcan, WEAPONS.voidLance], pilot: CAMPAIGN_PILOTS.veep, level: 7 }),
+  // act-3 fast striker — drains HP on hit, high evade, hunts stragglers
+  cataphract: U({ id: 'cataphract', name: 'Karn Cataphract', title: 'Shadow Striker', color: '#2e2e3a', accent: '#a0a0ff', maxHp: 4200, maxEn: 120, armor: 650, mobility: 158, moveRange: 8, moveType: 'air', weapons: [WEAPONS.vampEdge, WEAPONS.plasmaEdge], pilot: PILOTS.grunt }),
 };
 
 export const ALL_UNITS: Record<string, UnitDef> = { ...UNITS, ...CAMPAIGN_UNITS };
@@ -541,7 +543,7 @@ function enemyComp(ch: ChapterDef): string[] {
   const fill = ch.act === 1 ? 'zolda' : ch.act === 2 ? 'vexia' : 'nightmare';
   const alt = ch.act === 1 ? 'zoldaAir' : ch.act === 2 ? 'nightmare' : 'bulwark';
   const heavy = ch.act === 1 ? 'zoldaTank' : 'nightmare';
-  const fast = 'lancer';
+  const fast = ch.act === 3 ? 'cataphract' : 'lancer';
   for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : fill);
   if (ch.boss) comp.push(ch.boss);
   return comp;

@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ITEMS, PARTS } from '../game/campaign';
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { bondMods } from '../game/bonds';
-import { bestCounterWeapon, critChance, damageOf, dist, hitChance, key, rallyBonus, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
+import { bestCounterWeapon, critChance, damageOf, dist, formationBonus, hitChance, key, rallyBonus, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, useGame } from '../game/store';
 import { SpiritId } from '../game/types';
 
@@ -221,7 +221,8 @@ export function SidePanel() {
                   .filter((e) => e.alive && e.side === 'enemy' && s.attackTiles.has(key(e.pos)))
                   .map((e) => {
                     const bm = bondMods(s.bonds, s.units, unit);
-                    const hc = hitChance(unit, e, s.pendingWeapon!, s.map, bm.hitBonus + rallyBonus(s.units, unit));
+                    const fb = formationBonus(s.units, unit);
+                    const hc = hitChance(unit, e, s.pendingWeapon!, s.map, bm.hitBonus + rallyBonus(s.units, unit) + fb);
                     const dmg = damageOf(unit, e, s.pendingWeapon!, s.map, false, bm.dmgMult);
                     const kill = e.hp - dmg <= 0;
                     const cw = bestCounterWeapon(e, s.pendingMove!);
@@ -242,7 +243,7 @@ export function SidePanel() {
                             <View style={[styles.tgtBarFill, { width: `${(Math.max(0, e.hp - dmg) / e.def.maxHp) * 100}%`, backgroundColor: '#4dff7a' }]} />
                           </View>
                           <Text style={styles.tgtCnt} numberOfLines={1}>
-                            {cw ? `↩ CNT ~${cDmg} (${cHc}%)` : '↩ no counter in range'} · CRIT {critChance(unit, e)}%
+                            {cw ? `↩ CNT ~${cDmg} (${cHc}%)` : '↩ no counter in range'} · CRIT {critChance(unit, e)}%{fb > 0 ? ` · ▣FORM +${fb}` : ''}
                           </Text>
                         </View>
                         <View style={styles.tgtHitBox}>
