@@ -147,7 +147,7 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   arklander: U({ id: 'arklander', name: 'Arklander Convoy', title: 'Civilian Transport', color: '#5a5148', accent: '#e0d0a8', maxHp: 3400, maxEn: 0, armor: 350, mobility: 40, moveRange: 0, moveType: 'land', weapons: [], pilot: PILOTS.civ }),
   // --- player reinforcements (join at arc boundaries) ---
   raxdenR: U({ id: 'raxdenR', name: 'Raxden Crimson', title: 'Defected Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.fangRipper, WEAPONS.plasmaEdge, WEAPONS.railgun, WEAPONS.vulcan, WEAPONS.crimsonDuet], pilot: CAMPAIGN_PILOTS.raxp, level: 5 }),
-  vexiaX: U({ id: 'vexiaX', name: 'Vexia Custom', title: 'Ark Interceptor', color: '#2a8a9a', accent: '#a0f0ff', maxHp: 5200, maxEn: 150, armor: 880, mobility: 142, moveRange: 7, moveType: 'air', weapons: [WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.vulcan, WEAPONS.voidLance], pilot: CAMPAIGN_PILOTS.veep, level: 7 }),
+  vexiaX: U({ id: 'vexiaX', name: 'Vexia Custom', title: 'Ark Interceptor', color: '#2a8a9a', accent: '#a0f0ff', maxHp: 5200, maxEn: 150, armor: 880, mobility: 142, moveRange: 7, moveType: 'air', weapons: [WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.vulcan, WEAPONS.voidLance, WEAPONS.arcCascade], pilot: CAMPAIGN_PILOTS.veep, level: 7 }),
   // act-3 fast striker — drains HP on hit, high evade, hunts stragglers
   cataphract: U({ id: 'cataphract', name: 'Karn Cataphract', title: 'Shadow Striker', color: '#2e2e3a', accent: '#a0a0ff', maxHp: 4200, maxEn: 120, armor: 650, mobility: 158, moveRange: 8, moveType: 'air', weapons: [WEAPONS.vampEdge, WEAPONS.plasmaEdge], pilot: PILOTS.grunt, resists: { beam: 0.4 }, jammer: true }),
   // Cpt. Vossen's personal frame — recurring ace, guaranteed salvage drop when downed
@@ -516,6 +516,15 @@ const MID_EVENTS: Record<number, MapDef['events']> = {
   }] as MapDef['events'],
 };
 /** First-contact duel banter: fires once per mission when the keyed player frame attacks the keyed boss. */
+export const TURN_CHATTER: Record<string, string> = {
+  'X-1': 'Ray: "Sensors are live — stay sharp out there."',
+  'X-2': 'Mira: "Holding formation. Keep pushing forward."',
+  'Y-1': 'Gara: "Hrnh. Still standing? Let me fix that."',
+  'Z-1': 'Orin: "Squad status nominal — fight on."',
+  RED: 'Rax: "Ha! Is that really all the Empire has?"',
+  FALCON: 'Vee: "Sky\'s mine — the ground is yours."',
+};
+
 export const DUEL_BANTER: Record<string, { speaker: string; text: string }[]> = {
   'valstray|kargan': [
     { speaker: 'kargan', text: 'The stray dog returns. Last time you crawled away — this time I nail the coffin shut myself.' },
@@ -1017,11 +1026,13 @@ export const HONORS: HonorDef[] = [
   { id: 'h_mirror', name: 'HALL OF MIRRORS', desc: 'Bait an enemy strike with a holoreplica decoy', rewardCr: 600 },
   { id: 'h_ifield', name: 'BARRIER BREAKER', desc: 'Destroy a unit shielded by an I-Field barrier', rewardCr: 800 },
   { id: 'h_sig', name: 'MIRROR BREAKER', desc: 'Clear a Σ mirror wave in the VR simulator', rewardCr: 800 },
+  { id: 'h_arc', name: 'CHAIN REACTION', desc: 'Kill two foes with a single chain-arc strike', rewardCr: 700 },
+  { id: 'h_blast', name: 'SATURATION', desc: 'Destroy four or more foes with a single strike', rewardCr: 900 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean; decoyHit?: boolean; iFieldKill?: boolean; mirrorWon?: boolean }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean; decoyHit?: boolean; iFieldKill?: boolean; mirrorWon?: boolean; arcKill?: boolean; blastKill?: boolean }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -1088,6 +1099,10 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return s.decoyHit === true;
     case 'h_sig':
       return s.mirrorWon === true;
+    case 'h_arc':
+      return s.arcKill === true;
+    case 'h_blast':
+      return s.blastKill === true;
     case 'h_ghostd':
       return s.altKill === true;
     default:

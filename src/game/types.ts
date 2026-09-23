@@ -22,6 +22,8 @@ export interface WeaponDef {
   aceReq?: number;
   /** multi-hit: this many independent strikes per trigger */
   multiHit?: number;
+  /** chain arc: on hit, bolt arcs to this many extra foes within 2 tiles of the target (50% dmg) */
+  chain?: number;
   name: string;
   kind: WeaponKind;
   power: number;

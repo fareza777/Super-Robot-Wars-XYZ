@@ -60,6 +60,7 @@ export const WEAPONS = {
   missilePods: W({ id: 'missile_pods', name: 'Missile Pods', kind: 'missile', power: 1500, rangeMin: 2, rangeMax: 6, enCost: 0, ammo: 8, hitMod: -5, postMove: true, animSeed: 3, antiAir: true }),
   gatling: W({ id: 'gatling', name: 'Arm Gatling', kind: 'gun', power: 1200, rangeMin: 1, rangeMax: 3, enCost: 0, ammo: 20, hitMod: 10, postMove: true, animSeed: 4, antiAir: true }),
   burstRepeater: W({ id: 'burst_repeater', name: 'Burst Repeater', kind: 'gun', power: 950, rangeMin: 1, rangeMax: 3, enCost: 0, ammo: 30, hitMod: 5, postMove: true, animSeed: 4, antiAir: true, multiHit: 2 }),
+  arcCascade: W({ id: 'arc_cascade', name: 'Arc Cascade', kind: 'funnel', power: 2400, rangeMin: 2, rangeMax: 5, enCost: 30, ammo: null, hitMod: 5, postMove: false, animSeed: 13, willReq: 110, chain: 2 }),
   plasmaEdge: W({ id: 'plasma_edge', name: 'Plasma Edge', kind: 'melee', power: 2900, rangeMin: 1, rangeMax: 2, enCost: 15, ammo: null, hitMod: 10, critMod: 12, postMove: true, animSeed: 5 }),
   megaBeam: W({ id: 'mega_beam', name: 'Mega Beam Launcher', kind: 'beam', power: 3400, rangeMin: 3, rangeMax: 7, enCost: 40, ammo: null, hitMod: -15, postMove: false, animSeed: 6, willReq: 115 }),
   vulcan: W({ id: 'vulcan', name: 'Head Vulcan', kind: 'gun', power: 800, rangeMin: 1, rangeMax: 2, enCost: 0, ammo: 30, hitMod: 25, postMove: true, animSeed: 7, antiAir: true }),

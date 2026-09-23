@@ -441,6 +441,33 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
     def.crippled = true;
     result.crippled = true;
   }
+  // chain arc — the bolt leaps to nearby foes of the struck unit (half damage, no counter)
+  if (result.hit && w.chain) {
+    const arcs = units
+      .filter((u) => u.alive && u.side === def.side && u.uid !== def.uid && dist(u.pos, def.pos) <= 2)
+      .sort((x, y) => dist(x.pos, def.pos) - dist(y.pos, def.pos))
+      .slice(0, w.chain);
+    const spl = (result.splash = result.splash ?? []);
+    for (const t of arcs) {
+      const r = resolveHit(att, t, w, state.map, attMods0);
+      if (!r.hit) {
+        spl.push({ uid: t.uid, name: t.def.name, hit: false, damage: 0, destroyed: false, hitChance: r.hitChance });
+        continue;
+      }
+      const dmg = Math.round(r.damage * 0.5);
+      const hpB = t.hp;
+      t.hp = Math.max(0, t.hp - dmg);
+      att.dmgDealt = (att.dmgDealt ?? 0) + dmg;
+      const dead = t.hp <= 0;
+      if (dead) {
+        t.alive = false;
+        att.kills += 1;
+        t.overkillDealt = Math.max(0, dmg - hpB);
+      }
+      spl.push({ uid: t.uid, name: t.def.name, hit: true, damage: dmg, destroyed: dead, hitChance: r.hitChance });
+    }
+  }
+
   if (!result.hit) def.dodges = (def.dodges ?? 0) + 1; // dodging costs — evasion decays through the phase
 
   if (result.counter) {
