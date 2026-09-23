@@ -33,7 +33,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen'): number {
   let n = 0;
   for (const p of u.parts) n += PARTS[p]?.[stat] ?? 0;
   return n;
@@ -552,6 +552,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'vanish':
       u.vanishUntilEndOfEnemyPhase = true;
       break;
+    case 'lucky':
+      u.luckyForNextKill = true;
+      break;
     case 'miracle':
       u.miracleArmed = true;
       break;
@@ -829,7 +832,7 @@ function timedOut(obj: EndObjective | null | undefined, turn?: number): boolean 
 export function phaseRecovery(u: UnitState, map: MapDef): { hpGain: number; enGain: number; hpLoss: number } {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
   const enGain = Math.min(u.def.maxEn - u.en, 5 + (t.enRegen ?? 0) + partBonus(u, 'enRegen'));
-  const hpGain = Math.min(u.def.maxHp - u.hp, Math.round(u.def.maxHp * (t.hpRegen ?? 0)));
+  const hpGain = Math.min(u.def.maxHp - u.hp, Math.round(u.def.maxHp * (t.hpRegen ?? 0)) + Math.round(u.def.maxHp * (partBonus(u, 'hpRegen') / 100)));
   const hpLoss = Math.min(u.hp - 1, Math.round(u.def.maxHp * (t.hpDmg ?? 0))); // terrain can't kill — leaves 1 HP
   u.en += enGain;
   u.hp = Math.max(1, u.hp + hpGain - Math.max(0, hpLoss));

@@ -98,6 +98,7 @@ export interface SaveData {
   killsByDef?: Record<string, number>; // enemies destroyed per frame id — codex tally
   snowFox?: boolean; // WHITEOUT honor — won during a blizzard turn
   extremeWon?: boolean; // OVERLORD honor — won a mission on EXTREME
+  shepHon?: boolean; // SHEPHERD honor — convoy reached safety unscathed
 }
 
 /** Serialized mid-battle snapshot — lets the player leave a mission and resume it later. */
@@ -212,6 +213,7 @@ interface Store {
   killsByDef: Record<string, number>; // enemy frames destroyed per def id — codex tally (persisted)
   snowFox: boolean;
   extremeWon: boolean;
+  shepHon: boolean;
   log: string[];
   enemyBusy: boolean;
   screenShake: number;
@@ -430,8 +432,8 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
 
 const BATTLE_SAVE_KEY = 'srwxyz_battle_v1';
 
-async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank' | 'snowFox' | 'extremeWon'>>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated, killsByDef: useGame.getState().killsByDef, snowFox: useGame.getState().snowFox, extremeWon: useGame.getState().extremeWon };
+async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank' | 'snowFox' | 'extremeWon' | 'shepHon'>>) {
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated, killsByDef: useGame.getState().killsByDef, snowFox: useGame.getState().snowFox, extremeWon: useGame.getState().extremeWon, shepHon: useGame.getState().shepHon };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -474,8 +476,15 @@ async function persistSettings(s: GameSettings) {
 
 const DROP_POOL: (keyof typeof ITEMS)[] = ['repairKit', 'enCell', 'ammoBox', 'spiritWing', 'valorPill', 'megaKit'];
 /** Enemies occasionally drop supplies — 25% chance per kill. */
-function rollDrop(): keyof typeof ITEMS | null {
-  return Math.random() < 0.25 ? DROP_POOL[Math.floor(Math.random() * DROP_POOL.length)] : null;
+function rollDrop(force = false): keyof typeof ITEMS | null {
+  return force || Math.random() < 0.25 ? DROP_POOL[Math.floor(Math.random() * DROP_POOL.length)] : null;
+}
+/** Lucky spirit — the next kill yields guaranteed supplies and +25cr salvage per enemy level. */
+function applyLucky(units: UnitState[], attackerUid: string, dead: UnitState[]): { cr: number; drop?: keyof typeof ITEMS } {
+  const att = units.find((u) => u.uid === attackerUid);
+  if (!att?.luckyForNextKill || dead.length === 0) return { cr: 0 };
+  att.luckyForNextKill = false;
+  return { cr: dead.reduce((n, d) => n + d.level * 25, 0), drop: DROP_POOL[Math.floor(Math.random() * DROP_POOL.length)] };
 }
 /** Roll salvage drops for `n` kills — returns updated inventory + log lines + item names for the map toast. */
 function dropsForKills(n: number, inventory: Record<string, number>): { inventory: Record<string, number>; lines: string[]; names: string[] } {
@@ -599,6 +608,7 @@ export const useGame = create<Store>((set, get) => ({
   killsByDef: {} as Record<string, number>,
   snowFox: false,
     extremeWon: false,
+    shepHon: false,
   hint: null,
   hintsSeen: [],
 
@@ -717,7 +727,7 @@ export const useGame = create<Store>((set, get) => ({
       await AsyncStorage.removeItem(SAVE_KEY);
       await AsyncStorage.removeItem(BATTLE_SAVE_KEY);
     } catch {}
-    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false, killsByDef: {}, snowFox: false, extremeWon: false });
+    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false, killsByDef: {}, snowFox: false, extremeWon: false, shepHon: false });
   },
 
   toggleDeploy: (defId) => {
@@ -798,7 +808,7 @@ export const useGame = create<Store>((set, get) => ({
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
       set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {}, simBest: d.simBest ?? 0, vossenDefeated: d.vossenDefeated ?? false, snowFox: d.snowFox ?? false,
-    extremeWon: d.extremeWon ?? false, killsByDef: d.killsByDef ?? {} });
+    extremeWon: d.extremeWon ?? false, shepHon: d.shepHon ?? false, killsByDef: d.killsByDef ?? {} });
     } catch {}
     try {
       const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
@@ -1329,13 +1339,32 @@ export const useGame = create<Store>((set, get) => ({
       const dead = deadEnemies(s.units, state.units);
       const overkillCr = Math.floor(dead.reduce((n, d) => n + (d.overkillDealt ?? 0), 0) / 50);
       if (overkillCr) log = push(log, `⚡ OVERKILL — +${overkillCr}cr salvage`);
+      let inventory = s.inventory;
+      let salvageQueue = s.salvageQueue;
+      for (const d of dead) {
+        const drop = rollDrop(d.elite);
+        if (drop) {
+          inventory = { ...inventory, [drop]: (inventory[drop] ?? 0) + 1 };
+          log = push(log, `Salvaged ${ITEMS[drop].name} from the wreck`);
+          salvageQueue = [...salvageQueue, ITEMS[drop].name];
+        }
+      }
+      const lucky = applyLucky(state.units, att.uid, dead);
+      if (lucky.cr) log = push(log, `☘ LUCKY — +${lucky.cr}cr bonus salvage`);
+      if (lucky.drop) {
+        inventory = { ...inventory, [lucky.drop]: (inventory[lucky.drop] ?? 0) + 1 };
+        log = push(log, `Salvaged ${ITEMS[lucky.drop].name} — Lucky's blessing`);
+        salvageQueue = [...salvageQueue, ITEMS[lucky.drop].name];
+      }
       const common = {
         units: state.units,
         log,
+        inventory,
+        salvageQueue,
         kills: s.kills + killCount,
         chainTurn: killCount > 0 ? s.turn : s.chainTurn,
         chainCount: chain,
-        salvageCr: s.salvageCr + chainBonus + overkillCr,
+        salvageCr: s.salvageCr + chainBonus + overkillCr + lucky.cr,
         killsByDef: tallyKills(s.killsByDef, dead),
         pendingWeapon: null,
         mapAim: null,
@@ -1423,13 +1452,20 @@ export const useGame = create<Store>((set, get) => ({
     if (quip) log2 = push(log2, `♥ ${quip}`);
     let inventory = s.inventory;
     let salvageQueue = s.salvageQueue;
-    for (let i = 0; i < killCount; i++) {
-      const drop = rollDrop();
+    for (const d of dead) {
+      const drop = rollDrop(d.elite);
       if (drop) {
         inventory = { ...inventory, [drop]: (inventory[drop] ?? 0) + 1 };
         log2 = push(log2, `Salvaged ${ITEMS[drop].name} from the wreck`);
         salvageQueue = [...salvageQueue, ITEMS[drop].name];
       }
+    }
+    const lucky = applyLucky(state.units, att.uid, dead);
+    if (lucky.cr) log2 = push(log2, `☘ LUCKY — +${lucky.cr}cr bonus salvage`);
+    if (lucky.drop) {
+      inventory = { ...inventory, [lucky.drop]: (inventory[lucky.drop] ?? 0) + 1 };
+      log2 = push(log2, `Salvaged ${ITEMS[lucky.drop].name} — Lucky's blessing`);
+      salvageQueue = [...salvageQueue, ITEMS[lucky.drop].name];
     }
     if (vossenDowned(s.units, state.units)) {
       inventory = { ...inventory, megaKit: (inventory.megaKit ?? 0) + 1 };
@@ -1454,7 +1490,7 @@ export const useGame = create<Store>((set, get) => ({
       kills: s.kills + killCount,
       chainTurn: killCount > 0 ? s.turn : s.chainTurn,
       chainCount: chain,
-      salvageCr: s.salvageCr + chainBonus + carrierCr + overkillCr,
+      salvageCr: s.salvageCr + chainBonus + carrierCr + overkillCr + lucky.cr,
       pendingWeapon: null,
       mapAim: null,
       attackTiles: new Set<string>(),
@@ -1511,6 +1547,22 @@ export const useGame = create<Store>((set, get) => ({
     const mapKills = deadEnemies(s.units, state.units).length;
     const overkillCr = Math.floor(deadEnemies(s.units, state.units).reduce((n, d) => n + (d.overkillDealt ?? 0), 0) / 50);
     if (overkillCr) log2 = push(log2, `⚡ OVERKILL — +${overkillCr}cr salvage`);
+    const mapDead = deadEnemies(s.units, state.units);
+    for (const d of mapDead) {
+      const drop = rollDrop(d.elite);
+      if (drop) {
+        inventory = { ...inventory, [drop]: (inventory[drop] ?? 0) + 1 };
+        log2 = push(log2, `Salvaged ${ITEMS[drop].name} from the wreck`);
+        salvageQueue = [...salvageQueue, ITEMS[drop].name];
+      }
+    }
+    const lucky = applyLucky(state.units, att.uid, mapDead);
+    if (lucky.cr) log2 = push(log2, `☘ LUCKY — +${lucky.cr}cr bonus salvage`);
+    if (lucky.drop) {
+      inventory = { ...inventory, [lucky.drop]: (inventory[lucky.drop] ?? 0) + 1 };
+      log2 = push(log2, `Salvaged ${ITEMS[lucky.drop].name} — Lucky's blessing`);
+      salvageQueue = [...salvageQueue, ITEMS[lucky.drop].name];
+    }
     const mapChain = mapKills > 0 ? (s.turn === s.chainTurn ? s.chainCount + mapKills : mapKills) : s.chainCount;
     const mapChainBonus = mapChain > 1 && mapKills > 0 ? 30 * mapChain : 0;
     if (mapChainBonus) log2 = push(log2, `⛓ CHAIN ×${mapChain} — +${mapChainBonus}cr bonus salvage`);
@@ -1524,7 +1576,7 @@ export const useGame = create<Store>((set, get) => ({
       kills: s.kills + deadEnemies(s.units, state.units).length,
       chainTurn: mapKills > 0 ? s.turn : s.chainTurn,
       chainCount: mapChain,
-      salvageCr: s.salvageCr + mapChainBonus + overkillCr,
+      salvageCr: s.salvageCr + mapChainBonus + overkillCr + lucky.cr,
       pendingWeapon: null,
       mapAim: null,
       attackTiles: new Set<string>(),
@@ -1822,6 +1874,7 @@ function applyVictory(set: SetFn, get: Get) {
   const unitsLost = s.units.filter((u) => u.side === 'player' && !u.alive).length;
   const snowFox = s.snowFox || (s.missionCh.theme === 'snow' && s.blizzard);
   const extremeWon = s.extremeWon || s.settings.difficulty === 'extreme';
+  const shepHon = s.shepHon || (s.missionCh.objectiveType === 'escort' && s.units.every((u) => !u.escort || (u.alive && u.hp >= u.def.maxHp)));
   // wrecked squad frames must be rebuilt — repair bill comes out of the reward
   const repairBill = s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive).reduce((n, u) => n + u.level * 15, 0);
   const aceLines: string[] = [];
@@ -1866,11 +1919,12 @@ function applyVictory(set: SetFn, get: Get) {
       partsOwned,
       snowFox,
       extremeWon,
+      shepHon,
       debrief: null,
       salvageQueue: [],
       log: aceLines.reduce((l, line) => push(l, line), push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''} · RANK ${rankS}${sRankNote ? ' · awarded 🛡 VETERAN PLATE' : ''}${repairBill > 0 ? ` · 🔧 repair bill -${repairBill}cr` : ''}`)),
     });
-    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank, snowFox, extremeWon });
+    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank, snowFox, extremeWon, shepHon });
     return;
   }
   const ch = s.missionCh;
@@ -1930,13 +1984,14 @@ function applyVictory(set: SetFn, get: Get) {
     partsOwned,
     snowFox,
     extremeWon,
+    shepHon,
     lastReward: reward + masteryCr + (clearedFinal ? 5000 : 0),
     debrief: DEBRIEFS[ch.id] ?? null,
     salvageQueue: [],
     log: push(log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + masteryCr + 5000} credits` : `Mission complete! +${reward + masteryCr} credits · RANK ${rank}`),
   });
   void clearBattleSave();
-  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route, missionRank, snowFox, extremeWon });
+  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route, missionRank, snowFox, extremeWon, shepHon });
 }
 
 async function runEnemyPhase(set: SetFn, get: Get) {

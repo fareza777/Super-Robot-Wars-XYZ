@@ -41,7 +41,7 @@ export interface StatusFx {
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'vanish';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -164,6 +164,8 @@ export interface UnitState {
   miracleArmed?: boolean;
   /** Vanish spirit — enemies cannot target this unit until the flag clears */
   vanishUntilEndOfEnemyPhase?: boolean;
+  /** Lucky spirit — the next kill yields a guaranteed drop and bonus salvage */
+  luckyForNextKill?: boolean;
   /** overkill damage this unit took on its deathblow — feeds salvage bonus */
   overkillDealt?: number;
 }
@@ -186,7 +188,8 @@ export interface PartDef {
   en?: number; // +max EN
   evade?: number; // +% evade
   crit?: number; // +% critical chance
-  enRegen?: number; // +EN regenerated at the start of own phase
+  enRegen?: number; // +EN regenerated each turn
+  hpRegen?: number; // +% max HP regenerated each turn // +EN regenerated at the start of own phase
   unique?: boolean; // not sold — awarded by story
   /** afterburner: unit may attack again after a kill, once per turn */
   again?: boolean;

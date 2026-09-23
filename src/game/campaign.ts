@@ -46,6 +46,7 @@ export const PARTS: Record<string, PartDef> = {
   catalystCore: { id: 'catalystCore', name: 'Catalyst Core', desc: '+14% weapon damage', price: 3200, dmg: 14 },
   targetCPU: { id: 'targetCPU', name: 'Targeting CPU', desc: '+10% critical chance', price: 1100, crit: 10 },
   ventCore: { id: 'ventCore', name: 'Vent Core', desc: '+10 EN regenerated each turn', price: 950, enRegen: 10 },
+  nanoWeave: { id: 'nanoWeave', name: 'Nano-Weave Frame', desc: '+8% max HP regenerated each turn', price: 1600, hpRegen: 8 },
   drakeCell: { id: 'drakeCell', name: "Drake's Cell", desc: '+2 move · +8% hit — Vossen tech', price: 0, move: 2, hit: 8, unique: true },
 };
 
@@ -858,10 +859,11 @@ export const HONORS: HonorDef[] = [
   { id: 'h_collector', name: 'ARSENAL', desc: 'Own 10 equipment parts', rewardCr: 1000 },
   { id: 'h_snowfox', name: 'WHITEOUT WALKER', desc: 'Win a mission during a blizzard turn', rewardCr: 900 },
   { id: 'h_overlord', name: 'OVERLORD', desc: 'Win any mission on EXTREME difficulty', rewardCr: 1500 },
+  { id: 'h_shepherd', name: 'SHEPHERD', desc: 'Finish an escort mission with the convoy unscathed', rewardCr: 1100 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; units?: { def: { id: string }; kills: number; alive: boolean; side: string }[] }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; units?: { def: { id: string }; kills: number; alive: boolean; side: string }[] }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -906,6 +908,8 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return s.snowFox === true;
     case 'h_overlord':
       return s.extremeWon === true;
+    case 'h_shepherd':
+      return s.shepHon === true;
     default:
       return false;
   }
