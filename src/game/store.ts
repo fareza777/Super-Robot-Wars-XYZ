@@ -101,6 +101,7 @@ export interface SaveData {
   vossenDefeated?: boolean; // NEMESIS honor — Drake Eclipse shot down at least once
   killsByDef?: Record<string, number>; // enemies destroyed per frame id — codex tally
   snowFox?: boolean; // WHITEOUT honor — won during a blizzard turn
+  mirrorWon?: boolean; // MIRROR BREAKER honor — cleared a Σ mirror wave
   extremeWon?: boolean; // OVERLORD honor — won a mission on EXTREME
   wounded?: string[]; // pilot def ids flying wounded (downed last mission)
   shepHon?: boolean; // SHEPHERD honor — convoy reached safety unscathed
@@ -223,6 +224,7 @@ interface Store {
   killsByDef: Record<string, number>; // enemy frames destroyed per def id — codex tally (persisted)
   wounded: string[]; // pilots downed in the previous battle — sortie weakened
   snowFox: boolean;
+  mirrorWon: boolean;
   extremeWon: boolean;
   shepHon: boolean;
   /** a frame transformed at least once this battle (FORMA SHIFT honor) */
@@ -459,7 +461,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
 const BATTLE_SAVE_KEY = 'srwxyz_battle_v1';
 
 async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank' | 'snowFox' | 'extremeWon' | 'shepHon' | 'flawlessHon' | 'maxHitEver' | 'wounded'>>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated, killsByDef: useGame.getState().killsByDef, snowFox: useGame.getState().snowFox, extremeWon: useGame.getState().extremeWon, shepHon: useGame.getState().shepHon, flawlessHon: useGame.getState().flawlessHon, maxHitEver: useGame.getState().maxHitEver, wounded: useGame.getState().wounded };
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated, killsByDef: useGame.getState().killsByDef, snowFox: useGame.getState().snowFox, mirrorWon: useGame.getState().mirrorWon, extremeWon: useGame.getState().extremeWon, shepHon: useGame.getState().shepHon, flawlessHon: useGame.getState().flawlessHon, maxHitEver: useGame.getState().maxHitEver, wounded: useGame.getState().wounded };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -653,6 +655,7 @@ export const useGame = create<Store>((set, get) => ({
   killsByDef: {} as Record<string, number>,
   wounded: [] as string[],
   snowFox: false,
+  mirrorWon: false,
     extremeWon: false,
     shepHon: false,
     transformed: false,
@@ -780,7 +783,7 @@ export const useGame = create<Store>((set, get) => ({
       await AsyncStorage.removeItem(SAVE_KEY);
       await AsyncStorage.removeItem(BATTLE_SAVE_KEY);
     } catch {}
-    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false, killsByDef: {}, snowFox: false, extremeWon: false, shepHon: false, flawlessHon: false, maxHitEver: 0, wounded: [] });
+    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false, killsByDef: {}, snowFox: false, mirrorWon: false, extremeWon: false, shepHon: false, flawlessHon: false, maxHitEver: 0, wounded: [] });
   },
 
   toggleDeploy: (defId) => {
@@ -860,7 +863,7 @@ export const useGame = create<Store>((set, get) => ({
       const raw = await AsyncStorage.getItem(SAVE_KEY);
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
-      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {}, simBest: d.simBest ?? 0, vossenDefeated: d.vossenDefeated ?? false, snowFox: d.snowFox ?? false,
+      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {}, simBest: d.simBest ?? 0, vossenDefeated: d.vossenDefeated ?? false, snowFox: d.snowFox ?? false, mirrorWon: d.mirrorWon ?? false,
     extremeWon: d.extremeWon ?? false, shepHon: d.shepHon ?? false, flawlessHon: d.flawlessHon ?? false, killsByDef: d.killsByDef ?? {}, maxHitEver: d.maxHitEver ?? 0, wounded: d.wounded ?? [] });
     } catch {}
     try {
@@ -2105,6 +2108,7 @@ function simNextWave(set: SetFn, get: Get) {
     }
     news.push(u);
   });
+  const mirrorCleared = s.simWave > 0 && s.simWave % 5 === 0;
   const healed = s.units.map((u) => (u.side !== 'player' || !u.alive ? u : { ...u, hp: Math.min(u.def.maxHp, u.hp + Math.round(u.def.maxHp * 0.25)), en: Math.min(u.def.maxEn, u.en + 30), moved: false, acted: false, dodges: 0 }));
   const units = healed.concat(news);
   // every 3rd wave a supply crate warps in with the hostiles
@@ -2116,7 +2120,7 @@ function simNextWave(set: SetFn, get: Get) {
   let log = push(s.log, `— Wave ${wave - 1} cleared — +${(wave - 1) * 150} pts`);
   log = push(log, mirror ? `▲ MIRROR WAVE ${wave} — Σ protocol: your own squad, reversed` : `▲ WAVE ${wave}: ${news.length} hostiles warp in (Lv ${lvl}${wave % 4 === 0 ? ' · ALL ELITE' : ''}${wave % 3 === 0 ? ' + supply crate' : ''})`);
   const notice = mirror ? `▲ MIRROR WAVE ${wave} — Σ PROTOCOL · ${s.kills * 50 + (wave - 1) * 150} PTS` : `▲ WAVE ${wave} — ${news.length} HOSTILES INBOUND · ${s.kills * 50 + (wave - 1) * 150} PTS`;
-  set({ units, crates, simWave: wave, battle: null, phase: 'player', enemyBusy: false, selectedUid: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, mapAim: null, pendingMove: null, attackTiles: new Set(), hazardWarn: [], blizzard: false, notice, log });
+  set({ units, crates, simWave: wave, mirrorWon: s.mirrorWon || mirrorCleared, battle: null, phase: 'player', enemyBusy: false, selectedUid: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, mapAim: null, pendingMove: null, attackTiles: new Set(), hazardWarn: [], blizzard: false, notice, log });
   setTimeout(() => set({ notice: null }), 2600);
 }
 
@@ -2715,11 +2719,11 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       }
     }
     // blizzard turns on snow fields — ground units lose 15% hit for the whole phase
-    const stormTheme = st.missionCh.theme === 'snow' ? 'snow' : st.missionCh.theme === 'desert' ? 'desert' : null;
+    const stormTheme = st.missionCh.theme === 'snow' ? 'snow' : st.missionCh.theme === 'desert' ? 'desert' : st.missionCh.theme === 'ruins' ? 'ruins' : null;
     const blizzard = stormTheme != null && nextTurn % 3 === 0;
     if (blizzard) {
-      if (!notice) { notice = stormTheme === 'desert' ? '🏜 SANDSTORM — ground units -15% hit' : '❄ BLIZZARD — ground units -15% hit'; setTimeout(() => set({ notice: null }), 2800); }
-      recovered.push(stormTheme === 'desert' ? '🏜 Sandstorm sweeps the field — ground units have -15% hit this turn.' : '❄ Blizzard sweeps the field — ground units have -15% hit this turn.');
+      if (!notice) { notice = stormTheme === 'desert' ? '🏜 SANDSTORM — ground units -15% hit' : stormTheme === 'ruins' ? '🌫 ASH STORM — ground units -15% hit' : '❄ BLIZZARD — ground units -15% hit'; setTimeout(() => set({ notice: null }), 2800); }
+      recovered.push(stormTheme === 'desert' ? '🏜 Sandstorm sweeps the field — ground units have -15% hit this turn.' : stormTheme === 'ruins' ? '🌫 Ash storm sweeps the ruins — ground units have -15% hit this turn.' : '❄ Blizzard sweeps the field — ground units have -15% hit this turn.');
     }
     // bond resonance — bonded partners standing together feed each other's Will
     let resonated = false;

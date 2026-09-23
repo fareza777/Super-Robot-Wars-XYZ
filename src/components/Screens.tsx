@@ -153,6 +153,15 @@ export function BriefingScreen() {
   );
 }
 
+const WIN_QUIPS: Record<string, string> = {
+  'X-1': 'Ray: "Sky\'s clear. Next fight."',
+  'X-2': 'Mira: "Targets down. Clean sweep."',
+  'Y-1': 'Gara: "Siege complete. Nothing left standing."',
+  'Z-1': 'Orin: "Everyone came home. That\'s a win."',
+  RED: 'Rax: "HAH! Who\'s next? Line \'em up!"',
+  FALCON: 'Vee: "Fast, sharp, done. As planned."',
+};
+
 const RANK_COLOR: Record<string, string> = { S: '#ffd34d', A: '#6fe0ff', B: '#b8c4dc', C: '#8a8fa8' };
 
 export function EndScreen({ victory }: { victory: boolean }) {
@@ -228,6 +237,9 @@ export function EndScreen({ victory }: { victory: boolean }) {
             <Text style={[styles.resultsAce, { color: '#ffd34d' }]}>
               ♛ MVP — {mvp.def.pilot.name} · {mvp.dmgDealt} dmg dealt
             </Text>
+          )}
+          {mvp && WIN_QUIPS[mvp.def.pilot.callsign] && (
+            <Text style={[styles.resultsAce, { color: '#9fd0ff', fontStyle: 'italic' }]}>{WIN_QUIPS[mvp.def.pilot.callsign]}</Text>
           )}
           {justUnlockedNg && <Text style={styles.resultsNg}>NEW GAME+ {ngPlus} — restart at Ch.1, keep everything, enemies +{Math.round(18 * ngPlus)}% HP</Text>}
         </View>
