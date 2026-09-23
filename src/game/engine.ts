@@ -110,7 +110,7 @@ export function maxAmmoOf(u: UnitState, w: WeaponDef): number {
 }
 
 export function usableWeapons(u: UnitState): WeaponDef[] {
-  return u.def.weapons.filter((w) => u.en >= enCostOf(u, w) && (w.ammo == null || (u.ammo[w.id] ?? 0) > 0) && u.will >= (w.willReq ?? 0));
+  return u.def.weapons.filter((w) => u.en >= enCostOf(u, w) && (w.ammo == null || (u.ammo[w.id] ?? 0) > 0) && u.will >= (w.willReq ?? 0) && (w.aceReq == null || u.kills >= w.aceReq));
 }
 
 /** Will (kiai) scaling — every point above 100 fights harder. */

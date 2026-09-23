@@ -203,13 +203,14 @@ export function SidePanel() {
               const noAmmo = ammoLeft != null && ammoLeft <= 0;
               const noPost = !w.postMove && s.pendingMovedFlag;
               const noWill = (w.willReq ?? 0) > unit.will;
+              const noAce = w.aceReq != null && unit.kills < w.aceReq;
               const partner = w.comboPartner ? s.units.find((p) => p.def.id === w.comboPartner && p.side === 'player' && p.alive) : undefined;
               const partnerHere = w.comboPartner ? partner && dist(partner.pos, unit.pos) === 1 && !partner.acted : true;
               const hitsAny =
                 w.mapRange != null
                   ? true // any tile in range is aim-able; the blast may still catch foes
                   : s.units.some((e) => e.alive && e.side === 'enemy' && weaponsAgainst(unit, s.pendingMove!, e, s.pendingMovedFlag).some((x) => x.id === w.id));
-              const disabled = noEn || noAmmo || noPost || noWill || !hitsAny || !partnerHere;
+              const disabled = noEn || noAmmo || noPost || noWill || noAce || !hitsAny || !partnerHere;
               const reason =
                 noEn
                   ? 'NEED EN'
@@ -219,6 +220,8 @@ export function SidePanel() {
                       ? 'CAN\'T AFTER MOVE'
                       : noWill
                         ? `NEED WILL ${w.willReq}`
+                        : noAce
+                          ? `SEALED · ${w.aceReq} KILLS`
                         : !hitsAny
                           ? 'NO TARGET'
                           : w.comboPartner

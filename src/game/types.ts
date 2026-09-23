@@ -18,6 +18,8 @@ export interface WeaponDef {
   drain?: boolean;
   /** breaker — a landed hit sunders the target's armor for the rest of the battle */
   breaker?: boolean;
+  /** ace-unlock — stays sealed until the pilot scores this many kills THIS battle */
+  aceReq?: number;
   name: string;
   kind: WeaponKind;
   power: number;

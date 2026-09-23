@@ -355,6 +355,34 @@ const ALLY_REINFORCE: Record<number, { turn: number; comp: { defId: string; arme
 
 /** Mid-battle story beats keyed by chapter id — dialog fires at the start of that player turn. */
 const MID_EVENTS: Record<number, MapDef['events']> = {
+  8: [{
+    turn: 2,
+    lines: [
+      { speaker: 'gruntborg', text: 'Contacts spreading left and right — they want us split. Nobody chases alone, we stay inside support range.' },
+      { speaker: 'arielis', text: 'Confirmed on scope. Tight formation, overlapping arcs — let them come to us.' },
+    ],
+  }] as MapDef['events'],
+  9: [{
+    turn: 3,
+    lines: [
+      { speaker: 'zephyra', text: 'Picking up fresh signatures on the far edge — the Empire is feeding this fight, squad. Expect more.' },
+      { speaker: 'valstray', text: 'Then we deny them a second wave. Hit hard, hit fast, do not let the line stall.' },
+    ],
+  }] as MapDef['events'],
+  11: [{
+    turn: 3,
+    lines: [
+      { speaker: 'npc_captain', text: 'Ark squadron, this is the Captain. Reinforcement corridor secured — militia frames inbound on your flank.' },
+      { speaker: 'raxdenR', text: 'Hah! About time the locals joined the war. Watch my six, allies — the Fang leads the charge!' },
+    ],
+  }] as MapDef['events'],
+  14: [{
+    turn: 2,
+    lines: [
+      { speaker: 'vexiaX', text: 'Ray. Their ambush net is tightening — read the terrain, pull the squad through the gap before it closes.' },
+      { speaker: 'valstray', text: 'Copy that, Vexia. Squad — we move as one blade. No heroics unless it counts.' },
+    ],
+  }] as MapDef['events'],
   1: [{
     turn: 3,
     lines: [
