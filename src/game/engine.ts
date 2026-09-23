@@ -28,7 +28,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0 },
   };
 }
 
@@ -259,15 +259,25 @@ export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map
   if (reaction === 'defend' && first.hit) first.damage = Math.round(first.damage * 0.5);
   if (reaction === 'cover' && first.hit) first.damage = Math.round(first.damage * 0.7);
   let counter: AttackResult['counter'] = null;
-  if (!first.destroyed && reaction === 'counter') {
-    // defender counter with its strongest in-range weapon (even if it "acted")
+  let counterCut = false;
+  if (reaction === 'counter') {
     const cw = bestCounterWeapon(def, att.pos);
-    if (cw) {
+    // Counter-Cut skill: trained pilots strike BEFORE the enemy lands — a kill pre-empts the hit entirely
+    const cutRank = def.skills?.countercut ?? 0;
+    if (cw && cutRank > 0 && Math.random() * 100 < cutRank * 4) {
       const c = resolveHit(def, att, cw, map, defMods);
       counter = { weapon: cw, ...c };
+      counterCut = true;
+      if (c.destroyed) {
+        return { hit: false, crit: false, graze: false, damage: 0, destroyed: false, hitChance: first.hitChance, counter, reaction, counterCut: true, expEvents: [] };
+      }
+    }
+    if (!counter && !first.destroyed) {
+      const c = resolveHit(def, att, cw!, map, defMods);
+      counter = { weapon: cw!, ...c };
     }
   }
-  return { hit: first.hit, crit: first.crit, graze: first.graze, damage: first.damage, destroyed: first.destroyed, hitChance: first.hitChance, counter, reaction, expEvents: [] };
+  return { hit: first.hit, crit: first.crit, graze: first.graze, damage: first.damage, destroyed: first.destroyed, hitChance: first.hitChance, counter, reaction, counterCut, expEvents: [] };
 }
 
 /** Tiles inside a MAP weapon's blast centered at `center`. */
@@ -573,6 +583,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'mercy':
       u.mercyArmed = true;
       break;
+    case 'purge':
+      break; // area cleanse is applied by the store pass
     case 'snipe':
       u.snipeForNextAttack = true;
       break;

@@ -43,7 +43,7 @@ export interface StatusFx {
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -176,7 +176,7 @@ export interface UnitState {
   overkillDealt?: number;
 }
 
-export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def';
+export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut';
 export type PilotSkills = Record<PilotSkillId, number>;
 
 /** SRW-style enhancement parts equippable on a mecha. */
@@ -223,6 +223,8 @@ export interface MapDef {
   bossHoldUntil?: number;
   /** enemy reinforcement wave: at the start of player turn `turn`, `comp` units spawn on the enemy edge */
   reinforce?: { turn: number; comp: string[] };
+  /** allied reinforcement wave: at the start of player turn `turn`, NPC units spawn on the player edge (west) */
+  allyReinforce?: { turn: number; comp: { defId: string; armed?: boolean }[] };
   /** mid-battle story beats: dialog plays at the start of player turn `turn` */
   events?: { turn: number; lines: { speaker: string; text: string; voice?: string }[] }[];
   /** seize missions: the beacon tile a player unit must reach to win */
@@ -289,6 +291,8 @@ export interface AttackResult {
   miracle?: boolean;
   /** Mercy spirit — attacker pulled the killing blow (defender at 10 HP) */
   mercy?: boolean;
+  /** Counter-Cut pilot skill — the defender's counter struck first; a kill pre-empts the incoming hit entirely */
+  counterCut?: boolean;
   /** this blow crippled the defender's frame (move -2) */
   crippled?: boolean;
   /** damage beyond what the finishing blow needed */

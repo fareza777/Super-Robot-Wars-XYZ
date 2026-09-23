@@ -100,6 +100,7 @@ export interface SaveData {
   extremeWon?: boolean; // OVERLORD honor — won a mission on EXTREME
   shepHon?: boolean; // SHEPHERD honor — convoy reached safety unscathed
   flawlessHon?: boolean; // FLAWLESS honor — no unit lost on a Ch.10+ mission
+  maxHitEver?: number; // ANNIHILATOR honor — biggest single hit ever landed
 }
 
 /** Serialized mid-battle snapshot — lets the player leave a mission and resume it later. */
@@ -216,6 +217,7 @@ interface Store {
   extremeWon: boolean;
   shepHon: boolean;
   flawlessHon: boolean;
+  maxHitEver: number;
   log: string[];
   enemyBusy: boolean;
   screenShake: number;
@@ -348,7 +350,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
       u.level = prog.level;
       u.exp = prog.exp;
       u.pp = prog.pp ?? 0;
-      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, ...(prog.skills ?? {}) };
+      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, ...(prog.skills ?? {}) };
       if ((prog.kills ?? 0) >= ACE_KILLS) u.will = 130; // ace pilots start hot
       if ((prog.kills ?? 0) >= ACE_MASTER_KILLS) u.aceMastery = true;
       // career-kill milestones: extra spirits the pilot learned along the war
@@ -434,8 +436,8 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
 
 const BATTLE_SAVE_KEY = 'srwxyz_battle_v1';
 
-async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank' | 'snowFox' | 'extremeWon' | 'shepHon' | 'flawlessHon'>>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated, killsByDef: useGame.getState().killsByDef, snowFox: useGame.getState().snowFox, extremeWon: useGame.getState().extremeWon, shepHon: useGame.getState().shepHon, flawlessHon: useGame.getState().flawlessHon };
+async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank' | 'snowFox' | 'extremeWon' | 'shepHon' | 'flawlessHon' | 'maxHitEver'>>) {
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated, killsByDef: useGame.getState().killsByDef, snowFox: useGame.getState().snowFox, extremeWon: useGame.getState().extremeWon, shepHon: useGame.getState().shepHon, flawlessHon: useGame.getState().flawlessHon, maxHitEver: useGame.getState().maxHitEver };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -491,6 +493,12 @@ function applyOverdrive(units: UnitState[], attackerUid: string, kills: number, 
   att.acted = false;
   att.moved = true;
   return push(log, `⚡ OVERDRIVE — ${att.def.name} presses the attack again!`);
+}
+
+/** Track the largest single hit ever landed — feeds the ANNIHILATOR honor. */
+function trackMaxHit(get: () => { maxHitEver: number }, set: (p: { maxHitEver: number }) => void, r: AttackResult): void {
+  const m = Math.max(get().maxHitEver ?? 0, r.damage ?? 0, r.counter?.damage ?? 0, r.support?.damage ?? 0, ...(r.splash ?? []).map((x) => x.damage));
+  if (m !== (get().maxHitEver ?? 0)) set({ maxHitEver: m });
 }
 
 function applyLucky(units: UnitState[], attackerUid: string, dead: UnitState[]): { cr: number; drop?: keyof typeof ITEMS } {
@@ -623,6 +631,7 @@ export const useGame = create<Store>((set, get) => ({
     extremeWon: false,
     shepHon: false,
     flawlessHon: false,
+    maxHitEver: 0,
   hint: null,
   hintsSeen: [],
 
@@ -741,7 +750,7 @@ export const useGame = create<Store>((set, get) => ({
       await AsyncStorage.removeItem(SAVE_KEY);
       await AsyncStorage.removeItem(BATTLE_SAVE_KEY);
     } catch {}
-    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false, killsByDef: {}, snowFox: false, extremeWon: false, shepHon: false, flawlessHon: false });
+    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false, killsByDef: {}, snowFox: false, extremeWon: false, shepHon: false, flawlessHon: false, maxHitEver: 0 });
   },
 
   toggleDeploy: (defId) => {
@@ -822,7 +831,7 @@ export const useGame = create<Store>((set, get) => ({
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
       set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {}, simBest: d.simBest ?? 0, vossenDefeated: d.vossenDefeated ?? false, snowFox: d.snowFox ?? false,
-    extremeWon: d.extremeWon ?? false, shepHon: d.shepHon ?? false, flawlessHon: d.flawlessHon ?? false, killsByDef: d.killsByDef ?? {} });
+    extremeWon: d.extremeWon ?? false, shepHon: d.shepHon ?? false, flawlessHon: d.flawlessHon ?? false, killsByDef: d.killsByDef ?? {}, maxHitEver: d.maxHitEver ?? 0 });
     } catch {}
     try {
       const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
@@ -889,7 +898,7 @@ export const useGame = create<Store>((set, get) => ({
     const s = get();
     const prog = s.pilotProg[defId];
     if (!prog || (prog.pp ?? 0) < 1) return;
-    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, ...(prog.skills ?? {}) };
+    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, ...(prog.skills ?? {}) };
     if (skills[statId] >= MAX_PILOT_SKILL) return;
     skills[statId] += 1;
     const pilotProg = { ...s.pilotProg, [defId]: { ...prog, pp: (prog.pp ?? 0) - 1, skills } };
@@ -1338,6 +1347,7 @@ export const useGame = create<Store>((set, get) => ({
     if (s.pendingWeapon.all) {
       const w0 = s.pendingWeapon;
       const out = applyAllAttack({ map: s.map, units: s.units, turn: s.turn }, att.uid, w0.id, modsFor(s.bonds, s.units));
+      trackMaxHit(get, set, out.result);
       const state = out.state;
       const result = out.result;
       const killCount = deadEnemies(s.units, state.units).length;
@@ -1407,6 +1417,7 @@ export const useGame = create<Store>((set, get) => ({
     }
     const reaction = aiPickReaction(att, def, s.pendingWeapon, s.map);
     let { state, result } = applyAttack({ map: s.map, units: s.units, turn: s.turn, blizzard: s.blizzard }, att.uid, uid, s.pendingWeapon.id, modsFor(s.bonds, s.units), reaction);
+    trackMaxHit(get, set, result);
     // SRW support attack — an ally beside the shooter chips in at reduced damage
     if (def.side === 'enemy' && state.units.find((u) => u.uid === uid)!.alive) {
       const sup = findSupport(state.units, att.uid, state.units.find((u) => u.uid === uid)!);
@@ -1547,6 +1558,7 @@ export const useGame = create<Store>((set, get) => ({
       return;
     }
     const { state, result } = applyMapAttack({ map: s.map, units: s.units, turn: s.turn }, att.uid, p, w.id, modsFor(s.bonds, s.units));
+    trackMaxHit(get, set, result);
     const primary = targets.slice().sort((a, b) => dist(a.pos, p) - dist(b.pos, p))[0];
     const attAfter = state.units.find((u) => u.uid === att.uid)!;
     const defAfter = state.units.find((u) => u.uid === primary.uid) ?? primary;
@@ -1671,6 +1683,20 @@ export const useGame = create<Store>((set, get) => ({
         if (sp === 'disrupt' && u2.side !== src.side) u2.will = Math.max(100, u2.will - 10);
       }
     }
+    // purge — cleanse self and adjacent allies of cripple + status debuffs
+    let purgeLog: string | null = null;
+    if (sp === 'purge') {
+      const src = units.find((x) => x.uid === uid)!;
+      let cleaned = 0;
+      for (const u2 of units) {
+        if (!u2.alive || u2.side !== src.side || dist(u2.pos, src.pos) > 2) continue;
+        const had = (u2.statuses?.length ?? 0) > 0 || !!u2.crippled;
+        u2.statuses = [];
+        u2.crippled = false;
+        if (had) cleaned++;
+      }
+      purgeLog = cleaned ? `Purge wave cleanses ${cleaned} frame${cleaned > 1 ? 's' : ''} — cripples and debuffs lifted` : 'Purge wave ripples out — nothing to cleanse';
+    }
     // trust — heal the most wounded ally within 2 tiles for 30% HP
     let trustLog: string | null = null;
     if (sp === 'trust') {
@@ -1688,7 +1714,7 @@ export const useGame = create<Store>((set, get) => ({
     set({
       units,
       spiritForUid: null,
-      log: trustLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), trustLog) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
+      log: trustLog || purgeLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), [trustLog, purgeLog].filter(Boolean).join(' · ')) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
       moveTiles: s.menuForUid ? new Map() : tiles,
     });
   },
@@ -1893,6 +1919,7 @@ function applyVictory(set: SetFn, get: Get) {
   const snowFox = s.snowFox || (s.missionCh.theme === 'snow' && s.blizzard);
   const extremeWon = s.extremeWon || s.settings.difficulty === 'extreme';
   const shepHon = s.shepHon || (s.missionCh.objectiveType === 'escort' && s.units.every((u) => !u.escort || (u.alive && u.hp >= u.def.maxHp)));
+  const maxHitEver = s.maxHitEver ?? 0;
   const flawlessHon = s.flawlessHon || (!s.sideId && s.simWave === 0 && s.missionCh.id >= 10 && !s.units.some((u) => u.side === 'player' && !u.npc && !u.alive));
   // wrecked squad frames must be rebuilt — repair bill comes out of the reward
   const repairBill = s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive).reduce((n, u) => n + u.level * 15, 0);
@@ -1940,11 +1967,12 @@ function applyVictory(set: SetFn, get: Get) {
       extremeWon,
       shepHon,
       flawlessHon,
+      maxHitEver,
       debrief: null,
       salvageQueue: [],
       log: aceLines.reduce((l, line) => push(l, line), push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''} · RANK ${rankS}${sRankNote ? ' · awarded 🛡 VETERAN PLATE' : ''}${repairBill > 0 ? ` · 🔧 repair bill -${repairBill}cr` : ''}`)),
     });
-    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank, snowFox, extremeWon, shepHon, flawlessHon });
+    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank, snowFox, extremeWon, shepHon, flawlessHon, maxHitEver });
     return;
   }
   const ch = s.missionCh;
@@ -2006,13 +2034,14 @@ function applyVictory(set: SetFn, get: Get) {
     extremeWon,
     shepHon,
     flawlessHon,
+    maxHitEver,
     lastReward: reward + masteryCr + (clearedFinal ? 5000 : 0),
     debrief: DEBRIEFS[ch.id] ?? null,
     salvageQueue: [],
     log: push(log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + masteryCr + 5000} credits` : `Mission complete! +${reward + masteryCr} credits · RANK ${rank}`),
   });
   void clearBattleSave();
-  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route, missionRank, snowFox, extremeWon, shepHon, flawlessHon });
+  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route, missionRank, snowFox, extremeWon, shepHon, flawlessHon, maxHitEver });
 }
 
 async function runEnemyPhase(set: SetFn, get: Get) {
@@ -2123,6 +2152,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       }
       const primary = targets[0];
       const { state, result } = applyMapAttack({ map: cur.map, units: cur.units, turn: cur.turn }, att.uid, aim, mw.id, modsFor(cur.bonds, cur.units));
+      trackMaxHit(get, set, result);
       let log2 = push(cur.log, `☄ MAP BARRAGE — ${att.def.name} fires ${mw.name}: ${targets.length} units in the blast`);
       const primaryRes = targets[0].uid;
       log2 = push(log2, `  ${primary.def.name}: ${result.hit ? `${result.damage}${result.destroyed ? ' — DESTROYED' : ''}` : 'missed'}`);
@@ -2194,6 +2224,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       if (warning) set({ bossWarned: true });
       const defUid = reaction === 'cover' ? coverUid! : def.uid;
       const { state, result } = applyAttack({ map: cur.map, units: cur.units, turn: cur.turn, blizzard: cur.blizzard }, att.uid, defUid, plan.weapon.id, modsFor(cur.bonds, cur.units), reaction);
+      trackMaxHit(get, set, result);
       if (reaction === 'cover' && coverUid) {
         const ci = state.units.findIndex((u) => u.uid === coverUid);
         if (ci >= 0) state.units[ci] = { ...state.units[ci], acted: true };
@@ -2207,7 +2238,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
           result.counter
             ? push(
                 l,
-                `${att.def.name} hits ${tgtName} for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''} · ${tgtName} counters for ${result.counter.damage}${result.counter.destroyed ? ' — DESTROYED' : ''}`,
+                `${att.def.name} hits ${tgtName} for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''} · ${result.counterCut ? '⚔COUNTER-CUT ' : ''}${tgtName} counters for ${result.counter.damage}${result.counter.destroyed ? ' — DESTROYED' : ''}`,
               )
             : push(
                 l,
@@ -2349,6 +2380,34 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       }
       notice = '⚠ ENEMY REINFORCEMENTS';
       recovered.push(`Enemy reinforcements: ${rf.comp.length} units incoming!`);
+      setTimeout(() => set({ notice: null }), 2800);
+    }
+    // allied reinforcement wave — NPC militia storm in from the west edge, fighting beside you
+    const arf = st.map.allyReinforce;
+    if (arf && nextTurn === arf.turn) {
+      const occupied = new Set(units.filter((u) => u.alive).map((u) => key(u.pos)));
+      let i = 0;
+      for (const c of arf.comp) {
+        outer: for (let x = 0; x <= Math.min(3, st.map.cols - 1); x++)
+          for (let y = 0; y < st.map.rows; y++) {
+            const k = `${x},${y}`;
+            const ti = TERRAIN_INFO[st.map.terrain[y][x]];
+            if (!occupied.has(k) && ti.passable.land && !ti.hpDmg) {
+              occupied.add(k);
+              const nu = makeUnit(c.defId, 'player', { x, y }, `ar${nextTurn}x${i++}`);
+              nu.npc = true;
+              nu.armed = c.armed ?? true;
+              nu.level = st.missionCh?.lvl ?? 1;
+              const hpScale = 1 + ((st.missionCh?.lvl ?? 1) - 1) * 0.12;
+              nu.def = { ...nu.def, maxHp: Math.round(nu.def.maxHp * hpScale) };
+              nu.hp = nu.def.maxHp;
+              units.push(nu);
+              break outer;
+            }
+          }
+      }
+      notice = '✚ ALLIED REINFORCEMENTS';
+      recovered.push(`Allied reinforcements: ${arf.comp.length} militia frames join the line!`);
       setTimeout(() => set({ notice: null }), 2800);
     }
     // mid-battle story event fires once, at the start of its turn

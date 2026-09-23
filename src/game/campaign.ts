@@ -66,6 +66,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'evade', name: 'Reflexes', desc: '+1% evade per point' },
   { id: 'dmg', name: 'Firepower', desc: '+1.5% damage per point' },
   { id: 'def', name: 'Endurance', desc: '-1.5% damage taken per point' },
+  { id: 'countercut', name: 'Counter Cut', desc: '+4% chance per point to strike first when countering — a kill pre-empts the blow' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -334,6 +335,13 @@ const REINFORCE: Record<number, { turn: number; comp: string[] }> = {
   1017: { turn: 3, comp: ['zolda', 'zoldaAir', 'zoldaTank'] },
   26: { turn: 3, comp: ['nightmare', 'zoldaTank', 'nightmare'] },
   30: { turn: 2, comp: ['nightmare', 'nightmare'] },
+};
+
+/** Mid-battle ALLIED reinforcement waves — NPC militia frames storm in from the west edge to fight beside you. */
+const ALLY_REINFORCE: Record<number, { turn: number; comp: { defId: string; armed?: boolean }[] }> = {
+  17: { turn: 3, comp: [{ defId: 'arkmilitia', armed: true }, { defId: 'arkmilitia', armed: true }] },
+  23: { turn: 4, comp: [{ defId: 'arkmilitia', armed: true }, { defId: 'arkmilitia', armed: true }] },
+  27: { turn: 3, comp: [{ defId: 'arkmilitia', armed: true }, { defId: 'arkmilitia', armed: true }, { defId: 'arkmilitia', armed: true }] },
 };
 
 /** Mid-battle story beats keyed by chapter id — dialog fires at the start of that player turn. */
@@ -637,6 +645,7 @@ export function genMap(ch: ChapterDef): MapDef {
     reachPos,
     bossHoldUntil: ch.boss ? 3 : undefined,
     reinforce: REINFORCE[ch.id],
+    allyReinforce: ALLY_REINFORCE[ch.id],
     events: MID_EVENTS[ch.id],
     hazards: ch.theme === 'void' || ch.theme === 'colony' ? { every: 3, count: 2 } : ch.theme === 'fortress' || ch.theme === 'moon' ? { every: 4, count: 3 } : undefined,
   };
@@ -862,11 +871,12 @@ export const HONORS: HonorDef[] = [
   { id: 'h_overlord', name: 'OVERLORD', desc: 'Win any mission on EXTREME difficulty', rewardCr: 1500 },
   { id: 'h_shepherd', name: 'SHEPHERD', desc: 'Finish an escort mission with the convoy unscathed', rewardCr: 1100 },
   { id: 'h_flawless', name: 'FLAWLESS', desc: 'Clear a main chapter at Ch.10+ without losing a single unit', rewardCr: 1400 },
+  { id: 'h_annihilator', name: 'ANNIHILATOR', desc: 'Land a single hit of 8000+ damage in battle', rewardCr: 1400 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; units?: { def: { id: string }; kills: number; alive: boolean; side: string }[] }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string }[] }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -917,6 +927,8 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return s.flawlessHon === true;
     case 'h_acecorps':
       return kills.filter((p) => (p.kills ?? 0) >= 25).length >= 3;
+    case 'h_annihilator':
+      return (s.maxHitEver ?? 0) >= 8000;
     default:
       return false;
   }
