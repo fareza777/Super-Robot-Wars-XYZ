@@ -52,6 +52,7 @@ export const PARTS: Record<string, PartDef> = {
   sensor: { id: 'sensor', name: 'Sensor Array', desc: 'Reveals stealth enemies within 5 tiles', price: 800 },
   salvageArm: { id: 'salvageArm', name: 'Salvage Arm', desc: '+25% salvage drop chance while any equipped frame stands (squad-wide)', price: 1200 },
   iField: { id: 'iField', name: 'I-Field Emitter', desc: 'Cuts incoming damage below 1400 to 20%', price: 3000, barrier: 1400 },
+  commandRelay: { id: 'commandRelay', name: 'Command Relay', desc: 'Allies within 2 tiles gain +8% hit (squad aura)', price: 1400, auraHit: 8 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -1041,11 +1042,13 @@ export const HONORS: HonorDef[] = [
   { id: 'h_surv', name: 'SURVIVOR', desc: 'Win with a squad frame at 10% HP or less still standing', rewardCr: 600 },
   { id: 'h_solo', name: 'SOLO WING', desc: 'A single squad frame scores every player kill (3 or more)', rewardCr: 900 },
   { id: 'h_arty', name: 'ARTILLERY HUNTER', desc: 'Destroy two Valkyr Ballista siege frames', rewardCr: 700 },
+  { id: 'h_attr', name: 'WAR OF ATTRITION', desc: 'Win a battle lasting fifteen turns or more', rewardCr: 700 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; side: string; hp?: number; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean; decoyHit?: boolean; iFieldKill?: boolean; mirrorWon?: boolean; arcKill?: boolean; blastKill?: boolean; lostAlly?: boolean; snipeKill?: boolean; rescuedPods?: string[]; bossRush?: boolean; chainCount?: number }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; turn?: number;
+units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; side: string; hp?: number; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean; decoyHit?: boolean; iFieldKill?: boolean; mirrorWon?: boolean; arcKill?: boolean; blastKill?: boolean; lostAlly?: boolean; snipeKill?: boolean; rescuedPods?: string[]; bossRush?: boolean; chainCount?: number }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -1134,6 +1137,8 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
     }
     case 'h_arty':
       return (s.killsByDef?.ballista ?? 0) >= 2;
+    case 'h_attr':
+      return (s.turn ?? 0) >= 15;
     case 'h_ghostd':
       return s.altKill === true;
     default:

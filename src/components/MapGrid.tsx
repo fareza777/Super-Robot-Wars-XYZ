@@ -145,7 +145,7 @@ const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitSt
       </View>
       {u.def.carrier ? <Text style={[styles.bossTag, { color: '#ffe8a0' }]}>💰LOOT</Text> : u.def.boss ? <Text style={[styles.bossTag, u.phase2 && { color: '#ff5050' }]}>{u.phase2 ? 'Ω ACE' : 'ACE'}</Text> : u.elite ? <Text style={[styles.bossTag, { color: '#ffd34d' }]}>★ELITE</Text> : u.npc ? <Text style={[styles.bossTag, { color: '#7dff9d' }]}>🛡ALLY</Text> : u.aceMastery ? <Text style={[styles.bossTag, { color: '#6fe0ff' }]}>★ACE</Text> : null}
       {spiritBadges(u).length > 0 && <Text style={styles.spiritTag}>{spiritBadges(u)}</Text>}
-      {(u.statuses?.length ?? 0) > 0 && <Text style={styles.statusTag}>{u.statuses!.map((fx) => (fx.id === 'burn' ? '🔥' : fx.id === 'stun' ? '⚡' : fx.id === 'slow' ? '🕸' : fx.id === 'mark' ? '🎯' : '⬇')).join('')}</Text>}
+      {(u.statuses?.length ?? 0) > 0 && <Text style={styles.statusTag}>{u.statuses!.map((fx) => (fx.id === 'burn' ? '🔥' : fx.id === 'stun' ? '⚡' : fx.id === 'slow' ? '🕸' : fx.id === 'mark' ? '🎯' : fx.id === 'supp' ? '🔻' : '⬇')).join('')}</Text>}
       {u.will > 100 && (
         <View style={[styles.willTag, u.will >= 130 && { borderColor: '#ffd34d' }]}>
           <Text style={[styles.willTxt, u.will >= 130 && { color: '#ffd34d' }]}>◈{u.will}</Text>

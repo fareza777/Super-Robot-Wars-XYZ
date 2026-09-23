@@ -45,13 +45,13 @@ export interface WeaponDef {
   /** combination attack: requires this partner unit adjacent & unacted; both consume their turn */
   comboPartner?: string;
   /** status inflicted on a hit: burn (HP loss/turn), stun (skip next action), break (armor -30%) */
-  status?: 'burn' | 'stun' | 'break' | 'slow' | 'mark';
+  status?: 'burn' | 'stun' | 'break' | 'slow' | 'mark' | 'supp';
   /** ALL weapon: fires on every enemy inside range at once — no counters (SRW ALL attack) */
   all?: boolean;
 }
 
 export interface StatusFx {
-  id: 'burn' | 'stun' | 'break' | 'slow' | 'mark';
+  id: 'burn' | 'stun' | 'break' | 'slow' | 'mark' | 'supp';
   turns: number; // remaining phase transitions it lasts through
 }
 
@@ -254,6 +254,8 @@ export interface PartDef {
   dmgTaken?: number;
   /** magazine extension — +% ammo capacity on ammo-limited weapons */
   ammoPct?: number;
+  /** command aura: allies within 2 tiles gain this much hit */
+  auraHit?: number;
   unique?: boolean; // not sold — awarded by story
   /** afterburner: unit may attack again after a kill, once per turn */
   again?: boolean;
