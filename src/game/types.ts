@@ -203,6 +203,8 @@ export interface UnitState {
   anchored?: boolean;
   /** overwatch stance: fires on the first hostile that enters range during the enemy phase */
   overwatch?: boolean;
+  /** charge stance — the next attack lands at 1.5x damage with +15 crit; consumed on the attack */
+  charged?: boolean;
   /** Guts — next attack deals +75% damage while under half HP */
   gutsForNextAttack?: boolean;
   /** Exposed — painted by targeting data: next hit lands +20 hit and +25% damage */
@@ -233,7 +235,7 @@ export interface UnitState {
   overkillDealt?: number;
 }
 
-export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte';
+export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand';
 export type PilotSkills = Record<PilotSkillId, number>;
 
 /** SRW-style enhancement parts equippable on a mecha. */

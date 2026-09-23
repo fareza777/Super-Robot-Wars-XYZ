@@ -24,6 +24,7 @@ function buffNames(u: UnitState): string[] {
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');
   if (u.breachNextAttack) names.push('\u26CFBREACH');
   if (u.relentlessUntilEndOfEnemyPhase) names.push('\U0001FA78RELENT');
+  if (u.charged) names.push('\u26A1CHRG');
   if (u.fortuneForNextAttack) names.push('FORTUNE');
   if (u.accelThisTurn) names.push('ACCEL');
   if (u.miracleArmed) names.push('MIRACLE');
@@ -319,6 +320,7 @@ export function SidePanel() {
               />
             )}
             <Btn label="\u25CF OVRWATCH" sub="hold — auto-fire on first foe in range" onPress={s.overwatchUnit} accent="#7ec8ff" />
+            <Btn label="\u26A1 CHARGE" sub="channel core — next strike \u00D71.5 dmg, +15 crit" onPress={s.chargeUnit} accent="#ffb84d" />
             {s.units.some((a2) => a2.alive && a2.side === 'player' && !a2.npc && a2.uid !== unit.uid && !a2.acted && dist(a2.pos, unit.pos) === 1) && (
               <Btn label="⇄ SWAP" sub="trade positions with an adjacent ally" onPress={s.swapUnit} accent="#9fd0ff" />
             )}
