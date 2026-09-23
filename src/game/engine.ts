@@ -232,17 +232,37 @@ const GRAZE_MARGIN = 12;
 
 function resolveHit(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, mods: CombatMods = NO_MODS): SimAttack {
   const hc = hitChance(att, def, w, map, mods.hitBonus);
-  const roll = rnd();
-  if (roll >= hc) {
-    if (roll < hc + GRAZE_MARGIN && def.hp > 0) {
-      const g = Math.round(damageOf(att, def, w, map, false, mods.dmgMult) * 0.45);
-      return { hit: true, crit: false, graze: true, damage: g, hitChance: hc, destroyed: def.hp - g <= 0 };
+  const strike = (remainingHp: number): SimAttack => {
+    const roll = rnd();
+    if (roll >= hc) {
+      if (roll < hc + GRAZE_MARGIN && remainingHp > 0) {
+        const g = Math.round(damageOf(att, def, w, map, false, mods.dmgMult) * 0.45);
+        return { hit: true, crit: false, graze: true, damage: g, hitChance: hc, destroyed: remainingHp - g <= 0 };
+      }
+      return { hit: false, crit: false, damage: 0, hitChance: hc, destroyed: false };
     }
-    return { hit: false, crit: false, damage: 0, hitChance: hc, destroyed: false };
+    const crit = critRoll(att, def, w);
+    const damage = damageOf(att, def, w, map, crit, mods.dmgMult);
+    return { hit: true, crit, damage, hitChance: hc, destroyed: remainingHp - damage <= 0 };
+  };
+  // multi-hit weapons resolve each strike independently against the remaining HP
+  let hp = def.hp;
+  let damage = 0;
+  let hit = false;
+  let crit = false;
+  let graze = false;
+  const strikes = Math.max(1, w.multiHit ?? 1);
+  for (let i = 0; i < strikes && hp > 0; i++) {
+    const r = strike(hp);
+    if (r.hit) {
+      hit = true;
+      damage += r.damage;
+      hp -= r.damage;
+      if (r.crit) crit = true;
+      if (r.graze) graze = true;
+    }
   }
-  const crit = critRoll(att, def, w);
-  const damage = damageOf(att, def, w, map, crit, mods.dmgMult);
-  return { hit: true, crit, damage, hitChance: hc, destroyed: def.hp - damage <= 0 };
+  return { hit, crit, graze: graze && !crit, damage, hitChance: hc, destroyed: hp <= 0 };
 }
 
 /** Rally trait: an allied unit with trait 'rally' within 2 tiles grants +8% hit (non-stacking). */

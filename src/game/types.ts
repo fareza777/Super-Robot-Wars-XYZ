@@ -20,6 +20,8 @@ export interface WeaponDef {
   breaker?: boolean;
   /** ace-unlock — stays sealed until the pilot scores this many kills THIS battle */
   aceReq?: number;
+  /** multi-hit: this many independent strikes per trigger */
+  multiHit?: number;
   name: string;
   kind: WeaponKind;
   power: number;

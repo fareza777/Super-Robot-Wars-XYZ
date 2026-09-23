@@ -2072,7 +2072,9 @@ function simNextWave(set: SetFn, get: Get) {
   const s = get();
   const wave = s.simWave + 1;
   const lvl = s.missionCh.lvl + wave;
-  const comp = enemyComp({ ...s.missionCh, count: Math.min(3 + wave, 8), boss: undefined });
+  // every 5th wave is MIRROR PROTOCOL — the simulator clones your own squad against you
+  const mirror = wave % 5 === 0;
+  const comp = mirror ? s.units.filter((u) => u.alive && u.side === 'player' && !u.npc).map((u) => u.def.id) : enemyComp({ ...s.missionCh, count: Math.min(3 + wave, 8), boss: undefined });
   const occupied = new Set(s.units.filter((u) => u.alive).map((u) => key(u.pos)));
   const free: Pos[] = [];
   for (let x = Math.max(0, s.map.cols - 6); x < s.map.cols; x++)
@@ -2097,6 +2099,10 @@ function simNextWave(set: SetFn, get: Get) {
       u.def = { ...u.def, name: `Elite ${u.def.name}`, accent: '#ffd34d', maxHp: Math.round(u.def.maxHp * 1.2), armor: u.def.armor + 150, mobility: u.def.mobility + 8 };
       u.hp = u.def.maxHp;
     }
+    if (mirror) {
+      u.def = { ...u.def, name: `Σ ${u.def.name}`, accent: '#ff5a7a' };
+      u.elite = true;
+    }
     news.push(u);
   });
   const healed = s.units.map((u) => (u.side !== 'player' || !u.alive ? u : { ...u, hp: Math.min(u.def.maxHp, u.hp + Math.round(u.def.maxHp * 0.25)), en: Math.min(u.def.maxEn, u.en + 30), moved: false, acted: false, dodges: 0 }));
@@ -2108,8 +2114,8 @@ function simNextWave(set: SetFn, get: Get) {
     crates = [...s.crates, { pos: free[news.length], itemId: crateItems[Math.floor(Math.random() * crateItems.length)] }];
   }
   let log = push(s.log, `— Wave ${wave - 1} cleared — +${(wave - 1) * 150} pts`);
-  log = push(log, `▲ WAVE ${wave}: ${news.length} hostiles warp in (Lv ${lvl}${wave % 4 === 0 ? ' · ALL ELITE' : ''}${wave % 3 === 0 ? ' + supply crate' : ''})`);
-  const notice = `▲ WAVE ${wave} — ${news.length} HOSTILES INBOUND · ${s.kills * 50 + (wave - 1) * 150} PTS`;
+  log = push(log, mirror ? `▲ MIRROR WAVE ${wave} — Σ protocol: your own squad, reversed` : `▲ WAVE ${wave}: ${news.length} hostiles warp in (Lv ${lvl}${wave % 4 === 0 ? ' · ALL ELITE' : ''}${wave % 3 === 0 ? ' + supply crate' : ''})`);
+  const notice = mirror ? `▲ MIRROR WAVE ${wave} — Σ PROTOCOL · ${s.kills * 50 + (wave - 1) * 150} PTS` : `▲ WAVE ${wave} — ${news.length} HOSTILES INBOUND · ${s.kills * 50 + (wave - 1) * 150} PTS`;
   set({ units, crates, simWave: wave, battle: null, phase: 'player', enemyBusy: false, selectedUid: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, mapAim: null, pendingMove: null, attackTiles: new Set(), hazardWarn: [], blizzard: false, notice, log });
   setTimeout(() => set({ notice: null }), 2600);
 }
