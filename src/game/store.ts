@@ -96,6 +96,7 @@ export interface SaveData {
   simBest?: number; // VR simulator high score
   vossenDefeated?: boolean; // NEMESIS honor — Drake Eclipse shot down at least once
   killsByDef?: Record<string, number>; // enemies destroyed per frame id — codex tally
+  snowFox?: boolean; // WHITEOUT honor — won during a blizzard turn
 }
 
 /** Serialized mid-battle snapshot — lets the player leave a mission and resume it later. */
@@ -208,6 +209,7 @@ interface Store {
   simBest: number; // VR simulator high score (persisted)
   vossenDefeated: boolean; // Cpt. Vossen shot down at least once (persisted — NEMESIS honor)
   killsByDef: Record<string, number>; // enemy frames destroyed per def id — codex tally (persisted)
+  snowFox: boolean;
   log: string[];
   enemyBusy: boolean;
   screenShake: number;
@@ -421,8 +423,8 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
 
 const BATTLE_SAVE_KEY = 'srwxyz_battle_v1';
 
-async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank'>>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated, killsByDef: useGame.getState().killsByDef };
+async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank' | 'snowFox'>>) {
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated, killsByDef: useGame.getState().killsByDef, snowFox: useGame.getState().snowFox };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -588,6 +590,7 @@ export const useGame = create<Store>((set, get) => ({
   simBest: 0,
   vossenDefeated: false,
   killsByDef: {} as Record<string, number>,
+  snowFox: false,
   hint: null,
   hintsSeen: [],
 
@@ -645,9 +648,10 @@ export const useGame = create<Store>((set, get) => ({
     const lvl = m.repeatable ? Math.max(m.lvl, s.chapter) : m.lvl;
     const ch = sideAsChapter({ ...m, lvl });
     const allied = (s.killsByDef['vossDrake'] ?? 0) >= 2;
+    const cellGranted = allied && grantDrakeCell(set, get);
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal', allied);
     void clearBattleSave();
-    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, simWave: 0, log: [`${m.repeatable ? 'PATROL OP' : 'SIDE QUEST'}: ${m.name}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
+    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, simWave: 0, log: [`${m.repeatable ? 'PATROL OP' : 'SIDE QUEST'}: ${m.name}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : []), ...(cellGranted ? [`▣ Drake's Cell integrated — unique part acquired`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
     setTimeout(() => set({ notice: null }), 2400);
     void persistBattle(get());
   },
@@ -705,7 +709,7 @@ export const useGame = create<Store>((set, get) => ({
       await AsyncStorage.removeItem(SAVE_KEY);
       await AsyncStorage.removeItem(BATTLE_SAVE_KEY);
     } catch {}
-    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false, killsByDef: {} });
+    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false, killsByDef: {}, snowFox: false });
   },
 
   toggleDeploy: (defId) => {
@@ -785,7 +789,7 @@ export const useGame = create<Store>((set, get) => ({
       const raw = await AsyncStorage.getItem(SAVE_KEY);
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
-      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {}, simBest: d.simBest ?? 0, vossenDefeated: d.vossenDefeated ?? false, killsByDef: d.killsByDef ?? {} });
+      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {}, simBest: d.simBest ?? 0, vossenDefeated: d.vossenDefeated ?? false, snowFox: d.snowFox ?? false, killsByDef: d.killsByDef ?? {} });
     } catch {}
     try {
       const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
@@ -937,6 +941,7 @@ export const useGame = create<Store>((set, get) => ({
     const s = get();
     const ch = missionOf(s.chapter, s.route);
     const allied = (s.killsByDef['vossDrake'] ?? 0) >= 2;
+    const cellGranted = allied && grantDrakeCell(set, get);
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, s.deploySel, s.ngPlus, s.parts, s.settings.difficulty ?? 'normal', allied);
     const zone = deployZone(map);
     // paint the deploy zone with the move-range overlay so the player sees where units can go
@@ -946,7 +951,7 @@ export const useGame = create<Store>((set, get) => ({
       zoneTiles.set(k, { pos: { x, y }, cost: 0 });
     }
     void clearBattleSave();
-    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
+    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : []), ...(cellGranted ? [`▣ Drake's Cell integrated — unique part acquired`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
   },
   finishDialog: () => {
     set({ phase: 'player', notice: 'PLAYER PHASE — TURN 1' });
@@ -1796,6 +1801,7 @@ function applyVictory(set: SetFn, get: Get) {
   }
   const pilotProg = { ...s.pilotProg };
   const unitsLost = s.units.filter((u) => u.side === 'player' && !u.alive).length;
+  const snowFox = s.snowFox || (s.missionCh.theme === 'snow' && s.blizzard);
   const aceLines: string[] = [];
   for (const u of s.units) {
     if (u.side === 'player' && !u.npc) {
@@ -1836,11 +1842,12 @@ function applyVictory(set: SetFn, get: Get) {
       lastRank: rankS,
       missionRank,
       partsOwned,
+      snowFox,
       debrief: null,
       salvageQueue: [],
       log: aceLines.reduce((l, line) => push(l, line), push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''} · RANK ${rankS}${sRankNote ? ' · awarded 🛡 VETERAN PLATE' : ''}`)),
     });
-    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank });
+    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank, snowFox });
     return;
   }
   const ch = s.missionCh;
@@ -1897,13 +1904,14 @@ function applyVictory(set: SetFn, get: Get) {
     lastSalvage: s.salvageCr,
     missionRank,
     partsOwned,
+    snowFox,
     lastReward: reward + masteryCr + (clearedFinal ? 5000 : 0),
     debrief: DEBRIEFS[ch.id] ?? null,
     salvageQueue: [],
     log: push(log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + masteryCr + 5000} credits` : `Mission complete! +${reward + masteryCr} credits · RANK ${rank}`),
   });
   void clearBattleSave();
-  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route, missionRank });
+  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route, missionRank, snowFox });
 }
 
 async function runEnemyPhase(set: SetFn, get: Get) {
@@ -2231,6 +2239,17 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       if (!notice) { notice = '❄ BLIZZARD — ground units -15% hit'; setTimeout(() => set({ notice: null }), 2800); }
       recovered.push('❄ Blizzard sweeps the field — ground units have -15% hit this turn.');
     }
+    // bond resonance — bonded partners standing together feed each other's Will
+    let resonated = false;
+    const pAlive = units.filter((u) => u.alive && u.side === 'player');
+    for (const a of pAlive)
+      for (const b of pAlive)
+        if (a.uid < b.uid && bondLevel(st.bonds, a.def.id, b.def.id) > 0 && dist(a.pos, b.pos) <= 2) {
+          a.will = Math.min(150, (a.will ?? 100) + 1);
+          b.will = Math.min(150, (b.will ?? 100) + 1);
+          resonated = true;
+        }
+    if (resonated) recovered.push('💞 Bond resonance — adjacent partners gain +1 Will.');
     const end = checkEnd(units, st.missionCh, nextTurn);
     let log = push(st.log, `— Turn ${nextTurn} player phase —`);
     for (const l of recovered) log = push(log, l);
@@ -2269,6 +2288,16 @@ async function runEnemyPhase(set: SetFn, get: Get) {
   });
   if (pendingVictory) applyVictory(set, get);
   else drainSalvage(set, get, 2700); // toast after the PLAYER PHASE banner clears
+}
+
+/** Awards the unique Drake's Cell part the first time Vossen defects (2+ drake downs). */
+function grantDrakeCell(set: (p: Partial<Store>) => void, get: () => Store): boolean {
+  const s = get();
+  if (s.partsOwned.includes('drakeCell')) return false;
+  const partsOwned = [...s.partsOwned, 'drakeCell'];
+  set({ partsOwned });
+  void persist({ ...s, partsOwned });
+  return true;
 }
 
 function waitFor(cond: () => boolean, timeoutMs = 20000): Promise<void> {

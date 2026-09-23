@@ -44,6 +44,7 @@ export const PARTS: Record<string, PartDef> = {
   titanFrame: { id: 'titanFrame', name: 'Titan Frame', desc: '+1500 max HP · −4 mobility', price: 2200, hp: 1500, mobility: -4 },
   gyroStab: { id: 'gyroStab', name: 'Gyro Stabilizer', desc: '+10% hit · +6% evade', price: 2600, hit: 10, evade: 6 },
   catalystCore: { id: 'catalystCore', name: 'Catalyst Core', desc: '+14% weapon damage', price: 3200, dmg: 14 },
+  drakeCell: { id: 'drakeCell', name: "Drake's Cell", desc: '+2 move · +8% hit — Vossen tech', price: 0, move: 2, hit: 8, unique: true },
 };
 
 export type PartId = keyof typeof PARTS;
@@ -853,10 +854,11 @@ export const HONORS: HonorDef[] = [
   { id: 'h_srank', name: 'FLAWLESS ACE', desc: 'Earn S rank on 5 different missions', rewardCr: 1500 },
   { id: 'h_turncoat', name: 'TURNCOAT', desc: 'Down the Drake Eclipse twice — Vossen joins your wing', rewardCr: 1200 },
   { id: 'h_collector', name: 'ARSENAL', desc: 'Own 10 equipment parts', rewardCr: 1000 },
+  { id: 'h_snowfox', name: 'WHITEOUT WALKER', desc: 'Win a mission during a blizzard turn', rewardCr: 900 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; units?: { def: { id: string }; kills: number; alive: boolean; side: string }[] }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; units?: { def: { id: string }; kills: number; alive: boolean; side: string }[] }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -897,6 +899,8 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return (s.killsByDef?.vossDrake ?? 0) >= 2;
     case 'h_collector':
       return (s.partsOwned ?? []).length >= 10;
+    case 'h_snowfox':
+      return s.snowFox === true;
     default:
       return false;
   }

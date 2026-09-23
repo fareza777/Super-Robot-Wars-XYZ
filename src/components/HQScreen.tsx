@@ -180,7 +180,7 @@ export function HQScreen() {
                   );
                 })}
               </View>
-              {Object.values(PARTS).map((p) => {
+              {Object.values(PARTS).filter((p) => !p.unique).map((p) => {
                 const owned = s.partsOwned.includes(p.id);
                 const equipped = (s.parts[selUnit] ?? []).includes(p.id);
                 const afford = s.credits >= p.price;

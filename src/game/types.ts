@@ -177,6 +177,7 @@ export interface PartDef {
   hp?: number; // +max HP
   en?: number; // +max EN
   evade?: number; // +% evade
+  unique?: boolean; // not sold — awarded by story
   /** afterburner: unit may attack again after a kill, once per turn */
   again?: boolean;
 }
