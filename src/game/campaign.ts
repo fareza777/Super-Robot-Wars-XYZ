@@ -39,6 +39,9 @@ export const PARTS: Record<string, PartDef> = {
   batteryPack: { id: 'batteryPack', name: 'Battery Pack', desc: '+30 max EN', price: 550, en: 30 },
   afterburner: { id: 'afterburner', name: 'Afterburner Core', desc: 'attack again after destroying a target (once/turn)', price: 2400, again: true },
   veteranPlate: { id: 'veteranPlate', name: 'Veteran Plate', desc: '+120 armor · +6 mobility — S-rank award', price: 3000, armor: 120, mobility: 6 },
+  titanFrame: { id: 'titanFrame', name: 'Titan Frame', desc: '+1500 max HP · −4 mobility', price: 2200, hp: 1500, mobility: -4 },
+  gyroStab: { id: 'gyroStab', name: 'Gyro Stabilizer', desc: '+10% hit · +6% evade', price: 2600, hit: 10, evade: 6 },
+  catalystCore: { id: 'catalystCore', name: 'Catalyst Core', desc: '+14% weapon damage', price: 3200, dmg: 14 },
 };
 
 export type PartId = keyof typeof PARTS;
@@ -127,6 +130,8 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   cataphract: U({ id: 'cataphract', name: 'Karn Cataphract', title: 'Shadow Striker', color: '#2e2e3a', accent: '#a0a0ff', maxHp: 4200, maxEn: 120, armor: 650, mobility: 158, moveRange: 8, moveType: 'air', weapons: [WEAPONS.vampEdge, WEAPONS.plasmaEdge], pilot: PILOTS.grunt, resists: { beam: 0.4 } }),
   // Cpt. Vossen's personal frame — recurring ace, guaranteed salvage drop when downed
   vossDrake: U({ id: 'vossDrake', name: 'Drake Eclipse', title: 'Rival Ace', color: '#3a2030', accent: '#ff6a5a', maxHp: 9800, maxEn: 160, armor: 1350, mobility: 150, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.plasmaEdge, WEAPONS.missilePods], pilot: CAMPAIGN_PILOTS.vossen, boss: true, level: 8 }),
+  // the Drake defects — after being downed twice he sorties as an armed Ark ally
+  vossAlly: U({ id: 'vossAlly', name: 'Drake Eclipse V', title: 'Turncoat Ace', color: '#2a3a50', accent: '#7dc9ff', maxHp: 9800, maxEn: 160, armor: 1350, mobility: 150, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.plasmaEdge, WEAPONS.missilePods], pilot: CAMPAIGN_PILOTS.vossen, level: 8 }),
   // unarmed loot hauler — flees the east edge on carrier missions; big salvage when downed
   cargoMule: U({ id: 'cargoMule', name: 'Supply Mule', title: 'Loot Carrier', color: '#4a4030', accent: '#ffe8a0', maxHp: 14000, maxEn: 0, armor: 500, mobility: 70, moveRange: 3, moveType: 'land', weapons: [], pilot: PILOTS.grunt, carrier: true }),
 };
@@ -844,10 +849,12 @@ export const HONORS: HonorDef[] = [
   { id: 'h_rival', name: 'NEMESIS', desc: 'Shoot down Cpt. Vossen and the Drake Eclipse', rewardCr: 1000 },
   { id: 'h_carrier', name: 'CARAVAN KING', desc: 'Down a Supply Mule before it escapes', rewardCr: 800 },
   { id: 'h_srank', name: 'FLAWLESS ACE', desc: 'Earn S rank on 5 different missions', rewardCr: 1500 },
+  { id: 'h_turncoat', name: 'TURNCOAT', desc: 'Down the Drake Eclipse twice — Vossen joins your wing', rewardCr: 1200 },
+  { id: 'h_collector', name: 'ARSENAL', desc: 'Own 10 equipment parts', rewardCr: 1000 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; units?: { def: { id: string }; kills: number; alive: boolean; side: string }[] }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; units?: { def: { id: string }; kills: number; alive: boolean; side: string }[] }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -884,6 +891,10 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return (s.killsByDef?.cargoMule ?? 0) >= 1;
     case 'h_srank':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 5;
+    case 'h_turncoat':
+      return (s.killsByDef?.vossDrake ?? 0) >= 2;
+    case 'h_collector':
+      return (s.partsOwned ?? []).length >= 10;
     default:
       return false;
   }

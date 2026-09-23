@@ -322,7 +322,7 @@ function hardEnemy(u: UnitState, difficulty: 'normal' | 'hard') {
   u.level += 2;
 }
 
-function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: UpgradeMap, wupg: WeaponUpgMap, deploySel: string[], ngPlus: number, parts: Record<string, string[]>, difficulty: 'normal' | 'hard' = 'normal'): { map: MapDef; units: UnitState[] } {
+function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: UpgradeMap, wupg: WeaponUpgMap, deploySel: string[], ngPlus: number, parts: Record<string, string[]>, difficulty: 'normal' | 'hard' = 'normal', vossenAllied = false): { map: MapDef; units: UnitState[] } {
   const map = genMap(ch);
   const units: UnitState[] = [];
   let i = 0;
@@ -354,6 +354,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
     units.push(u);
   }
   for (const s of map.enemySpawns) {
+    if (vossenAllied && s.defId === 'vossDrake') continue; // the Drake fights on our wing this sortie
     const u = makeUnit(s.defId, 'enemy', s.pos, `e${i++}`);
     u.level = enemyLevelOf(ch, s.defId);
     ngEnemy(u, ngPlus);
@@ -371,6 +372,16 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
       u.hp = u.def.maxHp;
     }
     units.push(u);
+  }
+  if (vossenAllied) {
+    // the Drake defects — armed npc ally sorties on our wing instead of against us
+    const va = makeUnit('vossAlly', 'player', { x: 1, y: Math.floor(map.rows / 2) - 1 }, `a${i++}`);
+    va.npc = true;
+    va.armed = true;
+    va.level = ch.lvl + 2;
+    va.def = { ...va.def, maxHp: Math.round(va.def.maxHp * (1 + (ch.lvl - 1) * 0.15)) };
+    va.hp = va.def.maxHp;
+    units.push(va);
   }
   if (ch.carrier) {
     if (ch.objectiveType === 'escort') {
@@ -631,9 +642,10 @@ export const useGame = create<Store>((set, get) => ({
     // patrol ops scale to campaign progress — always stay relevant as a grind option
     const lvl = m.repeatable ? Math.max(m.lvl, s.chapter) : m.lvl;
     const ch = sideAsChapter({ ...m, lvl });
-    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
+    const allied = (s.killsByDef['vossDrake'] ?? 0) >= 2;
+    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal', allied);
     void clearBattleSave();
-    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, simWave: 0, log: [`${m.repeatable ? 'PATROL OP' : 'SIDE QUEST'}: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
+    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, simWave: 0, log: [`${m.repeatable ? 'PATROL OP' : 'SIDE QUEST'}: ${m.name}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
     setTimeout(() => set({ notice: null }), 2400);
     void persistBattle(get());
   },
@@ -657,7 +669,8 @@ export const useGame = create<Store>((set, get) => ({
       sim: true,
       lines: [],
     };
-    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
+    // no guest ace in the simulator — it would inflate scores
+    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal', false);
     // VR runs are ephemeral and never autosave — keep any prior mission snapshot
     // so the ops board still offers RESUME for it after the run ends.
     set({ phase: 'player', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: s.savedBattle, simWave: 1, simSettled: false, log: ['▲ VR SIMULATION — WAVE 1', `Objective: ${ch.objective}`, 'Waves escalate. The run ends when the squad falls.'], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], notice: '▲ VR SIMULATION — WAVE 1' });
@@ -904,7 +917,8 @@ export const useGame = create<Store>((set, get) => ({
   startMission: () => {
     const s = get();
     const ch = missionOf(s.chapter, s.route);
-    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, s.deploySel, s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
+    const allied = (s.killsByDef['vossDrake'] ?? 0) >= 2;
+    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, s.deploySel, s.ngPlus, s.parts, s.settings.difficulty ?? 'normal', allied);
     const zone = deployZone(map);
     // paint the deploy zone with the move-range overlay so the player sees where units can go
     const zoneTiles = new Map<string, MoveRec>();
@@ -913,7 +927,7 @@ export const useGame = create<Store>((set, get) => ({
       zoneTiles.set(k, { pos: { x, y }, cost: 0 });
     }
     void clearBattleSave();
-    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
+    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
   },
   finishDialog: () => {
     set({ phase: 'player', notice: 'PLAYER PHASE — TURN 1' });
