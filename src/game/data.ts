@@ -26,6 +26,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   overdrive: { id: 'overdrive', name: 'Overdrive', cost: 50, desc: 'Act again after landing a kill' },
   mercy: { id: 'mercy', name: 'Mercy', cost: 30, desc: 'Pull the next lethal hit — leave the foe at 10 HP for capture' },
   purge: { id: 'purge', name: 'Purge', cost: 40, desc: 'Cleanse self and adjacent allies — cripple, burn, stun, break lifted' },
+  resolve: { id: 'resolve', name: 'Resolve', cost: 50, desc: 'Kiai surge — Will instantly climbs to 150' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

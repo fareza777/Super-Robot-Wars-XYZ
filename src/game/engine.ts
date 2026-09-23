@@ -33,7 +33,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken'): number {
   let n = 0;
   for (const p of u.parts) n += PARTS[p]?.[stat] ?? 0;
   return n;
@@ -176,6 +176,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (def.guardUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.5);
   dmg = Math.round(dmg * (1 + partBonus(att, 'dmg') * 0.01 + (att.skills?.dmg ?? 0) * 0.015));
   dmg = Math.round(dmg * (1 - Math.min(0.5, (def.skills?.def ?? 0) * 0.015)));
+  dmg = Math.round(dmg * Math.max(0.4, 1 + partBonus(def, 'dmgTaken') * 0.01));
   if (att.aceMastery) dmg = Math.round(dmg * 1.05);
   if (att.phase2) dmg = Math.round(dmg * 1.15);
   const trait = att.def.pilot.trait;
@@ -330,13 +331,24 @@ export function hasPincer(units: UnitState[], att: UnitState, def: UnitState): b
 export function applyAttack(state: GameState, attackerUid: string, defenderUid: string, weaponId: string, mods?: (u: UnitState) => CombatMods, reaction: Reaction = 'counter'): { state: GameState; result: AttackResult } {
   const units = state.units.map((u) => ({ ...u, ammo: { ...u.ammo } }));
   const att = units.find((u) => u.uid === attackerUid)!;
-  const def = units.find((u) => u.uid === defenderUid)!;
+  let def = units.find((u) => u.uid === defenderUid)!;
   const w = att.def.weapons.find((x) => x.id === weaponId)!;
+  // Guardian frames: a bodyguard beside a boss throws itself into the line of fire
+  const bossTarget = def;
+  let guarded: string | undefined;
+  if (def.def.boss) {
+    const grd = units.find((u) => u.alive && u.side === def.side && u.uid !== def.uid && u.def.guardian === true && dist(u.pos, def.pos) <= 2);
+    if (grd) {
+      def = grd;
+      guarded = bossTarget.def.name;
+    }
+  }
   const pin = hasPincer(units, att, def);
   let attMods0 = mods ? mods(att) : NO_MODS;
   if (state.blizzard && att.def.moveType !== 'air') attMods0 = { ...attMods0, hitBonus: attMods0.hitBonus - 15 };
   const result0 = simulateAttack(att, def, w, state.map, pin ? { ...attMods0, dmgMult: attMods0.dmgMult * 1.1 } : attMods0, mods ? mods(def) : NO_MODS, reaction);
   const result: AttackResult = { ...result0, pincer: pin };
+  if (guarded) { result.guarded = guarded; result.struckUid = def.uid; }
 
   att.en = Math.max(0, att.en - w.enCost);
   if (w.ammo != null) att.ammo[w.id] = (att.ammo[w.id] ?? 0) - 1;
@@ -585,6 +597,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break;
     case 'purge':
       break; // area cleanse is applied by the store pass
+    case 'resolve':
+      u.will = 150;
+      break;
     case 'snipe':
       u.snipeForNextAttack = true;
       break;

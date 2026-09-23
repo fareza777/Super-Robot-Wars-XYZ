@@ -43,7 +43,7 @@ export interface StatusFx {
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -88,6 +88,8 @@ export interface UnitDef {
   weapons: WeaponDef[];
   pilot: PilotDef;
   boss?: boolean;
+  /** bodyguard frame — intercepts strikes aimed at an adjacent boss (within 2 tiles) */
+  guardian?: boolean;
   level?: number; // starting level (default 1)
   /** support frame: can REPAIR an adjacent ally (heal HP/EN) instead of attacking */
   repairer?: boolean;
@@ -197,6 +199,8 @@ export interface PartDef {
   enRegen?: number; // +EN regenerated each turn
   hpRegen?: number; // +% max HP regenerated each turn
   xp?: number; // +% EXP gained // +EN regenerated at the start of own phase
+  /** % reduction to incoming damage (Aegis barrier) */
+  dmgTaken?: number;
   unique?: boolean; // not sold — awarded by story
   /** afterburner: unit may attack again after a kill, once per turn */
   again?: boolean;
@@ -293,6 +297,10 @@ export interface AttackResult {
   mercy?: boolean;
   /** Counter-Cut pilot skill — the defender's counter struck first; a kill pre-empts the incoming hit entirely */
   counterCut?: boolean;
+  /** a guardian frame intercepted — the boss this blow was meant for */
+  guarded?: string;
+  /** uid of the unit that actually took the hit (guardian redirect) */
+  struckUid?: string;
   /** this blow crippled the defender's frame (move -2) */
   crippled?: boolean;
   /** damage beyond what the finishing blow needed */

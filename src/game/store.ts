@@ -1452,6 +1452,7 @@ export const useGame = create<Store>((set, get) => ({
     if (result.support) log2 = push(log2, `⇒ ${result.support.name} support fire: ${result.support.hit ? `${result.support.damage}${result.support.destroyed ? ' — DESTROYED' : ''}` : 'missed'}`);
     if (result.miracle) log2 = push(log2, `✦ MIRACLE — ${def.def.name} refuses to fall! (10 HP)`);
     if (result.mercy) log2 = push(log2, `🕊 MERCY — ${def.def.name} spared at 10 HP — the crew can board the frame`);
+    if (result.guarded) log2 = push(log2, `🛡 GUARDIAN — a Royal Guard throws itself in front of ${result.guarded}!`);
     if (result.crippled) log2 = push(log2, `⚠ ${def.def.name} is CRIPPLED — move -2`);
     if (result.counter?.miracle) log2 = push(log2, `✦ MIRACLE — ${att.def.name} refuses to fall! (10 HP)`);
     if (result.counter?.crippled) log2 = push(log2, `⚠ ${att.def.name} is CRIPPLED — move -2`);
@@ -1541,7 +1542,15 @@ export const useGame = create<Store>((set, get) => ({
     set({
       ...common,
       bossWarned: s.bossWarned || !!warning,
-      battle: { attacker: { ...att }, defender: { ...def }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: s.pendingWeapon, result, warning },
+      battle: {
+        attacker: { ...att },
+        defender: { ...(result.struckUid ? (state.units.find((u) => u.uid === result.struckUid) ?? def) : def) },
+        attackerAfter: attAfter,
+        defenderAfter: defAfter,
+        weapon: s.pendingWeapon,
+        result,
+        warning,
+      },
       phase: 'battle',
     });
   },
