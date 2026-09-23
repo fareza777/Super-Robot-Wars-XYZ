@@ -94,10 +94,10 @@ const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
   raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike'], faceColor: '#ff7a7a', trait: 'crimson_fury' }),
-  moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0' }),
+  moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff' }),
   veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
-  bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878' }),
+  bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally' }),
   vaelp: P({ name: 'Emperor Vael', callsign: 'THRONE', melee: 82, ranged: 84, defense: 76, evade: 72, maxSp: 90, spirits: ['strike', 'valor', 'focus', 'guard'], faceColor: '#ffe08a', trait: 'sovereign' }),
 };
 
@@ -113,8 +113,8 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   warden: U({ id: 'warden', name: 'Gate Warden', title: 'Ancient Guardian', color: '#7a5a30', accent: '#ffe0a8', maxHp: 12000, maxEn: 140, armor: 1600, mobility: 90, moveRange: 4, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.bramp, boss: true }),
   emperor: U({ id: 'emperor', name: 'Throne of Vael', title: 'The Emperor', color: '#e8d8a0', accent: '#fff8d8', maxHp: 15000, maxEn: 240, armor: 1500, mobility: 130, moveRange: 6, moveType: 'air', weapons: [WEAPONS.chestBlaster, WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.vaelp, boss: true }),
   // --- late-wave line frames ---
-  lancer: U({ id: 'lancer', name: 'Wolfen Lance', title: 'Strike Cavalry', color: '#4a3a2e', accent: '#ff9060', maxHp: 3600, maxEn: 120, armor: 700, mobility: 150, moveRange: 7, moveType: 'land', weapons: [WEAPONS.plasmaEdge, WEAPONS.vulcan], pilot: PILOTS.grunt }),
-  bulwark: U({ id: 'bulwark', name: 'Rampart Bulwark', title: 'Siege Anchor', color: '#3a4438', accent: '#ffe060', maxHp: 8200, maxEn: 80, armor: 1700, mobility: 55, moveRange: 3, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod], pilot: PILOTS.grunt }),
+  lancer: U({ id: 'lancer', name: 'Wolfen Lance', title: 'Strike Cavalry', color: '#4a3a2e', accent: '#ff9060', maxHp: 3600, maxEn: 120, armor: 700, mobility: 150, moveRange: 7, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.plasmaEdge, WEAPONS.vulcan], pilot: PILOTS.grunt }),
+  bulwark: U({ id: 'bulwark', name: 'Rampart Bulwark', title: 'Siege Anchor', color: '#3a4438', accent: '#ffe060', maxHp: 8200, maxEn: 80, armor: 1700, mobility: 55, moveRange: 3, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod, WEAPONS.vampEdge], pilot: PILOTS.grunt }),
   // unarmed civilian convoy — escort objective on protect chapters
   arklander: U({ id: 'arklander', name: 'Arklander Convoy', title: 'Civilian Transport', color: '#5a5148', accent: '#e0d0a8', maxHp: 3400, maxEn: 0, armor: 350, mobility: 40, moveRange: 0, moveType: 'land', weapons: [], pilot: PILOTS.civ }),
   // --- player reinforcements (join at arc boundaries) ---
@@ -492,6 +492,7 @@ export function genMap(ch: ChapterDef): MapDef {
     bossHoldUntil: ch.boss ? 3 : undefined,
     reinforce: REINFORCE[ch.id],
     events: MID_EVENTS[ch.id],
+    hazards: ch.theme === 'void' || ch.theme === 'colony' ? { every: 3, count: 2 } : undefined,
   };
 }
 

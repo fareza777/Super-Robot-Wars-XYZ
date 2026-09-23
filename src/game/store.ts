@@ -25,6 +25,12 @@ import {
   weaponUpgCost,
 } from './campaign';
 import { BOND_EVENTS, MAX_BOND, bondKey, bondLevel, bondMods } from './bonds';
+
+/** full attacker mods: bond bonus + rally aura (+8 hit from an allied 'rally' unit within 2 tiles) */
+const modsFor = (bonds: Record<string, number>, units: UnitState[]) => (u: UnitState) => {
+  const bm = bondMods(bonds, units, u);
+  return { hitBonus: bm.hitBonus + rallyBonus(units, u), dmgMult: bm.dmgMult };
+};
 import { MISSION_SSS, SPIRITS, TERRAIN_INFO } from './data';
 import { setMusicEnabled, setSoundEnabled } from '../audio';
 import {
@@ -46,6 +52,7 @@ import {
   partBonus,
   phaseRecovery,
   planEnemyActions,
+  rallyBonus,
   same,
   terrainAt,
   unitAt,
@@ -89,6 +96,7 @@ export interface BattleSave {
   inventory: Record<string, number>;
   log: string[];
   crates?: { pos: Pos; itemId: string }[];
+  hazardWarn?: Pos[];
 }
 
 /** Pilots with this many career kills deploy at raised will (ace bonus). */
@@ -136,6 +144,8 @@ interface Store {
   inspectUid: string | null;
   dangerZone: boolean;
   dangerTiles: Set<string>;
+  /** ion-storm strike tiles telegraphed this round — detonate at the next turn transition */
+  hazardWarn: Pos[];
   /** empty-tile tap -> show terrain info card */
   tileInfo: Pos | null;
   threatTiles: Set<string>;
@@ -360,6 +370,7 @@ async function persistBattle(s: Store) {
     inventory: s.inventory,
     log: s.log.slice(-30),
     crates: s.crates,
+    hazardWarn: s.hazardWarn,
   };
   try {
     await AsyncStorage.setItem(BATTLE_SAVE_KEY, JSON.stringify(data));
@@ -473,6 +484,7 @@ export const useGame = create<Store>((set, get) => ({
   dangerZone: false,
   dangerTiles: new Set<string>(),
   threatTiles: new Set<string>(),
+  hazardWarn: [],
   kills: 0,
   ngPlus: 0,
   battleReaction: null,
@@ -537,7 +549,7 @@ export const useGame = create<Store>((set, get) => ({
     const ch = sideAsChapter(m);
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
     void clearBattleSave();
-    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
+    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
     setTimeout(() => set({ notice: null }), 2400);
     void persistBattle(get());
   },
@@ -753,7 +765,7 @@ export const useGame = create<Store>((set, get) => ({
       zoneTiles.set(k, { pos: { x, y }, cost: 0 });
     }
     void clearBattleSave();
-    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
+    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
   },
   finishDialog: () => {
     set({ phase: 'player', notice: 'PLAYER PHASE — TURN 1' });
@@ -784,6 +796,7 @@ export const useGame = create<Store>((set, get) => ({
       eventsFired: b.eventsFired,
       inventory: b.inventory,
       crates: b.crates ?? [],
+      hazardWarn: b.hazardWarn ?? [],
       log: b.log,
       cursor: null,
       selectedUid: null,
@@ -1020,12 +1033,12 @@ export const useGame = create<Store>((set, get) => ({
     const att = s.units.find((x) => x.uid === s.menuForUid)!;
     const def = s.units.find((x) => x.uid === uid)!;
     const reaction = aiPickReaction(att, def, s.pendingWeapon, s.map);
-    let { state, result } = applyAttack({ map: s.map, units: s.units, turn: s.turn }, att.uid, uid, s.pendingWeapon.id, (u) => bondMods(s.bonds, s.units, u), reaction);
+    let { state, result } = applyAttack({ map: s.map, units: s.units, turn: s.turn }, att.uid, uid, s.pendingWeapon.id, modsFor(s.bonds, s.units), reaction);
     // SRW support attack — an ally beside the shooter chips in at reduced damage
     if (def.side === 'enemy' && state.units.find((u) => u.uid === uid)!.alive) {
       const sup = findSupport(state.units, att.uid, state.units.find((u) => u.uid === uid)!);
       if (sup) {
-        const out = applySupportStrike(state, sup.uid, uid, (u) => bondMods(s.bonds, s.units, u));
+        const out = applySupportStrike(state, sup.uid, uid, modsFor(s.bonds, s.units));
         if (out) {
           state = out.state;
           result = { ...result, support: { name: sup.def.name, hit: out.result.hit, damage: out.result.damage, destroyed: out.result.destroyed, hitChance: out.result.hitChance } };
@@ -1116,7 +1129,7 @@ export const useGame = create<Store>((set, get) => ({
       set({ log: push(s.log, `${w.name}: no units in the blast — pick another tile`) });
       return;
     }
-    const { state, result } = applyMapAttack({ map: s.map, units: s.units, turn: s.turn }, att.uid, p, w.id, (u) => bondMods(s.bonds, s.units, u));
+    const { state, result } = applyMapAttack({ map: s.map, units: s.units, turn: s.turn }, att.uid, p, w.id, modsFor(s.bonds, s.units));
     const primary = targets.slice().sort((a, b) => dist(a.pos, p) - dist(b.pos, p))[0];
     const attAfter = state.units.find((u) => u.uid === att.uid)!;
     const defAfter = state.units.find((u) => u.uid === primary.uid) ?? primary;
@@ -1437,7 +1450,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       }
       if (warning) set({ bossWarned: true });
       const defUid = reaction === 'cover' ? coverUid! : def.uid;
-      const { state, result } = applyAttack({ map: cur.map, units: cur.units, turn: cur.turn }, att.uid, defUid, plan.weapon.id, (u) => bondMods(cur.bonds, cur.units, u), reaction);
+      const { state, result } = applyAttack({ map: cur.map, units: cur.units, turn: cur.turn }, att.uid, defUid, plan.weapon.id, modsFor(cur.bonds, cur.units), reaction);
       if (reaction === 'cover' && coverUid) {
         const ci = state.units.findIndex((u) => u.uid === coverUid);
         if (ci >= 0) state.units[ci] = { ...state.units[ci], acted: true };
@@ -1594,13 +1607,45 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         eventsFired.push(String(idx));
       }
     }
+    // ion-storm hazards: tiles telegraphed last round detonate now (never lethal — leaves 1 HP)
+    for (const hz of st.hazardWarn) {
+      for (const v of units.filter((u) => u.alive && same(u.pos, hz))) {
+        const dmg = Math.min(v.hp - 1, Math.round(v.def.maxHp * 0.15));
+        if (dmg > 0) {
+          v.hp -= dmg;
+          recovered.push(`${v.def.name} -${dmg} HP (ion storm)`);
+        }
+      }
+    }
+    let hazardWarn: Pos[] = [];
+    const hz = st.map.hazards;
+    if (hz && nextTurn % hz.every === 0) {
+      // telegraph the next volley near living units — detonates at the next transition
+      const alive = units.filter((u) => u.alive);
+      const picked = new Set<string>();
+      for (let i = 0; i < hz.count * 10 && hazardWarn.length < hz.count && alive.length; i++) {
+        const t = alive[Math.floor(Math.random() * alive.length)];
+        const tx = Math.max(0, Math.min(st.map.cols - 1, t.pos.x + Math.floor(Math.random() * 5) - 2));
+        const ty = Math.max(0, Math.min(st.map.rows - 1, t.pos.y + Math.floor(Math.random() * 5) - 2));
+        const k = `${tx},${ty}`;
+        if (!picked.has(k) && TERRAIN_INFO[st.map.terrain[ty][tx]].passable.land) {
+          picked.add(k);
+          hazardWarn.push({ x: tx, y: ty });
+        }
+      }
+      if (hazardWarn.length) {
+        notice = '⚠ ION STORM INCOMING';
+        recovered.push('⚠ Ion storm telegraphed — evacuate the marked tiles!');
+        setTimeout(() => set({ notice: null }), 2800);
+      }
+    }
     const end = checkEnd(units, st.missionCh, nextTurn);
     let log = push(st.log, `— Turn ${nextTurn} player phase —`);
     for (const l of recovered) log = push(log, l);
     if (end === 'victory') {
       // survive-objective reached its turn limit — resolve outside this updater
       pendingVictory = true;
-      return { units, turn: nextTurn, midDialog, eventsFired };
+      return { units, turn: nextTurn, midDialog, eventsFired, hazardWarn };
     }
     if (!notice && end !== 'defeat') {
       notice = `PLAYER PHASE — TURN ${nextTurn}`;
@@ -1622,6 +1667,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       midDialog,
       eventsFired,
       dangerTiles,
+      hazardWarn,
     };
   });
   if (pendingVictory) applyVictory(set, get);
@@ -1661,6 +1707,7 @@ useGame.subscribe((s, prev) => {
     inventory: s.inventory,
     log: s.log.slice(-30),
     crates: s.crates,
+    hazardWarn: s.hazardWarn,
   };
   useGame.setState({ savedBattle: b });
   try {

@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ITEMS, PARTS } from '../game/campaign';
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { bondMods } from '../game/bonds';
-import { bestCounterWeapon, critChance, damageOf, dist, hitChance, key, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
+import { bestCounterWeapon, critChance, damageOf, dist, hitChance, key, rallyBonus, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, useGame } from '../game/store';
 import { SpiritId } from '../game/types';
 
@@ -210,7 +210,7 @@ export function SidePanel() {
                   .filter((e) => e.alive && e.side === 'enemy' && s.attackTiles.has(key(e.pos)))
                   .map((e) => {
                     const bm = bondMods(s.bonds, s.units, unit);
-                    const hc = hitChance(unit, e, s.pendingWeapon!, s.map, bm.hitBonus);
+                    const hc = hitChance(unit, e, s.pendingWeapon!, s.map, bm.hitBonus + rallyBonus(s.units, unit));
                     const dmg = damageOf(unit, e, s.pendingWeapon!, s.map, false, bm.dmgMult);
                     const kill = e.hp - dmg <= 0;
                     const cw = bestCounterWeapon(e, s.pendingMove!);

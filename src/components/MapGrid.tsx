@@ -24,6 +24,7 @@ const Tile = React.memo(function Tile({
   crate,
   beacon,
   reach,
+  hazard,
   onTap,
 }: {
   p: Pos;
@@ -37,6 +38,7 @@ const Tile = React.memo(function Tile({
   crate: boolean;
   beacon: boolean;
   reach: boolean;
+  hazard: boolean;
   onTap: (p: Pos) => void;
 }) {
   return (
@@ -52,6 +54,11 @@ const Tile = React.memo(function Tile({
       {reach && (
         <View style={[styles.beaconOv, { backgroundColor: 'rgba(60,220,255,0.16)', borderColor: 'rgba(90,230,255,0.8)' }]} pointerEvents="none">
           <Text style={[styles.beaconTag, { color: '#4de3ff', textShadowColor: 'rgba(60,220,255,0.9)' }]}>➤</Text>
+        </View>
+      )}
+      {hazard && (
+        <View style={[styles.beaconOv, styles.hazardOv]} pointerEvents="none">
+          <Text style={[styles.beaconTag, { color: '#ff9a4d', textShadowColor: 'rgba(255,140,40,0.9)' }]}>⚠</Text>
         </View>
       )}
       {inThreat && !inMove && !inAtk && <View style={[styles.overlay, styles.threatOv]} pointerEvents="none" />}
@@ -119,6 +126,7 @@ export function MapGrid() {
   const moveTiles = useGame((s) => s.moveTiles);
   const attackTiles = useGame((s) => s.attackTiles);
   const threatTiles = useGame((s) => s.threatTiles);
+  const hazardWarn = useGame((s) => s.hazardWarn);
   const dangerTiles = useGame((s) => s.dangerTiles);
   const crates = useGame((s) => s.crates);
   const selectedUid = useGame((s) => s.selectedUid);
@@ -186,6 +194,7 @@ export function MapGrid() {
             crate={crates.some((c) => c.pos.x === p.x && c.pos.y === p.y)}
             beacon={!!missionCh.seizePos && missionCh.seizePos.x === p.x && missionCh.seizePos.y === p.y}
             reach={!!missionCh.reachPos && missionCh.reachPos.x === p.x && missionCh.reachPos.y === p.y}
+            hazard={hazardWarn.some((h) => h.x === p.x && h.y === p.y)}
             onTap={tapTile}
           />
         ))}
@@ -246,6 +255,7 @@ const styles = StyleSheet.create({
   moveOv: { backgroundColor: 'rgba(70,140,255,0.4)' },
   atkOv: { backgroundColor: 'rgba(255,60,60,0.45)' },
   threatOv: { backgroundColor: 'rgba(255,150,40,0.26)', borderWidth: 1, borderColor: 'rgba(255,150,40,0.35)' },
+  hazardOv: { backgroundColor: 'rgba(255,90,30,0.22)', borderColor: 'rgba(255,140,60,0.9)', borderStyle: 'dashed' },
   dangerOv: { backgroundColor: 'rgba(255,50,50,0.16)' },
   crateTag: { position: 'absolute', top: 3, right: 3, color: '#ffd34d', fontSize: 15, fontWeight: '900', textShadowColor: 'rgba(255,190,40,0.9)', textShadowRadius: 5 },
   beaconOv: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(255,210,60,0.16)', borderWidth: 1.5, borderColor: 'rgba(255,220,90,0.7)', alignItems: 'center', justifyContent: 'center' },

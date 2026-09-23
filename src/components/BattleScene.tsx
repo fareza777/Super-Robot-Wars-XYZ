@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ART, DEFEAT_BARK, KIND_SFX, MECH_ART, PILOT_ART, SUBTITLES, UNIT_BARK, UNIT_DEFEAT_VOICE, UNIT_VOICE } from '../assets';
 import { play } from '../audio';
 import { bondMods } from '../game/bonds';
-import { bestCounterWeapon, damageOf, hitChance } from '../game/engine';
+import { bestCounterWeapon, damageOf, hitChance, rallyBonus } from '../game/engine';
 import { useGame } from '../game/store';
 import { AttackResult, CounterResult, UnitState, WeaponDef } from '../game/types';
 
@@ -279,6 +279,7 @@ export function BattleScene() {
       {!battle.needsReaction && stage <= 2 && battle.result.reaction === 'cover' && <Banner text="COVER" color="#ffd34d" />}
       {/* critical hits get their own splash — up high so it never collides with FINISH */}
       {!battle.needsReaction && stage === 3 && battle.result.hit && battle.result.crit && !battle.result.destroyed && <Banner text="⚡ CRITICAL ⚡" color="#ffd34d" pos="high" />}
+      {!battle.needsReaction && stage === 3 && battle.result.hit && battle.result.graze && !battle.result.destroyed && <Banner text="≈ GRAZE" color="#9fd8ff" pos="high" />}
       {!battle.needsReaction && stage === 5 && !!battle.result.counter?.hit && battle.result.counter.crit && !battle.result.counter.destroyed && <Banner text="⚡ CRITICAL ⚡" color="#ff8a5c" pos="high" />}
       {/* killing blow on a boss — the dramatic finish */}
       {!battle.needsReaction && stage >= 3 && battle.result.destroyed && def.def.boss && <Banner text="★ FINISH ★" color="#ffd34d" />}
@@ -379,7 +380,7 @@ function HitPlate({ unit, after, side, active, result }: { unit: UnitState; afte
         (result.hit ? (
           <ImpactText
             text={`${dmg}`}
-            sub={result.crit ? 'CRITICAL!' : result.destroyed ? 'DESTROYED!' : `${result.hitChance}%`}
+            sub={result.crit ? 'CRITICAL!' : result.graze ? 'GRAZE' : result.destroyed ? 'DESTROYED!' : `${result.hitChance}%`}
             color={result.crit ? '#ffd34d' : '#fff'}
           />
         ) : (
@@ -929,7 +930,7 @@ function ReactionBar({ attacker, defender, weapon, coverUid }: { attacker: UnitS
   const defNow = units.find((u) => u.uid === defender.uid) ?? defender;
   const bmA = bondMods(useGame.getState().bonds, units, attNow);
   const bmD = bondMods(useGame.getState().bonds, units, defNow);
-  const inHc = hitChance(attNow, defNow, weapon, map, bmA.hitBonus);
+  const inHc = hitChance(attNow, defNow, weapon, map, bmA.hitBonus + rallyBonus(units, attNow));
   const inDmg = damageOf(attNow, defNow, weapon, map, false, bmA.dmgMult);
   const cw = bestCounterWeapon(defNow, attNow.pos);
   const cDmg = cw ? damageOf(defNow, attNow, cw, map, false, bmD.dmgMult) : 0;

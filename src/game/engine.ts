@@ -167,7 +167,8 @@ export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: Map
 }
 
 export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, crit: boolean, dmgMult = 1): number {
-  const raw = w.power + statFor(att, w) * 10 - armorOf(def, map);
+  const armor = armorOf(def, map);
+  const raw = w.power + statFor(att, w) * 10 - (w.pierce ? Math.round(armor * 0.65) : armor);
   let dmg = Math.max(120, Math.round(raw));
   if (crit) dmg = Math.round(dmg * 1.3);
   if (att.valorForNextAttack) dmg = Math.round(dmg * 1.5);
@@ -192,18 +193,33 @@ const critRoll = (att: UnitState, def: UnitState) => rnd() < critChance(att, def
 interface SimAttack {
   hit: boolean;
   crit: boolean;
+  graze?: boolean;
   damage: number;
   hitChance: number;
   destroyed: boolean;
 }
 
+/** an attack that just misses the hit roll by a small margin grazes for 45% damage */
+const GRAZE_MARGIN = 12;
+
 function resolveHit(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, mods: CombatMods = NO_MODS): SimAttack {
   const hc = hitChance(att, def, w, map, mods.hitBonus);
-  const hit = rnd() < hc;
-  if (!hit) return { hit: false, crit: false, damage: 0, hitChance: hc, destroyed: false };
+  const roll = rnd();
+  if (roll >= hc) {
+    if (roll < hc + GRAZE_MARGIN && def.hp > 0) {
+      const g = Math.round(damageOf(att, def, w, map, false, mods.dmgMult) * 0.45);
+      return { hit: true, crit: false, graze: true, damage: g, hitChance: hc, destroyed: def.hp - g <= 0 };
+    }
+    return { hit: false, crit: false, damage: 0, hitChance: hc, destroyed: false };
+  }
   const crit = critRoll(att, def);
   const damage = damageOf(att, def, w, map, crit, mods.dmgMult);
-  return { hit, crit, damage, hitChance: hc, destroyed: def.hp - damage <= 0 };
+  return { hit: true, crit, damage, hitChance: hc, destroyed: def.hp - damage <= 0 };
+}
+
+/** Rally trait: an allied unit with trait 'rally' within 2 tiles grants +8% hit (non-stacking). */
+export function rallyBonus(units: UnitState[], u: UnitState): number {
+  return units.some((a) => a.alive && a.side === u.side && a.uid !== u.uid && a.def.pilot.trait === 'rally' && dist(a.pos, u.pos) <= 2) ? 8 : 0;
 }
 
 export function bestCounterWeapon(def: UnitState, attPos: Pos): WeaponDef | undefined {
@@ -240,7 +256,7 @@ export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map
       counter = { weapon: cw, ...c };
     }
   }
-  return { hit: first.hit, crit: first.crit, damage: first.damage, destroyed: first.destroyed, hitChance: first.hitChance, counter, reaction, expEvents: [] };
+  return { hit: first.hit, crit: first.crit, graze: first.graze, damage: first.damage, destroyed: first.destroyed, hitChance: first.hitChance, counter, reaction, expEvents: [] };
 }
 
 /** Tiles inside a MAP weapon's blast centered at `center`. */
@@ -290,7 +306,8 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   att.en = Math.max(0, att.en - w.enCost);
   if (w.ammo != null) att.ammo[w.id] = (att.ammo[w.id] ?? 0) - 1;
   if (result.hit) def.hp = Math.max(0, def.hp - result.damage);
-  if (result.hit && def.alive && w.status) applyStatus(def, w.status);
+  if (result.hit && w.drain) att.hp = Math.min(att.def.maxHp, att.hp + Math.round(result.damage * 0.25));
+  if (result.hit && def.alive && w.status && !result.graze) applyStatus(def, w.status);
   if (result.destroyed) {
     def.alive = false;
     att.kills += 1;
@@ -301,7 +318,8 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
     def.en = Math.max(0, def.en - cw.enCost);
     if (cw.ammo != null) def.ammo[cw.id] = (def.ammo[cw.id] ?? 0) - 1;
     if (result.counter.hit) att.hp = Math.max(0, att.hp - result.counter.damage);
-    if (result.counter.hit && att.alive && cw.status) applyStatus(att, cw.status);
+    if (result.counter.hit && cw.drain) def.hp = Math.min(def.def.maxHp, def.hp + Math.round(result.counter.damage * 0.25));
+    if (result.counter.hit && att.alive && cw.status && !result.counter.graze) applyStatus(att, cw.status);
     if (result.counter.destroyed) {
       att.alive = false;
       def.kills += 1;
@@ -487,7 +505,7 @@ export function planEnemyActions(state: GameState): AiPlan[] {
     for (const tile of tiles) {
       for (const p of players) {
         for (const w of weaponsAgainst(e, tile, p, willMove(tile))) {
-          const hc = hitChance(e, p, w, map);
+          const hc = hitChance(e, p, w, map, rallyBonus(units, e));
           const dmg = damageOf(e, p, w, map, false);
           // convoy priority: protect-mission NPCs are the AI's preferred prey
           const score = dmg * (hc / 100) + (p.hp - dmg <= 0 ? 5000 : 0) + (p.escort ? 800 : 0) + w.power * 0.01;
@@ -520,7 +538,7 @@ export function planEnemyActions(state: GameState): AiPlan[] {
     for (const tile of moveTiles) {
       for (const e of enemies) {
         for (const w of weaponsAgainst(a, tile, e, willMove(tile))) {
-          const hc = hitChance(a, e, w, map);
+          const hc = hitChance(a, e, w, map, rallyBonus(units, a));
           const dmg = damageOf(a, e, w, map, false);
           const score = dmg * (hc / 100) + (e.hp - dmg <= 0 ? 5000 : 0) + w.power * 0.01;
           if (!best || score > best.score) best = { pos: tile, target: e, weapon: w, score };

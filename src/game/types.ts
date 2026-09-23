@@ -8,6 +8,10 @@ export type WeaponKind = 'melee' | 'beam' | 'missile' | 'gun' | 'funnel';
 
 export interface WeaponDef {
   id: string;
+  /** ignores 35% of the target's armor */
+  pierce?: boolean;
+  /** heals the attacker for 25% of damage dealt */
+  drain?: boolean;
   name: string;
   kind: WeaponKind;
   power: number;
@@ -43,7 +47,7 @@ export interface SpiritDef {
 }
 
 /** Unique pilot passive — see TRAITS in data.ts for name/description. */
-export type TraitId = 'ace_instinct' | 'deadeye' | 'siege_breaker' | 'field_medic' | 'crimson_fury' | 'falcon_wing' | 'sovereign';
+export type TraitId = 'ace_instinct' | 'deadeye' | 'siege_breaker' | 'field_medic' | 'crimson_fury' | 'falcon_wing' | 'sovereign' | 'rally';
 
 export interface PilotDef {
   name: string;
@@ -182,6 +186,8 @@ export interface MapDef {
   beaconPos?: Pos;
   /** reach missions: the extraction tile — a player unit landing here wins */
   reachPos?: Pos;
+  /** ion-storm volleys: every N turns, `count` telegraphed strike tiles detonate next turn */
+  hazards?: { every: number; count: number };
 }
 
 export type Phase =
@@ -223,6 +229,8 @@ export interface AttackResult {
   damage: number;
   destroyed: boolean;
   hitChance: number;
+  /** a near-miss that grazes the target for reduced damage */
+  graze?: boolean;
   // counter-attack performed by defender, if any
   counter: CounterResult | null;
   // the defender's chosen reaction (none for MAP weapons)
@@ -242,6 +250,7 @@ export interface CounterResult {
   damage: number;
   destroyed: boolean;
   hitChance: number;
+  graze?: boolean;
 }
 
 export interface BattleData {

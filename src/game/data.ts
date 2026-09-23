@@ -32,6 +32,7 @@ export const TRAITS: Record<TraitId, { name: string; desc: string }> = {
   crimson_fury: { name: 'Crimson Fury', desc: '+10% damage and +8% hit while under 50% HP' },
   falcon_wing: { name: 'Falcon Wing', desc: '+10% hit chance against air units' },
   sovereign: { name: 'Sovereign', desc: '+8% damage at all times' },
+  rally: { name: 'Rally', desc: 'allies within 2 tiles gain +8% hit chance' },
 };
 
 // ---------- Weapons ----------
@@ -46,13 +47,14 @@ export const WEAPONS = {
   plasmaEdge: W({ id: 'plasma_edge', name: 'Plasma Edge', kind: 'melee', power: 2900, rangeMin: 1, rangeMax: 2, enCost: 15, ammo: null, hitMod: 10, postMove: true, animSeed: 5 }),
   megaBeam: W({ id: 'mega_beam', name: 'Mega Beam Launcher', kind: 'beam', power: 3400, rangeMin: 3, rangeMax: 7, enCost: 40, ammo: null, hitMod: -15, postMove: false, animSeed: 6, willReq: 115 }),
   vulcan: W({ id: 'vulcan', name: 'Head Vulcan', kind: 'gun', power: 800, rangeMin: 1, rangeMax: 2, enCost: 0, ammo: 30, hitMod: 25, postMove: true, animSeed: 7 }),
-  railgun: W({ id: 'railgun', name: 'Linear Railgun', kind: 'gun', power: 2600, rangeMin: 2, rangeMax: 6, enCost: 20, ammo: 10, hitMod: 0, postMove: true, animSeed: 8 }),
+  railgun: W({ id: 'railgun', name: 'Linear Railgun', kind: 'gun', power: 2600, rangeMin: 2, rangeMax: 6, enCost: 20, ammo: 10, hitMod: 0, postMove: true, animSeed: 8, pierce: true }),
   heatRod: W({ id: 'heat_rod', name: 'Heat Rod', kind: 'melee', power: 2100, rangeMin: 1, rangeMax: 2, enCost: 8, ammo: null, hitMod: 10, postMove: true, animSeed: 9, status: 'burn' }),
   stasisRay: W({ id: 'stasis_ray', name: 'Stasis Ray', kind: 'beam', power: 1600, rangeMin: 2, rangeMax: 5, enCost: 12, ammo: null, hitMod: 12, postMove: true, animSeed: 23, status: 'stun' }),
   chestBlaster: W({ id: 'chest_blaster', name: 'Chest Blaster', kind: 'beam', power: 3100, rangeMin: 1, rangeMax: 4, enCost: 30, ammo: null, hitMod: -5, postMove: false, animSeed: 10, willReq: 115 }),
   mapBuster: W({ id: 'map_buster', name: 'MAP: Buster Mortar', kind: 'missile', power: 2200, rangeMin: 2, rangeMax: 5, enCost: 0, ammo: 3, hitMod: -10, postMove: false, animSeed: 14, willReq: 110, mapRange: 1 }),
   punch: W({ id: 'punch', name: 'Rocket Punch', kind: 'melee', power: 1900, rangeMin: 1, rangeMax: 3, enCost: 10, ammo: null, hitMod: 10, postMove: true, animSeed: 11 }),
-  drillLancer: W({ id: 'drill_lancer', name: 'Drill Lancer', kind: 'melee', power: 2700, rangeMin: 1, rangeMax: 1, enCost: 12, ammo: null, hitMod: 5, postMove: true, animSeed: 12 }),
+  drillLancer: W({ id: 'drill_lancer', name: 'Drill Lancer', kind: 'melee', power: 2700, rangeMin: 1, rangeMax: 1, enCost: 12, ammo: null, hitMod: 5, postMove: true, animSeed: 12, pierce: true }),
+  vampEdge: W({ id: 'vamp_edge', name: 'Vampiric Edge', kind: 'melee', power: 2350, rangeMin: 1, rangeMax: 2, enCost: 14, ammo: null, hitMod: 8, postMove: true, animSeed: 24, drain: true }),
   funnelArray: W({ id: 'funnel_array', name: 'Funnel Array', kind: 'funnel', power: 2800, rangeMin: 2, rangeMax: 6, enCost: 25, ammo: null, hitMod: 10, postMove: false, animSeed: 13, willReq: 115 }),
   // combination attacks — need the partner unit standing adjacent & unacted
   twinBreaker: W({ id: 'twin_breaker', name: 'Twin Breaker', kind: 'melee', power: 4300, rangeMin: 1, rangeMax: 2, enCost: 25, ammo: null, hitMod: 30, postMove: true, animSeed: 15, willReq: 110, comboPartner: 'gruntborg' }),
@@ -78,7 +80,7 @@ export const PILOTS = {
   karg: P({ name: 'Col. Karg Draven', callsign: 'BOSS', melee: 75, ranged: 75, defense: 70, evade: 65, maxSp: 70, spirits: ['valor', 'strike'], faceColor: '#d0a0ff' }),
   grunt: P({ name: 'Soldier', callsign: 'GR', melee: 56, ranged: 56, defense: 52, evade: 52, maxSp: 30, spirits: [], faceColor: '#bbbbbb' }),
   civ: P({ name: 'Convoy Crew', callsign: 'CVY', melee: 40, ranged: 40, defense: 40, evade: 40, maxSp: 0, spirits: [], faceColor: '#c8b090' }),
-  militia: P({ name: 'Ark Militia', callsign: 'DEF', melee: 55, ranged: 60, defense: 58, evade: 55, maxSp: 0, spirits: [], faceColor: '#8fb8dd' }),
+  militia: P({ name: 'Ark Militia', callsign: 'DEF', melee: 55, ranged: 60, defense: 58, evade: 55, maxSp: 0, spirits: [], faceColor: '#8fb8dd', trait: 'rally' }),
 };
 
 // ---------- Units (original mecha, 3 factions X / Y / Z) ----------
