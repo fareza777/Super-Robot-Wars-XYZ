@@ -138,7 +138,13 @@ function evadeOf(u: UnitState, map: MapDef): number {
 
 function armorOf(u: UnitState, map: MapDef): number {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
-  return u.def.armor + (u.level - 1) * 40 + t.def + (u.gritUntilEndOfEnemyPhase ? 400 : 0) + willArmor(u) + partBonus(u, 'armor') + (u.phase2 ? 300 : 0);
+  const base = u.def.armor + (u.level - 1) * 40 + t.def + (u.gritUntilEndOfEnemyPhase ? 400 : 0) + willArmor(u) + partBonus(u, 'armor') + (u.phase2 ? 300 : 0);
+  return Math.round(base * (u.statuses?.some((s) => s.id === 'break') ? 0.7 : 1));
+}
+
+/** status applied on a landed hit — refreshes the same debuff instead of stacking */
+function applyStatus(u: UnitState, id: 'burn' | 'stun' | 'break'): void {
+  u.statuses = [...(u.statuses ?? []).filter((s) => s.id !== id), { id, turns: 2 }];
 }
 
 function statFor(u: UnitState, w: WeaponDef): number {
@@ -284,6 +290,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   att.en = Math.max(0, att.en - w.enCost);
   if (w.ammo != null) att.ammo[w.id] = (att.ammo[w.id] ?? 0) - 1;
   if (result.hit) def.hp = Math.max(0, def.hp - result.damage);
+  if (result.hit && def.alive && w.status) applyStatus(def, w.status);
   if (result.destroyed) {
     def.alive = false;
     att.kills += 1;
@@ -294,6 +301,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
     def.en = Math.max(0, def.en - cw.enCost);
     if (cw.ammo != null) def.ammo[cw.id] = (def.ammo[cw.id] ?? 0) - 1;
     if (result.counter.hit) att.hp = Math.max(0, att.hp - result.counter.damage);
+    if (result.counter.hit && att.alive && cw.status) applyStatus(att, cw.status);
     if (result.counter.destroyed) {
       att.alive = false;
       def.kills += 1;
@@ -302,6 +310,12 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
 
   att.moved = true;
   att.acted = true;
+  // afterburner part: a kill refreshes the attacker's turn, once per turn
+  if (result.destroyed && att.parts.includes('afterburner') && att.alive && !att.followUpReady) {
+    att.acted = false;
+    att.moved = false;
+    att.followUpReady = true;
+  }
   att.strikeForNextAttack = false;
   att.valorForNextAttack = false;
   att.snipeForNextAttack = false;
@@ -437,6 +451,7 @@ export function clearTransientForOwnPhase(u: UnitState): void {
   u.accelThisTurn = 0;
   u.moved = false;
   u.acted = false;
+  u.followUpReady = false;
 }
 
 // ---------- Enemy AI ----------
@@ -452,7 +467,7 @@ interface AiPlan {
 export function planEnemyActions(state: GameState): AiPlan[] {
   const { map, units } = state;
   const players = units.filter((u) => u.alive && u.side === 'player');
-  const enemies = units.filter((u) => u.alive && u.side === 'enemy');
+  const enemies = units.filter((u) => u.alive && u.side === 'enemy' && !u.acted);
   const plans: AiPlan[] = [];
   const claimed = new Set<string>(); // tiles other AI units plan to occupy
 
@@ -528,10 +543,11 @@ export function planEnemyActions(state: GameState): AiPlan[] {
 }
 
 export interface EndObjective {
-  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect' | 'seize';
+  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect' | 'seize' | 'reach';
   surviveTurns?: number;
   protectTurns?: number;
   seizePos?: Pos;
+  reachPos?: Pos;
 }
 
 /** SRW support attack: an ally adjacent to the attacker and in range of the defender chips in (55% dmg, no counter, doesn't consume its turn). */
@@ -598,6 +614,13 @@ export function checkEnd(units: UnitState[], obj?: EndObjective | null, turn?: n
     // a player unit standing on the beacon wins; routing the defenders also wins
     const bp = obj?.seizePos;
     if (bp && units.some((u) => u.alive && u.side === 'player' && u.pos.x === bp.x && u.pos.y === bp.y)) return 'victory';
+    if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
+    return null;
+  }
+  if (type === 'reach') {
+    // reach missions: land a unit on the extraction tile, or rout the blockade
+    const rp = obj?.reachPos;
+    if (rp && units.some((u) => u.alive && u.side === 'player' && u.pos.x === rp.x && u.pos.y === rp.y)) return 'victory';
     if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
     return null;
   }

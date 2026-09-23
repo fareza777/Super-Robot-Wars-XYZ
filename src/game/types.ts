@@ -24,6 +24,13 @@ export interface WeaponDef {
   mapRange?: number;
   /** combination attack: requires this partner unit adjacent & unacted; both consume their turn */
   comboPartner?: string;
+  /** status inflicted on a hit: burn (HP loss/turn), stun (skip next action), break (armor -30%) */
+  status?: 'burn' | 'stun' | 'break';
+}
+
+export interface StatusFx {
+  id: 'burn' | 'stun' | 'break';
+  turns: number; // remaining phase transitions it lasts through
 }
 
 export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust';
@@ -123,6 +130,10 @@ export interface UnitState {
   escort?: boolean;
   /** npc ally that fights back during the enemy phase */
   armed?: boolean;
+  /** active debuffs (burn/stun/break) — ticked at the start of the unit's own phase */
+  statuses?: StatusFx[];
+  /** afterburner part: may attack once more after destroying a target, once per turn */
+  followUpReady?: boolean;
 }
 
 export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def';
@@ -142,6 +153,8 @@ export interface PartDef {
   hp?: number; // +max HP
   en?: number; // +max EN
   evade?: number; // +% evade
+  /** afterburner: unit may attack again after a kill, once per turn */
+  again?: boolean;
 }
 
 export interface MapDef {
@@ -167,6 +180,8 @@ export interface MapDef {
   events?: { turn: number; lines: { speaker: string; text: string; voice?: string }[] }[];
   /** seize missions: the beacon tile a player unit must reach to win */
   beaconPos?: Pos;
+  /** reach missions: the extraction tile — a player unit landing here wins */
+  reachPos?: Pos;
 }
 
 export type Phase =
@@ -198,7 +213,7 @@ export interface GameSettings {
   difficulty?: 'normal' | 'hard';
 }
 
-export type ObjectiveType = 'rout' | 'survive' | 'boss' | 'protect' | 'seize';
+export type ObjectiveType = 'rout' | 'survive' | 'boss' | 'protect' | 'seize' | 'reach';
 
 export type Reaction = 'counter' | 'defend' | 'evade' | 'cover';
 

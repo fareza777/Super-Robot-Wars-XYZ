@@ -23,6 +23,7 @@ const Tile = React.memo(function Tile({
   inDanger,
   crate,
   beacon,
+  reach,
   onTap,
 }: {
   p: Pos;
@@ -35,6 +36,7 @@ const Tile = React.memo(function Tile({
   inDanger: boolean;
   crate: boolean;
   beacon: boolean;
+  reach: boolean;
   onTap: (p: Pos) => void;
 }) {
   return (
@@ -45,6 +47,11 @@ const Tile = React.memo(function Tile({
       {beacon && (
         <View style={styles.beaconOv} pointerEvents="none">
           <Text style={styles.beaconTag}>⌖</Text>
+        </View>
+      )}
+      {reach && (
+        <View style={[styles.beaconOv, { backgroundColor: 'rgba(60,220,255,0.16)', borderColor: 'rgba(90,230,255,0.8)' }]} pointerEvents="none">
+          <Text style={[styles.beaconTag, { color: '#4de3ff', textShadowColor: 'rgba(60,220,255,0.9)' }]}>➤</Text>
         </View>
       )}
       {inThreat && !inMove && !inAtk && <View style={[styles.overlay, styles.threatOv]} pointerEvents="none" />}
@@ -82,6 +89,7 @@ const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitSt
       </View>
       {u.def.boss ? <Text style={[styles.bossTag, u.phase2 && { color: '#ff5050' }]}>{u.phase2 ? 'Ω ACE' : 'ACE'}</Text> : u.elite ? <Text style={[styles.bossTag, { color: '#ffd34d' }]}>★ELITE</Text> : u.npc ? <Text style={[styles.bossTag, { color: '#7dff9d' }]}>🛡ALLY</Text> : u.aceMastery ? <Text style={[styles.bossTag, { color: '#6fe0ff' }]}>★ACE</Text> : null}
       {spiritBadges(u).length > 0 && <Text style={styles.spiritTag}>{spiritBadges(u)}</Text>}
+      {(u.statuses?.length ?? 0) > 0 && <Text style={styles.statusTag}>{u.statuses!.map((fx) => (fx.id === 'burn' ? '🔥' : fx.id === 'stun' ? '⚡' : '⬇')).join('')}</Text>}
       {u.will > 100 && (
         <View style={[styles.willTag, u.will >= 130 && { borderColor: '#ffd34d' }]}>
           <Text style={[styles.willTxt, u.will >= 130 && { color: '#ffd34d' }]}>◈{u.will}</Text>
@@ -177,6 +185,7 @@ export function MapGrid() {
             inDanger={dangerTiles.has(key(p))}
             crate={crates.some((c) => c.pos.x === p.x && c.pos.y === p.y)}
             beacon={!!missionCh.seizePos && missionCh.seizePos.x === p.x && missionCh.seizePos.y === p.y}
+            reach={!!missionCh.reachPos && missionCh.reachPos.x === p.x && missionCh.reachPos.y === p.y}
             onTap={tapTile}
           />
         ))}
@@ -242,6 +251,7 @@ const styles = StyleSheet.create({
   beaconOv: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(255,210,60,0.16)', borderWidth: 1.5, borderColor: 'rgba(255,220,90,0.7)', alignItems: 'center', justifyContent: 'center' },
   beaconTag: { color: '#ffd34d', fontSize: 20, fontWeight: '900', textShadowColor: 'rgba(255,210,60,0.9)', textShadowRadius: 8 },
   spiritTag: { position: 'absolute', bottom: 3, right: 2, color: '#9fe8ff', fontSize: 8, fontWeight: '800', textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
+  statusTag: { position: 'absolute', bottom: 3, left: 2, color: '#ffb44d', fontSize: 9, fontWeight: '800', textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
   unitWrap: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
   chip: { borderRadius: 6, overflow: 'hidden', borderWidth: 1.5, backgroundColor: '#0a0e1e' },
   hpBarBg: { position: 'absolute', bottom: 0, height: 3, backgroundColor: '#111', borderRadius: 1 },

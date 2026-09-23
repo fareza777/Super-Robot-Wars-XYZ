@@ -52,7 +52,7 @@ import {
   usableWeapons,
   weaponsAgainst,
 } from './engine';
-import { AttackResult, GameSettings, MapDef, Phase, PilotSkillId, PilotSkills, Pos, Reaction, SpiritId, UnitState, WeaponDef } from './types';
+import { AttackResult, GameSettings, MapDef, Phase, PilotSkillId, PilotSkills, Pos, Reaction, SpiritId, StatusFx, UnitState, WeaponDef } from './types';
 
 const SAVE_KEY = 'srwxyz_save_v1';
 const SETTINGS_KEY = 'srwxyz_settings_v1';
@@ -537,7 +537,7 @@ export const useGame = create<Store>((set, get) => ({
     const ch = sideAsChapter(m);
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
     void clearBattleSave();
-    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
+    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
     setTimeout(() => set({ notice: null }), 2400);
     void persistBattle(get());
   },
@@ -753,7 +753,7 @@ export const useGame = create<Store>((set, get) => ({
       zoneTiles.set(k, { pos: { x, y }, cost: 0 });
     }
     void clearBattleSave();
-    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
+    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
   },
   finishDialog: () => {
     set({ phase: 'player', notice: 'PLAYER PHASE — TURN 1' });
@@ -817,7 +817,12 @@ export const useGame = create<Store>((set, get) => ({
     const heal = Math.round(t.def.maxHp * 0.4 * (u.def.pilot.trait === 'field_medic' ? 1.5 : 1));
     const enGain = 30;
     const units = s.units.map((x) => {
-      if (x.uid === targetUid) return { ...x, hp: Math.min(x.def.maxHp, x.hp + heal), en: Math.min(x.def.maxEn, x.en + enGain) };
+      if (x.uid === targetUid) {
+        // a repair crew also restocks limited-ammo weapons
+        const ammo = { ...x.ammo };
+        for (const w of x.def.weapons) if (w.ammo != null) ammo[w.id] = w.ammo;
+        return { ...x, hp: Math.min(x.def.maxHp, x.hp + heal), en: Math.min(x.def.maxEn, x.en + enGain), ammo };
+      }
       if (x.uid === uid) return { ...x, moved: true, acted: true, exp: Math.min(99, x.exp + 25) };
       return x;
     });
@@ -826,7 +831,7 @@ export const useGame = create<Store>((set, get) => ({
       menuForUid: null,
       pendingMove: null,
       selectedUid: null,
-      log: push(s.log, `${u.def.name} repairs ${t.def.name} — +${heal} HP, +${enGain} EN`),
+      log: push(s.log, `${u.def.name} repairs ${t.def.name} — +${heal} HP, +${enGain} EN, ammo restocked`),
     });
     void persistBattle(get());
   },
@@ -1525,6 +1530,26 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       else {
         c.moved = false;
         c.acted = false;
+      }
+      if (c.alive && c.statuses && c.statuses.length) {
+        // status effects tick once per round: burn bleeds HP, stun eats the unit's phase, break shreds armor
+        const keep: StatusFx[] = [];
+        for (const fx of c.statuses) {
+          if (fx.id === 'burn') {
+            const dmg = Math.min(c.hp - 1, Math.round(c.def.maxHp * 0.08));
+            if (dmg > 0) {
+              c.hp -= dmg;
+              recovered.push(`${c.def.name} -${dmg} HP (burn)`);
+            }
+          } else if (fx.id === 'stun') {
+            c.acted = true;
+            c.moved = true;
+            recovered.push(`${c.def.name} is STUNNED`);
+          }
+          const t = { ...fx, turns: fx.turns - 1 };
+          if (t.turns > 0) keep.push(t);
+        }
+        c.statuses = keep.length ? keep : undefined;
       }
       if (c.alive) {
         const r = phaseRecovery(c, st.map);

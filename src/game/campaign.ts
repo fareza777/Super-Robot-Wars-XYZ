@@ -37,6 +37,7 @@ export const PARTS: Record<string, PartDef> = {
   reflexChip: { id: 'reflexChip', name: 'Reflex Chip', desc: '+6% evade', price: 850, evade: 6 },
   overcharger: { id: 'overcharger', name: 'Overcharger', desc: '+8% weapon damage', price: 1200, dmg: 8 },
   batteryPack: { id: 'batteryPack', name: 'Battery Pack', desc: '+30 max EN', price: 550, en: 30 },
+  afterburner: { id: 'afterburner', name: 'Afterburner Core', desc: 'attack again after destroying a target (once/turn)', price: 2400, again: true },
 };
 
 export type PartId = keyof typeof PARTS;
@@ -104,7 +105,7 @@ export const CAMPAIGN_PILOTS = {
 export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   zoldaTank: U({ id: 'zoldaTank', name: 'Zolda Bastion', title: 'Imperial Heavy', color: '#5c6b52', accent: '#b8c4a8', maxHp: 5200, maxEn: 90, armor: 1300, mobility: 70, moveRange: 4, moveType: 'land', weapons: [WEAPONS.railgun, WEAPONS.heatRod], pilot: PILOTS.grunt }),
   vexia: U({ id: 'vexia', name: 'Vexia', title: 'Imperial Interceptor', color: '#4a6b8a', accent: '#c0e0ff', maxHp: 4400, maxEn: 130, armor: 800, mobility: 138, moveRange: 7, moveType: 'air', weapons: [WEAPONS.photonRifle, WEAPONS.vulcan], pilot: PILOTS.grunt }),
-  nightmare: U({ id: 'nightmare', name: 'Nightmare', title: 'Royal Guard', color: '#5a2f3a', accent: '#ffb0c0', maxHp: 6800, maxEn: 140, armor: 1150, mobility: 122, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.missilePods], pilot: PILOTS.grunt }),
+  nightmare: U({ id: 'nightmare', name: 'Nightmare', title: 'Royal Guard', color: '#5a2f3a', accent: '#ffb0c0', maxHp: 6800, maxEn: 140, armor: 1150, mobility: 122, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.missilePods, WEAPONS.stasisRay], pilot: PILOTS.grunt }),
   raxden: U({ id: 'raxden', name: 'Raxden Crimson', title: 'Custom Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.plasmaEdge, WEAPONS.railgun, WEAPONS.vulcan], pilot: CAMPAIGN_PILOTS.raxp, boss: true }),
   moorin: U({ id: 'moorin', name: 'Moorin Anvil', title: 'Imperial General', color: '#4a5a48', accent: '#d0e0c0', maxHp: 9800, maxEn: 160, armor: 1500, mobility: 96, moveRange: 5, moveType: 'land', weapons: [WEAPONS.megaBeam, WEAPONS.gatling, WEAPONS.punch], pilot: CAMPAIGN_PILOTS.moorinp, boss: true }),
   serka: U({ id: 'serka', name: 'Serka Vanta', title: 'Void Empress', color: '#5a2f6e', accent: '#e0b8ff', maxHp: 8200, maxEn: 190, armor: 1000, mobility: 140, moveRange: 7, moveType: 'air', weapons: [WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.serkap, boss: true }),
@@ -155,12 +156,14 @@ export interface ChapterDef {
   count: number;
   boss?: string;
   bossLevel?: number;
-  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect' | 'seize';
+  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect' | 'seize' | 'reach';
   surviveTurns?: number;
   /** protect missions: turns the NPC convoy must stay alive */
   protectTurns?: number;
   /** seize missions: beacon tile a player unit must occupy to win (filled by genMap) */
   seizePos?: Pos;
+  /** reach missions: extraction tile a player unit must reach to win (filled by genMap) */
+  reachPos?: Pos;
   objective: string;
   /** SRW-point style bonus challenge — award credits when the mission ends meeting it */
   mastery?: { desc: string; maxTurns?: number; keepAll?: boolean; rewardCr: number };
@@ -428,6 +431,18 @@ export function genMap(ch: ChapterDef): MapDef {
         }
       }
   }
+  // reach chapters place the extraction tile at the far edge — get any unit there alive
+  let reachPos: Pos | undefined;
+  if (ch.objectiveType === 'reach') {
+    outer: for (let x = 13; x >= 11; x--)
+      for (let y = 0; y <= 2; y++) {
+        const ti = TERRAIN_INFO[terrain2[y][x]];
+        if (ti.passable.land && !ti.hpDmg) {
+          reachPos = { x, y };
+          break outer;
+        }
+      }
+  }
   // protect chapters station the convoy near the deployment zone, guarded by armed militia
   let allySpawns: { defId: string; pos: Pos; armed?: boolean; escort?: boolean }[] | undefined;
   if (ch.objectiveType === 'protect') {
@@ -473,6 +488,7 @@ export function genMap(ch: ChapterDef): MapDef {
     allySpawns,
     crates,
     beaconPos,
+    reachPos,
     bossHoldUntil: ch.boss ? 3 : undefined,
     reinforce: REINFORCE[ch.id],
     events: MID_EVENTS[ch.id],

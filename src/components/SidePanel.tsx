@@ -41,6 +41,7 @@ export function SidePanel() {
   const [showRoster, setShowRoster] = React.useState(false);
   const objType = s.missionCh.objectiveType ?? 'rout';
   const unitOnBeacon = !!s.missionCh.seizePos && s.units.some((u) => u.side === 'player' && u.alive && u.pos.x === s.missionCh.seizePos!.x && u.pos.y === s.missionCh.seizePos!.y);
+  const unitOnReach = !!s.missionCh.reachPos && s.units.some((u) => u.side === 'player' && u.alive && u.pos.x === s.missionCh.reachPos!.x && u.pos.y === s.missionCh.reachPos!.y);
   const npcU = s.units.find((u) => u.escort && u.alive);
   const bossU = s.units.find((u) => u.side === 'enemy' && u.def.boss && u.alive);
 
@@ -80,6 +81,11 @@ export function SidePanel() {
       {objType === 'seize' && (
         <View style={styles.objCard}>
           <Text style={styles.objTxt}>⌖ SEIZE THE BEACON{unitOnBeacon ? ' — SECURED!' : ` · (${s.missionCh.seizePos?.x},${s.missionCh.seizePos?.y})`}</Text>
+        </View>
+      )}
+      {objType === 'reach' && (
+        <View style={styles.objCard}>
+          <Text style={styles.objTxt}>➤ REACH THE EXTRACTION POINT{unitOnReach ? ' — THERE!' : ` · (${s.missionCh.reachPos?.x},${s.missionCh.reachPos?.y})`}</Text>
         </View>
       )}
 
