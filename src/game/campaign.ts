@@ -54,6 +54,7 @@ export const PARTS: Record<string, PartDef> = {
   iField: { id: 'iField', name: 'I-Field Emitter', desc: 'Cuts incoming damage below 1400 to 20%', price: 3000, barrier: 1400 },
   commandRelay: { id: 'commandRelay', name: 'Command Relay', desc: 'Allies within 2 tiles gain +8% hit (squad aura)', price: 1400, auraHit: 8 },
   stealthField: { id: 'stealthField', name: 'Stealth Field', desc: 'Enemies cannot target this unit beyond 3 tiles', price: 2400, stealthField: true },
+  deepMags: { id: 'deepMags', name: 'Deep Magazines', desc: '+50% ammunition capacity', price: 1600, ammoPct: 50 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -87,6 +88,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'assassin', name: 'Assassin', desc: '+6% damage per point vs targets under 40% HP' },
   { id: 'brawler', name: 'Brawler', desc: '+5% damage per point with melee weapons' },
   { id: 'initiative', name: 'Initiative', desc: '+10% damage per point on the first strike each battle' },
+  { id: 'gunner', name: 'Gunner', desc: '+5% damage per point with ranged weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -129,7 +131,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -165,6 +167,7 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   // act-3 anchored defender — rooted in place, still swings hard
   bastion: U({ id: 'bastion', name: 'Bastion Anchor', title: 'Rooted Defender', color: '#5a4a42', accent: '#ffd8a8', maxHp: 5600, maxEn: 80, armor: 1900, mobility: 80, moveRange: 3, moveType: 'land', weapons: [WEAPONS.siegeCrusher, WEAPONS.vulcan], pilot: PILOTS.grunt, holdPos: true }),
   voidChanter: U({ id: 'voidChanter', name: 'Void Chanter', title: 'Hex Adept', color: '#3a1a4a', accent: '#c080ff', maxHp: 4600, maxEn: 130, armor: 500, mobility: 140, moveRange: 5, moveType: 'air', weapons: [WEAPONS.hexBolt, WEAPONS.nullChord], pilot: PILOTS.grunt }),
+  blackguard: U({ id: 'blackguard', name: 'Blackguard', title: 'Veteran Elite', color: '#1a1a22', accent: '#ff5040', maxHp: 7400, maxEn: 120, armor: 1050, mobility: 118, moveRange: 5, moveType: 'land', weapons: [WEAPONS.vulcan, WEAPONS.havocMortar, WEAPONS.hexBolt], pilot: PILOTS.grunt }),
   // Cpt. Vossen's personal frame — recurring ace, guaranteed salvage drop when downed
   vossDrake: U({ id: 'vossDrake', name: 'Drake Eclipse', title: 'Rival Ace', color: '#3a2030', accent: '#ff6a5a', maxHp: 9800, maxEn: 160, armor: 1350, mobility: 150, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.plasmaEdge, WEAPONS.missilePods], pilot: CAMPAIGN_PILOTS.vossen, boss: true, level: 8 }),
   // the Drake defects — after being downed twice he sorties as an armed Ark ally
@@ -816,7 +819,7 @@ export function enemyComp(ch: ChapterDef): string[] {
   const heavy = ch.act === 1 ? 'zoldaTank' : 'nightmare';
   const fast = ch.act === 3 ? 'cataphract' : 'lancer';
   const ghost = ch.act === 3 ? 'phantom' : 'vexia';
-  for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : (i % 11 === 9 && ch.act >= 2) ? 'medic' : (i % 13 === 11 && ch.act === 3) ? 'ballista' : (i % 11 === 10 && ch.act === 3) ? 'bastion' : (i % 12 === 8 && ch.act >= 2) ? 'voidChanter' : i % 7 === 6 ? ghost : fill);
+  for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : (i % 11 === 9 && ch.act >= 2) ? 'medic' : (i % 13 === 11 && ch.act === 3) ? 'ballista' : (i % 11 === 10 && ch.act === 3) ? 'bastion' : (i % 12 === 8 && ch.act >= 2) ? 'voidChanter' : (i % 10 === 5 && ch.act === 3) ? 'blackguard' : i % 7 === 6 ? ghost : fill);
   if (ch.boss) comp.push(ch.boss);
   // Cpt. Vossen ambushes the squad on these chapters — a recurring ace duelist
   if ([6, 13, 19, 26].includes(ch.id)) comp.push('vossDrake');
@@ -1059,6 +1062,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_dark', name: 'DARK PASSAGE', desc: 'Win a mission under sensor fog', rewardCr: 700 },
   { id: 'h_glory', name: 'SHARED GLORY', desc: 'Win with every deployed squad frame landing a kill', rewardCr: 900 },
   { id: 'h_light', name: 'LIGHTNING', desc: 'Win a battle in three turns or fewer', rewardCr: 700 },
+  { id: 'h_uns', name: 'UNSCATHED', desc: 'Win with every squad frame above 80% HP', rewardCr: 800 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
@@ -1174,6 +1178,10 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
     }
     case 'h_light':
       return (s.turn ?? 99) <= 3;
+    case 'h_uns': {
+      const ps = (s.units ?? []).filter((u) => u.side === 'player' && u.alive && !u.npc);
+      return ps.length > 0 && ps.every((u) => (u.hp ?? 0) >= (u.def.maxHp ?? 1) * 0.8);
+    }
     case 'h_ghostd':
       return s.altKill === true;
     default:

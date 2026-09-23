@@ -395,7 +395,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
       u.level = prog.level;
       u.exp = prog.exp;
       u.pp = prog.pp ?? 0;
-      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, ...(prog.skills ?? {}) };
+      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, ...(prog.skills ?? {}) };
       if ((prog.kills ?? 0) >= ACE_KILLS) u.will = 130; // ace pilots start hot
       if ((prog.kills ?? 0) >= ACE_MASTER_KILLS) u.aceMastery = true;
       // career-kill milestones: extra spirits the pilot learned along the war
@@ -978,7 +978,7 @@ export const useGame = create<Store>((set, get) => ({
     const s = get();
     const prog = s.pilotProg[defId];
     if (!prog || (prog.pp ?? 0) < 1) return;
-    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, ...(prog.skills ?? {}) };
+    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, ...(prog.skills ?? {}) };
     if (skills[statId] >= MAX_PILOT_SKILL) return;
     skills[statId] += 1;
     const pilotProg = { ...s.pilotProg, [defId]: { ...prog, pp: (prog.pp ?? 0) - 1, skills } };
@@ -1903,6 +1903,10 @@ export const useGame = create<Store>((set, get) => ({
       set({ spiritForUid: null, log: push(s.log, 'Charity: hull too weak or no wounded ally within 2 tiles') });
       return;
     }
+    if (sp === 'siphon' && !s.units.some((u) => u.alive && u.side === 'enemy' && dist(u.pos, target.pos) <= 3)) {
+      set({ spiritForUid: null, log: push(s.log, 'Siphon: no enemy within 3 tiles') });
+      return;
+    }
     if (sp === 'emp' && !s.units.some((u) => u.alive && u.side === 'enemy' && dist(u.pos, target.pos) <= 4)) {
       set({ spiritForUid: null, log: push(s.log, 'EMP Burst: no enemy within 4 tiles') });
       return;
@@ -2098,13 +2102,24 @@ export const useGame = create<Store>((set, get) => ({
         charityLog = `\u2665 CHARITY — ${c.def.name} bleeds hull to mend ${cand.def.name}`;
       }
     }
+    // siphon — rip Will from the nearest enemy within 3 tiles and take it for the caster
+    let siphonLog: string | null = null;
+    if (sp === 'siphon') {
+      const c = units.find((x) => x.uid === uid)!;
+      const foe = units.filter((u2) => u2.alive && u2.side === 'enemy').sort((x, y) => dist(x.pos, c.pos) - dist(y.pos, c.pos)).find((u2) => dist(u2.pos, c.pos) <= 3);
+      if (foe) {
+        foe.will = Math.max(100, foe.will - 15);
+        c.will = Math.min(150, c.will + 15);
+        siphonLog = `\u262F SIPHON — ${foe.def.name} drained, ${c.def.name} burns brighter`;
+      }
+    }
     const u = units.find((x) => x.uid === uid)!;
     const tiles = movementRange(s.map, units, u);
     set({
       units,
       spiritForUid: null,
       usedSupport: true,
-      log: trustLog || purgeLog || cheerLog || wishLog || gravityLog || decoyLog || hymnLog || empLog || phalanxLog || sanctLog || awakenLog || charityLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), [trustLog, purgeLog, cheerLog, wishLog, gravityLog, decoyLog, hymnLog, empLog, phalanxLog, sanctLog, awakenLog, charityLog].filter(Boolean).join(' · ')) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
+      log: trustLog || purgeLog || cheerLog || wishLog || gravityLog || decoyLog || hymnLog || empLog || phalanxLog || sanctLog || awakenLog || charityLog || siphonLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), [trustLog, purgeLog, cheerLog, wishLog, gravityLog, decoyLog, hymnLog, empLog, phalanxLog, sanctLog, awakenLog, charityLog, siphonLog].filter(Boolean).join(' · ')) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
       moveTiles: s.menuForUid ? new Map() : tiles,
     });
   },

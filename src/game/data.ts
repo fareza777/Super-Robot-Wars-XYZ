@@ -46,6 +46,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   sanctuary: { id: 'sanctuary', name: 'Sanctuary', cost: 55, desc: 'Litany of the Ark — allies within 2 tiles recover 20% HP' },
   awaken: { id: 'awaken', name: 'Awaken', cost: 70, desc: 'Second wind — the nearest spent ally within 3 tiles acts again' },
   charity: { id: 'charity', name: 'Charity', cost: 30, desc: 'Bleed 20% own hull — the weakest ally within 2 tiles mends 40% HP' },
+  siphon: { id: 'siphon', name: 'Siphon', cost: 35, desc: 'Drain 15 Will from the nearest enemy within 3 tiles' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
