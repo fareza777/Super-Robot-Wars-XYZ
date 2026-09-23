@@ -37,6 +37,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   decoy: { id: 'decoy', name: 'Decoy', cost: 45, desc: 'Deploy a holoreplica beside you — hostiles waste their attacks on it until next phase' },
   hymn: { id: 'hymn', name: 'Hymn', cost: 50, desc: 'Squad anthem — every ally gains +15 hit & +15 evade until end of enemy phase' },
   emp: { id: 'emp', name: 'EMP Burst', cost: 40, desc: 'Electromagnetic burst — the nearest enemy within 4 tiles is stunned, skipping its next activation' },
+  phalanx: { id: 'phalanx', name: 'Phalanx', cost: 50, desc: 'Lock formation — every ally gains +400 armor until end of enemy phase' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
@@ -86,7 +87,7 @@ export const WEAPONS = {
   dawnCutter: W({ id: 'dawn_cutter', name: 'Dawn Cutter', kind: 'beam', power: 4600, rangeMin: 1, rangeMax: 4, enCost: 30, ammo: null, hitMod: 25, postMove: true, animSeed: 33, willReq: 115, comboPartner: 'vexiaX' }),
   // v1.8 hero weapons — one extra trick per mech
   arcCannon: W({ id: 'arc_cannon', name: 'Arc Cannon', kind: 'beam', power: 3200, rangeMin: 2, rangeMax: 5, enCost: 28, ammo: null, hitMod: 5, postMove: false, animSeed: 17, willReq: 105 }),
-  thermoCharge: W({ id: 'thermo_charge', name: 'Thermobaric Charge', kind: 'missile', power: 3600, rangeMin: 1, rangeMax: 3, enCost: 0, ammo: 4, hitMod: 0, postMove: false, animSeed: 18, willReq: 110 }),
+  thermoCharge: W({ id: 'thermo_charge', name: 'Thermobaric Charge', kind: 'missile', power: 3600, rangeMin: 1, rangeMax: 3, enCost: 0, ammo: 4, hitMod: 0, postMove: false, animSeed: 18, willReq: 110, knockback: true }),
   railVolley: W({ id: 'rail_volley', name: 'Railgun Volley', kind: 'gun', power: 2000, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 12, hitMod: 15, postMove: true, animSeed: 19, status: 'break', sniper: true }),
   flareField: W({ id: 'flare_field', name: 'Flare Field', kind: 'funnel', power: 2400, rangeMin: 1, rangeMax: 4, enCost: 20, ammo: null, hitMod: 15, postMove: true, animSeed: 20, status: 'burn' }),
   mapFlare: W({ id: 'map_flare', name: 'MAP: Flare Burst', kind: 'funnel', power: 1900, rangeMin: 2, rangeMax: 5, enCost: 45, ammo: null, hitMod: -5, postMove: false, animSeed: 20, willReq: 105, mapRange: 1 }),
@@ -95,7 +96,7 @@ export const WEAPONS = {
   // ALL weapon — saturates every hostile inside range in one volley, no counters
   omniBarrage: W({ id: 'omni_barrage', name: 'ALL: Omni Barrage', kind: 'missile', power: 2100, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 4, hitMod: 0, postMove: false, animSeed: 27, willReq: 110, all: true }),
   fangRipper: W({ id: 'fang_ripper', name: 'Fang Ripper', kind: 'melee', power: 3300, rangeMin: 1, rangeMax: 2, enCost: 30, ammo: null, hitMod: 12, postMove: true, animSeed: 54, breaker: true }),
-  siegeCrusher: W({ id: 'siege_crusher', name: 'Siege Crusher', kind: 'melee', power: 3600, rangeMin: 1, rangeMax: 1, enCost: 20, ammo: null, hitMod: -5, postMove: true, animSeed: 55, breaker: true }),
+  siegeCrusher: W({ id: 'siege_crusher', name: 'Siege Crusher', kind: 'melee', power: 3600, rangeMin: 1, rangeMax: 1, enCost: 20, ammo: null, hitMod: -5, postMove: true, animSeed: 55, breaker: true, knockback: true }),
   arkZenith: W({ id: 'ark_zenith', name: 'Ark Zenith Saber', kind: 'melee', power: 5200, rangeMin: 1, rangeMax: 2, enCost: 45, ammo: null, hitMod: 20, critMod: 20, postMove: true, animSeed: 56, aceReq: 5 }),
   novaMortar: W({ id: 'nova_mortar', name: 'MAP: Nova Mortar', kind: 'missile', power: 3100, rangeMin: 2, rangeMax: 5, enCost: 0, ammo: 3, hitMod: -5, postMove: false, animSeed: 57, mapRange: 1, aceReq: 5 }),
   eclipseLance: W({ id: 'eclipse_lance', name: 'Eclipse Lance', kind: 'beam', power: 4900, rangeMin: 3, rangeMax: 8, enCost: 50, ammo: null, hitMod: 10, postMove: false, animSeed: 58, aceReq: 5, sniper: true, pierce: true }),
@@ -112,7 +113,7 @@ const P = (p: PilotDef) => p;
 export const PILOTS = {
   ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul'], faceColor: '#ffb347', trait: 'ace_instinct' }),
   mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse', 'fortune', 'trust', 'emp'], faceColor: '#7ee7ff', trait: 'deadeye' }),
-  gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor', 'sunder', 'provoke'], faceColor: '#ff9d9d', trait: 'siege_breaker' }),
+  gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor', 'sunder', 'provoke', 'phalanx'], faceColor: '#ff9d9d', trait: 'siege_breaker' }),
   orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless', 'lucky', 'mercy', 'purge', 'cheer', 'expose', 'decoy', 'hymn'], faceColor: '#b6ff9d', trait: 'field_medic' }),
   karg: P({ name: 'Col. Karg Draven', callsign: 'BOSS', melee: 75, ranged: 75, defense: 70, evade: 65, maxSp: 70, spirits: ['valor', 'strike'], faceColor: '#d0a0ff', lastWords: 'Rex is scrap... the Empire builds another. Always.', killQuip: 'Another Aegis relic for the pyre.' }),
   grunt: P({ name: 'Soldier', callsign: 'GR', melee: 56, ranged: 56, defense: 52, evade: 52, maxSp: 30, spirits: [], faceColor: '#bbbbbb' }),

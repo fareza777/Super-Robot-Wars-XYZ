@@ -431,6 +431,23 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   if (result.hit && w.drain) att.hp = Math.min(att.def.maxHp, att.hp + Math.round(result.damage * 0.25));
   if (result.hit && def.alive && w.status && !result.graze) applyStatus(def, w.status);
   if (result.hit && def.alive && w.breaker && !result.graze) def.sundered = true;
+  // bash knockback — a landed hit hurls the survivor one tile away from the strike
+  if (result.hit && def.alive && !result.destroyed && w.knockback) {
+    const kx = Math.sign(def.pos.x - att.pos.x);
+    const ky = Math.sign(def.pos.y - att.pos.y);
+    const opts =
+      Math.abs(def.pos.x - att.pos.x) >= Math.abs(def.pos.y - att.pos.y)
+        ? [{ x: def.pos.x + kx, y: def.pos.y }, { x: def.pos.x, y: def.pos.y + ky }]
+        : [{ x: def.pos.x, y: def.pos.y + ky }, { x: def.pos.x + kx, y: def.pos.y }];
+    for (const np of opts) {
+      if (np.x === def.pos.x && np.y === def.pos.y) continue;
+      if (np.x < 0 || np.y < 0 || np.x >= state.map.cols || np.y >= state.map.rows) continue;
+      if (!TERRAIN_INFO[terrainAt(state.map, np)].passable[def.def.moveType]) continue;
+      if (state.units.some((o) => o.alive && o.pos.x === np.x && o.pos.y === np.y)) continue;
+      def.pos = np;
+      break;
+    }
+  }
   if (result.hit) def.exposed = false;
   if (result.destroyed) {
     def.alive = false;
@@ -696,6 +713,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break; // squad anthem — the store flags every ally
     case 'emp':
       break; // the stunned enemy is marked by the store pass
+    case 'phalanx':
+      break; // formation armor — the store flags every ally
     case 'expose':
       break; // enemies in radius are marked by the store pass
     case 'overdrive':

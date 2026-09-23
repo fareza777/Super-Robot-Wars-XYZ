@@ -24,6 +24,8 @@ export interface WeaponDef {
   multiHit?: number;
   /** chain arc: on hit, bolt arcs to this many extra foes within 2 tiles of the target (50% dmg) */
   chain?: number;
+  /** bash — a landed hit hurls the survivor one tile away from the attacker */
+  knockback?: boolean;
   name: string;
   kind: WeaponKind;
   power: number;
@@ -53,7 +55,7 @@ export interface StatusFx {
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy' | 'hymn' | 'emp';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy' | 'hymn' | 'emp' | 'phalanx';
 
 export interface SpiritDef {
   id: SpiritId;
