@@ -92,6 +92,8 @@ export interface UnitDef {
   guardian?: boolean;
   /** ECM suite — hostile units within 2 tiles take -15 hit */
   jammer?: boolean;
+  /** transformable frame — swaps into this def via the TRANSFORM action */
+  transformInto?: string;
   level?: number; // starting level (default 1)
   /** support frame: can REPAIR an adjacent ally (heal HP/EN) instead of attacking */
   repairer?: boolean;
@@ -172,6 +174,10 @@ export interface UnitState {
   sundered?: boolean;
   /** provoked — this enemy is drawn to attack the provoking unit next enemy phase */
   provokedTo?: string;
+  /** transformable frame — the alternate def this unit can swap into */
+  altDef?: UnitDef;
+  /** original def id when transformable — tracks which form is active */
+  baseDefId?: string;
   /** Miracle spirit armed — survive the next fatal hit with 10 HP */
   miracleArmed?: boolean;
   /** Vanish spirit — enemies cannot target this unit until the flag clears */
@@ -186,7 +192,7 @@ export interface UnitState {
   overkillDealt?: number;
 }
 
-export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut';
+export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave';
 export type PilotSkills = Record<PilotSkillId, number>;
 
 /** SRW-style enhancement parts equippable on a mecha. */
@@ -209,6 +215,8 @@ export interface PartDef {
   xp?: number; // +% EXP gained // +EN regenerated at the start of own phase
   /** % reduction to incoming damage (Aegis barrier) */
   dmgTaken?: number;
+  /** magazine extension — +% ammo capacity on ammo-limited weapons */
+  ammoPct?: number;
   unique?: boolean; // not sold — awarded by story
   /** afterburner: unit may attack again after a kill, once per turn */
   again?: boolean;

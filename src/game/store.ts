@@ -58,6 +58,7 @@ import {
   MoveRec,
   movementRange,
   partBonus,
+  maxAmmoOf,
   formationBonus,
   jammerPenalty,
   phaseRecovery,
@@ -264,6 +265,7 @@ interface Store {
   chooseMapTile: (p: Pos) => void;
   setReaction: (r: Reaction) => void;
   waitUnit: () => void;
+  transformUnit: (uid: string) => void;
   openSpirits: (uid: string) => void;
   beginMission: () => void; // deploy phase -> chapter dialog
   finishMidDialog: () => void;
@@ -354,7 +356,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
       u.level = prog.level;
       u.exp = prog.exp;
       u.pp = prog.pp ?? 0;
-      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, ...(prog.skills ?? {}) };
+      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, ...(prog.skills ?? {}) };
       if ((prog.kills ?? 0) >= ACE_KILLS) u.will = 130; // ace pilots start hot
       if ((prog.kills ?? 0) >= ACE_MASTER_KILLS) u.aceMastery = true;
       // career-kill milestones: extra spirits the pilot learned along the war
@@ -363,6 +365,8 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
     }
     u.parts = (parts[s.defId] ?? []).slice(0, MAX_PART_SLOTS);
     u.wounded = woundedIds.includes(s.defId);
+    const ap = partBonus(u, 'ammoPct');
+    if (ap) for (const k of Object.keys(u.ammo)) u.ammo[k] = Math.ceil(u.ammo[k] * (1 + ap / 100));
     applyUpgrades(u, upgrades, wupg);
     // flat stat parts raise the frame itself
     const hpB = partBonus(u, 'hp');
@@ -916,7 +920,7 @@ export const useGame = create<Store>((set, get) => ({
     const s = get();
     const prog = s.pilotProg[defId];
     if (!prog || (prog.pp ?? 0) < 1) return;
-    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, ...(prog.skills ?? {}) };
+    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, ...(prog.skills ?? {}) };
     if (skills[statId] >= MAX_PILOT_SKILL) return;
     skills[statId] += 1;
     const pilotProg = { ...s.pilotProg, [defId]: { ...prog, pp: (prog.pp ?? 0) - 1, skills } };
@@ -972,7 +976,7 @@ export const useGame = create<Store>((set, get) => ({
           c.en = Math.min(c.def.maxEn, c.en + item.amount);
           break;
         case 'ammo':
-          for (const w of c.def.weapons) if (w.ammo != null) c.ammo[w.id] = w.ammo;
+          for (const w of c.def.weapons) if (w.ammo != null) c.ammo[w.id] = maxAmmoOf(c, w);
           break;
         case 'sp':
           c.sp = Math.min(c.def.pilot.maxSp, c.sp + item.amount);
@@ -1086,7 +1090,7 @@ export const useGame = create<Store>((set, get) => ({
       if (x.uid === targetUid) {
         // a repair crew also restocks limited-ammo weapons
         const ammo = { ...x.ammo };
-        for (const w of x.def.weapons) if (w.ammo != null) ammo[w.id] = w.ammo;
+        for (const w of x.def.weapons) if (w.ammo != null) ammo[w.id] = maxAmmoOf(x, w);
         return { ...x, hp: Math.min(x.def.maxHp, x.hp + heal), en: Math.min(x.def.maxEn, x.en + enGain), ammo };
       }
       if (x.uid === uid) return { ...x, moved: true, acted: true, exp: Math.min(99, x.exp + 25) };
@@ -1113,7 +1117,7 @@ export const useGame = create<Store>((set, get) => ({
     const units = s.units.map((x) => {
       if (x.uid === targetUid) {
         const ammo = { ...x.ammo };
-        for (const w of x.def.weapons) if (w.ammo != null) ammo[w.id] = w.ammo;
+        for (const w of x.def.weapons) if (w.ammo != null) ammo[w.id] = maxAmmoOf(x, w);
         return { ...x, en: Math.min(x.def.maxEn, x.en + enGain), ammo };
       }
       if (x.uid === uid) return { ...x, moved: true, acted: true, exp: Math.min(99, x.exp + 20) };
@@ -1662,6 +1666,28 @@ export const useGame = create<Store>((set, get) => ({
     const s = get();
     if (!s.battle?.needsReaction) return;
     set({ battleReaction: r });
+  },
+
+  // TRANSFORM: swap the frame between its two forms — free action, only before moving
+  transformUnit: (uid) => {
+    const s = get();
+    const u = s.units.find((x) => x.uid === uid);
+    if (!u || !u.altDef || u.moved || u.acted || u.side !== 'player') return;
+    const units = s.units.map((x) => {
+      if (x.uid !== uid || !x.altDef) return x;
+      const ammo = { ...x.ammo };
+      for (const w of x.altDef.weapons) if (w.ammo != null && ammo[w.id] == null) ammo[w.id] = maxAmmoOf(x, w);
+      return { ...x, def: x.altDef, altDef: x.def, ammo };
+    });
+    const into = units.find((x) => x.uid === uid)!;
+    set({
+      units,
+      menuForUid: null,
+      selectedUid: null,
+      moveTiles: new Map(),
+      threatTiles: new Set(),
+      log: push(s.log, `⇄ ${into.def.name} — frame transformed (move ${u.def.moveRange}→${into.def.moveRange}${into.def.moveType === 'air' ? ', air' : ', land'})`),
+    });
   },
 
   waitUnit: () => {

@@ -51,6 +51,7 @@ export const PARTS: Record<string, PartDef> = {
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
   drakeCell: { id: 'drakeCell', name: "Drake's Cell", desc: '+2 move · +8% hit — Vossen tech', price: 0, move: 2, hit: 8, unique: true },
+  ammoRack: { id: 'ammoRack', name: 'Ammo Rack', desc: '+30% weapon ammo capacity — extended magazine', price: 1100, ammoPct: 30 },
 };
 
 export type PartId = keyof typeof PARTS;
@@ -69,6 +70,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'dmg', name: 'Firepower', desc: '+1.5% damage per point' },
   { id: 'def', name: 'Endurance', desc: '-1.5% damage taken per point' },
   { id: 'countercut', name: 'Counter Cut', desc: '+4% chance per point to strike first when countering — a kill pre-empts the blow' },
+  { id: 'esave', name: 'E-Save', desc: '-4% weapon EN cost per point' },
 ];
 
 export const MAX_PILOT_SKILL = 20;

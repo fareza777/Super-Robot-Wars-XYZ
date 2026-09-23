@@ -28,12 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0 },
+    altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
+    baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct'): number {
   let n = 0;
   for (const p of u.parts) n += PARTS[p]?.[stat] ?? 0;
   return n;
@@ -94,8 +96,21 @@ export function movementRange(map: MapDef, units: UnitState[], u: UnitState): Ma
   return out;
 }
 
+/** E-Save pilot skill: weapon EN cost discounted 4% per trained rank. */
+export function enCostOf(u: UnitState, w: WeaponDef): number {
+  const r = u.skills?.esave ?? 0;
+  return r ? Math.max(1, Math.round(w.enCost * (1 - 0.04 * r))) : w.enCost;
+}
+
+/** Ammo Rack part: extended magazine capacity for ammo-limited weapons. */
+export function maxAmmoOf(u: UnitState, w: WeaponDef): number {
+  if (w.ammo == null) return 0;
+  const p = partBonus(u, 'ammoPct');
+  return p ? Math.ceil(w.ammo * (1 + p / 100)) : w.ammo;
+}
+
 export function usableWeapons(u: UnitState): WeaponDef[] {
-  return u.def.weapons.filter((w) => u.en >= w.enCost && (w.ammo == null || (u.ammo[w.id] ?? 0) > 0) && u.will >= (w.willReq ?? 0));
+  return u.def.weapons.filter((w) => u.en >= enCostOf(u, w) && (w.ammo == null || (u.ammo[w.id] ?? 0) > 0) && u.will >= (w.willReq ?? 0));
 }
 
 /** Will (kiai) scaling — every point above 100 fights harder. */
@@ -263,8 +278,8 @@ export function aiPickReaction(att: UnitState, def: UnitState, w: WeaponDef, map
 /** Resolve a full attack including a possible single counter-attack. Pure-ish: mutates nothing, returns result. */
 export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, attMods: CombatMods = NO_MODS, defMods: CombatMods = NO_MODS, reaction: Reaction = 'counter'): AttackResult {
   const first = resolveHit(att, def, w, map, reaction === 'evade' ? { ...attMods, hitBonus: attMods.hitBonus - 30 } : attMods);
-  if (reaction === 'defend' && first.hit) first.damage = Math.round(first.damage * 0.5);
-  if (reaction === 'cover' && first.hit) first.damage = Math.round(first.damage * 0.7);
+  if (reaction === 'defend' && first.hit && !w.pierce) first.damage = Math.round(first.damage * 0.5);
+  if (reaction === 'cover' && first.hit && !w.pierce) first.damage = Math.round(first.damage * 0.7);
   let counter: AttackResult['counter'] = null;
   let counterCut = false;
   if (reaction === 'counter') {
@@ -356,7 +371,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   const result: AttackResult = { ...result0, pincer: pin };
   if (guarded) { result.guarded = guarded; result.struckUid = def.uid; }
 
-  att.en = Math.max(0, att.en - w.enCost);
+  att.en = Math.max(0, att.en - enCostOf(att, w));
   if (w.ammo != null) att.ammo[w.id] = (att.ammo[w.id] ?? 0) - 1;
   if (result.hit) {
     const hpBefore = def.hp;
@@ -396,7 +411,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
 
   if (result.counter) {
     const cw = result.counter.weapon;
-    def.en = Math.max(0, def.en - cw.enCost);
+    def.en = Math.max(0, def.en - enCostOf(def, cw));
     if (cw.ammo != null) def.ammo[cw.id] = (def.ammo[cw.id] ?? 0) - 1;
     if (result.counter.hit) {
       const hpBefore = att.hp;
@@ -463,7 +478,7 @@ export function applyMapAttack(state: GameState, attackerUid: string, targetTile
   inBlast.sort((a, b) => dist(a.pos, targetTile) - dist(b.pos, targetTile));
   const result = simulateMapAttack(att, inBlast, w, state.map, mods ? mods(att) : NO_MODS);
 
-  att.en = Math.max(0, att.en - w.enCost);
+  att.en = Math.max(0, att.en - enCostOf(att, w));
   if (w.ammo != null) att.ammo[w.id] = (att.ammo[w.id] ?? 0) - 1;
   att.moved = true;
   att.acted = true;
@@ -507,7 +522,7 @@ export function applyAllAttack(state: GameState, attackerUid: string, weaponId: 
     .sort((a, b) => dist(a.pos, att.pos) - dist(b.pos, att.pos));
   const result = simulateMapAttack(att, inRange, w, state.map, mods ? mods(att) : NO_MODS);
 
-  att.en = Math.max(0, att.en - w.enCost);
+  att.en = Math.max(0, att.en - enCostOf(att, w));
   if (w.ammo != null) att.ammo[w.id] = (att.ammo[w.id] ?? 0) - 1;
   att.moved = true;
   att.acted = true;
@@ -844,7 +859,7 @@ export function applySupportStrike(
   const w = opts[0];
   const m = mods ? mods(sup) : NO_MODS;
   const r = resolveHit(sup, def, w, state.map, { hitBonus: m.hitBonus, dmgMult: m.dmgMult * 0.55 });
-  sup.en = Math.max(0, sup.en - w.enCost);
+  sup.en = Math.max(0, sup.en - enCostOf(sup, w));
   if (w.ammo != null) sup.ammo[w.id] = (sup.ammo[w.id] ?? 0) - 1;
   sup.strikeForNextAttack = false;
   sup.valorForNextAttack = false;

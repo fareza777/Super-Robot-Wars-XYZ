@@ -30,6 +30,7 @@ function buffNames(u: UnitState): string[] {
   if (u.wounded) names.push('🩹WOUNDED');
   if (u.sundered) names.push('⭗SUNDERED');
   if (u.def.jammer) names.push('📡JAMMER');
+  if (u.baseDefId && u.def.id !== u.baseDefId) names.push('⇄ALT-FORM');
   return names;
 }
 
@@ -286,6 +287,14 @@ export function SidePanel() {
                   return <Btn key={it.id} label={`▣ ${it.name} ×${n}`} sub={it.desc} disabled={n <= 0} onPress={() => s.useItem(unit.uid, it.id)} accent="#7ee0a0" />;
                 })}
               </>
+            )}
+            {unit.altDef && !unit.moved && !unit.acted && (
+              <Btn
+                label={`⇄ TRANSFORM — ${unit.altDef.name}`}
+                sub={`swap frames: move ${unit.def.moveRange}→${unit.altDef.moveRange} · armor ${unit.def.armor}→${unit.altDef.armor}${unit.altDef.moveType === 'air' ? ' · AIR' : ''}`}
+                onPress={() => s.transformUnit(unit.uid)}
+                accent="#7ec8ff"
+              />
             )}
             <Btn label="WAIT" onPress={s.waitUnit} />
             <Btn label="CANCEL" onPress={s.cancel} accent="#666" />

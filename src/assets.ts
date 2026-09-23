@@ -23,6 +23,7 @@ export const ART = {
 // Keyed by unit defId
 export const MECH_ART: Record<string, number> = {
   valstray: require('../assets/art/mech2_valstray.jpg'),
+  valstray_s: require('../assets/art/mech2_valstray_s.jpg'),
   arielis: require('../assets/art/mech2_arielis.jpg'),
   gruntborg: require('../assets/art/mech2_gruntborg.jpg'),
   zephyra: require('../assets/art/mech2_zephyra.jpg'),
