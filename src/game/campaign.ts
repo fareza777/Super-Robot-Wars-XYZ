@@ -153,6 +153,7 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   vossAlly: U({ id: 'vossAlly', name: 'Drake Eclipse V', title: 'Turncoat Ace', color: '#2a3a50', accent: '#7dc9ff', maxHp: 9800, maxEn: 160, armor: 1350, mobility: 150, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.plasmaEdge, WEAPONS.missilePods], pilot: CAMPAIGN_PILOTS.vossen, level: 8 }),
   // unarmed loot hauler — flees the east edge on carrier missions; big salvage when downed
   cargoMule: U({ id: 'cargoMule', name: 'Supply Mule', title: 'Loot Carrier', color: '#4a4030', accent: '#ffe8a0', maxHp: 14000, maxEn: 0, armor: 500, mobility: 70, moveRange: 3, moveType: 'land', weapons: [], pilot: PILOTS.grunt, carrier: true }),
+  holoDecoy: U({ id: 'holoDecoy', name: 'Holoreplica', title: 'Hardlight Decoy', color: '#223244', accent: '#7de8ff', maxHp: 1, maxEn: 0, armor: 0, mobility: 0, moveRange: 0, moveType: 'air', weapons: [], pilot: PILOTS.grunt }),
 };
 
 export const ALL_UNITS: Record<string, UnitDef> = { ...UNITS, ...CAMPAIGN_UNITS };
@@ -993,11 +994,12 @@ export const HONORS: HonorDef[] = [
   { id: 'h_raw', name: 'RAW POWER', desc: 'Win a battle with no spirits and no items used', rewardCr: 900 },
   { id: 'h_ghost', name: 'GHOST HUNTER', desc: 'Destroy 3 Phantom Shade stealth units', rewardCr: 800 },
   { id: 'h_ghostd', name: 'GHOSTDANCER', desc: 'Score a kill while in a transformed frame', rewardCr: 700 },
+  { id: 'h_mirror', name: 'HALL OF MIRRORS', desc: 'Bait an enemy strike with a holoreplica decoy', rewardCr: 600 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean; decoyHit?: boolean }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -1058,6 +1060,8 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return s.usedSupport !== true;
     case 'h_ghost':
       return (s.killsByDef?.phantom ?? 0) >= 3;
+    case 'h_mirror':
+      return s.decoyHit === true;
     case 'h_ghostd':
       return s.altKill === true;
     default:

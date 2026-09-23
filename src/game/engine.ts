@@ -638,6 +638,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'guts':
       u.gutsForNextAttack = true;
       break;
+    case 'decoy':
+      // store spawns the holoreplica unit next to the caster
+      break;
     case 'expose':
       break; // enemies in radius are marked by the store pass
     case 'overdrive':
@@ -919,7 +922,7 @@ export function applySupportStrike(
 }
 
 export function checkEnd(units: UnitState[], obj?: EndObjective | null, turn?: number): 'victory' | 'defeat' | null {
-  if (!units.some((u) => u.alive && u.side === 'player')) return 'defeat';
+  if (!units.some((u) => u.alive && u.side === 'player' && !u.npc)) return 'defeat';
   // hero clause — if the required sortie was fielded and destroyed, the mission is lost
   if (obj?.requiredDefId && units.some((u) => u.side === 'player' && u.def.id === obj.requiredDefId) && !units.some((u) => u.alive && u.side === 'player' && u.def.id === obj.requiredDefId)) return 'defeat';
   const type = obj?.objectiveType ?? 'rout';
