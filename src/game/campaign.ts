@@ -394,7 +394,9 @@ const MID_EVENTS: Record<number, MapDef['events']> = {
       { speaker: 'valstray', text: 'Then we will put out every reactor you have. For everyone who believed we would get this far — attack!' },
     ],
   }] as MapDef['events'],
-  // recurring rival — Cpt. Vossen taunts the squad on each Drake Eclipse sortie
+  
+
+// recurring rival — Cpt. Vossen taunts the squad on each Drake Eclipse sortie
   3: [{
     turn: 3,
     lines: [
@@ -473,6 +475,38 @@ const MID_EVENTS: Record<number, MapDef['events']> = {
     ],
   }] as MapDef['events'],
 };
+/** First-contact duel banter: fires once per mission when the keyed player frame attacks the keyed boss. */
+export const DUEL_BANTER: Record<string, { speaker: string; text: string }[]> = {
+  'valstray|kargan': [
+    { speaker: 'kargan', text: 'The stray dog returns. Last time you crawled away — this time I nail the coffin shut myself.' },
+    { speaker: 'valstray', text: 'You talk like a monument, Draven. Monuments fall. So will you.' },
+  ],
+  'valstray|serka': [
+    { speaker: 'serka', text: 'The Ark\'s little spearhead. I have watched you carve through my fleet — it ends in this void.' },
+    { speaker: 'valstray', text: 'You watched? Then you saw how this ends. Come down and learn it up close.' },
+  ],
+  'valstray|emperor': [
+    { speaker: 'emperor', text: 'The weapon that outlived its makers. Bow, and I will let you stand at my throne\'s foot.' },
+    { speaker: 'valstray', text: 'The Ark doesn\'t bow to thrones, Vael — it burns them. For everyone you took. Now!' },
+  ],
+  'gruntborg|moorin': [
+    { speaker: 'moorin', text: 'A siege frame challenging the General who wrote the doctrine of siege. Bold. Foolish, but bold.' },
+    { speaker: 'gruntborg', text: 'Doctrine\'s only good while the wall holds, General. My mortar says otherwise.' },
+  ],
+  'zephyra|empress': [
+    { speaker: 'empress', text: 'A repair frame in my throne room? The Ark sends its nurses to fight its wars now.' },
+    { speaker: 'zephyra', text: 'Nurse? I\'m the reason my whole squad is still standing. Today I\'m the reason you fall.' },
+  ],
+  'vexiaX|warden': [
+    { speaker: 'warden', text: 'I have held this gate for three hundred years, child of the Empire. You will not be the one to open it.' },
+    { speaker: 'vexiaX', text: 'I deserted that Empire for a reason, Warden. The gate opens today — one way or another.' },
+  ],
+  'raxdenR|emperor': [
+    { speaker: 'emperor', text: 'Captain Daver. I promoted you with my own hands — and you point them at me now?' },
+    { speaker: 'raxdenR', text: 'You taught me loyalty is earned, not owed. The Ark earned it. You burned it.' },
+  ],
+};
+
 
 /** Post-mission debrief scenes keyed by chapter id — play over the HQ screen after victory. */
 export const DEBRIEFS: Record<number, { speaker: string; text: string; voice?: string }[]> = {
@@ -922,11 +956,12 @@ export const HONORS: HonorDef[] = [
   { id: 'h_annihilator', name: 'ANNIHILATOR', desc: 'Land a single hit of 8000+ damage in battle', rewardCr: 1400 },
   { id: 'h_ironwill', name: 'IRON WILL', desc: 'Win a battle with a wounded pilot in the line', rewardCr: 800 },
   { id: 'h_forma', name: 'FORMA SHIFT', desc: 'Transform a frame mid-battle and win', rewardCr: 700 },
+  { id: 'h_raw', name: 'RAW POWER', desc: 'Win a battle with no spirits and no items used', rewardCr: 900 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string; wounded?: boolean }[]; transformed?: boolean }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -983,6 +1018,8 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return (s.units ?? []).some((u) => u.side === 'player' && u.wounded);
     case 'h_forma':
       return s.transformed === true;
+    case 'h_raw':
+      return s.usedSupport !== true;
     default:
       return false;
   }

@@ -204,6 +204,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   const res = def.def.resists?.[w.kind] ?? 0;
   if (res > 0) dmg = Math.round(dmg * (1 - res));
   if (w.antiAir && def.def.moveType === 'air') dmg = Math.round(dmg * 1.25);
+  if (w.sniper && dist(att.pos, def.pos) >= 4) dmg = Math.round(dmg * 1.15);
   return Math.round(dmg * dmgMult * willDmgMult(att));
 }
 

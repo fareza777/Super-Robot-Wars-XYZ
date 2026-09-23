@@ -10,6 +10,8 @@ export interface WeaponDef {
   id: string;
   /** ignores 35% of the target's armor */
   pierce?: boolean;
+  /** +15% damage when fired from 4+ tiles away */
+  sniper?: boolean;
   /** anti-air — +25% damage vs airborne units */
   antiAir?: boolean;
   /** heals the attacker for 25% of damage dealt */
