@@ -329,6 +329,35 @@ const MID_EVENTS: Record<number, MapDef['events']> = {
       { speaker: 'valstray', text: 'Then we will put out every reactor you have. For everyone who believed we would get this far — attack!' },
     ],
   }] as MapDef['events'],
+  // recurring rival — Cpt. Vossen taunts the squad on each Drake Eclipse sortie
+  6: [{
+    turn: 2,
+    lines: [
+      { speaker: 'vossDrake', text: 'So you are the stray dog the Ark keeps feeding. The Drake has not tasted a real fight in months — do not disappoint me.' },
+      { speaker: 'valstray', text: 'Who is that lunatic? Fine — you want a real fight? Come and get it!' },
+    ],
+  }] as MapDef['events'],
+  13: [{
+    turn: 2,
+    lines: [
+      { speaker: 'vossDrake', text: 'Back again, Ardent? Persistent. I respect that — it makes the wreckage more memorable.' },
+      { speaker: 'valstray', text: 'You again! Didn\'t learn your lesson last time, Vossen?' },
+    ],
+  }] as MapDef['events'],
+  19: [{
+    turn: 2,
+    lines: [
+      { speaker: 'vossDrake', text: 'Three sorties now, pup. You should know — the Eclipse keeps no mercy in its magazines.' },
+      { speaker: 'arielis', text: 'He\'s faster than before — keep spacing tight and do not chase him alone!' },
+    ],
+  }] as MapDef['events'],
+  26: [{
+    turn: 2,
+    lines: [
+      { speaker: 'vossDrake', text: 'Last dance, Ardent. When this ends, one of us never flies again. Show me everything.' },
+      { speaker: 'valstray', text: 'Everything he\'s got, squad — this is the last time we meet the Drake!' },
+    ],
+  }] as MapDef['events'],
   30: [{
     turn: 3,
     lines: [
@@ -718,6 +747,8 @@ export const PATROL_MISSIONS: SideMissionDef[] = [
   { id: 'p1', name: 'Drift Wolves Patrol', desc: 'Imperial stragglers harass the belt lanes. Run them off — again and again.', unlockCh: 7, theme: 'void', lvl: 8, count: 5, rewardCr: 800, repeatable: true, turnLimit: 7, objective: 'Rout all hostiles within 7 turns — or they slip away' },
   { id: 'p2', name: 'Ash Belt Sweep', desc: 'Scavenger packs regroup in the Glass Desert whenever we look away.', unlockCh: 13, theme: 'desert', lvl: 12, count: 6, rewardCr: 1100, repeatable: true, turnLimit: 8, objective: 'Rout all hostiles within 8 turns — or they slip away' },
   { id: 'p3', name: "Throne's Shadow Watch", desc: 'The Emperor\'s vanguard tests our perimeter. Answer in kind.', unlockCh: 20, theme: 'fortress', lvl: 17, count: 7, rewardCr: 1500, repeatable: true, turnLimit: 9, objective: 'Rout all hostiles within 9 turns — or they slip away' },
+  { id: 'p4', name: 'Ghost Relay Intercept', desc: 'A dead relay station keeps pinging the throne. Reach it before the garrison does.', unlockCh: 15, theme: 'ice', lvl: 14, count: 6, rewardCr: 1250, repeatable: true, objectiveType: 'seize', turnLimit: 8, objective: 'Seize the relay beacon within 8 turns — before the Empire silences it' },
+  { id: 'p5', name: 'Karn Circuit', desc: 'Cataphract wolf-packs run the caldera rim hunting convoys. Break the pack.', unlockCh: 24, theme: 'lava', lvl: 20, count: 8, rewardCr: 1800, repeatable: true, turnLimit: 10, objective: 'Rout all hostiles within 10 turns — or they slip away' },
 ];
 
 export const ALL_SIDE_MISSIONS: SideMissionDef[] = [...SIDE_MISSIONS, ...PATROL_MISSIONS];
@@ -744,10 +775,12 @@ export const HONORS: HonorDef[] = [
   { id: 'h_allclear', name: 'PEACEKEEPER', desc: 'Clear all 10 side quests', rewardCr: 2000 },
   { id: 'h_eternal', name: 'ETERNAL WAR', desc: 'Begin a New Game+ cycle', rewardCr: 3000 },
   { id: 'h_chest', name: 'WAR CHEST', desc: 'Hold 20,000 credits at once', rewardCr: 1500 },
+  { id: 'h_simace', name: 'VR ACE', desc: 'Score 1500+ PTS in the VR simulator', rewardCr: 1200 },
+  { id: 'h_rival', name: 'NEMESIS', desc: 'Shoot down Cpt. Vossen and the Drake Eclipse', rewardCr: 1000 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string }[] }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -776,6 +809,10 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return s.ngPlus >= 1;
     case 'h_chest':
       return s.credits >= 20000;
+    case 'h_simace':
+      return (s.simBest ?? 0) >= 1500;
+    case 'h_rival':
+      return (s as { vossenDefeated?: boolean }).vossenDefeated === true;
     default:
       return false;
   }

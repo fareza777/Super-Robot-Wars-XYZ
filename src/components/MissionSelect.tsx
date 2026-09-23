@@ -2,7 +2,7 @@ import React from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART } from '../assets';
-import { ALL_SIDE_MISSIONS, CHAPTERS_COUNT, missionOf, sideAsChapter } from '../game/campaign';
+import { ALL_SIDE_MISSIONS, CHAPTERS_COUNT, ITEMS, missionOf, sideAsChapter } from '../game/campaign';
 import { useGame } from '../game/store';
 
 /** Mission select — main campaign chapter + optional side quests. */
@@ -105,7 +105,7 @@ export function MissionSelect() {
                     <Text style={styles.sideDesc}>{locked ? '???' : m.desc}</Text>
                     {!locked && (
                       <Text style={styles.sideMeta}>
-                        LV {m.repeatable ? `${Math.max(m.lvl, s.chapter)} (scales)` : m.lvl} · {m.count + (m.boss ? 1 : 0)} hostiles{m.turnLimit ? ` · ⌛${m.turnLimit}T` : ''} · Reward {m.rewardCr} CR{m.rewardItem ? ` + ${m.rewardItem === 'ammoBox' ? 'Ammo Box' : m.rewardItem === 'enCell' ? 'EN Cell' : m.rewardItem === 'megaKit' ? 'Mega Repair Kit' : 'Spirit Wing'}` : ''}
+                        {m.objectiveType === 'seize' ? '⌖' : m.objectiveType === 'survive' ? '🛡' : m.boss ? '◆' : '⚔'} LV {m.repeatable ? `${Math.max(m.lvl, s.chapter)} (scales)` : m.lvl} · {m.count + (m.boss ? 1 : 0)} hostiles{m.turnLimit ? ` · ⌛${m.turnLimit}T` : ''} · Reward {m.rewardCr} CR{m.rewardItem ? ` + ${ITEMS[m.rewardItem].name}` : ''}
                       </Text>
                     )}
                   </View>

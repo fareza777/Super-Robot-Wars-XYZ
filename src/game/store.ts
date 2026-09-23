@@ -92,6 +92,7 @@ export interface SaveData {
   honorsClaimed?: string[];
   missionRank?: Record<string, 'S' | 'A' | 'B' | 'C'>; // HONORS achievement ids whose credit bounty was claimed
   simBest?: number; // VR simulator high score
+  vossenDefeated?: boolean; // NEMESIS honor — Drake Eclipse shot down at least once
 }
 
 /** Serialized mid-battle snapshot — lets the player leave a mission and resume it later. */
@@ -194,6 +195,7 @@ interface Store {
   simWave: number; // VR simulator — current wave (0 when not in a sim run)
   simSettled: boolean; // VR simulator — payout already applied for this run
   simBest: number; // VR simulator high score (persisted)
+  vossenDefeated: boolean; // Cpt. Vossen shot down at least once (persisted — NEMESIS honor)
   log: string[];
   enemyBusy: boolean;
   screenShake: number;
@@ -373,7 +375,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
 const BATTLE_SAVE_KEY = 'srwxyz_battle_v1';
 
 async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank'>>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest };
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -530,6 +532,7 @@ export const useGame = create<Store>((set, get) => ({
   simWave: 0,
   simSettled: false,
   simBest: 0,
+  vossenDefeated: false,
   hint: null,
   hintsSeen: [],
 
@@ -645,7 +648,7 @@ export const useGame = create<Store>((set, get) => ({
       await AsyncStorage.removeItem(SAVE_KEY);
       await AsyncStorage.removeItem(BATTLE_SAVE_KEY);
     } catch {}
-    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0 });
+    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false });
   },
 
   toggleDeploy: (defId) => {
@@ -698,6 +701,7 @@ export const useGame = create<Store>((set, get) => ({
       honorsClaimed: [] as string[],
       missionRank: {} as Record<number, 'S' | 'A' | 'B' | 'C'>,
       lastRank: null as 'S' | 'A' | 'B' | 'C' | null,
+      vossenDefeated: false,
     };
     void clearBattleSave();
     set({ ...fresh, hasSave: true, kills: 0, phase: 'prologue' });
@@ -722,7 +726,7 @@ export const useGame = create<Store>((set, get) => ({
       const raw = await AsyncStorage.getItem(SAVE_KEY);
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
-      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {}, simBest: d.simBest ?? 0 });
+      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {}, simBest: d.simBest ?? 0, vossenDefeated: d.vossenDefeated ?? false });
     } catch {}
     try {
       const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
@@ -1237,6 +1241,7 @@ export const useGame = create<Store>((set, get) => ({
       menuForUid: null,
       pendingMove: null,
       selectedUid: null,
+      vossenDefeated: s.vossenDefeated || vossenDowned(s.units, state.units),
     };
     if (s.settings.battleMode === 'off') {
       const end = checkEnd(state.units, s.missionCh, s.turn);
@@ -1287,6 +1292,7 @@ export const useGame = create<Store>((set, get) => ({
       log: log2,
       inventory,
       salvageQueue,
+      vossenDefeated: s.vossenDefeated || vossenDowned(s.units, state.units),
       kills: s.kills + (result.destroyed ? 1 : 0) + result.splash!.filter((x) => x.destroyed).length,
       pendingWeapon: null,
       attackTiles: new Set<string>(),

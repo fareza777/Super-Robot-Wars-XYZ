@@ -163,11 +163,12 @@ function NoticeBanner({ text }: { text: string }) {
     ]).start();
     Animated.spring(slide, { toValue: 0, useNativeDriver: true, friction: 8, tension: 60 }).start();
   }, []);
-  // player phase banners cool blue, hostiles/events warm
+  // player phase banners cool blue, hostiles/events warm, VR wave banners violet
   const playerPhase = text.startsWith('PLAYER PHASE');
-  const bg = playerPhase ? 'rgba(18,60,140,0.75)' : 'rgba(150,50,10,0.72)';
-  const border = playerPhase ? '#6db4ff' : '#ff8a3a';
-  const txt = playerPhase ? '#c8e4ff' : '#ffd8b0';
+  const vr = text.startsWith('▲');
+  const bg = vr ? 'rgba(70,30,140,0.78)' : playerPhase ? 'rgba(18,60,140,0.75)' : 'rgba(150,50,10,0.72)';
+  const border = vr ? '#b78bff' : playerPhase ? '#6db4ff' : '#ff8a3a';
+  const txt = vr ? '#e4d0ff' : playerPhase ? '#c8e4ff' : '#ffd8b0';
   return (
     <Animated.View style={[styles.noticeBanner, { backgroundColor: bg, borderColor: border, opacity: v, transform: [{ translateX: slide }] }]}>
       <Text style={[styles.noticeTxt, { color: txt }]}>{text}</Text>
