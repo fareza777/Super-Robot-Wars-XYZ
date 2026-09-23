@@ -673,7 +673,7 @@
   "theme": "void",
   "lvl": 18,
   "count": 9,
-  "objective": "Push through the Imperial screen guarding the throne approach.",
+  "objective": "Rout all hostiles \u2014 hunt the Supply Mule before it escapes east",
   "lines": [
    {
     "speaker": "arielis",
@@ -700,7 +700,8 @@
    "desc": "Clear within 10 turns",
    "maxTurns": 10,
    "rewardCr": 960
-  }
+  },
+  "carrier": true
  },
  {
   "id": 19,

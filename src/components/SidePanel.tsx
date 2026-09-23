@@ -104,6 +104,21 @@ export function SidePanel() {
           <Text style={styles.objTxt}>➤ REACH THE EXTRACTION POINT{unitOnReach ? ' — THERE!' : ` · (${s.missionCh.reachPos?.x},${s.missionCh.reachPos?.y})`}</Text>
         </View>
       )}
+      {!!s.missionCh.carrier && (
+        <View style={styles.objCard}>
+          {(() => {
+            const mule = s.units.find((u) => u.def.carrier);
+            if (mule?.alive) return (
+              <>
+                <Text style={[styles.objTxt, { color: '#ffe8a0' }]}>💰 HUNT THE SUPPLY MULE · ({mule.pos.x},{mule.pos.y})</Text>
+                <Bar label="MULE" val={mule.hp} max={mule.def.maxHp} color="#ffe8a0" />
+              </>
+            );
+            const escaped = !!mule && mule.pos.x >= s.map.cols - 1;
+            return <Text style={[styles.objTxt, { color: escaped ? '#ff8a5c' : '#7dff9d' }]}>{escaped ? '🏃 CARRIER ESCAPED' : '💰 CARRIER DOWN — cargo secured'}</Text>;
+          })()}
+        </View>
+      )}
       {!!s.missionCh.requiredDefId && s.units.some((u) => u.side === 'player' && u.def.id === s.missionCh.requiredDefId) && (
         <View style={styles.objCard}>
           <Text style={[styles.objTxt, { color: '#ff8a5c' }]}>⚠ {ALL_UNITS[s.missionCh.requiredDefId]?.name.toUpperCase() ?? 'HERO'} MUST SURVIVE</Text>

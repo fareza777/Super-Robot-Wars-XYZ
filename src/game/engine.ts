@@ -514,6 +514,17 @@ export function planEnemyActions(state: GameState): AiPlan[] {
   const claimed = new Set<string>(); // tiles other AI units plan to occupy
 
   for (const e of enemies) {
+    // loot carriers ignore combat entirely — they bolt for the east edge every turn
+    if (e.def.carrier) {
+      const tiles = [...movementRange(map, units, e).values()].map((v) => v.pos).filter((p) => {
+        const occ = unitAt(units, p);
+        return (!occ || occ.uid === e.uid) && !claimed.has(key(p));
+      });
+      const best = (tiles.length ? tiles : [e.pos]).slice().sort((a, b) => b.x - a.x)[0];
+      claimed.add(key(best));
+      plans.push({ unit: e, moveTo: best });
+      continue;
+    }
     // bosses hold position until the map's hold turn (commanding from the back line)
     const holding = !!e.def.boss && state.turn < (map.bossHoldUntil ?? 0);
     // seize missions: defenders already near the beacon stay to guard it

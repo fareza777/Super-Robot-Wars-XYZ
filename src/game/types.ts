@@ -89,6 +89,8 @@ export interface UnitDef {
   supplier?: boolean;
   /** damage-type resistance — fraction reduced per weapon kind (0.4 = -40% beam) */
   resists?: Partial<Record<WeaponKind, number>>;
+  /** loot carrier: flees east each enemy phase; kill it before it leaves the map */
+  carrier?: boolean;
 }
 
 export interface UnitState {

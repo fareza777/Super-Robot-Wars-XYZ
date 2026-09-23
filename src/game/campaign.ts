@@ -38,6 +38,7 @@ export const PARTS: Record<string, PartDef> = {
   overcharger: { id: 'overcharger', name: 'Overcharger', desc: '+8% weapon damage', price: 1200, dmg: 8 },
   batteryPack: { id: 'batteryPack', name: 'Battery Pack', desc: '+30 max EN', price: 550, en: 30 },
   afterburner: { id: 'afterburner', name: 'Afterburner Core', desc: 'attack again after destroying a target (once/turn)', price: 2400, again: true },
+  veteranPlate: { id: 'veteranPlate', name: 'Veteran Plate', desc: '+120 armor · +6 mobility — S-rank award', price: 3000, armor: 120, mobility: 6 },
 };
 
 export type PartId = keyof typeof PARTS;
@@ -126,6 +127,8 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   cataphract: U({ id: 'cataphract', name: 'Karn Cataphract', title: 'Shadow Striker', color: '#2e2e3a', accent: '#a0a0ff', maxHp: 4200, maxEn: 120, armor: 650, mobility: 158, moveRange: 8, moveType: 'air', weapons: [WEAPONS.vampEdge, WEAPONS.plasmaEdge], pilot: PILOTS.grunt, resists: { beam: 0.4 } }),
   // Cpt. Vossen's personal frame — recurring ace, guaranteed salvage drop when downed
   vossDrake: U({ id: 'vossDrake', name: 'Drake Eclipse', title: 'Rival Ace', color: '#3a2030', accent: '#ff6a5a', maxHp: 9800, maxEn: 160, armor: 1350, mobility: 150, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.plasmaEdge, WEAPONS.missilePods], pilot: CAMPAIGN_PILOTS.vossen, boss: true, level: 8 }),
+  // unarmed loot hauler — flees the east edge on carrier missions; big salvage when downed
+  cargoMule: U({ id: 'cargoMule', name: 'Supply Mule', title: 'Loot Carrier', color: '#4a4030', accent: '#ffe8a0', maxHp: 14000, maxEn: 0, armor: 500, mobility: 70, moveRange: 3, moveType: 'land', weapons: [], pilot: PILOTS.grunt, carrier: true }),
 };
 
 export const ALL_UNITS: Record<string, UnitDef> = { ...UNITS, ...CAMPAIGN_UNITS };
@@ -222,6 +225,8 @@ export interface ChapterDef {
   sim?: boolean;
   /** fog of war: enemy units are hidden until a player unit is within FOG_RANGE */
   fog?: boolean;
+  /** a loot carrier spawns with the enemy force — kill it before it escapes east */
+  carrier?: boolean;
 }
 
 export const CHAPTERS: ChapterDef[] = chaptersJson as unknown as ChapterDef[];
@@ -665,6 +670,8 @@ export interface SideMissionDef {
   repeatable?: boolean;
   /** fog of war: enemy units are hidden until a player unit is within FOG_RANGE */
   fog?: boolean;
+  /** hunt objective: a loot carrier joins the enemy side and flees east */
+  carrier?: boolean;
 }
 
 export const SIDE_MISSIONS: SideMissionDef[] = [
@@ -800,6 +807,7 @@ export const PATROL_MISSIONS: SideMissionDef[] = [
   { id: 'p4', name: 'Ghost Relay Intercept', desc: 'A dead relay station keeps pinging the throne. Reach it before the garrison does.', unlockCh: 15, theme: 'ice', lvl: 14, count: 6, rewardCr: 1250, repeatable: true, objectiveType: 'seize', turnLimit: 8, objective: 'Seize the relay beacon within 8 turns — before the Empire silences it' },
   { id: 'p5', name: 'Karn Circuit', desc: 'Cataphract wolf-packs run the caldera rim hunting convoys. Break the pack.', unlockCh: 24, theme: 'lava', lvl: 20, count: 8, rewardCr: 1800, repeatable: true, turnLimit: 10, objective: 'Rout all hostiles within 10 turns — or they slip away' },
   { id: 'p7', name: 'Dead Runner', desc: 'A courier frame carries stolen throne codes through the ruins. Get a unit to the drop point before they torch it.', unlockCh: 18, theme: 'ruins', lvl: 16, count: 7, rewardCr: 1400, repeatable: true, objectiveType: 'reach', turnLimit: 8, objective: 'Reach the extraction ➤ within 8 turns — or rout the blockade' },
+  { id: 'p9', name: 'Caravan Robbery', desc: 'Imperial supply mules haul throne gold through the dunes. Raid the caravan before it clears the pass.', unlockCh: 14, theme: 'desert', lvl: 13, count: 5, rewardCr: 1500, repeatable: true, carrier: true, objective: 'Destroy the Supply Mule before it escapes east — or rout the escort' },
   { id: 'p8', name: 'Night Passage', desc: 'Sensors are blind in the darkside channel. Slip a unit through the blockade line.', unlockCh: 24, theme: 'void', lvl: 20, count: 8, rewardCr: 1900, repeatable: true, objectiveType: 'reach', turnLimit: 9, fog: true, objective: 'Reach the extraction ➤ within 9 turns — sensors blind beyond 4 tiles' },
   { id: 'p6', name: 'Blackout Watch', desc: 'A sensor dead-zone hangs over the frozen relay shelf. Hostiles only reveal at knife range.', unlockCh: 11, theme: 'ice', lvl: 12, count: 6, rewardCr: 1150, repeatable: true, fog: true, objective: 'Rout all hostiles — sensors blind beyond 4 tiles' },
 ];
@@ -891,5 +899,6 @@ export function sideAsChapter(m: SideMissionDef): ChapterDef {
     lines: [],
     rosterCh: m.unlockCh,
     fog: m.fog,
+    carrier: m.carrier,
   };
 }

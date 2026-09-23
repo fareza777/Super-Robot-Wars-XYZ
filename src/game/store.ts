@@ -371,6 +371,15 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
     }
     units.push(u);
   }
+  if (ch.carrier) {
+    // loot carrier spawns mid-right and flees east every enemy phase
+    const spawnX = Math.floor(map.cols * 0.55);
+    const mule = makeUnit('cargoMule', 'enemy', { x: spawnX, y: Math.floor(map.rows / 2) }, `e${i++}`);
+    mule.level = ch.lvl;
+    ngEnemy(mule, ngPlus);
+    hardEnemy(mule, difficulty);
+    units.push(mule);
+  }
   for (const s of map.allySpawns ?? []) {
     const u = makeUnit(s.defId, 'player', s.pos, `a${i++}`);
     u.npc = true;
@@ -1310,6 +1319,16 @@ export const useGame = create<Store>((set, get) => ({
       log2 = push(log2, "Cpt. Vossen's wreck spills a cache — Mega Repair Kit acquired");
       salvageQueue = [...salvageQueue, ITEMS.megaKit.name];
     }
+    let carrierCr = 0;
+    if (dead.some((d) => d.def.carrier)) {
+      carrierCr = 600;
+      const drop = rollDrop() ?? 'repairKit';
+      inventory = { ...inventory, [drop]: (inventory[drop] ?? 0) + 1 };
+      log2 = push(log2, `💰 CARRIER DOWN — crews crack the cargo hold: +${carrierCr}cr + ${ITEMS[drop].name}`);
+      salvageQueue = [...salvageQueue, ITEMS[drop].name];
+      setTimeout(() => set({ notice: '💰 CARRIER DOWN — cargo secured (+600cr)' }), 900);
+      setTimeout(() => set({ notice: null }), 3100);
+    }
     const common = {
       units: state.units,
       log: log2,
@@ -1318,7 +1337,7 @@ export const useGame = create<Store>((set, get) => ({
       kills: s.kills + killCount,
       chainTurn: killCount > 0 ? s.turn : s.chainTurn,
       chainCount: chain,
-      salvageCr: s.salvageCr + chainBonus,
+      salvageCr: s.salvageCr + chainBonus + carrierCr,
       pendingWeapon: null,
       mapAim: null,
       attackTiles: new Set<string>(),
@@ -1704,7 +1723,11 @@ function applyVictory(set: SetFn, get: Get) {
     const sideCleared = side.repeatable ? s.sideCleared : [...s.sideCleared, side.id];
     const parS = side.surviveTurns ?? Math.max(6, Math.ceil(side.count * 1.2));
     const rankS = battleRank(unitsLost, s.turn, parS, false);
-    const missionRank = { ...s.missionRank, [sideAsChapter({ ...side, lvl: 0 }).id]: betterRank(s.missionRank[sideAsChapter({ ...side, lvl: 0 }).id], rankS) };
+    const sideRankKey = sideAsChapter({ ...side, lvl: 0 }).id;
+    const missionRank = { ...s.missionRank, [sideRankKey]: betterRank(s.missionRank[sideRankKey], rankS) };
+    let partsOwned = s.partsOwned;
+    const sRankNote = rankS === 'S' && s.missionRank[sideRankKey] !== 'S' && !partsOwned.includes('veteranPlate');
+    if (sRankNote) partsOwned = [...partsOwned, 'veteranPlate'];
     set({
       battle: null,
       phase: 'victory',
@@ -1717,11 +1740,12 @@ function applyVictory(set: SetFn, get: Get) {
       lastSalvage: s.salvageCr,
       lastRank: rankS,
       missionRank,
+      partsOwned,
       debrief: null,
       salvageQueue: [],
-      log: aceLines.reduce((l, line) => push(l, line), push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''} · RANK ${rankS}`)),
+      log: aceLines.reduce((l, line) => push(l, line), push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''} · RANK ${rankS}${sRankNote ? ' · awarded 🛡 VETERAN PLATE' : ''}`)),
     });
-    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank });
+    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank });
     return;
   }
   const ch = s.missionCh;
@@ -1756,7 +1780,11 @@ function applyVictory(set: SetFn, get: Get) {
   const par = ch.surviveTurns ?? Math.max(6, Math.ceil((ch.count + (ch.boss ? 1 : 0)) * 1.1));
   const rank = battleRank(unitsLost, s.turn, par, lastMastery != null);
   const missionRank = { ...s.missionRank, [ch.id]: betterRank(s.missionRank[ch.id], rank) };
-  if (rank === 'S') log = push(log, `★ RANK S — flawless execution!`);
+  let partsOwned = s.partsOwned;
+  if (rank === 'S' && s.missionRank[ch.id] !== 'S' && !partsOwned.includes('veteranPlate')) {
+    partsOwned = [...partsOwned, 'veteranPlate'];
+    log = push(log, `★ RANK S — flawless execution! Awarded 🛡 VETERAN PLATE`);
+  } else if (rank === 'S') log = push(log, `★ RANK S — flawless execution!`);
   for (const line of aceLines) log = push(log, line);
   set({
     battle: null,
@@ -1773,13 +1801,14 @@ function applyVictory(set: SetFn, get: Get) {
     lastRank: rank,
     lastSalvage: s.salvageCr,
     missionRank,
+    partsOwned,
     lastReward: reward + masteryCr + (clearedFinal ? 5000 : 0),
     debrief: DEBRIEFS[ch.id] ?? null,
     salvageQueue: [],
     log: push(log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + masteryCr + 5000} credits` : `Mission complete! +${reward + masteryCr} credits · RANK ${rank}`),
   });
   void clearBattleSave();
-  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route, missionRank });
+  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route, missionRank });
 }
 
 async function runEnemyPhase(set: SetFn, get: Get) {
@@ -1826,6 +1855,18 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       await sleep(path && path.length > 1 ? 160 + path.length * 190 : 200);
       set({ walk: null });
       detonateMineAt(set, get, plan.unit.uid, plan.moveTo, 0);
+      // loot carrier reaching the east edge slips away with the cargo
+      const mover = get().units.find((u) => u.uid === plan.unit.uid);
+      if (mover?.def.carrier && mover.pos.x >= get().map.cols - 1) {
+        set((st) => ({
+          units: st.units.map((u) => (u.uid === mover.uid ? { ...u, alive: false, acted: true } : u)),
+          notice: '🏃 LOOT CARRIER ESCAPED — the salvage is gone',
+          log: push(st.log, '🏃 Supply Mule escaped east with the cargo — objective reward lost'),
+        }));
+        setTimeout(() => set({ notice: null }), 2600);
+        await sleep(700);
+        continue; // no attack — it's off the map
+      }
     }
 
     if (plan.target && plan.weapon) {
