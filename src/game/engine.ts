@@ -28,7 +28,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
@@ -195,6 +195,9 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (att.relentlessUntilEndOfEnemyPhase && def.hp < def.def.maxHp / 2) dmg = Math.round(dmg * 1.25);
   if (att.charged) dmg = Math.round(dmg * 1.5);
   if ((att.skills?.lastStand ?? 0) > 0 && att.hp < att.def.maxHp * 0.3) dmg = Math.round(dmg * (1 + 0.05 * att.skills.lastStand));
+  if ((att.skills?.assassin ?? 0) > 0 && def.hp < def.def.maxHp * 0.4) dmg = Math.round(dmg * (1 + 0.06 * att.skills.assassin));
+  if ((att.skills?.brawler ?? 0) > 0 && w.kind === 'melee') dmg = Math.round(dmg * (1 + 0.05 * att.skills.brawler));
+  if (att.enraged) dmg = Math.round(dmg * 1.15);
   if (def.guardUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.5);
   dmg = Math.round(dmg * (1 + partBonus(att, 'dmg') * 0.01 + (att.skills?.dmg ?? 0) * 0.015));
   dmg = Math.round(dmg * (1 - Math.min(0.5, (def.skills?.def ?? 0) * 0.015)));
@@ -220,7 +223,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
 }
 
 const rnd = () => Math.random() * 100;
-export const critChance = (att: UnitState, def: UnitState, w?: WeaponDef) => Math.max(5, Math.round(8 + (att.def.mobility - def.def.mobility) * 0.2 + (w?.critMod ?? 0) + partBonus(att, 'crit') + (att.charged ? 15 : 0) + (att.skills?.crit ?? 0) * 2));
+export const critChance = (att: UnitState, def: UnitState, w?: WeaponDef) => Math.max(5, Math.round(8 + (att.def.mobility - def.def.mobility) * 0.2 + (w?.critMod ?? 0) + partBonus(att, 'crit') + (att.charged ? 15 : 0) + (att.enraged ? 10 : 0) + (att.skills?.crit ?? 0) * 2));
 const critRoll = (att: UnitState, def: UnitState, w?: WeaponDef) => att.deadshotForNextAttack === true || rnd() < critChance(att, def, w);
 
 interface SimAttack {
@@ -751,6 +754,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break; // ally heal ring — applied by the store pass
     case 'awaken':
       break; // ally reactivation — applied by the store pass
+    case 'charity':
+      break; // self-sacrifice heal — applied by the store pass
     case 'reboot':
       u.statuses = [];
       u.hp = Math.min(u.def.maxHp, u.hp + Math.round(u.def.maxHp * 0.25));

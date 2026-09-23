@@ -83,6 +83,8 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'regen', name: 'Nanite Cloud', desc: '+1% HP regenerated per turn per point' },
   { id: 'riposte', name: 'Riposte', desc: '+8% counter-attack damage per point' },
   { id: 'lastStand', name: 'Last Stand', desc: '+5% damage per point while under 30% HP' },
+  { id: 'assassin', name: 'Assassin', desc: '+6% damage per point vs targets under 40% HP' },
+  { id: 'brawler', name: 'Brawler', desc: '+5% damage per point with melee weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1053,6 +1055,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_dec', name: 'DECIMATION', desc: 'Destroy ten enemies in a single battle', rewardCr: 800 },
   { id: 'h_last', name: 'LAST MAN', desc: 'Win with a single squad frame left standing', rewardCr: 800 },
   { id: 'h_dark', name: 'DARK PASSAGE', desc: 'Win a mission under sensor fog', rewardCr: 700 },
+  { id: 'h_glory', name: 'SHARED GLORY', desc: 'Win with every deployed squad frame landing a kill', rewardCr: 900 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
@@ -1162,6 +1165,10 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.units ?? []).filter((u) => u.side === 'player' && u.alive && !u.npc).length === 1;
     case 'h_dark':
       return s.missionCh?.fog === true;
+    case 'h_glory': {
+      const ps = (s.units ?? []).filter((u) => u.side === 'player' && u.alive && !u.npc);
+      return ps.length >= 3 && ps.every((u) => u.kills > 0);
+    }
     case 'h_ghostd':
       return s.altKill === true;
     default:
