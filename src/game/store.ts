@@ -2502,7 +2502,20 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       }
       await sleep(180);
     } else {
-      set((st) => ({ units: st.units.map((u) => (u.uid === plan.unit.uid ? { ...u, acted: true } : u)), log: plan.fleeing ? push(st.log, `${plan.unit.def.name} is falling back!`) : st.log }));
+      const edge = get().map.cols - 1;
+      const routed = !!plan.fleeing && plan.moveTo.x >= edge;
+      set((st) => ({
+        units: st.units.map((u) => (u.uid === plan.unit.uid ? { ...u, acted: true, ...(routed ? { alive: false, hp: 0 } : {}) } : u)),
+        log: plan.fleeing ? push(st.log, routed ? `${plan.unit.def.name} ROUTED — falls back off the field!` : `${plan.unit.def.name} is falling back!`) : st.log,
+      }));
+      if (routed) {
+        const end = checkEnd(get().units, get().missionCh, get().turn);
+        if (end) {
+          if (end === 'victory') applyVictory(set, get);
+          else set({ phase: end, enemyBusy: false });
+          return;
+        }
+      }
       await sleep(140);
     }
   }

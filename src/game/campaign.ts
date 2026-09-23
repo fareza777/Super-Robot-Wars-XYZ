@@ -49,6 +49,7 @@ export const PARTS: Record<string, PartDef> = {
   targetCPU: { id: 'targetCPU', name: 'Targeting CPU', desc: '+10% critical chance', price: 1100, crit: 10 },
   ventCore: { id: 'ventCore', name: 'Vent Core', desc: '+10 EN regenerated each turn', price: 950, enRegen: 10 },
   nanoWeave: { id: 'nanoWeave', name: 'Nano-Weave Frame', desc: '+8% max HP regenerated each turn', price: 1600, hpRegen: 8 },
+  sensor: { id: 'sensor', name: 'Sensor Array', desc: 'Reveals stealth enemies within 5 tiles', price: 800 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },

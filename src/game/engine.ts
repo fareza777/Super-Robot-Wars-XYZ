@@ -260,7 +260,7 @@ export function formationBonus(units: UnitState[], u: UnitState): number {
 
 /** Stealth frames are invisible on the field until a non-enemy unit closes within 3 tiles. */
 export function isStealthHidden(u: UnitState, units: UnitState[]): boolean {
-  return u.side === 'enemy' && u.def.stealth === true && !units.some((p) => p.alive && p.side !== 'enemy' && dist(p.pos, u.pos) <= 3);
+  return u.side === 'enemy' && u.def.stealth === true && !units.some((p) => p.alive && p.side !== 'enemy' && dist(p.pos, u.pos) <= (p.parts?.includes('sensor') ? 5 : 3));
 }
 
 export function bestCounterWeapon(def: UnitState, attPos: Pos): WeaponDef | undefined {
