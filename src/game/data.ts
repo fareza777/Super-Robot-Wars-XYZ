@@ -30,6 +30,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   sunder: { id: 'sunder', name: 'Sunder', cost: 45, desc: 'Breacher field — enemies within 3 tiles lose 300 armor & 15 evade' },
   provoke: { id: 'provoke', name: 'Provoke', cost: 35, desc: 'War horn — enemies within 3 tiles are drawn to attack this unit next phase' },
   cheer: { id: 'cheer', name: 'Cheer', cost: 30, desc: 'The most junior ally within 3 tiles gains double EXP on their next attack' },
+  wish: { id: 'wish', name: 'Wish', cost: 50, desc: 'The most drained ally within 3 tiles regains +30 SP' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

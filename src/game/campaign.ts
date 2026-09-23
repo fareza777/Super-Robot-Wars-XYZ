@@ -72,6 +72,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'countercut', name: 'Counter Cut', desc: '+4% chance per point to strike first when countering — a kill pre-empts the blow' },
   { id: 'esave', name: 'E-Save', desc: '-4% weapon EN cost per point' },
   { id: 'hitrun', name: 'Hit & Run', desc: 'Strike, then keep moving — one rank unlocks move-after-attack' },
+  { id: 'crit', name: 'Veteran', desc: '+2% critical chance per point' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -113,7 +114,7 @@ export const CAMPAIGN_PILOTS = {
   raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -394,6 +395,48 @@ const MID_EVENTS: Record<number, MapDef['events']> = {
     ],
   }] as MapDef['events'],
   // recurring rival — Cpt. Vossen taunts the squad on each Drake Eclipse sortie
+  3: [{
+    turn: 3,
+    lines: [
+      { speaker: 'gruntborg', text: 'Coastal guns are targeting our flank! Keep moving — a parked frame is a dead frame.' },
+      { speaker: 'valstray', text: 'Battery positions sighted. Gara, crack their armor — Mira and I will sweep the gunline.' },
+    ],
+  }] as MapDef['events'],
+  7: [{
+    turn: 3,
+    lines: [
+      { speaker: 'arielis', text: 'Bridge integrity is failing under shelling. Orin — if the deck gives out we lose the whole line.' },
+      { speaker: 'zephyra', text: 'Then we do not let it give out. Every unit off the span by sundown, understood?' },
+    ],
+  }] as MapDef['events'],
+  12: [{
+    turn: 2,
+    lines: [
+      { speaker: 'arielis', text: 'Debris this thick fouls my targeting solution... wait — power signature, three o\'clock high!' },
+      { speaker: 'vexia', text: 'Imperial ambush in the wreckage! Squadron, weapons free — burn a hole through the field!' },
+    ],
+  }] as MapDef['events'],
+  17: [{
+    turn: 3,
+    lines: [
+      { speaker: 'raxdenR', text: 'This lattice is a cage and they know it — every corridor a firing lane. Stay tight, Ark squad.' },
+      { speaker: 'vexiaX', text: 'I mapped this facility for the Empire once. Rax — on your wing. We take the core and we are out before the counterstrike.' },
+    ],
+  }] as MapDef['events'],
+  22: [{
+    turn: 4,
+    lines: [
+      { speaker: 'gruntborg', text: 'Outer wall, inner wall, throne — they built this fortress to bury people like us. Good thing I brought a bigger drill.' },
+      { speaker: 'arielis', text: 'Mortar crews spotted on the parapets. If that wall speaks, it speaks in shells — move, now!' },
+    ],
+  }] as MapDef['events'],
+  27: [{
+    turn: 3,
+    lines: [
+      { speaker: 'vexiaX', text: 'The Sanctum hums. Vael knows we are coming — he is letting us walk in on purpose.' },
+      { speaker: 'raxdenR', text: 'Then let him watch his welcome burn. One more push — the throne is almost within reach.' },
+    ],
+  }] as MapDef['events'],
   6: [{
     turn: 2,
     lines: [

@@ -28,7 +28,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
@@ -208,7 +208,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
 }
 
 const rnd = () => Math.random() * 100;
-export const critChance = (att: UnitState, def: UnitState, w?: WeaponDef) => Math.max(5, Math.round(8 + (att.def.mobility - def.def.mobility) * 0.2 + (w?.critMod ?? 0) + partBonus(att, 'crit')));
+export const critChance = (att: UnitState, def: UnitState, w?: WeaponDef) => Math.max(5, Math.round(8 + (att.def.mobility - def.def.mobility) * 0.2 + (w?.critMod ?? 0) + partBonus(att, 'crit') + (att.skills?.crit ?? 0) * 2));
 const critRoll = (att: UnitState, def: UnitState, w?: WeaponDef) => rnd() < critChance(att, def, w);
 
 interface SimAttack {
@@ -626,6 +626,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break; // area debuff is applied by the store pass
     case 'cheer':
       break; // the inspired ally is chosen by the store pass
+    case 'wish':
+      break; // the restored ally is chosen by the store pass
     case 'snipe':
       u.snipeForNextAttack = true;
       break;

@@ -358,7 +358,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
       u.level = prog.level;
       u.exp = prog.exp;
       u.pp = prog.pp ?? 0;
-      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, ...(prog.skills ?? {}) };
+      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, ...(prog.skills ?? {}) };
       if ((prog.kills ?? 0) >= ACE_KILLS) u.will = 130; // ace pilots start hot
       if ((prog.kills ?? 0) >= ACE_MASTER_KILLS) u.aceMastery = true;
       // career-kill milestones: extra spirits the pilot learned along the war
@@ -923,7 +923,7 @@ export const useGame = create<Store>((set, get) => ({
     const s = get();
     const prog = s.pilotProg[defId];
     if (!prog || (prog.pp ?? 0) < 1) return;
-    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, ...(prog.skills ?? {}) };
+    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, ...(prog.skills ?? {}) };
     if (skills[statId] >= MAX_PILOT_SKILL) return;
     skills[statId] += 1;
     const pilotProg = { ...s.pilotProg, [defId]: { ...prog, pp: (prog.pp ?? 0) - 1, skills } };
@@ -1726,6 +1726,10 @@ export const useGame = create<Store>((set, get) => ({
       return;
     }
     // Trust needs a wounded ally in reach — refuse without spending SP
+    if (sp === 'wish' && !s.units.some((u) => u.alive && u.uid !== uid && u.side === target.side && dist(u.pos, target.pos) <= 3 && u.sp < u.def.pilot.maxSp)) {
+      set({ spiritForUid: null, log: push(s.log, 'Wish: no drained ally within 3 tiles') });
+      return;
+    }
     if (sp === 'cheer' && !s.units.some((u) => u.alive && u.uid !== uid && u.side === target.side && dist(u.pos, target.pos) <= 3)) {
       set({ spiritForUid: null, log: push(s.log, 'Cheer: no ally within 3 tiles') });
       return;
@@ -1767,6 +1771,18 @@ export const useGame = create<Store>((set, get) => ({
       }
       purgeLog = cleaned ? `Purge wave cleanses ${cleaned} frame${cleaned > 1 ? 's' : ''} — cripples and debuffs lifted` : 'Purge wave ripples out — nothing to cleanse';
     }
+    // wish — the most SP-drained ally within 3 tiles is reinvigorated
+    let wishLog: string | null = null;
+    if (sp === 'wish') {
+      const src = units.find((x) => x.uid === uid)!;
+      const tgt = units
+        .filter((u2) => u2.alive && u2.uid !== uid && u2.side === src.side && dist(u2.pos, src.pos) <= 3 && u2.sp < u2.def.pilot.maxSp)
+        .sort((a, b) => a.sp / a.def.pilot.maxSp - b.sp / b.def.pilot.maxSp)[0];
+      if (tgt) {
+        tgt.sp = Math.min(tgt.def.pilot.maxSp, tgt.sp + 30);
+        wishLog = `Wish restores ${tgt.def.name} +30 SP`;
+      }
+    }
     // cheer — the most junior ally within 3 tiles is inspired: double EXP next attack
     let cheerLog: string | null = null;
     if (sp === 'cheer') {
@@ -1796,7 +1812,7 @@ export const useGame = create<Store>((set, get) => ({
     set({
       units,
       spiritForUid: null,
-      log: trustLog || purgeLog || cheerLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), [trustLog, purgeLog, cheerLog].filter(Boolean).join(' · ')) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
+      log: trustLog || purgeLog || cheerLog || wishLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), [trustLog, purgeLog, cheerLog, wishLog].filter(Boolean).join(' · ')) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
       moveTiles: s.menuForUid ? new Map() : tiles,
     });
   },
