@@ -114,6 +114,8 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   // --- late-wave line frames ---
   lancer: U({ id: 'lancer', name: 'Wolfen Lance', title: 'Strike Cavalry', color: '#4a3a2e', accent: '#ff9060', maxHp: 3600, maxEn: 120, armor: 700, mobility: 150, moveRange: 7, moveType: 'land', weapons: [WEAPONS.plasmaEdge, WEAPONS.vulcan], pilot: PILOTS.grunt }),
   bulwark: U({ id: 'bulwark', name: 'Rampart Bulwark', title: 'Siege Anchor', color: '#3a4438', accent: '#ffe060', maxHp: 8200, maxEn: 80, armor: 1700, mobility: 55, moveRange: 3, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod], pilot: PILOTS.grunt }),
+  // unarmed civilian convoy — escort objective on protect chapters
+  arklander: U({ id: 'arklander', name: 'Arklander Convoy', title: 'Civilian Transport', color: '#5a5148', accent: '#e0d0a8', maxHp: 3400, maxEn: 0, armor: 350, mobility: 40, moveRange: 0, moveType: 'land', weapons: [], pilot: PILOTS.civ }),
   // --- player reinforcements (join at arc boundaries) ---
   raxdenR: U({ id: 'raxdenR', name: 'Raxden Crimson', title: 'Defected Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.plasmaEdge, WEAPONS.railgun, WEAPONS.vulcan], pilot: CAMPAIGN_PILOTS.raxp, level: 5 }),
   vexiaX: U({ id: 'vexiaX', name: 'Vexia Custom', title: 'Ark Interceptor', color: '#2a8a9a', accent: '#a0f0ff', maxHp: 5200, maxEn: 150, armor: 880, mobility: 142, moveRange: 7, moveType: 'air', weapons: [WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.vulcan], pilot: CAMPAIGN_PILOTS.veep, level: 7 }),
@@ -153,8 +155,10 @@ export interface ChapterDef {
   count: number;
   boss?: string;
   bossLevel?: number;
-  objectiveType?: 'rout' | 'survive' | 'boss';
+  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect';
   surviveTurns?: number;
+  /** protect missions: turns the NPC convoy must stay alive */
+  protectTurns?: number;
   objective: string;
   /** SRW-point style bonus challenge — award credits when the mission ends meeting it */
   mastery?: { desc: string; maxTurns?: number; keepAll?: boolean; rewardCr: number };
@@ -313,10 +317,40 @@ export const DEBRIEFS: Record<number, { speaker: string; text: string; voice?: s
   ],
 };
 
+// ~15% of non-boss line units deploy as elites — tougher, worth more EXP and credits
+function markElites(spawns: { defId: string; pos: Pos; elite?: boolean }[], rSpawn: () => number) {
+  for (const s of spawns) if (!ALL_UNITS[s.defId]?.boss && rSpawn() < 0.15) s.elite = true;
+}
+
+// hidden salvage crates — 1-2 claimable tiles scattered mid-field
+function genCrates(terrain: Terrain[][], used: Set<string>, rSpawn: () => number) {
+  const crates: { pos: Pos; itemId: string }[] = [];
+  const crateItems = ['repairKit', 'enCell', 'ammoBox', 'megaKit', 'spiritWing'];
+  for (let i = 0, n = 1 + Math.floor(rSpawn() * 2); i < n; i++) {
+    for (let t = 0; t < 60; t++) {
+      const x = 3 + Math.floor(rSpawn() * 7);
+      const y = Math.floor(rSpawn() * 8);
+      const k = `${x},${y}`;
+      const ti = TERRAIN_INFO[terrain[y]?.[x]];
+      if (ti && !used.has(k) && !crates.some((c) => c.pos.x === x && c.pos.y === y) && ti.passable.land && !ti.hpDmg) {
+        used.add(k);
+        crates.push({ pos: { x, y }, itemId: crateItems[Math.floor(rSpawn() * crateItems.length)] });
+        break;
+      }
+    }
+  }
+  return crates;
+}
+
 export function genMap(ch: ChapterDef): MapDef {
   if (ch.theme === 'custom') {
     const roster = rosterFor(ch);
-    return { ...MISSION_SSS, bossHoldUntil: 3, events: MID_EVENTS[ch.id], playerSpawns: MISSION_SSS.playerSpawns.slice(0, 4).map((s, i) => ({ defId: roster[i] ?? s.defId, pos: s.pos })) };
+    const m: MapDef = { ...MISSION_SSS, bossHoldUntil: 3, events: MID_EVENTS[ch.id], playerSpawns: MISSION_SSS.playerSpawns.slice(0, 4).map((s, i) => ({ defId: roster[i] ?? s.defId, pos: s.pos })), enemySpawns: MISSION_SSS.enemySpawns.map((s) => ({ ...s })) };
+    const rSpawn = rng(ch.id * 4243);
+    markElites(m.enemySpawns, rSpawn);
+    const used = new Set(m.enemySpawns.concat(m.playerSpawns).map((s) => `${s.pos.x},${s.pos.y}`));
+    m.crates = genCrates(m.terrain, used, rSpawn);
+    return m;
   }
   const r = rng(ch.id * 7919);
   const terrain: Terrain[][] = [];
@@ -344,7 +378,7 @@ export function genMap(ch: ChapterDef): MapDef {
       }
     }
   // enemy spawns along the right edge
-  const enemySpawns: { defId: string; pos: Pos }[] = [];
+  const enemySpawns: { defId: string; pos: Pos; elite?: boolean }[] = [];
   const used = new Set<string>();
   const comps = enemyComp(ch);
   const rSpawn = rng(ch.id * 4243);
@@ -364,6 +398,7 @@ export function genMap(ch: ChapterDef): MapDef {
       }
     }
   }
+  markElites(enemySpawns, rSpawn);
   // fallback: never silently drop a unit (a missing boss would auto-win a boss-objective map)
   for (const defId of comps) {
     if (enemySpawns.filter((s) => s.defId === defId).length >= comps.filter((c) => c === defId).length) continue;
@@ -378,6 +413,21 @@ export function genMap(ch: ChapterDef): MapDef {
         }
       }
   }
+  const crates = genCrates(terrain2, used, rSpawn);
+  // protect chapters station the convoy near the deployment zone
+  let allySpawns: { defId: string; pos: Pos }[] | undefined;
+  if (ch.objectiveType === 'protect') {
+    outer: for (let y = 3; y <= 6; y++)
+      for (let x = 0; x <= 2; x++) {
+        const k = `${x},${y}`;
+        const ti = TERRAIN_INFO[terrain2[y][x]];
+        if (!used.has(k) && ti.passable.land && !ti.hpDmg) {
+          used.add(k);
+          allySpawns = [{ defId: 'arklander', pos: { x, y } }];
+          break outer;
+        }
+      }
+  }
   return {
     id: `c${ch.id}`,
     name: `CHAPTER ${ch.id}`,
@@ -388,6 +438,8 @@ export function genMap(ch: ChapterDef): MapDef {
     objective: ch.objective,
     playerSpawns: PLAYER_SPAWNS.slice(0, rosterFor(ch).length).map((p, i) => ({ defId: rosterFor(ch)[i], pos: p })),
     enemySpawns,
+    allySpawns,
+    crates,
     bossHoldUntil: ch.boss ? 3 : undefined,
     reinforce: REINFORCE[ch.id],
     events: MID_EVENTS[ch.id],
