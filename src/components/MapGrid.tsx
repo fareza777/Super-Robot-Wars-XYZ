@@ -20,6 +20,7 @@ const Tile = React.memo(function Tile({
   inMove,
   inAtk,
   inThreat,
+  inDanger,
   crate,
   beacon,
   onTap,
@@ -31,6 +32,7 @@ const Tile = React.memo(function Tile({
   inMove: boolean;
   inAtk: boolean;
   inThreat: boolean;
+  inDanger: boolean;
   crate: boolean;
   beacon: boolean;
   onTap: (p: Pos) => void;
@@ -46,6 +48,7 @@ const Tile = React.memo(function Tile({
         </View>
       )}
       {inThreat && !inMove && !inAtk && <View style={[styles.overlay, styles.threatOv]} pointerEvents="none" />}
+      {inDanger && !inMove && !inAtk && !inThreat && <View style={[styles.overlay, styles.dangerOv]} pointerEvents="none" />}
       {inMove && <View style={[styles.overlay, styles.moveOv]} pointerEvents="none" />}
       {inAtk && <View style={[styles.overlay, styles.atkOv]} pointerEvents="none" />}
     </Pressable>
@@ -108,6 +111,7 @@ export function MapGrid() {
   const moveTiles = useGame((s) => s.moveTiles);
   const attackTiles = useGame((s) => s.attackTiles);
   const threatTiles = useGame((s) => s.threatTiles);
+  const dangerTiles = useGame((s) => s.dangerTiles);
   const crates = useGame((s) => s.crates);
   const selectedUid = useGame((s) => s.selectedUid);
   const pendingMove = useGame((s) => s.pendingMove);
@@ -170,6 +174,7 @@ export function MapGrid() {
             inMove={moveTiles.has(key(p))}
             inAtk={attackTiles.has(key(p))}
             inThreat={threatTiles.has(key(p))}
+            inDanger={dangerTiles.has(key(p))}
             crate={crates.some((c) => c.pos.x === p.x && c.pos.y === p.y)}
             beacon={!!missionCh.seizePos && missionCh.seizePos.x === p.x && missionCh.seizePos.y === p.y}
             onTap={tapTile}
@@ -232,6 +237,7 @@ const styles = StyleSheet.create({
   moveOv: { backgroundColor: 'rgba(70,140,255,0.4)' },
   atkOv: { backgroundColor: 'rgba(255,60,60,0.45)' },
   threatOv: { backgroundColor: 'rgba(255,150,40,0.26)', borderWidth: 1, borderColor: 'rgba(255,150,40,0.35)' },
+  dangerOv: { backgroundColor: 'rgba(255,50,50,0.16)' },
   crateTag: { position: 'absolute', top: 3, right: 3, color: '#ffd34d', fontSize: 15, fontWeight: '900', textShadowColor: 'rgba(255,190,40,0.9)', textShadowRadius: 5 },
   beaconOv: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(255,210,60,0.16)', borderWidth: 1.5, borderColor: 'rgba(255,220,90,0.7)', alignItems: 'center', justifyContent: 'center' },
   beaconTag: { color: '#ffd34d', fontSize: 20, fontWeight: '900', textShadowColor: 'rgba(255,210,60,0.9)', textShadowRadius: 8 },

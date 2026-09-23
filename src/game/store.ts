@@ -134,6 +134,8 @@ interface Store {
   settings: GameSettings;
   deploySel: string[];
   inspectUid: string | null;
+  dangerZone: boolean;
+  dangerTiles: Set<string>;
   /** empty-tile tap -> show terrain info card */
   tileInfo: Pos | null;
   threatTiles: Set<string>;
@@ -187,6 +189,7 @@ interface Store {
   equipPart: (defId: string, partId: string) => void;
   allocPP: (defId: string, statId: PilotSkillId) => void;
   clearInspect: () => void;
+  toggleDanger: () => void;
   startMission: () => void;
   finishDialog: () => void;
   newCampaign: () => void;
@@ -322,6 +325,13 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
   for (const s of map.allySpawns ?? []) {
     const u = makeUnit(s.defId, 'player', s.pos, `a${i++}`);
     u.npc = true;
+    if (s.escort) u.escort = true;
+    if (s.armed) u.armed = true;
+    u.level = ch.lvl;
+    // allied NPC frames scale with chapter level so escorts aren't paper vs late-game enemies
+    const hpScale = s.escort ? 1 + (ch.lvl - 1) * 0.18 : 1 + (ch.lvl - 1) * 0.12;
+    u.def = { ...u.def, maxHp: Math.round(u.def.maxHp * hpScale) };
+    u.hp = u.def.maxHp;
     units.push(u);
   }
   return { map, units };
@@ -460,6 +470,8 @@ export const useGame = create<Store>((set, get) => ({
   deploySel: [],
   inspectUid: null,
   tileInfo: null,
+  dangerZone: false,
+  dangerTiles: new Set<string>(),
   threatTiles: new Set<string>(),
   kills: 0,
   ngPlus: 0,
@@ -525,7 +537,7 @@ export const useGame = create<Store>((set, get) => ({
     const ch = sideAsChapter(m);
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
     void clearBattleSave();
-    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, threatTiles: new Set(), midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
+    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
     setTimeout(() => set({ notice: null }), 2400);
     void persistBattle(get());
   },
@@ -568,6 +580,15 @@ export const useGame = create<Store>((set, get) => ({
   },
 
   clearInspect: () => set({ inspectUid: null, threatTiles: new Set() }),
+
+  // SRW danger zone: paint every tile any hostile could reach + attack this turn
+  toggleDanger: () =>
+    set((s) => {
+      if (s.dangerZone) return { dangerZone: false, dangerTiles: new Set<string>() };
+      const tiles = new Set<string>();
+      for (const e of s.units.filter((u) => u.alive && u.side === 'enemy')) for (const t of threatTilesFor(s.map, s.units, e)) tiles.add(t);
+      return { dangerZone: true, dangerTiles: tiles };
+    }),
 
   newCampaign: () => {
     const fresh = {
@@ -732,7 +753,7 @@ export const useGame = create<Store>((set, get) => ({
       zoneTiles.set(k, { pos: { x, y }, cost: 0 });
     }
     void clearBattleSave();
-    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, threatTiles: new Set(), midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
+    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
   },
   finishDialog: () => {
     set({ phase: 'player', notice: 'PLAYER PHASE — TURN 1' });
@@ -1560,6 +1581,12 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       notice = `PLAYER PHASE — TURN ${nextTurn}`;
       setTimeout(() => set({ notice: null }), 2400);
     }
+    // refresh the danger-zone overlay for the new positions while it stays enabled
+    let dangerTiles = st.dangerTiles;
+    if (st.dangerZone) {
+      dangerTiles = new Set<string>();
+      for (const e of units.filter((u) => u.alive && u.side === 'enemy')) for (const t of threatTilesFor(st.map, units, e)) dangerTiles.add(t);
+    }
     return {
       units,
       phase: end === 'defeat' ? 'defeat' : 'player',
@@ -1569,6 +1596,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       notice,
       midDialog,
       eventsFired,
+      dangerTiles,
     };
   });
   if (pendingVictory) applyVictory(set, get);

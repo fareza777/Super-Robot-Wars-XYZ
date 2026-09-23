@@ -119,6 +119,10 @@ export interface UnitState {
   elite?: boolean;
   /** NPC ally (side 'player') — uncontrollable, must be protected on protect missions */
   npc?: boolean;
+  /** the protect objective itself — mission is lost if it dies */
+  escort?: boolean;
+  /** npc ally that fights back during the enemy phase */
+  armed?: boolean;
 }
 
 export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def';
@@ -151,7 +155,7 @@ export interface MapDef {
   playerSpawns: { defId: string; pos: Pos }[];
   enemySpawns: { defId: string; pos: Pos; elite?: boolean }[];
   /** NPC ally units that spawn fixed on the map (protect objectives) */
-  allySpawns?: { defId: string; pos: Pos }[];
+  allySpawns?: { defId: string; pos: Pos; armed?: boolean; escort?: boolean }[];
   /** hidden salvage crates: a player unit moving onto the tile claims the item */
   crates?: { pos: Pos; itemId: string }[];
   objective: string;

@@ -41,7 +41,7 @@ export function SidePanel() {
   const [showRoster, setShowRoster] = React.useState(false);
   const objType = s.missionCh.objectiveType ?? 'rout';
   const unitOnBeacon = !!s.missionCh.seizePos && s.units.some((u) => u.side === 'player' && u.alive && u.pos.x === s.missionCh.seizePos!.x && u.pos.y === s.missionCh.seizePos!.y);
-  const npcU = s.units.find((u) => u.npc && u.alive);
+  const npcU = s.units.find((u) => u.escort && u.alive);
   const bossU = s.units.find((u) => u.side === 'enemy' && u.def.boss && u.alive);
 
   return (
@@ -50,11 +50,16 @@ export function SidePanel() {
         <Text style={styles.phaseTxt}>{s.phase === 'enemy' ? 'ENEMY PHASE' : 'PLAYER PHASE'}</Text>
         <Text style={styles.turnTxt}>T{s.turn}</Text>
       </View>
-      <TouchableOpacity onPress={() => setShowRoster((v) => !v)}>
-        <Text style={styles.counts}>
-          Ally {alivePlayers(s).length} · Enemy {aliveEnemies(s).length}  {showRoster ? '▲' : '▼'}
-        </Text>
-      </TouchableOpacity>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <TouchableOpacity onPress={() => setShowRoster((v) => !v)} style={{ flex: 1 }}>
+          <Text style={styles.counts}>
+            Ally {alivePlayers(s).length} · Enemy {aliveEnemies(s).length}  {showRoster ? '▲' : '▼'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={s.toggleDanger} style={[styles.dangerBtn, s.dangerZone && styles.dangerBtnOn]}>
+          <Text style={[styles.dangerTxt, s.dangerZone && { color: '#ff8080' }]}>⚠ DANGER</Text>
+        </TouchableOpacity>
+      </View>
       {objType === 'protect' && npcU && (
         <View style={styles.objCard}>
           <Text style={styles.objTxt}>🛡 PROTECT CONVOY · T{s.turn}/{s.missionCh.protectTurns ?? 8}</Text>
@@ -341,13 +346,13 @@ export function SidePanel() {
         )}
 
         {!s.menuForUid && !s.pendingWeapon && !s.spiritForUid && !inspect && (
-          <View style={styles.logBox}>
+          <ScrollView style={styles.logBox} nestedScrollEnabled>
             {s.log.map((l, i) => (
               <Text key={i} style={styles.logLine}>
                 {l}
               </Text>
             ))}
-          </View>
+          </ScrollView>
         )}
       </ScrollView>
 
@@ -398,7 +403,10 @@ const styles = StyleSheet.create({
   tgtHitBox: { alignItems: 'flex-end' },
   tgtHit: { fontSize: 15, fontWeight: '900' },
   tgtDmg: { color: '#9fb0d0', fontSize: 8.5, fontWeight: '700' },
-  logBox: { marginTop: 7, backgroundColor: '#0c0e16', borderRadius: 6, padding: 6, minHeight: 60 },
+  logBox: { marginTop: 7, backgroundColor: '#0c0e16', borderRadius: 6, padding: 6, minHeight: 60, maxHeight: 110 },
+  dangerBtn: { borderWidth: 1, borderColor: '#ff5a5a55', borderRadius: 5, paddingHorizontal: 6, paddingVertical: 2, marginLeft: 6 },
+  dangerBtnOn: { borderColor: '#ff5a5a', backgroundColor: '#3a1010' },
+  dangerTxt: { color: '#8a90a0', fontSize: 8, fontWeight: '800', letterSpacing: 0.5 },
   logLine: { color: '#9fb0d0', fontSize: 9, marginBottom: 2 },
   endTurn: { marginTop: 6, borderWidth: 1, borderColor: '#ffd34d', borderRadius: 6, paddingVertical: 7, alignItems: 'center', backgroundColor: '#26251a' },
   endTurnReady: { borderWidth: 2, backgroundColor: 'rgba(255,211,77,0.22)' },

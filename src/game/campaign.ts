@@ -428,8 +428,8 @@ export function genMap(ch: ChapterDef): MapDef {
         }
       }
   }
-  // protect chapters station the convoy near the deployment zone
-  let allySpawns: { defId: string; pos: Pos }[] | undefined;
+  // protect chapters station the convoy near the deployment zone, guarded by armed militia
+  let allySpawns: { defId: string; pos: Pos; armed?: boolean; escort?: boolean }[] | undefined;
   if (ch.objectiveType === 'protect') {
     outer: for (let y = 3; y <= 6; y++)
       for (let x = 0; x <= 2; x++) {
@@ -437,7 +437,25 @@ export function genMap(ch: ChapterDef): MapDef {
         const ti = TERRAIN_INFO[terrain2[y][x]];
         if (!used.has(k) && ti.passable.land && !ti.hpDmg) {
           used.add(k);
-          allySpawns = [{ defId: 'arklander', pos: { x, y } }];
+          allySpawns = [{ defId: 'arklander', pos: { x, y }, escort: true }];
+          // armed escort wing: up to 2 militia on free passable tiles beside the convoy
+          const candidates = [
+            { x: x + 1, y },
+            { x: x + 1, y: y + 1 },
+            { x, y: y + 1 },
+            { x: x - 1, y: y + 1 },
+            { x: x + 1, y: y - 1 },
+            { x, y: y - 1 },
+          ];
+          for (const c of candidates) {
+            if ((allySpawns.length ?? 0) >= 3) break;
+            const ck = `${c.x},${c.y}`;
+            if (c.x < 0 || c.y < 0 || c.x >= 14 || c.y >= 10 || used.has(ck)) continue;
+            const ct = TERRAIN_INFO[terrain2[c.y][c.x]];
+            if (!ct.passable.land || ct.hpDmg) continue;
+            used.add(ck);
+            allySpawns.push({ defId: 'arkmilitia', pos: c, armed: true });
+          }
           break outer;
         }
       }

@@ -62,6 +62,7 @@ export const WEAPONS = {
   thermoCharge: W({ id: 'thermo_charge', name: 'Thermobaric Charge', kind: 'missile', power: 3600, rangeMin: 1, rangeMax: 3, enCost: 0, ammo: 4, hitMod: 0, postMove: false, animSeed: 18, willReq: 110 }),
   railVolley: W({ id: 'rail_volley', name: 'Railgun Volley', kind: 'gun', power: 2000, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 12, hitMod: 15, postMove: true, animSeed: 19 }),
   flareField: W({ id: 'flare_field', name: 'Flare Field', kind: 'funnel', power: 2400, rangeMin: 1, rangeMax: 4, enCost: 20, ammo: null, hitMod: 15, postMove: true, animSeed: 20 }),
+  militiaRifle: W({ id: 'militia_rifle', name: 'Defense Rifle', kind: 'gun', power: 1500, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 12, hitMod: 8, postMove: true, animSeed: 21 }),
 };
 
 // ---------- Pilots ----------
@@ -76,6 +77,7 @@ export const PILOTS = {
   karg: P({ name: 'Col. Karg Draven', callsign: 'BOSS', melee: 75, ranged: 75, defense: 70, evade: 65, maxSp: 70, spirits: ['valor', 'strike'], faceColor: '#d0a0ff' }),
   grunt: P({ name: 'Soldier', callsign: 'GR', melee: 56, ranged: 56, defense: 52, evade: 52, maxSp: 30, spirits: [], faceColor: '#bbbbbb' }),
   civ: P({ name: 'Convoy Crew', callsign: 'CVY', melee: 40, ranged: 40, defense: 40, evade: 40, maxSp: 0, spirits: [], faceColor: '#c8b090' }),
+  militia: P({ name: 'Ark Militia', callsign: 'DEF', melee: 55, ranged: 60, defense: 58, evade: 55, maxSp: 0, spirits: [], faceColor: '#8fb8dd' }),
 };
 
 // ---------- Units (original mecha, 3 factions X / Y / Z) ----------
@@ -92,6 +94,7 @@ export const UNITS: Record<string, UnitDef> = {
   zolda: U({ id: 'zolda', name: 'Zolda', title: 'Imperial Mass Unit', color: '#6b6f7a', accent: '#c9ccd6', maxHp: 3800, maxEn: 100, armor: 850, mobility: 88, moveRange: 5, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod], pilot: PILOTS.grunt }),
   zoldaAir: U({ id: 'zolda_air', name: 'Zolda Flyer', title: 'Imperial Air Unit', color: '#7a6b6f', accent: '#d6c9cc', maxHp: 3400, maxEn: 110, armor: 700, mobility: 104, moveRange: 7, moveType: 'air', weapons: [WEAPONS.missilePods, WEAPONS.vulcan], pilot: PILOTS.grunt }),
   kargan: U({ id: 'kargan', name: 'Kargan Rex', title: 'Imperial Ace', color: '#8a2fbe', accent: '#e0b3ff', maxHp: 8600, maxEn: 170, armor: 1250, mobility: 124, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.funnelArray, WEAPONS.chestBlaster], pilot: PILOTS.karg, boss: true, level: 5 }),
+  arkmilitia: U({ id: 'arkmilitia', name: 'Ark Militia', title: 'Colony Defender', color: '#3e4a5a', accent: '#8fb8dd', maxHp: 3800, maxEn: 80, armor: 420, mobility: 62, moveRange: 4, moveType: 'land', weapons: [WEAPONS.militiaRifle], pilot: PILOTS.militia }),
 };
 
 // ---------- Terrain table ----------

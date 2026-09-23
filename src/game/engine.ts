@@ -459,11 +459,14 @@ export function planEnemyActions(state: GameState): AiPlan[] {
   for (const e of enemies) {
     // bosses hold position until the map's hold turn (commanding from the back line)
     const holding = !!e.def.boss && state.turn < (map.bossHoldUntil ?? 0);
+    // seize missions: defenders already near the beacon stay to guard it
+    const bp = map.beaconPos;
+    const guarding = !!bp && dist(e.pos, bp) <= 4;
     const moveTiles = [...movementRange(map, units, e).values()].map((v) => v.pos).filter((p) => {
       const occ = unitAt(units, p);
       return (!occ || occ.uid === e.uid) && !claimed.has(key(p));
     });
-    const tiles = holding ? moveTiles.filter((p) => same(p, e.pos)) : moveTiles;
+    const tiles = holding ? moveTiles.filter((p) => same(p, e.pos)) : guarding ? moveTiles.filter((p) => dist(p, bp!) <= 3) : moveTiles;
     let best: { pos: Pos; target: UnitState; weapon: WeaponDef; score: number } | null = null;
     const willMove = (p: Pos) => !same(p, e.pos);
     for (const tile of tiles) {
@@ -472,7 +475,7 @@ export function planEnemyActions(state: GameState): AiPlan[] {
           const hc = hitChance(e, p, w, map);
           const dmg = damageOf(e, p, w, map, false);
           // convoy priority: protect-mission NPCs are the AI's preferred prey
-          const score = dmg * (hc / 100) + (p.hp - dmg <= 0 ? 5000 : 0) + (p.npc ? 1500 : 0) + w.power * 0.01;
+          const score = dmg * (hc / 100) + (p.hp - dmg <= 0 ? 5000 : 0) + (p.escort ? 800 : 0) + w.power * 0.01;
           if (!best || score > best.score) best = { pos: tile, target: p, weapon: w, score };
         }
       }
@@ -482,11 +485,43 @@ export function planEnemyActions(state: GameState): AiPlan[] {
       plans.push({ unit: e, moveTo: best.pos, target: best.target, weapon: best.weapon });
     } else {
       // advance toward nearest player — NPC convoy draws attackers like a magnet
-      const nearest = players.slice().sort((a, b) => dist(e.pos, a.pos) - (a.npc ? 3 : 0) - (dist(e.pos, b.pos) - (b.npc ? 3 : 0)))[0];
+      const nearest = players.slice().sort((a, b) => dist(e.pos, a.pos) - (a.escort ? 1.5 : 0) - (dist(e.pos, b.pos) - (b.escort ? 1.5 : 0)))[0];
       if (!nearest) continue;
-      const target = moveTiles.slice().sort((a, b) => dist(a, nearest.pos) - dist(b, nearest.pos))[0] ?? e.pos;
+      // guards drift back toward the beacon; everyone else chases the nearest player
+      const anchor = guarding ? bp! : nearest.pos;
+      const target = moveTiles.slice().sort((a, b) => dist(a, anchor) - dist(b, anchor))[0] ?? e.pos;
       claimed.add(key(target));
       plans.push({ unit: e, moveTo: target });
+    }
+  }
+  // armed npc allies (militia) fight back on the enemy phase — same scoring, aimed at hostiles
+  for (const a of units.filter((u) => u.alive && u.armed && !u.acted && usableWeapons(u).length > 0)) {
+    const moveTiles = [...movementRange(map, units, a).values()].map((v) => v.pos).filter((p) => {
+      const occ = unitAt(units, p);
+      return (!occ || occ.uid === a.uid) && !claimed.has(key(p));
+    });
+    let best: { pos: Pos; target: UnitState; weapon: WeaponDef; score: number } | null = null;
+    const willMove = (p: Pos) => !same(p, a.pos);
+    for (const tile of moveTiles) {
+      for (const e of enemies) {
+        for (const w of weaponsAgainst(a, tile, e, willMove(tile))) {
+          const hc = hitChance(a, e, w, map);
+          const dmg = damageOf(a, e, w, map, false);
+          const score = dmg * (hc / 100) + (e.hp - dmg <= 0 ? 5000 : 0) + w.power * 0.01;
+          if (!best || score > best.score) best = { pos: tile, target: e, weapon: w, score };
+        }
+      }
+    }
+    if (best) {
+      claimed.add(key(best.pos));
+      plans.push({ unit: a, moveTo: best.pos, target: best.target, weapon: best.weapon });
+    } else {
+      // escorts hold formation near the convoy rather than charging off
+      const esc = players.find((p) => p.escort && p.alive);
+      const anchor = esc ? esc.pos : a.pos;
+      const target = moveTiles.slice().sort((x, y) => dist(x, anchor) - dist(y, anchor))[0] ?? a.pos;
+      claimed.add(key(target));
+      plans.push({ unit: a, moveTo: target });
     }
   }
   return plans;
@@ -554,8 +589,8 @@ export function checkEnd(units: UnitState[], obj?: EndObjective | null, turn?: n
     return (turn ?? 0) > (obj?.surviveTurns ?? 8) ? 'victory' : null;
   }
   if (type === 'protect') {
-    // NPC ally destroyed is an instant loss; outlasting the turn limit (or routing the ambush) wins
-    if (!units.some((u) => u.alive && u.npc)) return 'defeat';
+    // the escorted unit dying is an instant loss; armed escorts may fall without failing the mission
+    if (!units.some((u) => u.alive && u.escort)) return 'defeat';
     if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
     return (turn ?? 0) > (obj?.protectTurns ?? 8) ? 'victory' : null;
   }

@@ -43,6 +43,7 @@ export const MECH_ART: Record<string, number> = {
   lancer: require('../assets/art/mech2_lancer.jpg'),
   bulwark: require('../assets/art/mech2_bulwark.jpg'),
   arklander: require('../assets/art/mech2_bulwark.jpg'),
+  arkmilitia: require('../assets/art/mech2_warden.jpg'),
 };
 
 // Keyed by terrain id — generated top-down map tiles
@@ -84,6 +85,7 @@ export const PILOT_ART: Record<string, number> = {
   lancer: require('../assets/art/face_grunt.jpg'),
   bulwark: require('../assets/art/face_grunt.jpg'),
   arklander: require('../assets/art/npcface_mechanic.jpg'),
+  arkmilitia: require('../assets/art/npcface_mechanic.jpg'),
 };
 
 // Bond event backdrops — romance events get the CG, friendship stays on mess/hangar
@@ -241,6 +243,7 @@ export const UNIT_DEFEAT_VOICE: Record<string, AudioKey> = {
   lancer: 'die_grunt',
   bulwark: 'die_grunt',
   arklander: 'die_grunt',
+  arkmilitia: 'die_grunt',
 };
 
 export const DEFEAT_BARK: Record<string, string> = {
