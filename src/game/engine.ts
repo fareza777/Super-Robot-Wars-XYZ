@@ -28,7 +28,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
@@ -694,6 +694,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break;
     case 'hymn':
       break; // squad anthem — the store flags every ally
+    case 'emp':
+      break; // the stunned enemy is marked by the store pass
     case 'expose':
       break; // enemies in radius are marked by the store pass
     case 'overdrive':
@@ -1037,7 +1039,7 @@ function timedOut(obj: EndObjective | null | undefined, turn?: number): boolean 
 export function phaseRecovery(u: UnitState, map: MapDef): { hpGain: number; enGain: number; hpLoss: number } {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
   const enGain = Math.min(u.def.maxEn - u.en, 5 + (t.enRegen ?? 0) + partBonus(u, 'enRegen'));
-  const hpGain = Math.min(u.def.maxHp - u.hp, Math.round(u.def.maxHp * (t.hpRegen ?? 0)) + Math.round(u.def.maxHp * (partBonus(u, 'hpRegen') / 100)));
+  const hpGain = Math.min(u.def.maxHp - u.hp, Math.round(u.def.maxHp * (t.hpRegen ?? 0)) + Math.round(u.def.maxHp * (partBonus(u, 'hpRegen') / 100)) + Math.round(u.def.maxHp * 0.01 * (u.skills?.regen ?? 0)));
   const hpLoss = Math.min(u.hp - 1, Math.round(u.def.maxHp * (t.hpDmg ?? 0))); // terrain can't kill — leaves 1 HP
   u.en += enGain;
   u.hp = Math.max(1, u.hp + hpGain - Math.max(0, hpLoss));

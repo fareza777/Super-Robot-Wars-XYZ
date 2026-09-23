@@ -388,7 +388,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
       u.level = prog.level;
       u.exp = prog.exp;
       u.pp = prog.pp ?? 0;
-      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, ...(prog.skills ?? {}) };
+      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, ...(prog.skills ?? {}) };
       if ((prog.kills ?? 0) >= ACE_KILLS) u.will = 130; // ace pilots start hot
       if ((prog.kills ?? 0) >= ACE_MASTER_KILLS) u.aceMastery = true;
       // career-kill milestones: extra spirits the pilot learned along the war
@@ -969,7 +969,7 @@ export const useGame = create<Store>((set, get) => ({
     const s = get();
     const prog = s.pilotProg[defId];
     if (!prog || (prog.pp ?? 0) < 1) return;
-    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, ...(prog.skills ?? {}) };
+    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, ...(prog.skills ?? {}) };
     if (skills[statId] >= MAX_PILOT_SKILL) return;
     skills[statId] += 1;
     const pilotProg = { ...s.pilotProg, [defId]: { ...prog, pp: (prog.pp ?? 0) - 1, skills } };
@@ -1874,6 +1874,10 @@ export const useGame = create<Store>((set, get) => ({
       set({ spiritForUid: null, log: push(s.log, 'Wish: no drained ally within 3 tiles') });
       return;
     }
+    if (sp === 'emp' && !s.units.some((u) => u.alive && u.side === 'enemy' && dist(u.pos, target.pos) <= 4)) {
+      set({ spiritForUid: null, log: push(s.log, 'EMP Burst: no enemy within 4 tiles') });
+      return;
+    }
     if (sp === 'gravity' && !s.units.some((u) => u.alive && u.side === 'enemy' && dist(u.pos, target.pos) <= 3)) {
       set({ spiritForUid: null, log: push(s.log, 'Gravity Well: no enemy within 3 tiles') });
       return;
@@ -1994,6 +1998,18 @@ export const useGame = create<Store>((set, get) => ({
       }
       decoyLog = placed ? 'Holoreplica deployed — hostiles will chase the phantom' : 'No open tile for the holoreplica';
     }
+    // emp — the nearest hostile within 4 tiles takes a stasis lock
+    let empLog: string | null = null;
+    if (sp === 'emp') {
+      const src = units.find((x) => x.uid === uid)!;
+      const tgt = units
+        .filter((u2) => u2.alive && u2.side === 'enemy' && dist(u2.pos, src.pos) <= 4)
+        .sort((a2, b2) => dist(a2.pos, src.pos) - dist(b2.pos, src.pos))[0];
+      if (tgt) {
+        tgt.statuses = [...(tgt.statuses ?? []).filter((x) => x.id !== 'stun'), { id: 'stun', turns: 1 }];
+        empLog = `\u26A1 EMP BURST — ${tgt.def.name}'s systems seize up`;
+      }
+    }
     // hymn — squad anthem: every living ally gains +15 hit & +15 evade until end of enemy phase
     let hymnLog: string | null = null;
     if (sp === 'hymn') {
@@ -2012,7 +2028,7 @@ export const useGame = create<Store>((set, get) => ({
       units,
       spiritForUid: null,
       usedSupport: true,
-      log: trustLog || purgeLog || cheerLog || wishLog || gravityLog || decoyLog || hymnLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), [trustLog, purgeLog, cheerLog, wishLog, gravityLog, decoyLog, hymnLog].filter(Boolean).join(' · ')) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
+      log: trustLog || purgeLog || cheerLog || wishLog || gravityLog || decoyLog || hymnLog || empLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), [trustLog, purgeLog, cheerLog, wishLog, gravityLog, decoyLog, hymnLog, empLog].filter(Boolean).join(' · ')) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
       moveTiles: s.menuForUid ? new Map() : tiles,
     });
   },
@@ -2436,6 +2452,20 @@ async function runEnemyPhase(set: SetFn, get: Get) {
     const remaining = plans.filter((pl) => !s.units.find((u) => u.uid === pl.unit.uid)?.acted);
     const plan = remaining[0];
     if (!plan) break;
+
+    // stasis lock / EMP burst — a stunned frame loses its whole activation
+    {
+      const cur0 = get();
+      const frozen = cur0.units.find((u) => u.uid === plan.unit.uid);
+      if (frozen?.statuses?.some((x) => x.id === 'stun')) {
+        set((st) => ({
+          units: st.units.map((u) => (u.uid === frozen.uid ? { ...u, acted: true, moved: true } : u)),
+          log: push(st.log, `\u23F8 ${frozen.def.name} is STUNNED — its systems are locked`),
+        }));
+        await sleep(300);
+        continue;
+      }
+    }
 
     // boss self-cast + phase-2 transformation: below 50% HP the boss snaps once per
     // battle — Grit spirit, permanent +300 armor / +15% damage / full Will, 15% heal
