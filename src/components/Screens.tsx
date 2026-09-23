@@ -111,6 +111,8 @@ export function BriefingScreen() {
   );
 }
 
+const RANK_COLOR: Record<string, string> = { S: '#ffd34d', A: '#6fe0ff', B: '#b8c4dc', C: '#8a8fa8' };
+
 export function EndScreen({ victory }: { victory: boolean }) {
   const gotoHq = useGame((s) => s.gotoHq);
   const gotoCredits = useGame((s) => s.gotoCredits);
@@ -141,9 +143,13 @@ export function EndScreen({ victory }: { victory: boolean }) {
           <Text style={styles.resultsRow}>ENEMY UNITS DESTROYED  {kills}</Text>
           <Text style={styles.resultsRow}>CREDITS EARNED  +{lastReward}</Text>
           {lastRank && (
-            <Text style={[styles.resultsMastery, { color: lastRank === 'S' ? '#ffd34d' : lastRank === 'A' ? '#6fe0ff' : '#c8d4f0' }]}>
-              BATTLE RANK — {lastRank === 'S' ? '★ S' : lastRank}
-            </Text>
+            <View style={styles.rankRow}>
+              <Text style={styles.rankLbl}>BATTLE RANK</Text>
+              <View style={[styles.rankBadge, { borderColor: RANK_COLOR[lastRank], shadowColor: RANK_COLOR[lastRank] }]}>
+                <Text style={[styles.rankLetter, { color: RANK_COLOR[lastRank] }]}>{lastRank}</Text>
+              </View>
+              <Text style={styles.rankHint}>{lastRank === 'S' ? 'FLAWLESS' : lastRank === 'A' ? 'EXCELLENT' : lastRank === 'B' ? 'CLEARED' : 'GRINDING'}</Text>
+            </View>
           )}
           {lastMastery && <Text style={styles.resultsMastery}>★ MASTERY — {lastMastery}</Text>}
           {aces.slice(0, 3).map((u) => (
@@ -238,6 +244,11 @@ const styles = StyleSheet.create({
   squadUnit: { color: '#9fb0d0', fontSize: 9, marginTop: 1 },
   resultsBox: { backgroundColor: 'rgba(14,17,28,0.88)', borderWidth: 1, borderColor: '#ffd34d', borderRadius: 12, padding: 12, marginTop: 12, minWidth: 340 },
   resultsRow: { color: '#e6ecff', fontSize: 12.5, fontWeight: '800', letterSpacing: 1.5, marginTop: 4 },
+  rankRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 },
+  rankLbl: { color: '#9fb0d0', fontSize: 12, fontWeight: '800', letterSpacing: 2 },
+  rankBadge: { width: 52, height: 52, borderRadius: 26, borderWidth: 3, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(8,10,22,0.85)', shadowOpacity: 0.9, shadowRadius: 12, elevation: 6 },
+  rankLetter: { fontSize: 30, fontWeight: '900', fontStyle: 'italic' },
+  rankHint: { color: '#7f95c0', fontSize: 10, fontWeight: '800', letterSpacing: 2 },
   resultsMastery: { color: '#ffd34d', fontSize: 13, fontWeight: '800', letterSpacing: 1.5, marginTop: 8, textAlign: 'center' },
   resultsAce: { color: '#ff9dbb', fontSize: 11, fontWeight: '700', marginTop: 4 },
   resultsNg: { color: '#ffd34d', fontSize: 12, fontWeight: '900', marginTop: 8, letterSpacing: 1 },

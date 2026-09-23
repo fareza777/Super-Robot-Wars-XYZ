@@ -27,6 +27,7 @@ const Tile = React.memo(function Tile({
   reach,
   hazard,
   onTap,
+  rp,
 }: {
   p: Pos;
   tw: number;
@@ -41,6 +42,8 @@ const Tile = React.memo(function Tile({
   reach: boolean;
   hazard: boolean;
   onTap: (p: Pos) => void;
+  /** shared range-overlay shimmer — one Animated.Value for the whole board */
+  rp: Animated.Value;
 }) {
   return (
     <Pressable onPress={() => onTap(p)} style={[styles.tile, { left: p.x * tw, top: p.y * th, width: tw, height: th }]}>
@@ -64,8 +67,8 @@ const Tile = React.memo(function Tile({
       )}
       {inThreat && !inMove && !inAtk && <View style={[styles.overlay, styles.threatOv]} pointerEvents="none" />}
       {inDanger && !inMove && !inAtk && !inThreat && <View style={[styles.overlay, styles.dangerOv]} pointerEvents="none" />}
-      {inMove && <View style={[styles.overlay, styles.moveOv]} pointerEvents="none" />}
-      {inAtk && <View style={[styles.overlay, styles.atkOv]} pointerEvents="none" />}
+      {inMove && <Animated.View style={[styles.overlay, styles.moveOv, { opacity: rp.interpolate({ inputRange: [0, 1], outputRange: [0.7, 1.18] }) }]} pointerEvents="none" />}
+      {inAtk && <Animated.View style={[styles.overlay, styles.atkOv, { opacity: rp.interpolate({ inputRange: [0, 1], outputRange: [0.75, 1.25] }) }]} pointerEvents="none" />}
     </Pressable>
   );
 });
@@ -137,6 +140,38 @@ function spiritBadges(u: UnitState): string {
   return b;
 }
 
+/** Pulsing corner-bracket reticle over the selected unit — SRW cursor feel. */
+function SelReticle({ tw, th }: { tw: number; th: number }) {
+  const v = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(v, { toValue: 1, duration: 560, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(v, { toValue: 0, duration: 560, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, []);
+  const op = v.interpolate({ inputRange: [0, 1], outputRange: [0.55, 1] });
+  const sc = v.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1.03] });
+  const c = 'rgba(255,222,110,0.95)';
+  const B = Math.min(tw, th) * 0.16;
+  const corners = [
+    { left: 0, top: 0, borderLeftWidth: 3, borderTopWidth: 3 },
+    { right: 0, top: 0, borderRightWidth: 3, borderTopWidth: 3 },
+    { left: 0, bottom: 0, borderLeftWidth: 3, borderBottomWidth: 3 },
+    { right: 0, bottom: 0, borderRightWidth: 3, borderBottomWidth: 3 },
+  ];
+  return (
+    <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity: op, transform: [{ scale: sc }] }]}>
+      {corners.map((cst, i) => (
+        <View key={i} style={[{ position: 'absolute', width: B, height: B, borderColor: c }, cst]} />
+      ))}
+    </Animated.View>
+  );
+}
+
 export function MapGrid() {
   const units = useGame((s) => s.units);
   const map = useGame((s) => s.map);
@@ -196,6 +231,20 @@ export function MapGrid() {
   }, []);
 
   const ghost = pendingMove && selectedUid ? units.find((u) => u.uid === selectedUid) : undefined;
+  const selected = selectedUid ? units.find((u) => u.uid === selectedUid && u.alive) : undefined;
+
+  // shared shimmer value driving every range overlay — one loop for the board
+  const rp = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(rp, { toValue: 1, duration: 640, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(rp, { toValue: 0, duration: 640, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, []);
 
   return (
     <View style={[styles.viewPort, { width: vw, height: vh }]} {...responder.panHandlers}>
@@ -216,8 +265,14 @@ export function MapGrid() {
             reach={!!missionCh.reachPos && missionCh.reachPos.x === p.x && missionCh.reachPos.y === p.y}
             hazard={hazardWarn.some((h) => h.x === p.x && h.y === p.y)}
             onTap={tapTile}
+            rp={rp}
           />
         ))}
+        {selected && (
+          <View pointerEvents="none" style={[styles.unitWrap, { left: selected.pos.x * tw, top: selected.pos.y * th, width: tw, height: th }]}>
+            <SelReticle tw={tw} th={th} />
+          </View>
+        )}
         {units
           .filter((u) => u.alive)
           .map((u) => {

@@ -18,6 +18,9 @@ import { AttackResult, CounterResult, UnitState, WeaponDef } from '../game/types
 const DUR_BASE = { intro: 820, banner: 800, attack: 2100, impact: 1700, outro: 700 };
 const DUR = { ...DUR_BASE };
 
+/** Impact tint per weapon kind — flashes and sparks take the weapon's element color. */
+const KIND_FLASH: Record<string, string> = { melee: '#aef3ff', beam: '#7ee7ff', missile: '#ffb84d', gun: '#ffe28a', funnel: '#d0a0ff' };
+
 /** Scale every scene duration. Runs synchronously in render so child anims read scaled values. */
 function scaleDur(mult: number) {
   for (const k of Object.keys(DUR) as (keyof typeof DUR)[]) DUR[k] = Math.round(DUR_BASE[k] / mult);
@@ -45,6 +48,9 @@ export function BattleScene() {
   const attDodge = useRef(new Animated.Value(0)).current;
   const defDodge = useRef(new Animated.Value(0)).current;
   const shieldAnim = useRef(new Animated.Value(0)).current;
+  const screenFlash = useRef(new Animated.Value(0)).current; // full-screen hit flash
+  const defKnock = useRef(new Animated.Value(0)).current; // defender knocked back on hit
+  const attKnock = useRef(new Animated.Value(0)).current; // attacker knocked back on counter hit
 
   const atk = battle?.attacker;
   const def = battle?.defender;
@@ -63,6 +69,9 @@ export function BattleScene() {
     attDodge.setValue(0);
     defDodge.setValue(0);
     shieldAnim.setValue(0);
+    screenFlash.setValue(0);
+    defKnock.setValue(0);
+    attKnock.setValue(0);
     Animated.timing(fade, { toValue: 1, duration: 400, useNativeDriver: true }).start();
     bgZoom.setValue(0);
     Animated.timing(bgZoom, { toValue: 1, duration: 24000, easing: Easing.linear, useNativeDriver: true }).start();
@@ -125,6 +134,8 @@ export function BattleScene() {
       if (r.hit) {
         play(r.destroyed ? 'sfx_explosion' : 'sfx_hit');
         pulse(defFlash, shakeX);
+        flashScreen(screenFlash, r.destroyed);
+        knockback(defKnock);
         if (r.reaction === 'defend') {
           Animated.sequence([
             Animated.timing(shieldAnim, { toValue: 1, duration: 280, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
@@ -149,6 +160,8 @@ export function BattleScene() {
       if (c.hit) {
         play(c.destroyed ? 'sfx_explosion' : 'sfx_hit');
         pulse(attFlash, shakeX);
+        flashScreen(screenFlash, c.destroyed);
+        knockback(attKnock);
         if (c.destroyed) {
           Animated.timing(attFall, { toValue: 1, duration: 1100, delay: 420, easing: Easing.in(Easing.cubic), useNativeDriver: true }).start();
           const dv = UNIT_DEFEAT_VOICE[battle.attacker.def.id];
@@ -195,8 +208,11 @@ export function BattleScene() {
               transform: [
                 {
                   translateX: Animated.add(
-                    Animated.add(attEnter.interpolate({ inputRange: [0, 1], outputRange: [-PW * 1.2, 0] }), attLunge.interpolate({ inputRange: [0, 1], outputRange: [0, width * 0.07] })),
-                    attDodge.interpolate({ inputRange: [0, 1], outputRange: [0, -width * 0.05] }),
+                    Animated.add(
+                      Animated.add(attEnter.interpolate({ inputRange: [0, 1], outputRange: [-PW * 1.2, 0] }), attLunge.interpolate({ inputRange: [0, 1], outputRange: [0, width * 0.07] })),
+                      attDodge.interpolate({ inputRange: [0, 1], outputRange: [0, -width * 0.05] }),
+                    ),
+                    attKnock.interpolate({ inputRange: [0, 1], outputRange: [0, -width * 0.018] }),
                   ),
                 },
                 { translateY: attFall.interpolate({ inputRange: [0, 1], outputRange: [0, 160] }) },
@@ -207,7 +223,7 @@ export function BattleScene() {
         >
           <Image cachePolicy="memory" source={MECH_ART[atk.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" contentPosition="top" />
           <LinearGradient colors={['transparent', 'rgba(0,0,0,0.55)']} style={StyleSheet.absoluteFill} />
-          <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#fff', opacity: attFlash }]} />
+          <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: KIND_FLASH[battle.result.counter?.weapon.kind ?? battle.weapon.kind] ?? '#fff', opacity: attFlash }]} />
         </Animated.View>
 
         {/* defender mech panel */}
@@ -224,8 +240,11 @@ export function BattleScene() {
               transform: [
                 {
                   translateX: Animated.add(
-                    Animated.add(defEnter.interpolate({ inputRange: [0, 1], outputRange: [PW * 1.2, 0] }), defLunge.interpolate({ inputRange: [0, 1], outputRange: [0, -width * 0.07] })),
-                    defDodge.interpolate({ inputRange: [0, 1], outputRange: [0, width * 0.05] }),
+                    Animated.add(
+                      Animated.add(defEnter.interpolate({ inputRange: [0, 1], outputRange: [PW * 1.2, 0] }), defLunge.interpolate({ inputRange: [0, 1], outputRange: [0, -width * 0.07] })),
+                      defDodge.interpolate({ inputRange: [0, 1], outputRange: [0, width * 0.05] }),
+                    ),
+                    defKnock.interpolate({ inputRange: [0, 1], outputRange: [0, width * 0.018] }),
                   ),
                 },
                 { translateY: defFall.interpolate({ inputRange: [0, 1], outputRange: [0, 160] }) },
@@ -236,7 +255,7 @@ export function BattleScene() {
         >
           <Image cachePolicy="memory" source={MECH_ART[def.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" contentPosition="top" />
           <LinearGradient colors={['transparent', 'rgba(0,0,0,0.55)']} style={StyleSheet.absoluteFill} />
-          <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#fff', opacity: defFlash }]} />
+          <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: KIND_FLASH[battle.weapon.kind] ?? '#fff', opacity: defFlash }]} />
           {/* DEFEND pick — energy shield flashes over the defender's hull on impact */}
           {battle.result.reaction === 'defend' && (
             <View pointerEvents="none" style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
@@ -313,9 +332,19 @@ export function BattleScene() {
       {stage === 1 && <Banner text={battle.weapon.name} color="#ffd34d" />}
       {stage === 4 && !!battle.result.counter && <Banner text={battle.result.counter!.weapon.name} color="#ff8a5c" />}
 
+      {/* weapon-tinted full-screen flash on every impact */}
+      {stage >= 3 && (
+        <Animated.View
+          pointerEvents="none"
+          style={[StyleSheet.absoluteFill, { backgroundColor: stage === 5 ? KIND_FLASH[battle.result.counter?.weapon.kind ?? ''] ?? '#fff' : KIND_FLASH[battle.weapon.kind] ?? '#fff', opacity: screenFlash, zIndex: 55 }]}
+        />
+      )}
+
       {/* impact feedback */}
-      {stage === 3 && battle.result.hit && battle.result.destroyed && <Explosion right w={width} h={height} />}
-      {stage === 5 && battle.result.counter?.hit && battle.result.counter.destroyed && <Explosion w={width} h={height} />}
+      {stage === 3 && battle.result.hit && battle.result.destroyed && <Explosion right w={width} h={height} color={KIND_FLASH[battle.weapon.kind]} />}
+      {stage === 3 && battle.result.hit && !battle.result.destroyed && <SparkBurst right w={width} h={height} color={KIND_FLASH[battle.weapon.kind]} />}
+      {stage === 5 && battle.result.counter?.hit && battle.result.counter.destroyed && <Explosion w={width} h={height} color={KIND_FLASH[battle.result.counter.weapon.kind]} />}
+      {stage === 5 && battle.result.counter?.hit && !battle.result.counter.destroyed && <SparkBurst w={width} h={height} color={KIND_FLASH[battle.result.counter.weapon.kind]} />}
 
       {/* footer */}
       {!battle.needsReaction && (
@@ -330,6 +359,77 @@ export function BattleScene() {
       </View>
       </Animated.View>
     </Pressable>
+  );
+}
+
+/** Whole-screen hit flash — quick double strobe, brighter on a kill. */
+function flashScreen(v: Animated.Value, big: boolean) {
+  v.setValue(0);
+  Animated.sequence([
+    Animated.timing(v, { toValue: big ? 0.5 : 0.3, duration: 50, useNativeDriver: true }),
+    Animated.timing(v, { toValue: 0, duration: big ? 320 : 210, useNativeDriver: true }),
+  ]).start();
+}
+
+/** Small knockback jolt on the struck mech — snap out, ease back. */
+function knockback(v: Animated.Value) {
+  v.setValue(0);
+  Animated.sequence([
+    Animated.timing(v, { toValue: 1, duration: 55, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+    Animated.timing(v, { toValue: 0, duration: 420, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+  ]).start();
+}
+
+/** Compact spark burst for ordinary (non-kill) hits — one ring + six embers. */
+function SparkBurst({ w, h, right, color }: { w: number; h: number; right?: boolean; color?: string }) {
+  const c = color ?? '#ffd9a0';
+  const ring = useRef(new Animated.Value(0)).current;
+  const parts = useRef(
+    Array.from({ length: 6 }, (_, i) => ({
+      v: new Animated.Value(0),
+      dx: Math.cos((i / 6) * Math.PI * 2) * (26 + (i % 3) * 12),
+      dy: Math.sin((i / 6) * Math.PI * 2) * (20 + (i % 2) * 10),
+    })),
+  ).current;
+  useEffect(() => {
+    Animated.timing(ring, { toValue: 1, duration: 380, useNativeDriver: true }).start();
+    parts.forEach((p) => Animated.timing(p.v, { toValue: 1, duration: 340, easing: Easing.out(Easing.quad), useNativeDriver: true }).start());
+  }, []);
+  const cx = right ? w * 0.74 : w * 0.26;
+  const cy = right ? h * 0.38 : h * 0.64;
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <Animated.View
+        style={{
+          position: 'absolute',
+          left: cx - 22,
+          top: cy - 22,
+          width: 44,
+          height: 44,
+          borderRadius: 22,
+          borderWidth: 3,
+          borderColor: c,
+          opacity: ring.interpolate({ inputRange: [0, 1], outputRange: [0.85, 0] }),
+          transform: [{ scale: ring.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1.7] }) }],
+        }}
+      />
+      {parts.map((p, i) => (
+        <Animated.View
+          key={i}
+          style={{
+            position: 'absolute',
+            left: cx,
+            top: cy,
+            width: 5,
+            height: 5,
+            borderRadius: 3,
+            backgroundColor: i % 2 ? c : '#ffffff',
+            opacity: p.v.interpolate({ inputRange: [0, 0.75, 1], outputRange: [1, 0.8, 0] }),
+            transform: [{ translateX: p.v.interpolate({ inputRange: [0, 1], outputRange: [0, p.dx] }) }, { translateY: p.v.interpolate({ inputRange: [0, 1], outputRange: [0, p.dy] }) }],
+          }}
+        />
+      ))}
+    </View>
   );
 }
 
@@ -529,25 +629,27 @@ function Banner({ text, color, pos }: { text: string; color: string; pos?: 'mid'
 
 function ImpactText({ text, sub, color }: { text: string; sub?: string; color: string }) {
   const scale = useRef(new Animated.Value(0.3)).current;
+  const rise = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.spring(scale, { toValue: 1, useNativeDriver: true, friction: 5 }).start();
+    Animated.timing(rise, { toValue: 1, duration: 1150, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
   }, []);
   return (
-    <Animated.View style={[styles.impactWrap, { transform: [{ scale }] }]}>
+    <Animated.View style={[styles.impactWrap, { transform: [{ scale }, { translateY: rise.interpolate({ inputRange: [0, 1], outputRange: [0, -26] }) }] }]}>
       <Text style={[styles.impactTxt, { color }]}>{text}</Text>
       {!!sub && <Text style={styles.impactSub}>{sub}</Text>}
     </Animated.View>
   );
 }
 
-function Explosion({ w, h, right }: { w: number; h: number; right?: boolean }) {
+function Explosion({ w, h, right, color }: { w: number; h: number; right?: boolean; color?: string }) {
   const rings = useRef(Array.from({ length: 3 }, () => new Animated.Value(0))).current;
   const parts = useRef(
     Array.from({ length: 10 }, (_, i) => ({
       v: new Animated.Value(0),
       dx: Math.cos((i / 10) * Math.PI * 2) * (40 + (i % 4) * 18),
       dy: Math.sin((i / 10) * Math.PI * 2) * (30 + (i % 3) * 14),
-      color: i % 2 ? '#ffb84d' : '#ff5a5a',
+      color: i % 2 ? (color ?? '#ffb84d') : '#ff5a5a',
     })),
   ).current;
   useEffect(() => {
@@ -569,7 +671,7 @@ function Explosion({ w, h, right }: { w: number; h: number; right?: boolean }) {
             height: 60,
             borderRadius: 30,
             borderWidth: 4,
-            borderColor: i === 0 ? '#fff' : '#ffb84d',
+            borderColor: i === 0 ? '#fff' : (color ?? '#ffb84d'),
             opacity: r.interpolate({ inputRange: [0, 1], outputRange: [0.9, 0] }),
             transform: [{ scale: r.interpolate({ inputRange: [0, 1], outputRange: [0.4, 2.6 + i] }) }],
           }}

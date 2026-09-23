@@ -21,11 +21,15 @@ import { useGame } from './src/game/store';
 
 function EnemyBanner() {
   const v = useRef(new Animated.Value(0)).current;
+  const slide = useRef(new Animated.Value(40)).current;
   useEffect(() => {
-    Animated.timing(v, { toValue: 1, duration: 300, useNativeDriver: true }).start();
+    Animated.parallel([
+      Animated.timing(v, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(slide, { toValue: 0, useNativeDriver: true, friction: 8, tension: 60 }),
+    ]).start();
   }, []);
   return (
-    <Animated.View style={[styles.enemyBanner, { opacity: v }]}>
+    <Animated.View style={[styles.enemyBanner, { opacity: v, transform: [{ translateX: slide }] }]}>
       <Text style={styles.enemyBannerTxt}>ENEMY PHASE</Text>
     </Animated.View>
   );
@@ -147,25 +151,32 @@ function HintCard() {
   );
 }
 
-/** Transient map banner — reinforcement arrivals and other events. */
+/** Transient map banner — phase changes, reinforcement arrivals, other events. */
 function NoticeBanner({ text }: { text: string }) {
   const v = useRef(new Animated.Value(0)).current;
+  const slide = useRef(new Animated.Value(-40)).current;
   useEffect(() => {
     Animated.sequence([
       Animated.timing(v, { toValue: 1, duration: 260, useNativeDriver: true }),
       Animated.timing(v, { toValue: 1, duration: 1900, useNativeDriver: true }),
       Animated.timing(v, { toValue: 0, duration: 400, useNativeDriver: true }),
     ]).start();
+    Animated.spring(slide, { toValue: 0, useNativeDriver: true, friction: 8, tension: 60 }).start();
   }, []);
+  // player phase banners cool blue, hostiles/events warm
+  const playerPhase = text.startsWith('PLAYER PHASE');
+  const bg = playerPhase ? 'rgba(18,60,140,0.75)' : 'rgba(150,50,10,0.72)';
+  const border = playerPhase ? '#6db4ff' : '#ff8a3a';
+  const txt = playerPhase ? '#c8e4ff' : '#ffd8b0';
   return (
-    <Animated.View style={[styles.noticeBanner, { opacity: v, transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [-18, 0] }) }] }]}>
-      <Text style={styles.noticeTxt}>{text}</Text>
+    <Animated.View style={[styles.noticeBanner, { backgroundColor: bg, borderColor: border, opacity: v, transform: [{ translateX: slide }] }]}>
+      <Text style={[styles.noticeTxt, { color: txt }]}>{text}</Text>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  noticeBanner: { position: 'absolute', top: '12%', left: 0, right: 240, alignItems: 'center', backgroundColor: 'rgba(150,50,10,0.72)', borderTopWidth: 1, borderBottomWidth: 1, borderColor: '#ff8a3a', paddingVertical: 10, zIndex: 45 },
+  noticeBanner: { position: 'absolute', top: '12%', left: 0, right: 240, alignItems: 'center', borderTopWidth: 1, borderBottomWidth: 1, paddingVertical: 10, zIndex: 45 },
   noticeTxt: { color: '#ffd8b0', fontSize: 20, fontWeight: '900', letterSpacing: 5, fontStyle: 'italic' },
   hintCard: { position: 'absolute', bottom: '14%', left: 40, right: 280, maxWidth: 560, alignSelf: 'center', backgroundColor: 'rgba(8,14,30,0.94)', borderWidth: 1.5, borderColor: '#6db4ff', borderRadius: 12, padding: 16, zIndex: 46 },
   hintTitle: { color: '#6db4ff', fontSize: 11, fontWeight: '900', letterSpacing: 3, marginBottom: 6 },
