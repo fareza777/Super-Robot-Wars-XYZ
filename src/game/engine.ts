@@ -35,7 +35,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier'): number {
   let n = 0;
   for (const p of u.parts) n += PARTS[p]?.[stat] ?? 0;
   return n;
@@ -207,7 +207,11 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (res > 0) dmg = Math.round(dmg * (1 - res));
   if (w.antiAir && def.def.moveType === 'air') dmg = Math.round(dmg * 1.25);
   if (w.sniper && dist(att.pos, def.pos) >= 4) dmg = Math.round(dmg * 1.15);
-  return Math.round(dmg * dmgMult * willDmgMult(att));
+  dmg = Math.round(dmg * dmgMult * willDmgMult(att));
+  // i-field barrier — weak hits are swallowed by the field (SRW barrier mechanic)
+  const barrier = Math.max(def.def.barrier ?? 0, partBonus(def, 'barrier'));
+  if (barrier > 0 && dmg < barrier) dmg = Math.max(60, Math.round(dmg * 0.2));
+  return dmg;
 }
 
 const rnd = () => Math.random() * 100;

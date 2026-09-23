@@ -108,6 +108,7 @@ export interface UnitDef {
   /** supply frame: can RESUPPLY an ally within 3 tiles (EN + ammo, no heal) */
   supplier?: boolean;
   /** damage-type resistance — fraction reduced per weapon kind (0.4 = -40% beam) */
+  barrier?: number;
   resists?: Partial<Record<WeaponKind, number>>;
   /** loot carrier: flees east each enemy phase; kill it before it leaves the map */
   carrier?: boolean;
@@ -236,6 +237,8 @@ export interface PartDef {
   unique?: boolean; // not sold — awarded by story
   /** afterburner: unit may attack again after a kill, once per turn */
   again?: boolean;
+  /** i-field: incoming damage below this threshold is cut to 20% */
+  barrier?: number;
 }
 
 export interface MapDef {

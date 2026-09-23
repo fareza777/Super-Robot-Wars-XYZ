@@ -491,6 +491,11 @@ export function SidePanel() {
                 ✦ STATUS: {buffNames(inspect).join(' · ')}
               </Text>
             )}
+            {(inspect.def.barrier ?? 0) > 0 && (
+              <Text style={[styles.traitLine, { color: '#8ef0e8' }]} numberOfLines={1}>
+                ◈ I-FIELD: incoming damage below {inspect.def.barrier} cut to 20%
+              </Text>
+            )}
             {inspect.def.resists && (
               <Text style={[styles.traitLine, { color: '#ffd34d' }]} numberOfLines={1}>
                 🛡 RESIST: {Object.entries(inspect.def.resists)
