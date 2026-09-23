@@ -413,6 +413,49 @@ export function applyMapAttack(state: GameState, attackerUid: string, targetTile
   return { state: { ...state, units }, result };
 }
 
+/** Apply an ALL weapon — every hostile inside weapon range eats an independent hit roll, no counters. */
+export function applyAllAttack(state: GameState, attackerUid: string, weaponId: string, mods?: (u: UnitState) => CombatMods): { state: GameState; result: AttackResult } {
+  const units = state.units.map((u) => ({ ...u, ammo: { ...u.ammo } }));
+  const att = units.find((u) => u.uid === attackerUid)!;
+  const w = att.def.weapons.find((x) => x.id === weaponId)!;
+  const inRange = units
+    .filter((u) => u.alive && u.side !== att.side && dist(u.pos, att.pos) >= w.rangeMin && dist(u.pos, att.pos) <= w.rangeMax)
+    .sort((a, b) => dist(a.pos, att.pos) - dist(b.pos, att.pos));
+  const result = simulateMapAttack(att, inRange, w, state.map, mods ? mods(att) : NO_MODS);
+
+  att.en = Math.max(0, att.en - w.enCost);
+  if (w.ammo != null) att.ammo[w.id] = (att.ammo[w.id] ?? 0) - 1;
+  att.moved = true;
+  att.acted = true;
+  att.strikeForNextAttack = false;
+  att.valorForNextAttack = false;
+  att.soulForNextAttack = false;
+
+  let hits = 0;
+  let kills = 0;
+  inRange.forEach((t, i) => {
+    const r = i === 0 ? { hit: result.hit, damage: result.damage, destroyed: result.destroyed } : result.splash![i - 1];
+    if (r.hit) {
+      t.hp = Math.max(0, t.hp - r.damage);
+      att.dmgDealt = (att.dmgDealt ?? 0) + r.damage;
+      willGain(t, 1);
+      hits++;
+      if (r.destroyed) {
+        t.alive = false;
+        att.kills += 1;
+        att.pp += 3;
+        kills++;
+      }
+    } else {
+      t.dodges = (t.dodges ?? 0) + 1;
+    }
+  });
+  willGain(att, 1 + kills * 4);
+  result.expEvents = [];
+  if (hits > 0) awardExp(att, 30 + kills * 40 + (hits - 1) * 15, result.expEvents);
+  return { state: { ...state, units }, result };
+}
+
 const MAX_LEVEL = 9;
 
 function awardExp(u: UnitState, amount: number, events: string[]) {

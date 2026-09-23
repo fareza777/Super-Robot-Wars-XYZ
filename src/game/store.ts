@@ -42,6 +42,7 @@ import { bgm, setMusicEnabled, setSoundEnabled } from '../audio';
 import {
   aiPickReaction,
   applyAttack,
+  applyAllAttack,
   applyMapAttack,
   applySpirit,
   applySupportStrike,
@@ -1250,6 +1251,55 @@ export const useGame = create<Store>((set, get) => ({
     if (!s.pendingWeapon || !s.menuForUid) return;
     const att = s.units.find((x) => x.uid === s.menuForUid)!;
     const def = s.units.find((x) => x.uid === uid)!;
+    // ALL weapon — volley on every hostile in range, no counters
+    if (s.pendingWeapon.all) {
+      const w0 = s.pendingWeapon;
+      const out = applyAllAttack({ map: s.map, units: s.units, turn: s.turn }, att.uid, w0.id, modsFor(s.bonds, s.units));
+      const state = out.state;
+      const result = out.result;
+      const killCount = deadEnemies(s.units, state.units).length;
+      const chain = killCount > 0 ? (s.turn === s.chainTurn ? s.chainCount + killCount : killCount) : s.chainCount;
+      const chainBonus = chain > 1 && killCount > 0 ? 30 * chain : 0;
+      let log = push(s.log, `◈ ALL ATTACK — ${att.def.name} saturates the field with ${w0.name}${result.hit ? ` for ${result.damage}` : ' — missed'}`);
+      for (const sp of result.splash ?? []) log = push(log, `  ${sp.name}: ${sp.hit ? `${sp.damage}${sp.destroyed ? ' — DESTROYED' : ''}` : 'missed'}`);
+      if (chainBonus) log = push(log, `⛓ CHAIN ×${chain} — +${chainBonus}cr bonus salvage`);
+      for (const e of result.expEvents) log = push(log, e);
+      for (const q of defeatQuotes(s.units, state.units)) log = push(log, q);
+      const attAfter = state.units.find((u) => u.uid === att.uid)!;
+      const defAfter = state.units.find((u) => u.uid === uid)!;
+      const dead = deadEnemies(s.units, state.units);
+      const common = {
+        units: state.units,
+        log,
+        kills: s.kills + killCount,
+        chainTurn: killCount > 0 ? s.turn : s.chainTurn,
+        chainCount: chain,
+        salvageCr: s.salvageCr + chainBonus,
+        killsByDef: tallyKills(s.killsByDef, dead),
+        pendingWeapon: null,
+        mapAim: null,
+        attackTiles: new Set<string>(),
+        menuForUid: null,
+        pendingMove: null,
+        selectedUid: null,
+      };
+      if (s.settings.battleMode === 'off') {
+        const end = checkEnd(state.units, s.missionCh, s.turn);
+        if (end === 'victory') {
+          set(common);
+          applyVictory(set, get);
+          return;
+        }
+        set({ ...common, battle: null, phase: end === 'defeat' ? 'defeat' : 'player' });
+        return;
+      }
+      set({
+        ...common,
+        battle: { attacker: { ...att }, defender: { ...def }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: w0, result },
+        phase: 'battle',
+      });
+      return;
+    }
     const reaction = aiPickReaction(att, def, s.pendingWeapon, s.map);
     let { state, result } = applyAttack({ map: s.map, units: s.units, turn: s.turn }, att.uid, uid, s.pendingWeapon.id, modsFor(s.bonds, s.units), reaction);
     // SRW support attack — an ally beside the shooter chips in at reduced damage

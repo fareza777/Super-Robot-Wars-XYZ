@@ -375,6 +375,9 @@ export function HQScreen() {
               <View style={styles.recordBox}>
                 <Text style={styles.recordRow}>CAMPAIGN — chapter {Math.min(s.chapter, CHAPTERS_COUNT)}/{CHAPTERS_COUNT} cleared{s.ngPlus > 0 ? ` · NG+ cycle ${s.ngPlus}` : ''}</Text>
                 <Text style={styles.recordRow}>MASTERY — {s.masteryDone.length}/{CHAPTERS.filter((c) => c.mastery).length} ★ earned</Text>
+                <Text style={styles.recordRow}>
+                  BATTLE RANKS — {Object.values(s.missionRank).filter((r) => r === 'S').length}★S · {Object.values(s.missionRank).filter((r) => r === 'A').length}A · {Object.values(s.missionRank).filter((r) => r === 'B').length}B · {Object.values(s.missionRank).filter((r) => r === 'C').length}C
+                </Text>
                 <Text style={styles.recordRow}>SIDE QUESTS — {s.sideCleared.length}/{SIDE_MISSIONS.length} cleared</Text>
                 <Text style={styles.recordRow}>BOND EVENTS — {s.bondSeen.length}/{BOND_EVENTS.length} seen</Text>
                 <Text style={styles.recordRow}>

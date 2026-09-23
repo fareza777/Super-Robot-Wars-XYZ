@@ -838,10 +838,12 @@ export const HONORS: HonorDef[] = [
   { id: 'h_chest', name: 'WAR CHEST', desc: 'Hold 20,000 credits at once', rewardCr: 1500 },
   { id: 'h_simace', name: 'VR ACE', desc: 'Score 1500+ PTS in the VR simulator', rewardCr: 1200 },
   { id: 'h_rival', name: 'NEMESIS', desc: 'Shoot down Cpt. Vossen and the Drake Eclipse', rewardCr: 1000 },
+  { id: 'h_carrier', name: 'CARAVAN KING', desc: 'Down a Supply Mule before it escapes', rewardCr: 800 },
+  { id: 'h_srank', name: 'FLAWLESS ACE', desc: 'Earn S rank on 5 different missions', rewardCr: 1500 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string }[] }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; units?: { def: { id: string }; kills: number; alive: boolean; side: string }[] }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -874,6 +876,10 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return (s.simBest ?? 0) >= 1500;
     case 'h_rival':
       return (s as { vossenDefeated?: boolean }).vossenDefeated === true;
+    case 'h_carrier':
+      return (s.killsByDef?.cargoMule ?? 0) >= 1;
+    case 'h_srank':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 5;
     default:
       return false;
   }

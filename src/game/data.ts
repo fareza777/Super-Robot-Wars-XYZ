@@ -68,6 +68,8 @@ export const WEAPONS = {
   railVolley: W({ id: 'rail_volley', name: 'Railgun Volley', kind: 'gun', power: 2000, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 12, hitMod: 15, postMove: true, animSeed: 19, status: 'break' }),
   flareField: W({ id: 'flare_field', name: 'Flare Field', kind: 'funnel', power: 2400, rangeMin: 1, rangeMax: 4, enCost: 20, ammo: null, hitMod: 15, postMove: true, animSeed: 20, status: 'burn' }),
   mapFlare: W({ id: 'map_flare', name: 'MAP: Flare Burst', kind: 'funnel', power: 1900, rangeMin: 2, rangeMax: 5, enCost: 45, ammo: null, hitMod: -5, postMove: false, animSeed: 20, willReq: 105, mapRange: 1 }),
+  // ALL weapon — saturates every hostile inside range in one volley, no counters
+  omniBarrage: W({ id: 'omni_barrage', name: 'ALL: Omni Barrage', kind: 'missile', power: 2100, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 4, hitMod: 0, postMove: false, animSeed: 27, willReq: 110, all: true }),
   militiaRifle: W({ id: 'militia_rifle', name: 'Defense Rifle', kind: 'gun', power: 1500, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 12, hitMod: 8, postMove: true, animSeed: 21 }),
   voidLance: W({ id: 'void_lance', name: 'Void Lance', kind: 'beam', power: 3300, rangeMin: 2, rangeMax: 7, enCost: 32, ammo: null, hitMod: 0, critMod: 8, postMove: false, animSeed: 25, willReq: 115, pierce: true }),
 };
@@ -95,7 +97,7 @@ export const UNITS: Record<string, UnitDef> = {
   // --- player squad ---
   valstray: U({ id: 'valstray', name: 'Valstray', title: 'X-Face Vanguard', color: '#2f6fd0', accent: '#9fd0ff', maxHp: 5800, maxEn: 140, armor: 1050, mobility: 118, moveRange: 6, moveType: 'land', weapons: [WEAPONS.beamSaber, WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.twinBreaker, WEAPONS.arcCannon], pilot: PILOTS.ray }),
   arielis: U({ id: 'arielis', name: 'Arielis', title: 'X-Face Sniper', color: '#38b6c9', accent: '#c8f6ff', maxHp: 4600, maxEn: 160, armor: 900, mobility: 132, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.photonRifle, WEAPONS.vulcan, WEAPONS.twinBarrage, WEAPONS.railVolley, WEAPONS.starfallStrike], pilot: PILOTS.mira }),
-  gruntborg: U({ id: 'gruntborg', name: 'Grunborg', title: 'Y-Face Heavy', color: '#c94f4f', accent: '#ffd0c0', maxHp: 7200, maxEn: 110, armor: 1400, mobility: 92, moveRange: 5, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.railgun, WEAPONS.gatling, WEAPONS.mapBuster, WEAPONS.thermoCharge], pilot: PILOTS.gara }),
+  gruntborg: U({ id: 'gruntborg', name: 'Grunborg', title: 'Y-Face Heavy', color: '#c94f4f', accent: '#ffd0c0', maxHp: 7200, maxEn: 110, armor: 1400, mobility: 92, moveRange: 5, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.railgun, WEAPONS.gatling, WEAPONS.mapBuster, WEAPONS.thermoCharge, WEAPONS.omniBarrage], pilot: PILOTS.gara }),
   zephyra: U({ id: 'zephyra', name: 'Zephyra', title: 'Z-Face Duelist', color: '#5fbf62', accent: '#d8ffd8', maxHp: 5400, maxEn: 150, armor: 1000, mobility: 126, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.chestBlaster, WEAPONS.vulcan, WEAPONS.flareField, WEAPONS.mapFlare], pilot: PILOTS.orin, repairer: true, supplier: true }),
   // --- enemy ---
   zolda: U({ id: 'zolda', name: 'Zolda', title: 'Imperial Mass Unit', color: '#6b6f7a', accent: '#c9ccd6', maxHp: 3800, maxEn: 100, armor: 850, mobility: 88, moveRange: 5, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod], pilot: PILOTS.grunt }),

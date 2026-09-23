@@ -32,6 +32,8 @@ export interface WeaponDef {
   comboPartner?: string;
   /** status inflicted on a hit: burn (HP loss/turn), stun (skip next action), break (armor -30%) */
   status?: 'burn' | 'stun' | 'break';
+  /** ALL weapon: fires on every enemy inside range at once — no counters (SRW ALL attack) */
+  all?: boolean;
 }
 
 export interface StatusFx {
