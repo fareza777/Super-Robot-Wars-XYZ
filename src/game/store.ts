@@ -127,6 +127,7 @@ export interface BattleSave {
   arcKill?: boolean;
   blastKill?: boolean;
   lostAlly?: boolean;
+  rescuedPods?: string[];
   bossWarned: boolean;
   eventsFired: string[];
   inventory: Record<string, number>;
@@ -235,6 +236,8 @@ interface Store {
   arcKill: boolean;
   blastKill: boolean;
   lostAlly: boolean;
+  /** escape pods recovered this battle — pilot of each def.id spared the wounded penalty */
+  rescuedPods: string[];
   extremeWon: boolean;
   shepHon: boolean;
   /** a frame transformed at least once this battle (FORMA SHIFT honor) */
@@ -488,7 +491,7 @@ async function persistBattle(s: Store) {
     map: s.map,
     units: s.units,
     turn: s.turn,
-    kills: s.kills, altKill: s.altKill, arcKill: s.arcKill, blastKill: s.blastKill, lostAlly: s.lostAlly,
+    kills: s.kills, altKill: s.altKill, arcKill: s.arcKill, blastKill: s.blastKill, lostAlly: s.lostAlly, rescuedPods: s.rescuedPods,
     decoyHit: s.decoyHit,
     iFieldKill: s.iFieldKill,
     bossWarned: s.bossWarned,
@@ -675,6 +678,7 @@ export const useGame = create<Store>((set, get) => ({
   arcKill: false,
   blastKill: false,
   lostAlly: false,
+  rescuedPods: [],
     extremeWon: false,
     shepHon: false,
     transformed: false,
@@ -744,7 +748,7 @@ export const useGame = create<Store>((set, get) => ({
     const cellGranted = allied && grantDrakeCell(set, get);
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal', allied);
     void clearBattleSave();
-    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, simWave: 0, log: [`${m.repeatable ? 'PATROL OP' : 'SIDE QUEST'}: ${m.name}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : []), ...(cellGranted ? [`▣ Drake's Cell integrated — unique part acquired`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1', usedSupport: false, altKill: false, decoyHit: false, iFieldKill: false, arcKill: false, blastKill: false, lostAlly: false });
+    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, simWave: 0, log: [`${m.repeatable ? 'PATROL OP' : 'SIDE QUEST'}: ${m.name}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : []), ...(cellGranted ? [`▣ Drake's Cell integrated — unique part acquired`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1', usedSupport: false, altKill: false, decoyHit: false, iFieldKill: false, arcKill: false, blastKill: false, lostAlly: false, rescuedPods: [] });
     setTimeout(() => set({ notice: null }), 2400);
     void persistBattle(get());
   },
@@ -772,7 +776,7 @@ export const useGame = create<Store>((set, get) => ({
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal', false, s.wounded);
     // VR runs are ephemeral and never autosave — keep any prior mission snapshot
     // so the ops board still offers RESUME for it after the run ends.
-    set({ phase: 'player', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: s.savedBattle, simWave: 1, simSettled: false, log: ['▲ VR SIMULATION — WAVE 1', `Objective: ${ch.objective}`, 'Waves escalate. The run ends when the squad falls.'], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], notice: '▲ VR SIMULATION — WAVE 1', usedSupport: false, altKill: false, decoyHit: false, iFieldKill: false, arcKill: false, blastKill: false, lostAlly: false });
+    set({ phase: 'player', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: s.savedBattle, simWave: 1, simSettled: false, log: ['▲ VR SIMULATION — WAVE 1', `Objective: ${ch.objective}`, 'Waves escalate. The run ends when the squad falls.'], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], notice: '▲ VR SIMULATION — WAVE 1', usedSupport: false, altKill: false, decoyHit: false, iFieldKill: false, arcKill: false, blastKill: false, lostAlly: false, rescuedPods: [] });
     setTimeout(() => set({ notice: null }), 2600);
   },
 
@@ -1075,7 +1079,7 @@ export const useGame = create<Store>((set, get) => ({
       zoneTiles.set(k, { pos: { x, y }, cost: 0 });
     }
     void clearBattleSave();
-    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : []), ...(cellGranted ? [`▣ Drake's Cell integrated — unique part acquired`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles, transformed: false, usedSupport: false, altKill: false, decoyHit: false, iFieldKill: false, arcKill: false, blastKill: false, lostAlly: false });
+    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : []), ...(cellGranted ? [`▣ Drake's Cell integrated — unique part acquired`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles, transformed: false, usedSupport: false, altKill: false, decoyHit: false, iFieldKill: false, arcKill: false, blastKill: false, lostAlly: false, rescuedPods: [] });
   },
   finishDialog: () => {
     set({ phase: 'player', notice: 'PLAYER PHASE — TURN 1' });
@@ -1111,6 +1115,7 @@ export const useGame = create<Store>((set, get) => ({
       eventsFired: b.eventsFired,
       inventory: b.inventory,
       crates: b.crates ?? [],
+      rescuedPods: b.rescuedPods ?? [],
       hazardWarn: b.hazardWarn ?? [],
       blizzard: false,
       log: b.log,
@@ -1366,13 +1371,25 @@ export const useGame = create<Store>((set, get) => ({
     let inventory = s.inventory;
     let crates = s.crates;
     let salvageQueue = s.salvageQueue;
+    let rescuedPods = s.rescuedPods;
+    let willBoostUid: string | undefined;
     if (crateIdx >= 0) {
       const itemId = s.crates[crateIdx].itemId;
-      inventory = { ...s.inventory, [itemId]: (s.inventory[itemId] ?? 0) + 1 };
       crates = s.crates.filter((_, i) => i !== crateIdx);
-      salvageQueue = [...s.salvageQueue, ITEMS[itemId]?.name ?? itemId];
+      if (itemId.startsWith('pod:')) {
+        const podDef = itemId.slice(4);
+        rescuedPods = [...rescuedPods, podDef];
+        willBoostUid = sel.uid;
+        salvageQueue = [...s.salvageQueue, '🛟 pilot pod'];
+      } else {
+        inventory = { ...s.inventory, [itemId]: (s.inventory[itemId] ?? 0) + 1 };
+        salvageQueue = [...s.salvageQueue, ITEMS[itemId]?.name ?? itemId];
+      }
     }
-    set({ units, walk: walking, pendingMove: sel.acted ? null : p, preMovePos: sel.pos, pendingMovedFlag: !same(sel.pos, p), menuForUid: sel.acted ? null : sel.uid, moveTiles: new Map(), selectedUid: sel.acted ? null : sel.uid, inventory, crates, salvageQueue, tileInfo: null });
+    const units2 = willBoostUid
+      ? units.map((u) => (u.uid === willBoostUid ? { ...u, will: Math.min(150, (u.will ?? 100) + 10) } : u))
+      : units;
+    set({ units: units2, walk: walking, pendingMove: sel.acted ? null : p, preMovePos: sel.pos, pendingMovedFlag: !same(sel.pos, p), menuForUid: sel.acted ? null : sel.uid, moveTiles: new Map(), selectedUid: sel.acted ? null : sel.uid, inventory, crates, salvageQueue, rescuedPods, tileInfo: null, log: willBoostUid ? push(s.log, '🛟 POD RECOVERED — the pilot ejected safely and is back aboard') : s.log });
     if (crateIdx >= 0) drainSalvage(set, get, walking ? path.length * 320 + 400 : 600);
     detonateMineAt(set, get, sel.uid, p, walking ? path.length * 320 + 300 : 350);
     if (walking) scheduleWalkClear(set, get, sel.uid, path.length);
@@ -1489,7 +1506,7 @@ export const useGame = create<Store>((set, get) => ({
         inventory,
         partsOwned,
         salvageQueue,
-        kills: s.kills + killCount, altKill: altFlag, iFieldKill: iFieldF, arcKill: arcF, blastKill: blastF, lostAlly: s.lostAlly || deadPlayers(s.units, state.units).length > 0,
+        kills: s.kills + killCount, altKill: altFlag, iFieldKill: iFieldF, arcKill: arcF, blastKill: blastF, lostAlly: s.lostAlly || deadPlayers(s.units, state.units).length > 0, crates: podsFor(s.units, state.units, s.crates),
         chainTurn: killCount > 0 ? s.turn : s.chainTurn,
         chainCount: chain,
         salvageCr: s.salvageCr + chainBonus + overkillCr + lucky.cr,
@@ -1632,7 +1649,7 @@ export const useGame = create<Store>((set, get) => ({
       inventory,
       partsOwned,
       salvageQueue,
-      kills: s.kills + killCount, altKill: altFlag, iFieldKill: iFieldF, arcKill: arcF, blastKill: blastF, lostAlly: s.lostAlly || deadPlayers(s.units, state.units).length > 0,
+      kills: s.kills + killCount, altKill: altFlag, iFieldKill: iFieldF, arcKill: arcF, blastKill: blastF, lostAlly: s.lostAlly || deadPlayers(s.units, state.units).length > 0, crates: podsFor(s.units, state.units, s.crates),
       chainTurn: killCount > 0 ? s.turn : s.chainTurn,
       chainCount: chain,
       salvageCr: s.salvageCr + chainBonus + carrierCr + overkillCr + lucky.cr,
@@ -1744,7 +1761,7 @@ export const useGame = create<Store>((set, get) => ({
       salvageQueue,
       vossenDefeated: s.vossenDefeated || vossenDowned(s.units, state.units),
       killsByDef: tallyKills(s.killsByDef, deadEnemies(s.units, state.units)),
-      kills: s.kills + deadEnemies(s.units, state.units).length, altKill: altFlag, iFieldKill: iFieldF, arcKill: arcF, blastKill: blastF, lostAlly: s.lostAlly || deadPlayers(s.units, state.units).length > 0,
+      kills: s.kills + deadEnemies(s.units, state.units).length, altKill: altFlag, iFieldKill: iFieldF, arcKill: arcF, blastKill: blastF, lostAlly: s.lostAlly || deadPlayers(s.units, state.units).length > 0, crates: podsFor(s.units, state.units, s.crates),
       chainTurn: mapKills > 0 ? s.turn : s.chainTurn,
       chainCount: mapChain,
       salvageCr: s.salvageCr + mapChainBonus + overkillCr + lucky.cr,
@@ -2092,6 +2109,14 @@ function deadPlayers(before: UnitState[], after: UnitState[]): UnitState[] {
   const afterAlive = new Set(after.filter((u) => u.alive).map((u) => u.uid));
   return before.filter((u) => u.side === 'player' && !u.npc && u.alive && !afterAlive.has(u.uid));
 }
+/** A downed pilot ejects — their pod waits on the tile for a squadmate to recover it. */
+function podsFor(before: UnitState[], after: UnitState[], crates: { pos: Pos; itemId: string }[]): { pos: Pos; itemId: string }[] {
+  let out = crates;
+  for (const d of deadPlayers(before, after)) {
+    if (!out.some((c) => same(c.pos, d.pos))) out = [...out, { pos: d.pos, itemId: `pod:${d.def.id}` }];
+  }
+  return out;
+}
 function tallyKills(acc: Record<string, number>, dead: UnitState[]): Record<string, number> {
   if (!dead.length) return acc;
   const next = { ...acc };
@@ -2224,7 +2249,7 @@ function applyVictory(set: SetFn, get: Get) {
   const repairBill = s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive).reduce((n, u) => n + u.level * 15, 0);
   // stragglers — surviving foes abandon their salvage when the field breaks (+15cr each)
   const stragglerCr = s.units.filter((u) => u.side === 'enemy' && u.alive).length * 15;
-  const woundedIds = s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive && !(u.parts ?? []).includes('escapePod')).map((u) => u.def.id);
+  const woundedIds = s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive && !(u.parts ?? []).includes('escapePod') && !s.rescuedPods.includes(u.def.id)).map((u) => u.def.id);
   const aceLines: string[] = [];
   for (const u of s.units) {
     if (u.side === 'player' && !u.npc) {
@@ -2604,7 +2629,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
           let l = mkLog(st.log);
           for (const x of d.lines) l = push(l, x);
           for (const q of defeatQuotes(cur.units, state.units, att)) l = push(l, q);
-          return { units: state.units, kills: st.kills + kc, decoyHit: st.decoyHit || def.decoyUntil != null, killsByDef: tallyKills(st.killsByDef, deadEnemies(cur.units, state.units)), inventory: d.inventory, salvageQueue: [...st.salvageQueue, ...d.names], lostAlly: st.lostAlly || deadPlayers(cur.units, state.units).length > 0, log: rxnLog(l) };
+          return { units: state.units, kills: st.kills + kc, decoyHit: st.decoyHit || def.decoyUntil != null, killsByDef: tallyKills(st.killsByDef, deadEnemies(cur.units, state.units)), inventory: d.inventory, salvageQueue: [...st.salvageQueue, ...d.names], lostAlly: st.lostAlly || deadPlayers(cur.units, state.units).length > 0, crates: podsFor(cur.units, state.units, st.crates), log: rxnLog(l) };
         });
         const end = checkEnd(get().units, get().missionCh, get().turn);
         if (end) {
@@ -2631,7 +2656,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
           killsByDef: tallyKills(st.killsByDef, deadEnemies(cur.units, state.units)),
           inventory: d.inventory,
           salvageQueue: [...st.salvageQueue, ...d.names],
-          lostAlly: st.lostAlly || deadPlayers(cur.units, state.units).length > 0,
+          lostAlly: st.lostAlly || deadPlayers(cur.units, state.units).length > 0, crates: podsFor(cur.units, state.units, st.crates),
           log: rxnLog(l),
           battle: { attacker: { ...att }, defender: { ...defForScene }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: plan.weapon!, result, warning },
         };
@@ -2918,7 +2943,7 @@ useGame.subscribe((s, prev) => {
     map: s.map,
     units: s.units,
     turn: s.turn,
-    kills: s.kills, altKill: s.altKill, arcKill: s.arcKill, blastKill: s.blastKill, lostAlly: s.lostAlly,
+    kills: s.kills, altKill: s.altKill, arcKill: s.arcKill, blastKill: s.blastKill, lostAlly: s.lostAlly, rescuedPods: s.rescuedPods,
     decoyHit: s.decoyHit,
     iFieldKill: s.iFieldKill,
     bossWarned: s.bossWarned,
