@@ -602,6 +602,7 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       u.will = 150;
       break;
     case 'sunder':
+    case 'provoke':
       break; // area debuff is applied by the store pass
     case 'snipe':
       u.snipeForNextAttack = true;
@@ -699,6 +700,7 @@ export function planEnemyActions(state: GameState): AiPlan[] {
     const willMove = (p: Pos) => !same(p, e.pos);
     for (const tile of tiles) {
       for (const p of players) {
+        if (e.provokedTo && p.uid !== e.provokedTo) continue; // Provoke: locked onto the war horn
         for (const w of weaponsAgainst(e, tile, p, willMove(tile))) {
           const hc = hitChance(e, p, w, map, rallyBonus(units, e) + formationBonus(units, e));
           const dmg = damageOf(e, p, w, map, false);
@@ -735,7 +737,7 @@ export function planEnemyActions(state: GameState): AiPlan[] {
       plans.push({ unit: e, moveTo: best.pos, target: best.target, weapon: best.weapon });
     } else {
       // advance toward nearest player — NPC convoy draws attackers like a magnet
-      const nearest = players.slice().sort((a, b) => dist(e.pos, a.pos) - (a.escort ? 1.5 : 0) - (dist(e.pos, b.pos) - (b.escort ? 1.5 : 0)))[0];
+      const nearest = (e.provokedTo ? players.find((p) => p.uid === e.provokedTo) : undefined) ?? players.slice().sort((a, b) => dist(e.pos, a.pos) - (a.escort ? 1.5 : 0) - (dist(e.pos, b.pos) - (b.escort ? 1.5 : 0)))[0];
       if (!nearest) continue;
       // guards drift back toward the beacon; everyone else chases the nearest player
       const anchor = guarding ? bp! : nearest.pos;

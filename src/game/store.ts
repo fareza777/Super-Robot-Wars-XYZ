@@ -1699,15 +1699,16 @@ export const useGame = create<Store>((set, get) => ({
       return c;
     });
     // area spirits — rouse/disrupt affect neighbours within 2 tiles
-    if (sp === 'rouse' || sp === 'disrupt' || sp === 'sunder') {
+    if (sp === 'rouse' || sp === 'disrupt' || sp === 'sunder' || sp === 'provoke') {
       const src = units.find((x) => x.uid === uid)!;
       for (const u2 of units) {
         if (u2.uid === uid || !u2.alive) continue;
         const d = Math.abs(u2.pos.x - src.pos.x) + Math.abs(u2.pos.y - src.pos.y);
-        if (d > (sp === 'sunder' ? 3 : 2)) continue;
+        if (d > (sp === 'sunder' || sp === 'provoke' ? 3 : 2)) continue;
         if (sp === 'rouse' && u2.side === src.side) u2.will = Math.min(150, u2.will + 10);
         if (sp === 'disrupt' && u2.side !== src.side) u2.will = Math.max(100, u2.will - 10);
         if (sp === 'sunder' && u2.side !== src.side) u2.sundered = true;
+        if (sp === 'provoke' && u2.side !== src.side) u2.provokedTo = src.uid;
       }
     }
     // purge — cleanse self and adjacent allies of cripple + status debuffs
@@ -2353,6 +2354,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       else {
         c.moved = false;
         c.acted = false;
+        if (c.side === 'enemy') c.provokedTo = undefined;
         c.dodges = 0;
       }
       if (c.alive && c.statuses && c.statuses.length) {
@@ -2453,7 +2455,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       }
     }
     // tile hazards: tiles telegraphed last round detonate now (never lethal — leaves 1 HP)
-    const hzLabel = st.missionCh.theme === 'fortress' || st.missionCh.theme === 'moon' ? 'artillery barrage' : 'ion storm';
+    const hzLabel = st.missionCh.theme === 'fortress' || st.missionCh.theme === 'moon' ? 'artillery barrage' : st.missionCh.theme === 'lava' ? 'magma surge' : 'ion storm';
     for (const hz of st.hazardWarn) {
       for (const v of units.filter((u) => u.alive && same(u.pos, hz))) {
         const dmg = Math.min(v.hp - 1, Math.round(v.def.maxHp * 0.15));
@@ -2480,8 +2482,8 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         }
       }
       if (hazardWarn.length) {
-        notice = hzLabel === 'artillery barrage' ? '⚠ ARTILLERY BARRAGE INCOMING' : '⚠ ION STORM INCOMING';
-        recovered.push(`⚠ ${hzLabel === 'artillery barrage' ? 'Artillery barrage' : 'Ion storm'} telegraphed — evacuate the marked tiles!`);
+        notice = hzLabel === 'artillery barrage' ? '⚠ ARTILLERY BARRAGE INCOMING' : hzLabel === 'magma surge' ? '🌋 MAGMA SURGE INCOMING' : '⚠ ION STORM INCOMING';
+        recovered.push(`⚠ ${hzLabel === 'artillery barrage' ? 'Artillery barrage' : hzLabel === 'magma surge' ? 'Magma surge' : 'Ion storm'} telegraphed — evacuate the marked tiles!`);
         setTimeout(() => set({ notice: null }), 2800);
       }
     }

@@ -648,7 +648,7 @@ export function genMap(ch: ChapterDef): MapDef {
     reinforce: REINFORCE[ch.id],
     allyReinforce: ALLY_REINFORCE[ch.id],
     events: MID_EVENTS[ch.id],
-    hazards: ch.theme === 'void' || ch.theme === 'colony' ? { every: 3, count: 2 } : ch.theme === 'fortress' || ch.theme === 'moon' ? { every: 4, count: 3 } : undefined,
+    hazards: ch.theme === 'void' || ch.theme === 'colony' ? { every: 3, count: 2 } : ch.theme === 'lava' ? { every: 3, count: 2 } : ch.theme === 'fortress' || ch.theme === 'moon' ? { every: 4, count: 3 } : undefined,
   };
 }
 
@@ -873,11 +873,12 @@ export const HONORS: HonorDef[] = [
   { id: 'h_shepherd', name: 'SHEPHERD', desc: 'Finish an escort mission with the convoy unscathed', rewardCr: 1100 },
   { id: 'h_flawless', name: 'FLAWLESS', desc: 'Clear a main chapter at Ch.10+ without losing a single unit', rewardCr: 1400 },
   { id: 'h_annihilator', name: 'ANNIHILATOR', desc: 'Land a single hit of 8000+ damage in battle', rewardCr: 1400 },
+  { id: 'h_ironwill', name: 'IRON WILL', desc: 'Win a battle with a wounded pilot in the line', rewardCr: 800 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string }[] }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string; wounded?: boolean }[] }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -930,6 +931,8 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return kills.filter((p) => (p.kills ?? 0) >= 25).length >= 3;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
+    case 'h_ironwill':
+      return (s.units ?? []).some((u) => u.side === 'player' && u.wounded);
     default:
       return false;
   }
