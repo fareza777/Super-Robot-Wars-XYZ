@@ -301,6 +301,7 @@ export function simulateMapAttack(att: UnitState, targets: UnitState[], w: Weapo
 // ---------- Store-level actions (pure functions on state slices) ----------
 
 export interface GameState {
+  blizzard?: boolean;
   map: MapDef;
   units: UnitState[];
   turn: number;
@@ -321,7 +322,8 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   const def = units.find((u) => u.uid === defenderUid)!;
   const w = att.def.weapons.find((x) => x.id === weaponId)!;
   const pin = hasPincer(units, att, def);
-  const attMods0 = mods ? mods(att) : NO_MODS;
+  let attMods0 = mods ? mods(att) : NO_MODS;
+  if (state.blizzard && att.def.moveType !== 'air') attMods0 = { ...attMods0, hitBonus: attMods0.hitBonus - 15 };
   const result0 = simulateAttack(att, def, w, state.map, pin ? { ...attMods0, dmgMult: attMods0.dmgMult * 1.1 } : attMods0, mods ? mods(def) : NO_MODS, reaction);
   const result: AttackResult = { ...result0, pincer: pin };
 

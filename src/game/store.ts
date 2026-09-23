@@ -162,6 +162,7 @@ interface Store {
   dangerTiles: Set<string>;
   /** ion-storm strike tiles telegraphed this round — detonate at the next turn transition */
   hazardWarn: Pos[];
+  blizzard: boolean;
   /** empty-tile tap -> show terrain info card */
   tileInfo: Pos | null;
   threatTiles: Set<string>;
@@ -559,6 +560,7 @@ export const useGame = create<Store>((set, get) => ({
   dangerTiles: new Set<string>(),
   threatTiles: new Set<string>(),
   hazardWarn: [],
+  blizzard: false,
   kills: 0,
   salvageCr: 0,
   chainTurn: 0,
@@ -645,7 +647,7 @@ export const useGame = create<Store>((set, get) => ({
     const allied = (s.killsByDef['vossDrake'] ?? 0) >= 2;
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal', allied);
     void clearBattleSave();
-    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, simWave: 0, log: [`${m.repeatable ? 'PATROL OP' : 'SIDE QUEST'}: ${m.name}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
+    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, simWave: 0, log: [`${m.repeatable ? 'PATROL OP' : 'SIDE QUEST'}: ${m.name}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
     setTimeout(() => set({ notice: null }), 2400);
     void persistBattle(get());
   },
@@ -673,7 +675,7 @@ export const useGame = create<Store>((set, get) => ({
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal', false);
     // VR runs are ephemeral and never autosave — keep any prior mission snapshot
     // so the ops board still offers RESUME for it after the run ends.
-    set({ phase: 'player', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: s.savedBattle, simWave: 1, simSettled: false, log: ['▲ VR SIMULATION — WAVE 1', `Objective: ${ch.objective}`, 'Waves escalate. The run ends when the squad falls.'], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], notice: '▲ VR SIMULATION — WAVE 1' });
+    set({ phase: 'player', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: s.savedBattle, simWave: 1, simSettled: false, log: ['▲ VR SIMULATION — WAVE 1', `Objective: ${ch.objective}`, 'Waves escalate. The run ends when the squad falls.'], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], notice: '▲ VR SIMULATION — WAVE 1' });
     setTimeout(() => set({ notice: null }), 2600);
   },
 
@@ -882,6 +884,23 @@ export const useGame = create<Store>((set, get) => ({
       if (x.uid !== uid) return x;
       const c = { ...x, ammo: { ...x.ammo } };
       switch (item.apply) {
+        case 'willAll': {
+          if (x.side === 'player' && x.alive) {
+            const c2 = { ...x, will: Math.min(150, (x.will ?? 100) + item.amount) };
+            if (x.uid === uid) { c2.moved = true; c2.acted = true; }
+            return c2;
+          }
+          return x;
+        }
+        case 'healArea': {
+          if (x.side === 'player' && x.alive && Math.abs(x.pos.x - u.pos.x) + Math.abs(x.pos.y - u.pos.y) <= 2) {
+            const c2 = { ...x, hp: Math.min(x.def.maxHp + 8000, x.hp + Math.round(x.def.maxHp * item.amount / 100)) };
+            if (x.uid === uid) { c2.moved = true; c2.acted = true; }
+            return c2;
+          }
+          if (x.uid === uid) return { ...x, moved: true, acted: true };
+          return x;
+        }
         case 'hp':
           c.hp = Math.min(c.def.maxHp, c.hp + item.amount);
           break;
@@ -927,7 +946,7 @@ export const useGame = create<Store>((set, get) => ({
       zoneTiles.set(k, { pos: { x, y }, cost: 0 });
     }
     void clearBattleSave();
-    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
+    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
   },
   finishDialog: () => {
     set({ phase: 'player', notice: 'PLAYER PHASE — TURN 1' });
@@ -964,6 +983,7 @@ export const useGame = create<Store>((set, get) => ({
       inventory: b.inventory,
       crates: b.crates ?? [],
       hazardWarn: b.hazardWarn ?? [],
+      blizzard: false,
       log: b.log,
       cursor: null,
       selectedUid: null,
@@ -1326,7 +1346,7 @@ export const useGame = create<Store>((set, get) => ({
       return;
     }
     const reaction = aiPickReaction(att, def, s.pendingWeapon, s.map);
-    let { state, result } = applyAttack({ map: s.map, units: s.units, turn: s.turn }, att.uid, uid, s.pendingWeapon.id, modsFor(s.bonds, s.units), reaction);
+    let { state, result } = applyAttack({ map: s.map, units: s.units, turn: s.turn, blizzard: s.blizzard }, att.uid, uid, s.pendingWeapon.id, modsFor(s.bonds, s.units), reaction);
     // SRW support attack — an ally beside the shooter chips in at reduced damage
     if (def.side === 'enemy' && state.units.find((u) => u.uid === uid)!.alive) {
       const sup = findSupport(state.units, att.uid, state.units.find((u) => u.uid === uid)!);
@@ -1742,7 +1762,7 @@ function simNextWave(set: SetFn, get: Get) {
   let log = push(s.log, `— Wave ${wave - 1} cleared — +${(wave - 1) * 150} pts`);
   log = push(log, `▲ WAVE ${wave}: ${news.length} hostiles warp in (Lv ${lvl}${wave % 4 === 0 ? ' · ALL ELITE' : ''}${wave % 3 === 0 ? ' + supply crate' : ''})`);
   const notice = `▲ WAVE ${wave} — ${news.length} HOSTILES INBOUND · ${s.kills * 50 + (wave - 1) * 150} PTS`;
-  set({ units, crates, simWave: wave, battle: null, phase: 'player', enemyBusy: false, selectedUid: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, mapAim: null, pendingMove: null, attackTiles: new Set(), hazardWarn: [], notice, log });
+  set({ units, crates, simWave: wave, battle: null, phase: 'player', enemyBusy: false, selectedUid: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, mapAim: null, pendingMove: null, attackTiles: new Set(), hazardWarn: [], blizzard: false, notice, log });
   setTimeout(() => set({ notice: null }), 2600);
 }
 
@@ -1926,7 +1946,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
   while (guard++ < 20) {
     const s = get();
     if (s.phase !== 'enemy') return;
-    const plans = planEnemyActions({ map: s.map, units: s.units, turn: s.turn });
+    const plans = planEnemyActions({ map: s.map, units: s.units, turn: s.turn, blizzard: s.blizzard });
     const remaining = plans.filter((pl) => !s.units.find((u) => u.uid === pl.unit.uid)?.acted);
     const plan = remaining[0];
     if (!plan) break;
@@ -2005,7 +2025,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       }
       if (warning) set({ bossWarned: true });
       const defUid = reaction === 'cover' ? coverUid! : def.uid;
-      const { state, result } = applyAttack({ map: cur.map, units: cur.units, turn: cur.turn }, att.uid, defUid, plan.weapon.id, modsFor(cur.bonds, cur.units), reaction);
+      const { state, result } = applyAttack({ map: cur.map, units: cur.units, turn: cur.turn, blizzard: cur.blizzard }, att.uid, defUid, plan.weapon.id, modsFor(cur.bonds, cur.units), reaction);
       if (reaction === 'cover' && coverUid) {
         const ci = state.units.findIndex((u) => u.uid === coverUid);
         if (ci >= 0) state.units[ci] = { ...state.units[ci], acted: true };
@@ -2205,13 +2225,19 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         setTimeout(() => set({ notice: null }), 2800);
       }
     }
+    // blizzard turns on snow fields — ground units lose 15% hit for the whole phase
+    const blizzard = st.missionCh.theme === 'snow' && nextTurn % 3 === 0;
+    if (blizzard) {
+      if (!notice) { notice = '❄ BLIZZARD — ground units -15% hit'; setTimeout(() => set({ notice: null }), 2800); }
+      recovered.push('❄ Blizzard sweeps the field — ground units have -15% hit this turn.');
+    }
     const end = checkEnd(units, st.missionCh, nextTurn);
     let log = push(st.log, `— Turn ${nextTurn} player phase —`);
     for (const l of recovered) log = push(log, l);
     if (end === 'victory') {
       // survive-objective reached its turn limit — resolve outside this updater
       pendingVictory = true;
-      return { units, turn: nextTurn, midDialog, eventsFired, hazardWarn, salvageCr: st.salvageCr + sectorCr };
+      return { units, turn: nextTurn, midDialog, eventsFired, hazardWarn, blizzard, salvageCr: st.salvageCr + sectorCr };
     }
     if (!notice && end !== 'defeat') {
       notice =
@@ -2237,6 +2263,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       eventsFired,
       dangerTiles,
       hazardWarn,
+      blizzard,
       salvageCr: st.salvageCr + sectorCr,
     };
   });

@@ -9,7 +9,7 @@ export interface ItemDef {
   name: string;
   desc: string;
   price: number;
-  apply: 'hp' | 'en' | 'ammo' | 'sp' | 'valor';
+  apply: 'hp' | 'en' | 'ammo' | 'sp' | 'valor' | 'willAll' | 'healArea';
   amount: number;
 }
 
@@ -20,6 +20,8 @@ export const ITEMS: Record<string, ItemDef> = {
   ammoBox: { id: 'ammoBox', name: 'Ammo Box', desc: 'Refill all weapon ammo', price: 300, apply: 'ammo', amount: 0 },
   spiritWing: { id: 'spiritWing', name: 'Spirit Wing', desc: 'Restore 40 SP', price: 500, apply: 'sp', amount: 40 },
   valorPill: { id: 'valorPill', name: 'Valor Pill', desc: 'Next attack damage x1.5', price: 600, apply: 'valor', amount: 0 },
+  rallyBanner: { id: 'rallyBanner', name: 'Rally Banner', desc: '+10 Will to every ally', price: 900, apply: 'willAll', amount: 10 },
+  repairDrone: { id: 'repairDrone', name: 'Repair Drone', desc: 'Heal 30% HP — unit + allies within 2 tiles', price: 750, apply: 'healArea', amount: 30 },
 };
 
 export type ItemId = keyof typeof ITEMS;

@@ -67,6 +67,7 @@ export function SidePanel() {
         <Text style={styles.phaseTxt}>{s.phase === 'enemy' ? 'ENEMY PHASE' : 'PLAYER PHASE'}</Text>
         <Text style={styles.turnTxt}>T{s.turn}</Text>
       </View>
+      {s.blizzard ? <Text style={styles.blizzChip}>❄ BLIZZARD — ground units -15% hit</Text> : null}
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity onPress={() => setShowRoster((v) => !v)} style={{ flex: 1 }}>
           <Text style={styles.counts}>
@@ -327,12 +328,12 @@ export function SidePanel() {
                     const bm = bondMods(s.bonds, s.units, unit);
                     const fb = formationBonus(s.units, unit);
                     const pin = hasPincer(s.units, unit, e);
-                    const hc = hitChance(unit, e, s.pendingWeapon!, s.map, bm.hitBonus + rallyBonus(s.units, unit) + fb);
+                    const hc = hitChance(unit, e, s.pendingWeapon!, s.map, bm.hitBonus + rallyBonus(s.units, unit) + fb + (s.blizzard && unit.def.moveType !== 'air' ? -15 : 0));
                     const dmg = damageOf(unit, e, s.pendingWeapon!, s.map, false, bm.dmgMult * (pin ? 1.1 : 1));
                     const kill = e.hp - dmg <= 0;
                     const cw = bestCounterWeapon(e, s.pendingMove!);
                     const cDmg = cw ? damageOf(e, unit, cw, s.map, false) : 0;
-                    const cHc = cw ? hitChance(e, unit, cw, s.map) : 0;
+                    const cHc = cw ? hitChance(e, unit, cw, s.map, s.blizzard && e.def.moveType !== 'air' ? -15 : 0) : 0;
                     return (
                       <TouchableOpacity key={e.uid} onPress={() => s.chooseTarget(e.uid)} style={[styles.tgtRow, kill && styles.tgtRowKill]}>
                         <View style={{ flex: 1 }}>
@@ -555,6 +556,7 @@ const styles = StyleSheet.create({
   logBox: { marginTop: 7, backgroundColor: '#0c0e16', borderRadius: 6, padding: 6, minHeight: 60, maxHeight: 110 },
   dangerBtn: { borderWidth: 1, borderColor: '#ff5a5a55', borderRadius: 5, paddingHorizontal: 6, paddingVertical: 2, marginLeft: 6 },
   dangerBtnOn: { borderColor: '#ff5a5a', backgroundColor: '#3a1010' },
+  blizzChip: { color: '#9fd8ff', fontSize: 10, fontWeight: '700', letterSpacing: 0.6, marginBottom: 4, backgroundColor: 'rgba(90,160,255,0.14)', borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2, overflow: 'hidden' },
   dangerTxt: { color: '#8a90a0', fontSize: 8, fontWeight: '800', letterSpacing: 0.5 },
   logLine: { color: '#9fb0d0', fontSize: 9, marginBottom: 2 },
   endTurn: { marginTop: 6, borderWidth: 1, borderColor: '#ffd34d', borderRadius: 6, paddingVertical: 7, alignItems: 'center', backgroundColor: '#26251a' },
