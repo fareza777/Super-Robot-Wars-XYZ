@@ -93,12 +93,12 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike'], faceColor: '#ff7a7a', trait: 'crimson_fury' }),
-  moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally' }),
-  serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.' }),
+  moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.' }),
+  serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.' }),
   veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
-  bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally' }),
-  vaelp: P({ name: 'Emperor Vael', callsign: 'THRONE', melee: 82, ranged: 84, defense: 76, evade: 72, maxSp: 90, spirits: ['strike', 'valor', 'focus', 'guard'], faceColor: '#ffe08a', trait: 'sovereign' }),
+  bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.' }),
+  vaelp: P({ name: 'Emperor Vael', callsign: 'THRONE', melee: 82, ranged: 84, defense: 76, evade: 72, maxSp: 90, spirits: ['strike', 'valor', 'focus', 'guard'], faceColor: '#ffe08a', trait: 'sovereign', lastWords: 'Impossible... I AM the Throne—' }),
 };
 
 // merged pilot lookup (unit.def.pilot stays typed as PilotDef)
@@ -569,6 +569,8 @@ export interface SideMissionDef {
   objectiveType?: 'rout' | 'survive' | 'seize';
   surviveTurns?: number;
   objective?: string;
+  /** repeatable patrol op — never marked cleared, level scales with campaign progress */
+  repeatable?: boolean;
 }
 
 export const SIDE_MISSIONS: SideMissionDef[] = [
@@ -696,12 +698,81 @@ export const SIDE_MISSIONS: SideMissionDef[] = [
   },
 ];
 
+/** Repeatable patrol operations — always replayable, level scales with campaign progress. */
+export const PATROL_MISSIONS: SideMissionDef[] = [
+  { id: 'p1', name: 'Drift Wolves Patrol', desc: 'Imperial stragglers harass the belt lanes. Run them off — again and again.', unlockCh: 7, theme: 'void', lvl: 8, count: 5, rewardCr: 800, repeatable: true, objective: 'Rout all hostiles' },
+  { id: 'p2', name: 'Ash Belt Sweep', desc: 'Scavenger packs regroup in the Glass Desert whenever we look away.', unlockCh: 13, theme: 'desert', lvl: 12, count: 6, rewardCr: 1100, repeatable: true, objective: 'Rout all hostiles' },
+  { id: 'p3', name: "Throne's Shadow Watch", desc: 'The Emperor\'s vanguard tests our perimeter. Answer in kind.', unlockCh: 20, theme: 'fortress', lvl: 17, count: 7, rewardCr: 1500, repeatable: true, objective: 'Rout all hostiles' },
+];
+
+export const ALL_SIDE_MISSIONS: SideMissionDef[] = [...SIDE_MISSIONS, ...PATROL_MISSIONS];
+
+// ---------- Honors — persistent achievements with one-time credit bounties ----------
+
+export interface HonorDef {
+  id: string;
+  name: string;
+  desc: string;
+  rewardCr: number;
+}
+
+export const HONORS: HonorDef[] = [
+  { id: 'h_first', name: 'FIRST BLOOD', desc: 'Destroy your first hostile', rewardCr: 300 },
+  { id: 'h_ace', name: 'ACE PILOT', desc: 'A pilot reaches 25 career kills', rewardCr: 800 },
+  { id: 'h_master', name: 'ACE MASTERY', desc: 'A pilot reaches 50 career kills', rewardCr: 1500 },
+  { id: 'h_full', name: 'FULL SQUADRON', desc: 'Six pilots hold service records', rewardCr: 600 },
+  { id: 'h_marksman', name: 'MARKSMAN', desc: 'Earn 5 ★ mastery objectives', rewardCr: 1000 },
+  { id: 'h_perfect', name: 'PERFECT CAMPAIGN', desc: 'Earn every ★ mastery objective', rewardCr: 5000 },
+  { id: 'h_comrades', name: 'COMRADES', desc: 'Watch 8 bond events in the mess hall', rewardCr: 800 },
+  { id: 'h_hearts', name: 'HEARTS OF STEEL', desc: 'Complete all romance bond events', rewardCr: 1500 },
+  { id: 'h_freelance', name: 'FREELANCER', desc: 'Clear 5 side quests', rewardCr: 800 },
+  { id: 'h_allclear', name: 'PEACEKEEPER', desc: 'Clear all 10 side quests', rewardCr: 2000 },
+  { id: 'h_eternal', name: 'ETERNAL WAR', desc: 'Begin a New Game+ cycle', rewardCr: 3000 },
+  { id: 'h_chest', name: 'WAR CHEST', desc: 'Hold 20,000 credits at once', rewardCr: 1500 },
+];
+
+/** Whether an honor's condition is currently met. */
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number }): boolean {
+  const kills = Object.values(s.pilotProg);
+  const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
+  const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
+  switch (h.id) {
+    case 'h_first':
+      return totalKills >= 1;
+    case 'h_ace':
+      return maxKills >= 25;
+    case 'h_master':
+      return maxKills >= 50;
+    case 'h_full':
+      return kills.length >= 6;
+    case 'h_marksman':
+      return s.masteryDone.length >= 5;
+    case 'h_perfect':
+      return s.masteryDone.length >= CHAPTERS.filter((c) => c.mastery).length;
+    case 'h_comrades':
+      return s.bondSeen.length >= 8;
+    case 'h_hearts':
+      return s.bondSeen.length >= 12;
+    case 'h_freelance':
+      return s.sideCleared.length >= 5;
+    case 'h_allclear':
+      return s.sideCleared.length >= SIDE_MISSIONS.length;
+    case 'h_eternal':
+      return s.ngPlus >= 1;
+    case 'h_chest':
+      return s.credits >= 20000;
+    default:
+      return false;
+  }
+}
+
 /** Fabricate a ChapterDef view of a side mission for genMap/enemyLevelOf/checkEnd. */
 export function sideAsChapter(m: SideMissionDef): ChapterDef {
+  const idx = m.repeatable ? SIDE_MISSIONS.length + PATROL_MISSIONS.findIndex((p) => p.id === m.id) : SIDE_MISSIONS.findIndex((x) => x.id === m.id);
   return {
-    id: 1000 + SIDE_MISSIONS.indexOf(m),
+    id: 1000 + idx,
     name: m.name,
-    subtitle: 'SIDE QUEST',
+    subtitle: m.repeatable ? 'PATROL OP' : 'SIDE QUEST',
     act: m.lvl >= 15 ? 3 : m.lvl >= 8 ? 2 : 1,
     theme: m.theme,
     lvl: m.lvl,

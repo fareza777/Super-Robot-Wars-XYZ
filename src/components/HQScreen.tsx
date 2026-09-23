@@ -4,7 +4,7 @@ import { Image as ExpoImage } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART, AudioKey, MECH_ART, NPC_ART, PILOT_ART } from '../assets';
 import { play } from '../audio';
-import { ALL_UNITS, CHAPTERS, CHAPTERS_COUNT, ITEMS, MAX_PART_SLOTS, MAX_PILOT_SKILL, MAX_WEAPON_UPG, PARTS, PILOT_STATS, PLAYER_DEF_IDS, SIDE_MISSIONS, UPGRADE_STATS, WEAPON_UPG_POWER, missionOf, rosterFor, weaponUpgCost } from '../game/campaign';
+import { ALL_UNITS, CHAPTERS, CHAPTERS_COUNT, HONORS, ITEMS, MAX_PART_SLOTS, MAX_PILOT_SKILL, MAX_WEAPON_UPG, PARTS, PILOT_STATS, PLAYER_DEF_IDS, SIDE_MISSIONS, UPGRADE_STATS, WEAPON_UPG_POWER, honorDone, missionOf, rosterFor, weaponUpgCost } from '../game/campaign';
 import { BOND_EVENTS, MAX_BOND, bondLevel } from '../game/bonds';
 import { SPIRITS, TRAITS } from '../game/data';
 import { useGame } from '../game/store';
@@ -377,6 +377,34 @@ export function HQScreen() {
                 </Text>
                 <Text style={styles.recordRow}>CREDITS ON HAND — ◆ {s.credits}</Text>
               </View>
+              <Text style={[styles.panelTitle, { marginTop: 14 }]}>HONORS</Text>
+              <View style={styles.recordBox}>
+                {HONORS.map((h) => {
+                  const claimed = s.honorsClaimed.includes(h.id);
+                  const done = honorDone(h, s);
+                  return (
+                    <View key={h.id} style={styles.honorRow}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.honorName, !done && { color: '#5a6488' }]}>
+                          {done ? '★' : '☆'} {h.name}
+                        </Text>
+                        <Text style={styles.honorDesc}>
+                          {h.desc} · +{h.rewardCr} CR
+                        </Text>
+                      </View>
+                      {claimed ? (
+                        <Text style={styles.honorClaimed}>CLAIMED</Text>
+                      ) : done ? (
+                        <Pressable style={styles.honorBtn} onPress={() => s.claimHonor(h.id)}>
+                          <Text style={styles.honorBtnTxt}>CLAIM</Text>
+                        </Pressable>
+                      ) : (
+                        <Text style={styles.honorLocked}>LOCKED</Text>
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
             </ScrollView>
             <Pressable style={styles.backBtn} onPress={() => setTab('main')}>
               <Text style={styles.backTxt}>◂ BACK TO HQ</Text>
@@ -562,4 +590,11 @@ const styles = StyleSheet.create({
   codexSide: { borderWidth: 1, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 },
   recordBox: { backgroundColor: 'rgba(12,15,26,0.85)', borderWidth: 1, borderColor: '#2a2f42', borderRadius: 10, padding: 12, gap: 6 },
   recordRow: { color: '#c8d4f0', fontSize: 11.5, fontWeight: '700', letterSpacing: 0.6 },
+  honorRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: 'rgba(42,47,66,0.6)' },
+  honorName: { color: '#ffd34d', fontSize: 11.5, fontWeight: '900', letterSpacing: 1 },
+  honorDesc: { color: '#8fa0c8', fontSize: 10, marginTop: 1 },
+  honorClaimed: { color: '#4dff7a', fontWeight: '900', fontSize: 9.5, letterSpacing: 1.5 },
+  honorLocked: { color: '#5a6488', fontWeight: '900', fontSize: 9.5, letterSpacing: 1.5 },
+  honorBtn: { backgroundColor: '#2a3a12', borderWidth: 1.5, borderColor: '#ffd34d', borderRadius: 7, paddingHorizontal: 12, paddingVertical: 5 },
+  honorBtnTxt: { color: '#ffd34d', fontWeight: '900', fontSize: 10.5, letterSpacing: 1.5 },
 });

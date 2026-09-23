@@ -15,6 +15,9 @@ import {
   WeaponUpgMap,
   ChapterDef,
   DEBRIEFS,
+  ALL_SIDE_MISSIONS,
+  HONORS,
+  honorDone,
   SIDE_MISSIONS,
   chapterOf,
   enemyLevelOf,
@@ -33,7 +36,7 @@ const modsFor = (bonds: Record<string, number>, units: UnitState[]) => (u: UnitS
   return { hitBonus: bm.hitBonus + rallyBonus(units, u), dmgMult: bm.dmgMult };
 };
 import { MISSION_SSS, SPIRITS, TERRAIN_INFO } from './data';
-import { setMusicEnabled, setSoundEnabled } from '../audio';
+import { bgm, setMusicEnabled, setSoundEnabled } from '../audio';
 import {
   aiPickReaction,
   applyAttack,
@@ -43,6 +46,7 @@ import {
   attackTiles as attackTilesFor,
   checkEnd,
   clearTransientForOwnPhase,
+  defeatQuotes,
   dist,
   findSupport,
   key,
@@ -83,6 +87,7 @@ export interface SaveData {
   masteryDone?: number[]; // chapter ids whose mastery challenge was achieved
   hintsSeen?: string[]; // one-time tutorial cards already dismissed
   route?: 'a' | 'b' | null; // route split chosen after ch.15
+  honorsClaimed?: string[]; // HONORS achievement ids whose credit bounty was claimed
 }
 
 /** Serialized mid-battle snapshot — lets the player leave a mission and resume it later. */
@@ -179,6 +184,7 @@ interface Store {
   debrief: { speaker: string; text: string; voice?: string }[] | null; // post-mission scene queued over HQ
   salvageQueue: string[]; // item names dropped on kills, toasted on the map
   route: 'a' | 'b' | null; // campaign route split chosen after ch.15 (affects ch.16-18)
+  honorsClaimed: string[]; // HONORS ids already claimed
   log: string[];
   enemyBusy: boolean;
   screenShake: number;
@@ -201,6 +207,7 @@ interface Store {
   buyPart: (partId: string) => void;
   equipPart: (defId: string, partId: string) => void;
   allocPP: (defId: string, statId: PilotSkillId) => void;
+  claimHonor: (id: string) => void;
   clearInspect: () => void;
   toggleDanger: () => void;
   startMission: () => void;
@@ -354,8 +361,8 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
 
 const BATTLE_SAVE_KEY = 'srwxyz_battle_v1';
 
-async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route'>>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route };
+async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed'>>) {
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -505,6 +512,7 @@ export const useGame = create<Store>((set, get) => ({
   debrief: null,
   salvageQueue: [],
   route: null,
+  honorsClaimed: [],
   hint: null,
   hintsSeen: [],
 
@@ -556,12 +564,14 @@ export const useGame = create<Store>((set, get) => ({
 
   startSideMission: (id) => {
     const s = get();
-    const m = SIDE_MISSIONS.find((x) => x.id === id);
-    if (!m || s.chapter < m.unlockCh || s.sideCleared.includes(id)) return;
-    const ch = sideAsChapter(m);
+    const m = ALL_SIDE_MISSIONS.find((x) => x.id === id);
+    if (!m || s.chapter < m.unlockCh || (s.sideCleared.includes(id) && !m.repeatable)) return;
+    // patrol ops scale to campaign progress — always stay relevant as a grind option
+    const lvl = m.repeatable ? Math.max(m.lvl, s.chapter) : m.lvl;
+    const ch = sideAsChapter({ ...m, lvl });
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
     void clearBattleSave();
-    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
+    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`${m.repeatable ? 'PATROL OP' : 'SIDE QUEST'}: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
     setTimeout(() => set({ notice: null }), 2400);
     void persistBattle(get());
   },
@@ -631,6 +641,7 @@ export const useGame = create<Store>((set, get) => ({
       masteryDone: [] as number[],
       savedBattle: null as BattleSave | null,
       route: null as 'a' | 'b' | null,
+      honorsClaimed: [] as string[],
     };
     void clearBattleSave();
     set({ ...fresh, hasSave: true, kills: 0, phase: 'prologue' });
@@ -639,12 +650,23 @@ export const useGame = create<Store>((set, get) => ({
 
   finishPrologue: () => set({ phase: 'hq' }),
 
+  // HONORS — one-time credit bounty for a persistent feat
+  claimHonor: (id) => {
+    const s = get();
+    const h = HONORS.find((x) => x.id === id);
+    if (!h || s.honorsClaimed.includes(id) || !honorDone(h, s)) return;
+    const honorsClaimed = [...s.honorsClaimed, id];
+    const credits = s.credits + h.rewardCr;
+    set({ honorsClaimed, credits, log: push(s.log, `★ HONOR — ${h.name}: +${h.rewardCr} credits`) });
+    void persist({ ...s, honorsClaimed, credits });
+  },
+
   loadSave: async () => {
     try {
       const raw = await AsyncStorage.getItem(SAVE_KEY);
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
-      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null });
+      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [] });
     } catch {}
     try {
       const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
@@ -1126,6 +1148,7 @@ export const useGame = create<Store>((set, get) => ({
       }
     }
     for (const e of result.expEvents) log2 = push(log2, e);
+    for (const q of defeatQuotes(s.units, state.units)) log2 = push(log2, q);
     const killCount = (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0) + (result.support?.destroyed ? 1 : 0);
     let inventory = s.inventory;
     let salvageQueue = s.salvageQueue;
@@ -1185,6 +1208,7 @@ export const useGame = create<Store>((set, get) => ({
     let log2 = push(s.log, `${att.def.name} fires ${w.name} — ${result.splash!.length + 1} units in the blast`);
     for (const sp of result.splash!) log2 = push(log2, `  ${sp.name}: ${sp.hit ? `${sp.damage}${sp.destroyed ? ' — DESTROYED' : ''}` : 'missed'}`);
     for (const e of result.expEvents) log2 = push(log2, e);
+    for (const q of defeatQuotes(s.units, state.units)) log2 = push(log2, q);
     const common = {
       units: state.units,
       log: log2,
@@ -1367,12 +1391,12 @@ function applyVictory(set: SetFn, get: Get) {
   }
   // each elite destroyed pays a bounty on top of the standard kill credit
   const eliteCr = s.units.filter((u) => u.side === 'enemy' && !u.alive && u.elite).length * 50;
-  const side = s.sideId ? SIDE_MISSIONS.find((m) => m.id === s.sideId) : undefined;
+  const side = s.sideId ? ALL_SIDE_MISSIONS.find((m) => m.id === s.sideId) : undefined;
   if (side) {
     const reward = Math.round((side.rewardCr + s.kills * 150 + eliteCr) * (s.settings.difficulty === 'hard' ? 1.25 : 1));
     const credits = s.credits + reward;
     const inventory = side.rewardItem ? { ...s.inventory, [side.rewardItem]: (s.inventory[side.rewardItem] ?? 0) + 1 } : s.inventory;
-    const sideCleared = [...s.sideCleared, side.id];
+    const sideCleared = side.repeatable ? s.sideCleared : [...s.sideCleared, side.id];
     set({
       battle: null,
       phase: 'victory',
@@ -1466,6 +1490,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
           log: push(st.log, `⚠ PHASE SHIFT — ${boss.def.name} unleashes full power! Armor +300, Will MAX`),
           notice: `⚠ PHASE SHIFT — ${boss.def.name.toUpperCase()}`,
         }));
+        bgm('bgm_boss');
         setTimeout(() => set({ notice: null }), 3200);
         await sleep(700);
       }
@@ -1548,6 +1573,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
           const d = dropsForKills(kc, st.inventory);
           let l = mkLog(st.log);
           for (const x of d.lines) l = push(l, x);
+          for (const q of defeatQuotes(cur.units, state.units)) l = push(l, q);
           return { units: state.units, kills: st.kills + kc, inventory: d.inventory, salvageQueue: [...st.salvageQueue, ...d.names], log: rxnLog(l) };
         });
         const end = checkEnd(get().units, get().missionCh, get().turn);
@@ -1566,6 +1592,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         const d = dropsForKills(kc, st.inventory);
         let l = mkLog(st.log);
         for (const x of d.lines) l = push(l, x);
+        for (const q of defeatQuotes(cur.units, state.units)) l = push(l, q);
         return {
           units: state.units,
           phase: 'battle',
@@ -1589,7 +1616,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       }
       await sleep(180);
     } else {
-      set((st) => ({ units: st.units.map((u) => (u.uid === plan.unit.uid ? { ...u, acted: true } : u)) }));
+      set((st) => ({ units: st.units.map((u) => (u.uid === plan.unit.uid ? { ...u, acted: true } : u)), log: plan.fleeing ? push(st.log, `${plan.unit.def.name} is falling back!`) : st.log }));
       await sleep(140);
     }
   }

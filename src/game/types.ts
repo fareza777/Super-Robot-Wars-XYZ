@@ -61,6 +61,8 @@ export interface PilotDef {
   faceColor: string;
   /** pilot trait (passive) — resolved inside the combat engine */
   trait?: TraitId;
+  /** spoken when this pilot's unit is destroyed (bosses) */
+  lastWords?: string;
 }
 
 export interface UnitDef {
