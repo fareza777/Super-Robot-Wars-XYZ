@@ -1039,6 +1039,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_rush', name: 'RUSH DOWN', desc: 'Destroy a boss before it can phase-shift', rewardCr: 800 },
   { id: 'h_chain', name: 'CHAIN GANG', desc: 'Score four or more kills in a single turn', rewardCr: 700 },
   { id: 'h_surv', name: 'SURVIVOR', desc: 'Win with a squad frame at 10% HP or less still standing', rewardCr: 600 },
+  { id: 'h_solo', name: 'SOLO WING', desc: 'A single squad frame scores every player kill (3 or more)', rewardCr: 900 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
@@ -1126,6 +1127,10 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return (s.chainCount ?? 0) >= 4;
     case 'h_surv':
       return (s.units ?? []).some((u) => u.side === 'player' && u.alive && u.hp != null && u.def.maxHp != null && u.hp <= u.def.maxHp * 0.1);
+    case 'h_solo': {
+      const ks = (s.units ?? []).filter((u) => u.side === 'player' && u.kills > 0);
+      return ks.length === 1 && (ks[0]?.kills ?? 0) >= 3;
+    }
     case 'h_ghostd':
       return s.altKill === true;
     default:

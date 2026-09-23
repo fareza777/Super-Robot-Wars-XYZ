@@ -51,7 +51,7 @@ export function unitAt(units: UnitState[], p: Pos): UnitState | undefined {
 }
 
 export function moveRangeOf(u: UnitState): number {
-  return Math.max(1, u.def.moveRange + (u.accelThisTurn ?? 0) + partBonus(u, 'move') - (u.crippled ? 2 : 0));
+  return Math.max(1, u.def.moveRange + (u.accelThisTurn ?? 0) + partBonus(u, 'move') - (u.crippled ? 2 : 0) - (u.statuses?.some((fx) => fx.id === 'slow') ? 3 : 0));
 }
 
 /** BFS over terrain move cost; blocked tiles occupied by other units. */
@@ -159,7 +159,7 @@ function armorOf(u: UnitState, map: MapDef): number {
 }
 
 /** status applied on a landed hit — refreshes the same debuff instead of stacking */
-function applyStatus(u: UnitState, id: 'burn' | 'stun' | 'break'): void {
+function applyStatus(u: UnitState, id: 'burn' | 'stun' | 'break' | 'slow'): void {
   u.statuses = [...(u.statuses ?? []).filter((s) => s.id !== id), { id, turns: 2 }];
 }
 
@@ -183,7 +183,7 @@ export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: Map
 }
 
 export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, crit: boolean, dmgMult = 1): number {
-  const armor = armorOf(def, map);
+  const armor = att.breachNextAttack ? 0 : armorOf(def, map);
   const raw = w.power + statFor(att, w) * 10 - (w.pierce ? Math.round(armor * 0.65) : armor);
   let dmg = Math.max(120, Math.round(raw));
   if (crit) dmg = Math.round(dmg * 1.3);
@@ -532,6 +532,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   }
   att.strikeForNextAttack = false;
   att.deadshotForNextAttack = false;
+  att.breachNextAttack = false;
   att.valorForNextAttack = false;
   att.gutsForNextAttack = false;
   att.snipeForNextAttack = false;
@@ -574,6 +575,7 @@ export function applyMapAttack(state: GameState, attackerUid: string, targetTile
   att.acted = true;
   att.strikeForNextAttack = false;
   att.deadshotForNextAttack = false;
+  att.breachNextAttack = false;
   att.valorForNextAttack = false;
   att.gutsForNextAttack = false;
 
@@ -621,6 +623,7 @@ export function applyAllAttack(state: GameState, attackerUid: string, weaponId: 
   att.acted = true;
   att.strikeForNextAttack = false;
   att.deadshotForNextAttack = false;
+  att.breachNextAttack = false;
   att.valorForNextAttack = false;
   att.gutsForNextAttack = false;
   att.soulForNextAttack = false;
@@ -724,6 +727,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break;
     case 'frenzy':
       u.frenzyThisTurn = true;
+      break;
+    case 'breach':
+      u.breachNextAttack = true;
       break;
     case 'expose':
       break; // enemies in radius are marked by the store pass
