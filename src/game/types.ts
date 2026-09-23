@@ -16,6 +16,8 @@ export interface WeaponDef {
   antiAir?: boolean;
   /** heals the attacker for 25% of damage dealt */
   drain?: boolean;
+  /** breaker — a landed hit sunders the target's armor for the rest of the battle */
+  breaker?: boolean;
   name: string;
   kind: WeaponKind;
   power: number;

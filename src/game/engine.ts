@@ -405,6 +405,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   }
   if (result.hit && w.drain) att.hp = Math.min(att.def.maxHp, att.hp + Math.round(result.damage * 0.25));
   if (result.hit && def.alive && w.status && !result.graze) applyStatus(def, w.status);
+  if (result.hit && def.alive && w.breaker && !result.graze) def.sundered = true;
   if (result.destroyed) {
     def.alive = false;
     att.kills += 1;
@@ -441,6 +442,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
     }
     if (result.counter.hit && cw.drain) def.hp = Math.min(def.def.maxHp, def.hp + Math.round(result.counter.damage * 0.25));
     if (result.counter.hit && att.alive && cw.status && !result.counter.graze) applyStatus(att, cw.status);
+    if (result.counter.hit && att.alive && cw.breaker && !result.counter.graze) att.sundered = true;
     if (result.counter.destroyed) {
       att.alive = false;
       def.kills += 1;
@@ -523,6 +525,7 @@ export function applyMapAttack(state: GameState, attackerUid: string, targetTile
     }
   });
   willGain(att, 1 + kills * 4);
+  if (kills > 0 && att.skills?.scavenger) att.en = Math.min(att.def.maxEn, att.en + (att.skills.scavenger ?? 0) * 4 * kills);
   result.expEvents = [];
   if (hits > 0) awardExp(att, 30 + kills * 40 + (hits - 1) * 15, result.expEvents);
   return { state: { ...state, units }, result };
@@ -568,6 +571,7 @@ export function applyAllAttack(state: GameState, attackerUid: string, weaponId: 
     }
   });
   willGain(att, 1 + kills * 4);
+  if (kills > 0 && att.skills?.scavenger) att.en = Math.min(att.def.maxEn, att.en + (att.skills.scavenger ?? 0) * 4 * kills);
   result.expEvents = [];
   if (hits > 0) awardExp(att, 30 + kills * 40 + (hits - 1) * 15, result.expEvents);
   return { state: { ...state, units }, result };

@@ -88,6 +88,8 @@ export const WEAPONS = {
   mapCataclysm: W({ id: 'map_cataclysm', name: 'MAP: Void Cataclysm', kind: 'funnel', power: 2800, rangeMin: 2, rangeMax: 6, enCost: 60, ammo: null, hitMod: -5, postMove: false, animSeed: 26, mapRange: 2 }),
   // ALL weapon — saturates every hostile inside range in one volley, no counters
   omniBarrage: W({ id: 'omni_barrage', name: 'ALL: Omni Barrage', kind: 'missile', power: 2100, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 4, hitMod: 0, postMove: false, animSeed: 27, willReq: 110, all: true }),
+  fangRipper: W({ id: 'fang_ripper', name: 'Fang Ripper', kind: 'melee', power: 3300, rangeMin: 1, rangeMax: 2, enCost: 30, ammo: null, hitMod: 12, postMove: true, animSeed: 54, breaker: true }),
+  siegeCrusher: W({ id: 'siege_crusher', name: 'Siege Crusher', kind: 'melee', power: 3600, rangeMin: 1, rangeMax: 1, enCost: 20, ammo: null, hitMod: -5, postMove: true, animSeed: 55, breaker: true }),
   militiaRifle: W({ id: 'militia_rifle', name: 'Defense Rifle', kind: 'gun', power: 1500, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 12, hitMod: 8, postMove: true, animSeed: 21 }),
   voidLance: W({ id: 'void_lance', name: 'Void Lance', kind: 'beam', power: 3300, rangeMin: 2, rangeMax: 7, enCost: 32, ammo: null, hitMod: 0, critMod: 8, postMove: false, animSeed: 25, willReq: 115, pierce: true, sniper: true }),
 };

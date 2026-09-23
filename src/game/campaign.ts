@@ -130,7 +130,7 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   nightmare: U({ id: 'nightmare', name: 'Nightmare', title: 'Royal Guard', color: '#5a2f3a', accent: '#ffb0c0', maxHp: 6800, maxEn: 140, armor: 1150, mobility: 122, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.missilePods, WEAPONS.stasisRay], pilot: PILOTS.grunt, guardian: true }),
   phantom: U({ id: 'phantom', name: 'Phantom Shade', title: 'Stealth Stalker', color: '#232336', accent: '#a0a8ff', maxHp: 3600, maxEn: 130, armor: 620, mobility: 172, moveRange: 8, moveType: 'air', weapons: [WEAPONS.heatRod, WEAPONS.vulcan, WEAPONS.missilePods], pilot: PILOTS.grunt, stealth: true }),
   raxden: U({ id: 'raxden', name: 'Raxden Crimson', title: 'Custom Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.plasmaEdge, WEAPONS.railgun, WEAPONS.vulcan], pilot: CAMPAIGN_PILOTS.raxp, boss: true }),
-  moorin: U({ id: 'moorin', name: 'Moorin Anvil', title: 'Imperial General', color: '#4a5a48', accent: '#d0e0c0', maxHp: 9800, maxEn: 160, armor: 1500, mobility: 96, moveRange: 5, moveType: 'land', weapons: [WEAPONS.megaBeam, WEAPONS.gatling, WEAPONS.punch], pilot: CAMPAIGN_PILOTS.moorinp, boss: true }),
+  moorin: U({ id: 'moorin', name: 'Moorin Anvil', title: 'Imperial General', color: '#4a5a48', accent: '#d0e0c0', maxHp: 9800, maxEn: 160, armor: 1500, mobility: 96, moveRange: 5, moveType: 'land', weapons: [WEAPONS.megaBeam, WEAPONS.gatling, WEAPONS.siegeCrusher], pilot: CAMPAIGN_PILOTS.moorinp, boss: true }),
   serka: U({ id: 'serka', name: 'Serka Vanta', title: 'Void Empress', color: '#5a2f6e', accent: '#e0b8ff', maxHp: 8200, maxEn: 190, armor: 1000, mobility: 140, moveRange: 7, moveType: 'air', weapons: [WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.serkap, boss: true }),
   empress: U({ id: 'empress', name: 'Empress Ascendant', title: 'True Void Form', color: '#7a3f8e', accent: '#ffe0ff', maxHp: 11000, maxEn: 220, armor: 1250, mobility: 146, moveRange: 7, moveType: 'air', weapons: [WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.chestBlaster, WEAPONS.mapCataclysm], pilot: CAMPAIGN_PILOTS.serkap, boss: true, resists: { beam: 0.3, funnel: 0.3 } }),
   warden: U({ id: 'warden', name: 'Gate Warden', title: 'Ancient Guardian', color: '#7a5a30', accent: '#ffe0a8', maxHp: 12000, maxEn: 140, armor: 1600, mobility: 90, moveRange: 4, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.bramp, boss: true }),
@@ -141,7 +141,7 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   // unarmed civilian convoy — escort objective on protect chapters
   arklander: U({ id: 'arklander', name: 'Arklander Convoy', title: 'Civilian Transport', color: '#5a5148', accent: '#e0d0a8', maxHp: 3400, maxEn: 0, armor: 350, mobility: 40, moveRange: 0, moveType: 'land', weapons: [], pilot: PILOTS.civ }),
   // --- player reinforcements (join at arc boundaries) ---
-  raxdenR: U({ id: 'raxdenR', name: 'Raxden Crimson', title: 'Defected Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.plasmaEdge, WEAPONS.railgun, WEAPONS.vulcan, WEAPONS.crimsonDuet], pilot: CAMPAIGN_PILOTS.raxp, level: 5 }),
+  raxdenR: U({ id: 'raxdenR', name: 'Raxden Crimson', title: 'Defected Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.fangRipper, WEAPONS.plasmaEdge, WEAPONS.railgun, WEAPONS.vulcan, WEAPONS.crimsonDuet], pilot: CAMPAIGN_PILOTS.raxp, level: 5 }),
   vexiaX: U({ id: 'vexiaX', name: 'Vexia Custom', title: 'Ark Interceptor', color: '#2a8a9a', accent: '#a0f0ff', maxHp: 5200, maxEn: 150, armor: 880, mobility: 142, moveRange: 7, moveType: 'air', weapons: [WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.vulcan, WEAPONS.voidLance], pilot: CAMPAIGN_PILOTS.veep, level: 7 }),
   // act-3 fast striker — drains HP on hit, high evade, hunts stragglers
   cataphract: U({ id: 'cataphract', name: 'Karn Cataphract', title: 'Shadow Striker', color: '#2e2e3a', accent: '#a0a0ff', maxHp: 4200, maxEn: 120, armor: 650, mobility: 158, moveRange: 8, moveType: 'air', weapons: [WEAPONS.vampEdge, WEAPONS.plasmaEdge], pilot: PILOTS.grunt, resists: { beam: 0.4 }, jammer: true }),
@@ -961,6 +961,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_ironwill', name: 'IRON WILL', desc: 'Win a battle with a wounded pilot in the line', rewardCr: 800 },
   { id: 'h_forma', name: 'FORMA SHIFT', desc: 'Transform a frame mid-battle and win', rewardCr: 700 },
   { id: 'h_raw', name: 'RAW POWER', desc: 'Win a battle with no spirits and no items used', rewardCr: 900 },
+  { id: 'h_ghost', name: 'GHOST HUNTER', desc: 'Destroy 3 Phantom Shade stealth units', rewardCr: 800 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
@@ -1024,6 +1025,8 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return s.transformed === true;
     case 'h_raw':
       return s.usedSupport !== true;
+    case 'h_ghost':
+      return (s.killsByDef?.phantom ?? 0) >= 3;
     default:
       return false;
   }
