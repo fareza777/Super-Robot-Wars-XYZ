@@ -55,7 +55,7 @@ export interface StatusFx {
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy' | 'hymn' | 'emp' | 'phalanx' | 'deadshot';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy' | 'hymn' | 'emp' | 'phalanx' | 'deadshot' | 'frenzy';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -142,6 +142,8 @@ export interface UnitState {
   hymnUntilEndOfEnemyPhase?: boolean;
   /** Deadshot — the next attack is a guaranteed critical */
   deadshotForNextAttack?: boolean;
+  /** Frenzy — weapons cost no EN for the rest of this turn */
+  frenzyThisTurn?: boolean;
   gritUntilEndOfEnemyPhase?: boolean;
   guardUntilEndOfEnemyPhase?: boolean;
   strikeForNextAttack?: boolean;

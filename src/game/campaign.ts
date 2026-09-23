@@ -153,6 +153,8 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   cataphract: U({ id: 'cataphract', name: 'Karn Cataphract', title: 'Shadow Striker', color: '#2e2e3a', accent: '#a0a0ff', maxHp: 4200, maxEn: 120, armor: 650, mobility: 158, moveRange: 8, moveType: 'air', weapons: [WEAPONS.vampEdge, WEAPONS.plasmaEdge], pilot: PILOTS.grunt, resists: { beam: 0.4 }, jammer: true }),
   // act-2/3 support frame — mends wounded allies instead of pressing the attack
   medic: U({ id: 'medic', name: 'Vesper Choir', title: 'Imperial Medic', color: '#3a4a52', accent: '#a0ffd8', maxHp: 4000, maxEn: 100, armor: 700, mobility: 140, moveRange: 6, moveType: 'air', weapons: [WEAPONS.vulcan], pilot: PILOTS.grunt, medic: true }),
+  // act-3 artillery — a dead-zone siege cannon: devastating at range, blind up close
+  ballista: U({ id: 'ballista', name: 'Valkyr Ballista', title: 'Siege Artillery', color: '#4a3a52', accent: '#e0b070', maxHp: 4600, maxEn: 90, armor: 800, mobility: 92, moveRange: 4, moveType: 'land', weapons: [WEAPONS.siegeRain, WEAPONS.vulcan], pilot: PILOTS.grunt }),
   // Cpt. Vossen's personal frame — recurring ace, guaranteed salvage drop when downed
   vossDrake: U({ id: 'vossDrake', name: 'Drake Eclipse', title: 'Rival Ace', color: '#3a2030', accent: '#ff6a5a', maxHp: 9800, maxEn: 160, armor: 1350, mobility: 150, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.plasmaEdge, WEAPONS.missilePods], pilot: CAMPAIGN_PILOTS.vossen, boss: true, level: 8 }),
   // the Drake defects — after being downed twice he sorties as an armed Ark ally
@@ -804,7 +806,7 @@ export function enemyComp(ch: ChapterDef): string[] {
   const heavy = ch.act === 1 ? 'zoldaTank' : 'nightmare';
   const fast = ch.act === 3 ? 'cataphract' : 'lancer';
   const ghost = ch.act === 3 ? 'phantom' : 'vexia';
-  for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : (i % 11 === 9 && ch.act >= 2) ? 'medic' : i % 7 === 6 ? ghost : fill);
+  for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : (i % 11 === 9 && ch.act >= 2) ? 'medic' : (i % 13 === 11 && ch.act === 3) ? 'ballista' : i % 7 === 6 ? ghost : fill);
   if (ch.boss) comp.push(ch.boss);
   // Cpt. Vossen ambushes the squad on these chapters — a recurring ace duelist
   if ([6, 13, 19, 26].includes(ch.id)) comp.push('vossDrake');
@@ -1036,11 +1038,12 @@ export const HONORS: HonorDef[] = [
   { id: 'h_angel', name: 'GUARDIAN ANGEL', desc: 'Recover two escape pods in a single battle', rewardCr: 800 },
   { id: 'h_rush', name: 'RUSH DOWN', desc: 'Destroy a boss before it can phase-shift', rewardCr: 800 },
   { id: 'h_chain', name: 'CHAIN GANG', desc: 'Score four or more kills in a single turn', rewardCr: 700 },
+  { id: 'h_surv', name: 'SURVIVOR', desc: 'Win with a squad frame at 10% HP or less still standing', rewardCr: 600 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean; decoyHit?: boolean; iFieldKill?: boolean; mirrorWon?: boolean; arcKill?: boolean; blastKill?: boolean; lostAlly?: boolean; snipeKill?: boolean; rescuedPods?: string[]; bossRush?: boolean; chainCount?: number }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; side: string; hp?: number; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean; decoyHit?: boolean; iFieldKill?: boolean; mirrorWon?: boolean; arcKill?: boolean; blastKill?: boolean; lostAlly?: boolean; snipeKill?: boolean; rescuedPods?: string[]; bossRush?: boolean; chainCount?: number }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -1121,6 +1124,8 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return s.bossRush === true;
     case 'h_chain':
       return (s.chainCount ?? 0) >= 4;
+    case 'h_surv':
+      return (s.units ?? []).some((u) => u.side === 'player' && u.alive && u.hp != null && u.def.maxHp != null && u.hp <= u.def.maxHp * 0.1);
     case 'h_ghostd':
       return s.altKill === true;
     default:

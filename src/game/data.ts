@@ -39,6 +39,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   emp: { id: 'emp', name: 'EMP Burst', cost: 40, desc: 'Electromagnetic burst — the nearest enemy within 4 tiles is stunned, skipping its next activation' },
   phalanx: { id: 'phalanx', name: 'Phalanx', cost: 50, desc: 'Lock formation — every ally gains +400 armor until end of enemy phase' },
   deadshot: { id: 'deadshot', name: 'Deadshot', cost: 45, desc: 'Paint the kill-shot — your next attack is a guaranteed critical' },
+  frenzy: { id: 'frenzy', name: 'Frenzy', cost: 40, desc: 'Push the reactor — your weapons cost no EN for the rest of this turn' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
@@ -71,6 +72,7 @@ export const WEAPONS = {
   railgun: W({ id: 'railgun', name: 'Linear Railgun', kind: 'gun', power: 2600, rangeMin: 2, rangeMax: 6, enCost: 20, ammo: 10, hitMod: 0, postMove: true, animSeed: 8, pierce: true, antiAir: true, sniper: true }),
   heatRod: W({ id: 'heat_rod', name: 'Heat Rod', kind: 'melee', power: 2100, rangeMin: 1, rangeMax: 2, enCost: 8, ammo: null, hitMod: 10, critMod: 10, postMove: true, animSeed: 9, status: 'burn' }),
   stasisRay: W({ id: 'stasis_ray', name: 'Stasis Ray', kind: 'beam', power: 1600, rangeMin: 2, rangeMax: 5, enCost: 12, ammo: null, hitMod: 12, postMove: true, animSeed: 23, status: 'stun' }),
+  siegeRain: W({ id: 'siege_rain', name: 'Siege Rain', kind: 'missile', power: 2600, rangeMin: 4, rangeMax: 8, enCost: 18, ammo: null, hitMod: -10, postMove: false, animSeed: 3, antiAir: true }),
   chestBlaster: W({ id: 'chest_blaster', name: 'Chest Blaster', kind: 'beam', power: 3100, rangeMin: 1, rangeMax: 4, enCost: 30, ammo: null, hitMod: -5, postMove: false, animSeed: 10, willReq: 115 }),
   mapBuster: W({ id: 'map_buster', name: 'MAP: Buster Mortar', kind: 'missile', power: 2200, rangeMin: 2, rangeMax: 5, enCost: 0, ammo: 3, hitMod: -10, postMove: false, animSeed: 14, willReq: 110, mapRange: 1 }),
   punch: W({ id: 'punch', name: 'Rocket Punch', kind: 'melee', power: 1900, rangeMin: 1, rangeMax: 3, enCost: 10, ammo: null, hitMod: 10, postMove: true, animSeed: 11 }),
@@ -112,7 +114,7 @@ export const WEAPONS = {
 const P = (p: PilotDef) => p;
 
 export const PILOTS = {
-  ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul'], faceColor: '#ffb347', trait: 'ace_instinct' }),
+  ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul', 'frenzy'], faceColor: '#ffb347', trait: 'ace_instinct' }),
   mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse', 'fortune', 'trust', 'emp', 'deadshot'], faceColor: '#7ee7ff', trait: 'deadeye' }),
   gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor', 'sunder', 'provoke', 'phalanx'], faceColor: '#ff9d9d', trait: 'siege_breaker' }),
   orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless', 'lucky', 'mercy', 'purge', 'cheer', 'expose', 'decoy', 'hymn'], faceColor: '#b6ff9d', trait: 'field_medic' }),

@@ -98,6 +98,7 @@ export function movementRange(map: MapDef, units: UnitState[], u: UnitState): Ma
 
 /** E-Save pilot skill: weapon EN cost discounted 4% per trained rank. */
 export function enCostOf(u: UnitState, w: WeaponDef): number {
+  if (u.frenzyThisTurn) return 0;
   const r = u.skills?.esave ?? 0;
   return r ? Math.max(1, Math.round(w.enCost * (1 - 0.04 * r))) : w.enCost;
 }
@@ -721,6 +722,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'deadshot':
       u.deadshotForNextAttack = true;
       break;
+    case 'frenzy':
+      u.frenzyThisTurn = true;
+      break;
     case 'expose':
       break; // enemies in radius are marked by the store pass
     case 'overdrive':
@@ -779,6 +783,7 @@ export function clearTransientForOwnPhase(u: UnitState): void {
   u.followUpReady = false;
   u.overwatch = false;
   u.hymnUntilEndOfEnemyPhase = false;
+  u.frenzyThisTurn = false;
   u.dodges = 0;
 }
 
