@@ -99,6 +99,7 @@ export interface SaveData {
   snowFox?: boolean; // WHITEOUT honor — won during a blizzard turn
   extremeWon?: boolean; // OVERLORD honor — won a mission on EXTREME
   shepHon?: boolean; // SHEPHERD honor — convoy reached safety unscathed
+  flawlessHon?: boolean; // FLAWLESS honor — no unit lost on a Ch.10+ mission
 }
 
 /** Serialized mid-battle snapshot — lets the player leave a mission and resume it later. */
@@ -214,6 +215,7 @@ interface Store {
   snowFox: boolean;
   extremeWon: boolean;
   shepHon: boolean;
+  flawlessHon: boolean;
   log: string[];
   enemyBusy: boolean;
   screenShake: number;
@@ -432,8 +434,8 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
 
 const BATTLE_SAVE_KEY = 'srwxyz_battle_v1';
 
-async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank' | 'snowFox' | 'extremeWon' | 'shepHon'>>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated, killsByDef: useGame.getState().killsByDef, snowFox: useGame.getState().snowFox, extremeWon: useGame.getState().extremeWon, shepHon: useGame.getState().shepHon };
+async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank' | 'snowFox' | 'extremeWon' | 'shepHon' | 'flawlessHon'>>) {
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated, killsByDef: useGame.getState().killsByDef, snowFox: useGame.getState().snowFox, extremeWon: useGame.getState().extremeWon, shepHon: useGame.getState().shepHon, flawlessHon: useGame.getState().flawlessHon };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -609,6 +611,7 @@ export const useGame = create<Store>((set, get) => ({
   snowFox: false,
     extremeWon: false,
     shepHon: false,
+    flawlessHon: false,
   hint: null,
   hintsSeen: [],
 
@@ -727,7 +730,7 @@ export const useGame = create<Store>((set, get) => ({
       await AsyncStorage.removeItem(SAVE_KEY);
       await AsyncStorage.removeItem(BATTLE_SAVE_KEY);
     } catch {}
-    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false, killsByDef: {}, snowFox: false, extremeWon: false, shepHon: false });
+    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false, killsByDef: {}, snowFox: false, extremeWon: false, shepHon: false, flawlessHon: false });
   },
 
   toggleDeploy: (defId) => {
@@ -808,7 +811,7 @@ export const useGame = create<Store>((set, get) => ({
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
       set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {}, simBest: d.simBest ?? 0, vossenDefeated: d.vossenDefeated ?? false, snowFox: d.snowFox ?? false,
-    extremeWon: d.extremeWon ?? false, shepHon: d.shepHon ?? false, killsByDef: d.killsByDef ?? {} });
+    extremeWon: d.extremeWon ?? false, shepHon: d.shepHon ?? false, flawlessHon: d.flawlessHon ?? false, killsByDef: d.killsByDef ?? {} });
     } catch {}
     try {
       const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
@@ -1875,6 +1878,7 @@ function applyVictory(set: SetFn, get: Get) {
   const snowFox = s.snowFox || (s.missionCh.theme === 'snow' && s.blizzard);
   const extremeWon = s.extremeWon || s.settings.difficulty === 'extreme';
   const shepHon = s.shepHon || (s.missionCh.objectiveType === 'escort' && s.units.every((u) => !u.escort || (u.alive && u.hp >= u.def.maxHp)));
+  const flawlessHon = s.flawlessHon || (!s.sideId && s.simWave === 0 && s.missionCh.id >= 10 && !s.units.some((u) => u.side === 'player' && !u.npc && !u.alive));
   // wrecked squad frames must be rebuilt — repair bill comes out of the reward
   const repairBill = s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive).reduce((n, u) => n + u.level * 15, 0);
   const aceLines: string[] = [];
@@ -1920,11 +1924,12 @@ function applyVictory(set: SetFn, get: Get) {
       snowFox,
       extremeWon,
       shepHon,
+      flawlessHon,
       debrief: null,
       salvageQueue: [],
       log: aceLines.reduce((l, line) => push(l, line), push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''} · RANK ${rankS}${sRankNote ? ' · awarded 🛡 VETERAN PLATE' : ''}${repairBill > 0 ? ` · 🔧 repair bill -${repairBill}cr` : ''}`)),
     });
-    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank, snowFox, extremeWon, shepHon });
+    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank, snowFox, extremeWon, shepHon, flawlessHon });
     return;
   }
   const ch = s.missionCh;
@@ -1985,13 +1990,14 @@ function applyVictory(set: SetFn, get: Get) {
     snowFox,
     extremeWon,
     shepHon,
+    flawlessHon,
     lastReward: reward + masteryCr + (clearedFinal ? 5000 : 0),
     debrief: DEBRIEFS[ch.id] ?? null,
     salvageQueue: [],
     log: push(log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + masteryCr + 5000} credits` : `Mission complete! +${reward + masteryCr} credits · RANK ${rank}`),
   });
   void clearBattleSave();
-  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route, missionRank, snowFox, extremeWon, shepHon });
+  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route, missionRank, snowFox, extremeWon, shepHon, flawlessHon });
 }
 
 async function runEnemyPhase(set: SetFn, get: Get) {
@@ -2281,13 +2287,14 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         eventsFired.push(String(idx));
       }
     }
-    // ion-storm hazards: tiles telegraphed last round detonate now (never lethal — leaves 1 HP)
+    // tile hazards: tiles telegraphed last round detonate now (never lethal — leaves 1 HP)
+    const hzLabel = st.missionCh.theme === 'fortress' || st.missionCh.theme === 'moon' ? 'artillery barrage' : 'ion storm';
     for (const hz of st.hazardWarn) {
       for (const v of units.filter((u) => u.alive && same(u.pos, hz))) {
         const dmg = Math.min(v.hp - 1, Math.round(v.def.maxHp * 0.15));
         if (dmg > 0) {
           v.hp -= dmg;
-          recovered.push(`${v.def.name} -${dmg} HP (ion storm)`);
+          recovered.push(`${v.def.name} -${dmg} HP (${hzLabel})`);
         }
       }
     }
@@ -2308,8 +2315,8 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         }
       }
       if (hazardWarn.length) {
-        notice = '⚠ ION STORM INCOMING';
-        recovered.push('⚠ Ion storm telegraphed — evacuate the marked tiles!');
+        notice = hzLabel === 'artillery barrage' ? '⚠ ARTILLERY BARRAGE INCOMING' : '⚠ ION STORM INCOMING';
+        recovered.push(`⚠ ${hzLabel === 'artillery barrage' ? 'Artillery barrage' : 'Ion storm'} telegraphed — evacuate the marked tiles!`);
         setTimeout(() => set({ notice: null }), 2800);
       }
     }

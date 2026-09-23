@@ -10,6 +10,8 @@ export interface WeaponDef {
   id: string;
   /** ignores 35% of the target's armor */
   pierce?: boolean;
+  /** anti-air — +25% damage vs airborne units */
+  antiAir?: boolean;
   /** heals the attacker for 25% of damage dealt */
   drain?: boolean;
   name: string;
@@ -189,7 +191,8 @@ export interface PartDef {
   evade?: number; // +% evade
   crit?: number; // +% critical chance
   enRegen?: number; // +EN regenerated each turn
-  hpRegen?: number; // +% max HP regenerated each turn // +EN regenerated at the start of own phase
+  hpRegen?: number; // +% max HP regenerated each turn
+  xp?: number; // +% EXP gained // +EN regenerated at the start of own phase
   unique?: boolean; // not sold — awarded by story
   /** afterburner: unit may attack again after a kill, once per turn */
   again?: boolean;

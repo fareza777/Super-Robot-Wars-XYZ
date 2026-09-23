@@ -47,6 +47,7 @@ export const PARTS: Record<string, PartDef> = {
   targetCPU: { id: 'targetCPU', name: 'Targeting CPU', desc: '+10% critical chance', price: 1100, crit: 10 },
   ventCore: { id: 'ventCore', name: 'Vent Core', desc: '+10 EN regenerated each turn', price: 950, enRegen: 10 },
   nanoWeave: { id: 'nanoWeave', name: 'Nano-Weave Frame', desc: '+8% max HP regenerated each turn', price: 1600, hpRegen: 8 },
+  driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
   drakeCell: { id: 'drakeCell', name: "Drake's Cell", desc: '+2 move · +8% hit — Vossen tech', price: 0, move: 2, hit: 8, unique: true },
 };
 
@@ -637,7 +638,7 @@ export function genMap(ch: ChapterDef): MapDef {
     bossHoldUntil: ch.boss ? 3 : undefined,
     reinforce: REINFORCE[ch.id],
     events: MID_EVENTS[ch.id],
-    hazards: ch.theme === 'void' || ch.theme === 'colony' ? { every: 3, count: 2 } : undefined,
+    hazards: ch.theme === 'void' || ch.theme === 'colony' ? { every: 3, count: 2 } : ch.theme === 'fortress' || ch.theme === 'moon' ? { every: 4, count: 3 } : undefined,
   };
 }
 
@@ -860,10 +861,11 @@ export const HONORS: HonorDef[] = [
   { id: 'h_snowfox', name: 'WHITEOUT WALKER', desc: 'Win a mission during a blizzard turn', rewardCr: 900 },
   { id: 'h_overlord', name: 'OVERLORD', desc: 'Win any mission on EXTREME difficulty', rewardCr: 1500 },
   { id: 'h_shepherd', name: 'SHEPHERD', desc: 'Finish an escort mission with the convoy unscathed', rewardCr: 1100 },
+  { id: 'h_flawless', name: 'FLAWLESS', desc: 'Clear a main chapter at Ch.10+ without losing a single unit', rewardCr: 1400 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; units?: { def: { id: string }; kills: number; alive: boolean; side: string }[] }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; units?: { def: { id: string }; kills: number; alive: boolean; side: string }[] }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -910,6 +912,8 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return s.extremeWon === true;
     case 'h_shepherd':
       return s.shepHon === true;
+    case 'h_flawless':
+      return s.flawlessHon === true;
     default:
       return false;
   }

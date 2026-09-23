@@ -33,7 +33,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp'): number {
   let n = 0;
   for (const p of u.parts) n += PARTS[p]?.[stat] ?? 0;
   return n;
@@ -186,6 +186,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   // damage-type resistance — beam coats, phase armor, disperser fields
   const res = def.def.resists?.[w.kind] ?? 0;
   if (res > 0) dmg = Math.round(dmg * (1 - res));
+  if (w.antiAir && def.def.moveType === 'air') dmg = Math.round(dmg * 1.25);
   return Math.round(dmg * dmgMult * willDmgMult(att));
 }
 
@@ -508,6 +509,7 @@ const MAX_LEVEL = 9;
 
 function awardExp(u: UnitState, amount: number, events: string[]) {
   if (!u.alive || u.level >= MAX_LEVEL) return;
+  amount = Math.round(amount * (1 + partBonus(u, 'xp') / 100));
   if (u.fortuneForNextAttack) {
     amount *= 2;
     u.fortuneForNextAttack = false;
