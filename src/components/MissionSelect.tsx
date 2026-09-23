@@ -2,13 +2,13 @@ import React from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART } from '../assets';
-import { CHAPTERS_COUNT, SIDE_MISSIONS, chapterOf, sideAsChapter } from '../game/campaign';
+import { CHAPTERS_COUNT, SIDE_MISSIONS, missionOf, sideAsChapter } from '../game/campaign';
 import { useGame } from '../game/store';
 
 /** Mission select — main campaign chapter + optional side quests. */
 export function MissionSelect() {
   const s = useGame();
-  const ch = chapterOf(s.chapter);
+  const ch = missionOf(s.chapter, s.route);
   const done = s.chapter >= CHAPTERS_COUNT;
 
   return (

@@ -305,7 +305,10 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
 
   att.en = Math.max(0, att.en - w.enCost);
   if (w.ammo != null) att.ammo[w.id] = (att.ammo[w.id] ?? 0) - 1;
-  if (result.hit) def.hp = Math.max(0, def.hp - result.damage);
+  if (result.hit) {
+    def.hp = Math.max(0, def.hp - result.damage);
+    att.dmgDealt = (att.dmgDealt ?? 0) + result.damage;
+  }
   if (result.hit && w.drain) att.hp = Math.min(att.def.maxHp, att.hp + Math.round(result.damage * 0.25));
   if (result.hit && def.alive && w.status && !result.graze) applyStatus(def, w.status);
   if (result.destroyed) {
@@ -317,7 +320,10 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
     const cw = result.counter.weapon;
     def.en = Math.max(0, def.en - cw.enCost);
     if (cw.ammo != null) def.ammo[cw.id] = (def.ammo[cw.id] ?? 0) - 1;
-    if (result.counter.hit) att.hp = Math.max(0, att.hp - result.counter.damage);
+    if (result.counter.hit) {
+      att.hp = Math.max(0, att.hp - result.counter.damage);
+      def.dmgDealt = (def.dmgDealt ?? 0) + result.counter.damage;
+    }
     if (result.counter.hit && cw.drain) def.hp = Math.min(def.def.maxHp, def.hp + Math.round(result.counter.damage * 0.25));
     if (result.counter.hit && att.alive && cw.status && !result.counter.graze) applyStatus(att, cw.status);
     if (result.counter.destroyed) {
@@ -376,6 +382,7 @@ export function applyMapAttack(state: GameState, attackerUid: string, targetTile
     const r = i === 0 ? { hit: result.hit, damage: result.damage, destroyed: result.destroyed } : result.splash![i - 1];
     if (r.hit) {
       t.hp = Math.max(0, t.hp - r.damage);
+      if (t.side !== att.side) att.dmgDealt = (att.dmgDealt ?? 0) + r.damage;
       willGain(t, 1);
       hits++;
       if (r.destroyed) {
@@ -597,7 +604,10 @@ export function applySupportStrike(
   sup.valorForNextAttack = false;
   sup.snipeForNextAttack = false;
   sup.soulForNextAttack = false;
-  if (r.hit) def.hp = Math.max(0, def.hp - r.damage);
+  if (r.hit) {
+    def.hp = Math.max(0, def.hp - r.damage);
+    sup.dmgDealt = (sup.dmgDealt ?? 0) + r.damage;
+  }
   const destroyed = r.hit && def.hp <= 0;
   if (destroyed) {
     def.alive = false;

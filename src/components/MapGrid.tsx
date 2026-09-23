@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, PanResponder, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
 import { MECH_ART, TERRAIN_ART } from '../assets';
+import { TERRAIN_INFO } from '../game/data';
 import { key, same } from '../game/engine';
 import { useGame } from '../game/store';
-import { Pos, UnitState } from '../game/types';
+import { MapDef, Pos, UnitState } from '../game/types';
 
 const COLS = 14;
 const ROWS = 10;
@@ -71,8 +72,25 @@ const Tile = React.memo(function Tile({
 
 /** Unit chip (mech art + hp bar + level) — memoized; only re-renders when its own unit state changes. */
 const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitState; chip: number; ghosting: boolean }) {
+  // gentle hover bob — each unit runs its own loop, staggered by uid so the
+  // squadron doesn't bob in lockstep
+  const bob = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(bob, { toValue: -2.2, duration: 950, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        Animated.timing(bob, { toValue: 0, duration: 950, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+      ]),
+    );
+    const t = setTimeout(() => loop.start(), (u.uid.charCodeAt(u.uid.length - 1) * 137) % 900);
+    return () => {
+      clearTimeout(t);
+      loop.stop();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
-    <>
+    <Animated.View style={{ alignItems: 'center', transform: [{ translateY: bob }] }}>
       <View
         style={[
           styles.chip,
@@ -102,7 +120,7 @@ const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitSt
           <Text style={[styles.willTxt, u.will >= 130 && { color: '#ffd34d' }]}>◈{u.will}</Text>
         </View>
       )}
-    </>
+    </Animated.View>
   );
 });
 
@@ -156,6 +174,7 @@ export function MapGrid() {
   }, [maxX, maxY, pan]);
 
   const clamp = (v: number, m: number) => Math.max(-m, Math.min(0, v));
+  const [panPos, setPanPos] = useState({ x: -maxX / 2, y: -maxY / 2 });
   const responder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 8 || Math.abs(g.dy) > 8,
@@ -165,6 +184,7 @@ export function MapGrid() {
       onPanResponderRelease: (_, g) => {
         last.current = { x: clamp(last.current.x + g.dx, maxX), y: clamp(last.current.y + g.dy, maxY) };
         pan.setValue(last.current);
+        setPanPos(last.current);
       },
     }),
   ).current;
@@ -217,6 +237,52 @@ export function MapGrid() {
           </View>
         )}
       </Animated.View>
+      <MiniMap map={map} units={units} missionCh={missionCh} crates={crates} panX={panPos.x} panY={panPos.y} bw={bw} bh={bh} vw={vw} vh={vh} />
+    </View>
+  );
+}
+
+const MINI_TW = 8;
+/** Corner overview — terrain tint, unit dots, objective & viewport markers. */
+function MiniMap({ map, units, missionCh, crates, panX, panY, bw, bh, vw, vh }: { map: MapDef; units: UnitState[]; missionCh: { seizePos?: Pos; reachPos?: Pos }; crates: { pos: Pos; itemId: string }[]; panX: number; panY: number; bw: number; bh: number; vw: number; vh: number }) {
+  const mw = map.cols * MINI_TW;
+  const mh = map.rows * MINI_TW;
+  const rectW = Math.min(mw, (vw / bw) * mw);
+  const rectH = Math.min(mh, (vh / bh) * mh);
+  const rectX = (-panX / bw) * mw;
+  const rectY = (-panY / bh) * mh;
+  return (
+    <View pointerEvents="none" style={[styles.miniWrap, { width: mw + 8, height: mh + 18 }]}>
+      <Text style={styles.miniLbl}>MAP</Text>
+      <View style={{ width: mw, height: mh }}>
+        {map.terrain.flatMap((row, y) =>
+          row.map((t, x) => <View key={`${x},${y}`} style={{ position: 'absolute', left: x * MINI_TW, top: y * MINI_TW, width: MINI_TW, height: MINI_TW, backgroundColor: TERRAIN_INFO[t].color }} />),
+        )}
+        {(crates ?? []).map((c, i) => (
+          <View key={`c${i}`} style={[styles.miniDot, { left: c.pos.x * MINI_TW + 1.5, top: c.pos.y * MINI_TW + 1.5, backgroundColor: '#ffd34d' }]} />
+        ))}
+        {missionCh.seizePos && <View style={[styles.miniDot, { left: missionCh.seizePos.x * MINI_TW + 1, top: missionCh.seizePos.y * MINI_TW + 1, width: 6, height: 6, backgroundColor: '#ffd34d', borderWidth: 1, borderColor: '#fff' }]} />}
+        {missionCh.reachPos && <View style={[styles.miniDot, { left: missionCh.reachPos.x * MINI_TW + 1, top: missionCh.reachPos.y * MINI_TW + 1, width: 6, height: 6, backgroundColor: '#4de3ff', borderWidth: 1, borderColor: '#fff' }]} />}
+        {units
+          .filter((u) => u.alive)
+          .map((u) => (
+            <View
+              key={u.uid}
+              style={[
+                styles.miniDot,
+                {
+                  left: u.pos.x * MINI_TW + 1.5,
+                  top: u.pos.y * MINI_TW + 1.5,
+                  backgroundColor: u.side === 'player' ? (u.npc ? '#7dff9d' : '#4db8ff') : '#ff5a5a',
+                  width: u.def.boss ? 7 : 5,
+                  height: u.def.boss ? 7 : 5,
+                  borderWidth: u.def.boss ? 1.5 : 0,
+                },
+              ]}
+            />
+          ))}
+        <View style={[styles.miniView, { width: rectW, height: rectH, left: Math.max(0, Math.min(mw - rectW, rectX)), top: Math.max(0, Math.min(mh - rectH, rectY)) }]} />
+      </View>
     </View>
   );
 }
@@ -280,4 +346,8 @@ const styles = StyleSheet.create({
   bossTag: { position: 'absolute', top: -6, fontSize: 8, color: '#ffd34d', fontWeight: '800' },
   willTag: { position: 'absolute', top: 1, right: 1, paddingHorizontal: 2, borderRadius: 3, borderWidth: 1, borderColor: '#ff7a9d', backgroundColor: 'rgba(20,8,16,0.85)' },
   willTxt: { color: '#ff7a9d', fontSize: 7, fontWeight: '800' },
+  miniWrap: { position: 'absolute', left: 10, bottom: 10, backgroundColor: 'rgba(5,8,16,0.82)', borderWidth: 1, borderColor: '#2a3a5a', borderRadius: 6, padding: 4, paddingTop: 14 },
+  miniLbl: { position: 'absolute', top: 2, left: 6, color: '#7f95c0', fontSize: 7, fontWeight: '800', letterSpacing: 2 },
+  miniDot: { position: 'absolute', width: 5, height: 5, borderRadius: 3, borderColor: '#fff' },
+  miniView: { position: 'absolute', borderWidth: 1, borderColor: 'rgba(255,255,255,0.75)', borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.07)' },
 });

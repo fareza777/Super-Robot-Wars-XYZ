@@ -19,6 +19,7 @@ import {
   chapterOf,
   enemyLevelOf,
   genMap,
+  missionOf,
   rosterFor,
   sideAsChapter,
   upgradedStat,
@@ -81,6 +82,7 @@ export interface SaveData {
   ngPlus?: number;
   masteryDone?: number[]; // chapter ids whose mastery challenge was achieved
   hintsSeen?: string[]; // one-time tutorial cards already dismissed
+  route?: 'a' | 'b' | null; // route split chosen after ch.15
 }
 
 /** Serialized mid-battle snapshot — lets the player leave a mission and resume it later. */
@@ -176,6 +178,7 @@ interface Store {
   savedBattle: BattleSave | null; // resumable in-progress mission
   debrief: { speaker: string; text: string; voice?: string }[] | null; // post-mission scene queued over HQ
   salvageQueue: string[]; // item names dropped on kills, toasted on the map
+  route: 'a' | 'b' | null; // campaign route split chosen after ch.15 (affects ch.16-18)
   log: string[];
   enemyBusy: boolean;
   screenShake: number;
@@ -223,6 +226,8 @@ interface Store {
   gotoCredits: () => void;
   castSpirit: (uid: string, s: SpiritId) => void;
   repairUnit: (uid: string, targetUid: string) => void;
+  supplyUnit: (uid: string, targetUid: string) => void;
+  chooseRoute: (r: 'a' | 'b') => void;
   resumeBattle: () => void;
   retreatMission: () => void;
   endTurn: () => void;
@@ -349,8 +354,8 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
 
 const BATTLE_SAVE_KEY = 'srwxyz_battle_v1';
 
-async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen'>>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen };
+async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route'>>) {
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -499,6 +504,7 @@ export const useGame = create<Store>((set, get) => ({
   savedBattle: null,
   debrief: null,
   salvageQueue: [],
+  route: null,
   hint: null,
   hintsSeen: [],
 
@@ -521,7 +527,13 @@ export const useGame = create<Store>((set, get) => ({
   finishOnboarding: () => set({ phase: 'home' }),
   gotoBriefing: () => {
     const s = get();
-    set({ phase: 'briefing', deploySel: rosterFor(chapterOf(s.chapter)) });
+    // safety net: a save written at the ch.15 victory screen carries chapter=15
+    // with no route yet — force the choice before briefing can be reached
+    if (s.chapter === 15 && !s.route) {
+      set({ phase: 'route' });
+      return;
+    }
+    set({ phase: 'briefing', deploySel: rosterFor(missionOf(s.chapter, s.route)) });
   },
 
   gotoMissions: () => set({ phase: 'missions' }),
@@ -618,6 +630,7 @@ export const useGame = create<Store>((set, get) => ({
       ngPlus: 0,
       masteryDone: [] as number[],
       savedBattle: null as BattleSave | null,
+      route: null as 'a' | 'b' | null,
     };
     void clearBattleSave();
     set({ ...fresh, hasSave: true, kills: 0, phase: 'prologue' });
@@ -631,7 +644,7 @@ export const useGame = create<Store>((set, get) => ({
       const raw = await AsyncStorage.getItem(SAVE_KEY);
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
-      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [] });
+      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null });
     } catch {}
     try {
       const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
@@ -648,7 +661,16 @@ export const useGame = create<Store>((set, get) => ({
     } catch {}
   },
 
-  gotoHq: () => set({ phase: 'hq' }),
+  gotoHq: () =>
+    set((s) => ({
+      // the route split unlocks once — right after the Void Empress falls (ch.15 cleared => chapter index 15)
+      phase: s.chapter === 15 && !s.route ? 'route' : 'hq',
+    })),
+
+  chooseRoute: (r) => {
+    set({ route: r, phase: 'hq' });
+    void persist({ ...get(), route: r });
+  },
 
   buyItem: (itemId) => {
     const s = get();
@@ -755,7 +777,7 @@ export const useGame = create<Store>((set, get) => ({
 
   startMission: () => {
     const s = get();
-    const ch = chapterOf(s.chapter);
+    const ch = missionOf(s.chapter, s.route);
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, s.deploySel, s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
     const zone = deployZone(map);
     // paint the deploy zone with the move-range overlay so the player sees where units can go
@@ -845,6 +867,33 @@ export const useGame = create<Store>((set, get) => ({
       pendingMove: null,
       selectedUid: null,
       log: push(s.log, `${u.def.name} repairs ${t.def.name} — +${heal} HP, +${enGain} EN, ammo restocked`),
+    });
+    void persistBattle(get());
+  },
+
+  // RESUPPLY: restock ammo + EN for an ally within 3 tiles (no heal — longer reach than repair)
+  supplyUnit: (uid, targetUid) => {
+    const s = get();
+    const u = s.units.find((x) => x.uid === uid);
+    const t = s.units.find((x) => x.uid === targetUid);
+    if (!u || !t || !u.def.supplier || t.side !== 'player' || !t.alive) return;
+    if (dist(u.pos, t.pos) > 3) return;
+    const enGain = 50;
+    const units = s.units.map((x) => {
+      if (x.uid === targetUid) {
+        const ammo = { ...x.ammo };
+        for (const w of x.def.weapons) if (w.ammo != null) ammo[w.id] = w.ammo;
+        return { ...x, en: Math.min(x.def.maxEn, x.en + enGain), ammo };
+      }
+      if (x.uid === uid) return { ...x, moved: true, acted: true, exp: Math.min(99, x.exp + 20) };
+      return x;
+    });
+    set({
+      units,
+      menuForUid: null,
+      pendingMove: null,
+      selectedUid: null,
+      log: push(s.log, `${u.def.name} resupplies ${t.def.name} — +${enGain} EN, ammo restocked`),
     });
     void persistBattle(get());
   },
@@ -1334,7 +1383,9 @@ function applyVictory(set: SetFn, get: Get) {
     return;
   }
   const ch = s.missionCh;
-  const reward = Math.round((800 + ch.id * 150 + s.kills * 150 + eliteCr) * (s.settings.difficulty === 'hard' ? 1.25 : 1));
+  const reward = Math.round((800 + ch.id * 150 + s.kills * 150 + eliteCr) * (s.settings.difficulty === 'hard' ? 1.25 : 1)) + (ch.rewardBonus ?? 0);
+  // route-variant bonus item (e.g. Route B stealth salvage)
+  const inventory = ch.bonusItem ? { ...s.inventory, [ch.bonusItem]: (s.inventory[ch.bonusItem] ?? 0) + 1 } : s.inventory;
   const clearedFinal = s.chapter + 1 >= CHAPTERS_COUNT;
   // beating the final chapter rolls the campaign into New Game+: back to ch.1,
   // keeping levels/upgrades/bonds/items; enemy frames get +18% HP, +10% armor, +6 mobility, +2 lv per cycle
@@ -1345,6 +1396,7 @@ function applyVictory(set: SetFn, get: Get) {
   let masteryDone = s.masteryDone;
   let lastMastery: string | null = null;
   let log = s.log;
+  if (ch.bonusItem) log = push(log, `▣ Route salvage — ${ITEMS[ch.bonusItem].name} acquired`);
   const m = ch.mastery;
   if (m && !masteryDone.includes(ch.id)) {
     const turnsOk = m.maxTurns == null || s.turn <= m.maxTurns;
@@ -1363,6 +1415,7 @@ function applyVictory(set: SetFn, get: Get) {
     battle: null,
     phase: 'victory',
     credits,
+    inventory,
     pilotProg,
     chapter,
     ngPlus,
@@ -1376,7 +1429,7 @@ function applyVictory(set: SetFn, get: Get) {
     log: push(log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + masteryCr + 5000} credits` : `Mission complete! +${reward + masteryCr} credits`),
   });
   void clearBattleSave();
-  void persist({ chapter, credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone });
+  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone });
 }
 
 async function runEnemyPhase(set: SetFn, get: Get) {

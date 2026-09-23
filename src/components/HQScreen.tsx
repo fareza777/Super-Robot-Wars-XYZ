@@ -4,7 +4,7 @@ import { Image as ExpoImage } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART, AudioKey, MECH_ART, NPC_ART, PILOT_ART } from '../assets';
 import { play } from '../audio';
-import { ALL_UNITS, CHAPTERS, CHAPTERS_COUNT, ITEMS, MAX_PART_SLOTS, MAX_PILOT_SKILL, MAX_WEAPON_UPG, PARTS, PILOT_STATS, PLAYER_DEF_IDS, SIDE_MISSIONS, UPGRADE_STATS, WEAPON_UPG_POWER, chapterOf, rosterFor, weaponUpgCost } from '../game/campaign';
+import { ALL_UNITS, CHAPTERS, CHAPTERS_COUNT, ITEMS, MAX_PART_SLOTS, MAX_PILOT_SKILL, MAX_WEAPON_UPG, PARTS, PILOT_STATS, PLAYER_DEF_IDS, SIDE_MISSIONS, UPGRADE_STATS, WEAPON_UPG_POWER, missionOf, rosterFor, weaponUpgCost } from '../game/campaign';
 import { BOND_EVENTS, MAX_BOND, bondLevel } from '../game/bonds';
 import { SPIRITS, TRAITS } from '../game/data';
 import { useGame } from '../game/store';
@@ -48,7 +48,7 @@ export function HQScreen() {
   const [chatLine, setChatLine] = useState(0);
   const npcBob = useIdle(300);
   const fade = useRef(new Animated.Value(0)).current;
-  const ch = chapterOf(s.chapter);
+  const ch = missionOf(s.chapter, s.route);
 
   useEffect(() => {
     Animated.timing(fade, { toValue: 1, duration: 500, useNativeDriver: true }).start();

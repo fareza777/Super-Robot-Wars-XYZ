@@ -170,12 +170,52 @@ export interface ChapterDef {
   lines: { speaker: string; text: string; voice?: string }[];
   /** overrides roster gating (used by side missions whose ids are off-chapter) */
   rosterCh?: number;
+  /** route variants: elite promotion chance override (default 0.15) */
+  eliteChance?: number;
+  /** route variant: force every non-boss spawn elite */
+  eliteAll?: boolean;
+  /** route variant: flat bonus credits on victory */
+  rewardBonus?: number;
+  /** route variant: item granted on victory */
+  bonusItem?: ItemId;
+  /** route flavor tag shown under the chapter name */
+  routeTag?: string;
 }
 
 export const CHAPTERS: ChapterDef[] = chaptersJson as unknown as ChapterDef[];
 
 export function chapterOf(idx: number): ChapterDef {
   return CHAPTERS[Math.max(0, Math.min(CHAPTERS.length - 1, idx))];
+}
+
+// ---------- Route split (chosen after Chapter 15 — affects chapters 16-18) ----------
+
+export type RouteId = 'a' | 'b';
+
+export const ROUTE_INFO: Record<RouteId, { name: string; tagline: string; desc: string }> = {
+  a: {
+    name: 'ROUTE A — IRON VANGUARD',
+    tagline: 'The frontal assault',
+    desc: 'Lead the charge down the Throne corridor. Enemy patrols are heavier and elites more common — but the salvage is rich.\n\nCh.16–18: +1 enemy unit · elevated elite spawns · +700 credits per mission.',
+  },
+  b: {
+    name: 'ROUTE B — GHOST LANCE',
+    tagline: 'The silent approach',
+    desc: 'Slip through the debris fields unseen. Fewer patrols guard this path, but every sentry is elite. Stealth pays in supplies.\n\nCh.16–18: −2 enemy units · more elite spawns · +400 credits + a Spirit Wing per mission · void-colony terrain.',
+  },
+};
+
+/** Apply the player's route choice to a chapter. Only chapters 16-18 carry variants. */
+export function applyRoute(ch: ChapterDef, route?: RouteId | null): ChapterDef {
+  if (!route || ch.id < 16 || ch.id > 18) return ch;
+  if (route === 'a') return { ...ch, count: ch.count + 1, eliteChance: 0.3, rewardBonus: 700, routeTag: ROUTE_INFO.a.name };
+  const theme = ch.id === 18 ? 'colony' : 'void';
+  return { ...ch, count: Math.max(4, ch.count - 2), theme, eliteChance: 0.4, rewardBonus: 400, bonusItem: 'spiritWing' as ItemId, routeTag: ROUTE_INFO.b.name };
+}
+
+/** The chapter as the player will actually face it — route variant applied. */
+export function missionOf(idx: number, route?: RouteId | null): ChapterDef {
+  return applyRoute(chapterOf(idx), route);
 }
 
 // ---------- Procedural map generation (14x10, theme-weighted, seeded) ----------
@@ -323,8 +363,8 @@ export const DEBRIEFS: Record<number, { speaker: string; text: string; voice?: s
 };
 
 // ~15% of non-boss line units deploy as elites — tougher, worth more EXP and credits
-function markElites(spawns: { defId: string; pos: Pos; elite?: boolean }[], rSpawn: () => number) {
-  for (const s of spawns) if (!ALL_UNITS[s.defId]?.boss && rSpawn() < 0.15) s.elite = true;
+function markElites(spawns: { defId: string; pos: Pos; elite?: boolean }[], rSpawn: () => number, chance = 0.15, all = false) {
+  for (const s of spawns) if (!ALL_UNITS[s.defId]?.boss && (all || rSpawn() < chance)) s.elite = true;
 }
 
 // hidden salvage crates — 1-2 claimable tiles scattered mid-field
@@ -352,7 +392,7 @@ export function genMap(ch: ChapterDef): MapDef {
     const roster = rosterFor(ch);
     const m: MapDef = { ...MISSION_SSS, bossHoldUntil: 3, events: MID_EVENTS[ch.id], playerSpawns: MISSION_SSS.playerSpawns.slice(0, 4).map((s, i) => ({ defId: roster[i] ?? s.defId, pos: s.pos })), enemySpawns: MISSION_SSS.enemySpawns.map((s) => ({ ...s })) };
     const rSpawn = rng(ch.id * 4243);
-    markElites(m.enemySpawns, rSpawn);
+    markElites(m.enemySpawns, rSpawn, ch.eliteChance ?? 0.15, !!ch.eliteAll);
     const used = new Set(m.enemySpawns.concat(m.playerSpawns).map((s) => `${s.pos.x},${s.pos.y}`));
     m.crates = genCrates(m.terrain, used, rSpawn);
     return m;
@@ -403,7 +443,7 @@ export function genMap(ch: ChapterDef): MapDef {
       }
     }
   }
-  markElites(enemySpawns, rSpawn);
+  markElites(enemySpawns, rSpawn, ch.eliteChance ?? 0.15, !!ch.eliteAll);
   // fallback: never silently drop a unit (a missing boss would auto-win a boss-objective map)
   for (const defId of comps) {
     if (enemySpawns.filter((s) => s.defId === defId).length >= comps.filter((c) => c === defId).length) continue;

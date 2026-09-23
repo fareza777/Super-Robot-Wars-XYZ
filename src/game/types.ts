@@ -81,6 +81,8 @@ export interface UnitDef {
   level?: number; // starting level (default 1)
   /** support frame: can REPAIR an adjacent ally (heal HP/EN) instead of attacking */
   repairer?: boolean;
+  /** supply frame: can RESUPPLY an ally within 3 tiles (EN + ammo, no heal) */
+  supplier?: boolean;
 }
 
 export interface UnitState {
@@ -138,6 +140,8 @@ export interface UnitState {
   statuses?: StatusFx[];
   /** afterburner part: may attack once more after destroying a target, once per turn */
   followUpReady?: boolean;
+  /** total damage dealt this mission (for the debrief MVP) */
+  dmgDealt?: number;
 }
 
 export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def';
@@ -206,6 +210,7 @@ export type Phase =
   | 'player'
   | 'enemy'
   | 'battle'
+  | 'route'
   | 'victory'
   | 'defeat';
 

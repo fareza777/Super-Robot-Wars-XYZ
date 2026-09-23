@@ -181,6 +181,17 @@ export function SidePanel() {
                     ))}
                 </>
               )}
+            {unit.def.supplier &&
+              s.units.some((t) => t.alive && t.side === 'player' && t.uid !== unit.uid && dist(t.pos, unit.pos) <= 3 && (t.en < t.def.maxEn || t.def.weapons.some((w) => w.ammo != null && (t.ammo[w.id] ?? 0) < w.ammo))) && (
+                <>
+                  <Text style={styles.menuTitle}>RESUPPLY</Text>
+                  {s.units
+                    .filter((t) => t.alive && t.side === 'player' && t.uid !== unit.uid && dist(t.pos, unit.pos) <= 3 && (t.en < t.def.maxEn || t.def.weapons.some((w) => w.ammo != null && (t.ammo[w.id] ?? 0) < w.ammo)))
+                    .map((t) => (
+                      <Btn key={t.uid} label={`▤ ${t.def.name}`} sub={`EN ${t.en}/${t.def.maxEn} — +50 EN & full ammo restock (range 3)`} onPress={() => s.supplyUnit(unit.uid, t.uid)} accent="#7ec8ff" />
+                    ))}
+                </>
+              )}
             {unit.def.pilot.spirits.length > 0 && <Btn label="✦ SPIRIT COMMANDS" sub={`SP ${unit.sp}`} onPress={() => s.openSpirits(unit.uid)} accent="#c9a0ff" />}
             {Object.values(ITEMS).some((it) => (s.inventory[it.id] ?? 0) > 0) && (
               <>

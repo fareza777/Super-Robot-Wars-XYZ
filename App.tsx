@@ -9,7 +9,7 @@ import { MissionSelect } from './src/components/MissionSelect';
 import { HQScreen } from './src/components/HQScreen';
 import { MapGrid } from './src/components/MapGrid';
 import { PrologueScreen } from './src/components/PrologueScreen';
-import { BriefingScreen, EndScreen, TitleScreen } from './src/components/Screens';
+import { BriefingScreen, EndScreen, RouteScreen, TitleScreen } from './src/components/Screens';
 import { SettingsScreen } from './src/components/SettingsScreen';
 import { CreditsScreen } from './src/components/CreditsScreen';
 import { DialogScene } from './src/components/DialogScene';
@@ -120,6 +120,7 @@ export default function App() {
           <HintCard />
         </View>
       )}
+      {phase === 'route' && <RouteScreen />}
       {phase === 'victory' && <EndScreen victory />}
       {phase === 'defeat' && <EndScreen victory={false} />}
       <MidDialog />

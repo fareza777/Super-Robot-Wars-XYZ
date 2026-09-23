@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART, PILOT_ART } from '../assets';
 import { play } from '../audio';
-import { CHAPTERS_COUNT, chapterOf, rosterFor, ALL_UNITS } from '../game/campaign';
+import { CHAPTERS_COUNT, chapterOf, missionOf, rosterFor, ALL_UNITS, ROUTE_INFO } from '../game/campaign';
 import { useGame } from '../game/store';
 
 export function TitleScreen() {
@@ -52,7 +52,8 @@ export function BriefingScreen() {
   const deploySel = useGame((s) => s.deploySel);
   const toggleDeploy = useGame((s) => s.toggleDeploy);
   const hard = useGame((s) => (s.settings.difficulty ?? 'normal') === 'hard');
-  const ch = chapterOf(chapter);
+  const route = useGame((s) => s.route);
+  const ch = missionOf(chapter, route);
   const roster = rosterFor(ch);
   return (
     <View style={styles.center}>
@@ -61,6 +62,7 @@ export function BriefingScreen() {
 
       <Text style={styles.briefTitle}>CHAPTER {ch.id}: {ch.name}{useGame.getState().ngPlus > 0 ? ` · NG+ ${useGame.getState().ngPlus}` : ''}</Text>
       <Text style={styles.briefSub}>— {ch.subtitle} —</Text>
+      {ch.routeTag && <Text style={{ color: '#9fd8ff', fontSize: 11, fontWeight: '800', letterSpacing: 2, marginTop: 2 }}>{ch.routeTag}</Text>}
 
       <View style={styles.briefBox}>
         <Text style={styles.briefTxt}>{ch.objective}</Text>
@@ -123,6 +125,7 @@ export function EndScreen({ victory }: { victory: boolean }) {
   // after the final chapter the save wraps to ch.0 — ngPlus>0 + chapter===0 means we just rolled NG+
   const justUnlockedNg = victory && ngPlus > 0 && chapter === 0;
   const aces = units.filter((u) => u.side === 'player' && u.kills >= 5).sort((a, b) => b.kills - a.kills);
+  const mvp = units.filter((u) => u.side === 'player' && !u.npc).sort((a, b) => (b.dmgDealt ?? 0) - (a.dmgDealt ?? 0))[0];
   return (
     <View style={styles.center}>
       <Image cachePolicy="memory" source={victory ? ART.titleKey : ART.story[1]} style={StyleSheet.absoluteFill} contentFit="cover" />
@@ -142,6 +145,11 @@ export function EndScreen({ victory }: { victory: boolean }) {
               ★ {u.def.pilot.name} — {u.kills} kills this mission
             </Text>
           ))}
+          {mvp && (mvp.dmgDealt ?? 0) > 0 && (
+            <Text style={[styles.resultsAce, { color: '#ffd34d' }]}>
+              ♛ MVP — {mvp.def.pilot.name} · {mvp.dmgDealt} dmg dealt
+            </Text>
+          )}
           {justUnlockedNg && <Text style={styles.resultsNg}>NEW GAME+ {ngPlus} — restart at Ch.1, keep everything, enemies +{Math.round(18 * ngPlus)}% HP</Text>}
         </View>
       )}
@@ -166,6 +174,37 @@ export function EndScreen({ victory }: { victory: boolean }) {
       >
         <Text style={styles.bigBtnTxt}>{victory ? 'RETURN TO HQ ▸' : 'RETRY ▸'}</Text>
       </TouchableOpacity>
+    </View>
+  );
+}
+
+/** Route split — shown once after ch.15; the choice reshapes chapters 16-18. */
+export function RouteScreen() {
+  const chooseRoute = useGame((s) => s.chooseRoute);
+  return (
+    <View style={styles.center}>
+      <Image cachePolicy="memory" source={ART.story[3]} style={StyleSheet.absoluteFill} contentFit="cover" />
+      <LinearGradient colors={['rgba(3,5,14,0.5)', 'rgba(3,5,14,0.94)']} style={StyleSheet.absoluteFill} />
+      <Text style={styles.briefTitle}>TWO PATHS TO THE THRONE</Text>
+      <Text style={styles.briefSub}>— the Void Empress has fallen; the approach to the Steel Throne forks —</Text>
+      <View style={{ flexDirection: 'row', gap: 14, marginTop: 14 }}>
+        {(['a', 'b'] as const).map((r) => (
+          <TouchableOpacity
+            key={r}
+            style={[styles.routeCard, { borderColor: r === 'a' ? '#ff9d5c' : '#9fd8ff' }]}
+            onPress={() => {
+              play('ui_confirm');
+              chooseRoute(r);
+            }}
+          >
+            <Text style={[styles.routeName, { color: r === 'a' ? '#ffb37e' : '#a5e1ff' }]}>{ROUTE_INFO[r].name}</Text>
+            <Text style={styles.routeTag}>{ROUTE_INFO[r].tagline}</Text>
+            <Text style={styles.routeDesc}>{ROUTE_INFO[r].desc}</Text>
+            <Text style={[styles.bigBtnTxt, { fontSize: 13, marginTop: 10 }]}>TAKE THIS PATH ▸</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <Text style={{ color: '#667', fontSize: 10, marginTop: 12, letterSpacing: 1 }}>The choice is permanent for this campaign cycle — it reshapes Chapters 16–18.</Text>
     </View>
   );
 }
@@ -196,4 +235,8 @@ const styles = StyleSheet.create({
   resultsMastery: { color: '#ffd34d', fontSize: 13, fontWeight: '800', letterSpacing: 1.5, marginTop: 8, textAlign: 'center' },
   resultsAce: { color: '#ff9dbb', fontSize: 11, fontWeight: '700', marginTop: 4 },
   resultsNg: { color: '#ffd34d', fontSize: 12, fontWeight: '900', marginTop: 8, letterSpacing: 1 },
+  routeCard: { width: 300, backgroundColor: 'rgba(14,17,28,0.9)', borderWidth: 2, borderRadius: 14, padding: 14, alignItems: 'center' },
+  routeName: { fontSize: 14, fontWeight: '900', letterSpacing: 2, textAlign: 'center' },
+  routeTag: { color: '#8fa1c7', fontSize: 11, fontStyle: 'italic', marginTop: 3 },
+  routeDesc: { color: '#c9d4f0', fontSize: 11.5, lineHeight: 17, marginTop: 8, textAlign: 'center' },
 });
