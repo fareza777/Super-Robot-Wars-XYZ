@@ -193,7 +193,7 @@ export interface ChapterDef {
   count: number;
   boss?: string;
   bossLevel?: number;
-  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect' | 'seize' | 'reach';
+  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect' | 'seize' | 'reach' | 'escort';
   surviveTurns?: number;
   /** rout/boss/seize/reach only: defeat if the objective isn't met by this turn */
   turnLimit?: number;
@@ -663,7 +663,7 @@ export interface SideMissionDef {
   boss?: string;
   rewardCr: number;
   rewardItem?: ItemId;
-  objectiveType?: 'rout' | 'survive' | 'seize' | 'reach';
+  objectiveType?: 'rout' | 'survive' | 'seize' | 'reach' | 'escort';
   surviveTurns?: number;
   /** rout/seize objectives: defeat if not met within this many turns */
   turnLimit?: number;
@@ -813,6 +813,7 @@ export const PATROL_MISSIONS: SideMissionDef[] = [
   { id: 'p8', name: 'Night Passage', desc: 'Sensors are blind in the darkside channel. Slip a unit through the blockade line.', unlockCh: 24, theme: 'void', lvl: 20, count: 8, rewardCr: 1900, repeatable: true, objectiveType: 'reach', turnLimit: 9, fog: true, objective: 'Reach the extraction ➤ within 9 turns — sensors blind beyond 4 tiles' },
   { id: 'p6', name: 'Blackout Watch', desc: 'A sensor dead-zone hangs over the frozen relay shelf. Hostiles only reveal at knife range.', unlockCh: 11, theme: 'ice', lvl: 12, count: 6, rewardCr: 1150, repeatable: true, fog: true, objective: 'Rout all hostiles — sensors blind beyond 4 tiles' },
   { id: 'p10', name: 'Last Stand Ridge', desc: 'The ridge garrison is dug in and holding. Reinforcements keep cresting the pass — outlast them.', unlockCh: 22, theme: 'mountain', lvl: 19, count: 8, rewardCr: 1700, repeatable: true, objectiveType: 'survive', surviveTurns: 6, objective: 'Survive 6 turns against the ridge garrison' },
+  { id: 'p11', name: 'The Long Haul', desc: 'A captured Imperial mule hauls Ark cargo across the dunes. Raiders want it back — get it to the east edge alive.', unlockCh: 16, theme: 'desert', lvl: 15, count: 7, rewardCr: 1600, repeatable: true, carrier: true, objectiveType: 'escort', turnLimit: 10, objective: 'Escort the Supply Mule to the east edge within 10 turns — or rout the raiders' },
 ];
 
 export const ALL_SIDE_MISSIONS: SideMissionDef[] = [...SIDE_MISSIONS, ...PATROL_MISSIONS];

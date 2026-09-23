@@ -373,13 +373,24 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
     units.push(u);
   }
   if (ch.carrier) {
-    // loot carrier spawns mid-right and flees east every enemy phase
-    const spawnX = Math.floor(map.cols * 0.55);
-    const mule = makeUnit('cargoMule', 'enemy', { x: spawnX, y: Math.floor(map.rows / 2) }, `e${i++}`);
-    mule.level = ch.lvl;
-    ngEnemy(mule, ngPlus);
-    hardEnemy(mule, difficulty);
-    units.push(mule);
+    if (ch.objectiveType === 'escort') {
+      // escort mission — friendly mule on our side, auto-flees east every enemy phase
+      const mule = makeUnit('cargoMule', 'player', { x: 1, y: Math.floor(map.rows / 2) }, `a${i++}`);
+      mule.npc = true;
+      mule.escort = true;
+      mule.level = ch.lvl;
+      mule.def = { ...mule.def, maxHp: Math.round(mule.def.maxHp * (1 + (ch.lvl - 1) * 0.15)) };
+      mule.hp = mule.def.maxHp;
+      units.push(mule);
+    } else {
+      // loot carrier spawns mid-right and flees east every enemy phase
+      const spawnX = Math.floor(map.cols * 0.55);
+      const mule = makeUnit('cargoMule', 'enemy', { x: spawnX, y: Math.floor(map.rows / 2) }, `e${i++}`);
+      mule.level = ch.lvl;
+      ngEnemy(mule, ngPlus);
+      hardEnemy(mule, difficulty);
+      units.push(mule);
+    }
   }
   for (const s of map.allySpawns ?? []) {
     const u = makeUnit(s.defId, 'player', s.pos, `a${i++}`);
@@ -1863,6 +1874,40 @@ function applyVictory(set: SetFn, get: Get) {
 
 async function runEnemyPhase(set: SetFn, get: Get) {
   await sleep(650);
+  // escort mule — a friendly carrier auto-flees east at the start of each enemy phase;
+  // reaching the edge delivers the cargo (victory)
+  {
+    const s0 = get();
+    const mule = s0.units.find((u) => u.alive && u.npc && u.def.carrier && u.side === 'player');
+    if (mule) {
+      const best = [...movementRange(s0.map, s0.units, mule).values()]
+        .map((r) => r.pos)
+        .filter((p) => !unitAt(s0.units, p))
+        .sort((a, b) => b.x - a.x)[0];
+      if (best && !same(best, mule.pos)) {
+        const path = pathTo(movementRange(s0.map, s0.units, mule), best);
+        set((st) => ({
+          units: st.units.map((u) => (u.uid === mule.uid ? { ...u, pos: best } : u)),
+          walk: path && path.length > 1 ? { uid: mule.uid, path } : null,
+          log: push(st.log, '🛡 Supply Mule advances toward the extraction point'),
+        }));
+        await sleep(path && path.length > 1 ? 160 + path.length * 190 : 200);
+        set({ walk: null });
+      }
+      const m2 = get().units.find((u) => u.uid === mule.uid);
+      if (m2 && m2.pos.x >= get().map.cols - 1) {
+        set((st) => ({
+          units: st.units.map((u) => (u.uid === mule.uid ? { ...u, alive: false } : u)),
+          notice: '🛡 CARGO DELIVERED — the mule reached the extraction point',
+          log: push(st.log, '🛡 Supply Mule delivered its cargo east — mission accomplished'),
+        }));
+        setTimeout(() => set({ notice: null }), 2600);
+        await sleep(900);
+        applyVictory(set, get);
+        return;
+      }
+    }
+  }
   let guard = 0;
   while (guard++ < 20) {
     const s = get();

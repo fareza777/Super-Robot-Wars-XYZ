@@ -676,7 +676,7 @@ export function defeatQuotes(before: UnitState[], after: UnitState[], killer?: U
 }
 
 export interface EndObjective {
-  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect' | 'seize' | 'reach';
+  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect' | 'seize' | 'reach' | 'escort';
   surviveTurns?: number;
   protectTurns?: number;
   seizePos?: Pos;
@@ -764,6 +764,13 @@ export function checkEnd(units: UnitState[], obj?: EndObjective | null, turn?: n
     // reach missions: land a unit on the extraction tile, or rout the blockade
     const rp = obj?.reachPos;
     if (rp && units.some((u) => u.alive && u.side === 'player' && u.pos.x === rp.x && u.pos.y === rp.y)) return 'victory';
+    if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
+    return timedOut(obj, turn) ? 'defeat' : null;
+  }
+  if (type === 'escort') {
+    // escort missions: the mule dying fails instantly; reaching the east edge wins (handled in store);
+    // routing all hostiles also secures the cargo
+    if (!units.some((u) => u.alive && u.escort)) return 'defeat';
     if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
     return timedOut(obj, turn) ? 'defeat' : null;
   }

@@ -108,13 +108,18 @@ export function SidePanel() {
         <View style={styles.objCard}>
           {(() => {
             const mule = s.units.find((u) => u.def.carrier);
+            const escorting = s.missionCh.objectiveType === 'escort';
             if (mule?.alive) return (
               <>
-                <Text style={[styles.objTxt, { color: '#ffe8a0' }]}>💰 HUNT THE SUPPLY MULE · ({mule.pos.x},{mule.pos.y})</Text>
-                <Bar label="MULE" val={mule.hp} max={mule.def.maxHp} color="#ffe8a0" />
+                <Text style={[styles.objTxt, { color: escorting ? '#7dc9ff' : '#ffe8a0' }]}>
+                  {escorting ? `🛡 ESCORT THE MULE EAST · (${mule.pos.x},${mule.pos.y}) — edge at x${s.map.cols - 1}` : `💰 HUNT THE SUPPLY MULE · (${mule.pos.x},${mule.pos.y})`}
+                </Text>
+                <Bar label="MULE" val={mule.hp} max={mule.def.maxHp} color={escorting ? '#7dc9ff' : '#ffe8a0'} />
               </>
             );
             const escaped = !!mule && mule.pos.x >= s.map.cols - 1;
+            const delivered = escorting && !!mule && !mule.alive && mule.pos.x >= s.map.cols - 1;
+            if (escorting) return <Text style={[styles.objTxt, { color: delivered ? '#7dff9d' : '#ff8a5c' }]}>{delivered ? '🛡 CARGO DELIVERED' : '💔 MULE LOST — the cargo is gone'}</Text>;
             return <Text style={[styles.objTxt, { color: escaped ? '#ff8a5c' : '#7dff9d' }]}>{escaped ? '🏃 CARRIER ESCAPED' : '💰 CARRIER DOWN — cargo secured'}</Text>;
           })()}
         </View>
@@ -134,7 +139,7 @@ export function SidePanel() {
       {!!s.missionCh.turnLimit && objType !== 'survive' && objType !== 'protect' && !s.missionCh.sim && (
         <View style={styles.objCard}>
           <Text style={[styles.objTxt, s.turn >= (s.missionCh.turnLimit ?? 99) - 1 && { color: '#ff8080' }]}>
-            ⌛ ROUT BY TURN {s.missionCh.turnLimit} · {Math.max(0, (s.missionCh.turnLimit ?? 0) - s.turn + 1)} LEFT
+            ⌛ {objType === 'escort' ? 'DELIVER' : 'ROUT'} BY TURN {s.missionCh.turnLimit} · {Math.max(0, (s.missionCh.turnLimit ?? 0) - s.turn + 1)} LEFT
           </Text>
         </View>
       )}
