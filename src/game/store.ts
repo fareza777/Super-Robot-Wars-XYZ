@@ -172,6 +172,8 @@ interface Store {
   pendingMovedFlag: boolean;
   attackTiles: Set<string>;
   pendingWeapon: WeaponDef | null;
+  /** MAP weapon aim point — first tap marks the blast, second tap (or FIRE) commits */
+  mapAim: Pos | null;
   menuForUid: string | null;
   spiritForUid: string | null;
   battle: BattleAnim | null;
@@ -482,6 +484,7 @@ export const useGame = create<Store>((set, get) => ({
   pendingMovedFlag: false,
   attackTiles: new Set(),
   pendingWeapon: null,
+  mapAim: null,
   menuForUid: null,
   spiritForUid: null,
   battle: null,
@@ -886,11 +889,11 @@ export const useGame = create<Store>((set, get) => ({
   // (in VR mode, retreating settles the run through the standard sim-over screen)
   retreatMission: () => {
     if (get().missionCh.sim) {
-      set({ phase: 'defeat', battle: null, cursor: null, selectedUid: null, pendingMove: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, midDialog: null });
+      set({ phase: 'defeat', battle: null, cursor: null, selectedUid: null, pendingMove: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, mapAim: null, midDialog: null });
       return;
     }
     void clearBattleSave();
-    set({ phase: 'missions', sideId: null, savedBattle: null, battle: null, cursor: null, selectedUid: null, pendingMove: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, midDialog: null, units: [] });
+    set({ phase: 'missions', sideId: null, savedBattle: null, battle: null, cursor: null, selectedUid: null, pendingMove: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, mapAim: null, midDialog: null, units: [] });
   },
 
   resumeBattle: () => {
@@ -920,6 +923,7 @@ export const useGame = create<Store>((set, get) => ({
       pendingMovedFlag: false,
       attackTiles: new Set(),
       pendingWeapon: null,
+      mapAim: null,
       menuForUid: null,
       spiritForUid: null,
       battle: null,
@@ -1001,6 +1005,7 @@ export const useGame = create<Store>((set, get) => ({
       pendingMove: null,
       attackTiles: new Set(),
       pendingWeapon: null,
+      mapAim: null,
       menuForUid: null,
       spiritForUid: null,
       battle: null,
@@ -1034,7 +1039,13 @@ export const useGame = create<Store>((set, get) => ({
     // target selection mode
     if (s.pendingWeapon && s.pendingMove) {
       if (s.pendingWeapon.mapRange != null) {
-        if (s.attackTiles.has(key(p))) get().chooseMapTile(p);
+        // MAP aim: first tap marks the blast zone, a second tap on the same tile commits
+        if (s.attackTiles.has(key(p))) {
+          if (s.mapAim && same(s.mapAim, p)) get().chooseMapTile(p);
+          else set({ mapAim: p });
+        } else if (s.mapAim) {
+          set({ mapAim: null });
+        }
         return;
       }
       const t = unitAt(s.units, p);
@@ -1049,8 +1060,8 @@ export const useGame = create<Store>((set, get) => ({
 
     const u = unitAt(s.units, p);
 
-    // tap an enemy: inspect card + threat-range overlay
-    if (u && (u.side === 'enemy' || u.npc) && !s.selectedUid) {
+    // tap an enemy: inspect card + threat-range overlay (fog hides uncontacted hostiles)
+    if (u && (u.side === 'enemy' || u.npc) && !s.selectedUid && !(s.missionCh.fog && u.side === 'enemy' && !fogLit(s.units, u.pos))) {
       const threat = threatTilesFor(s.map, s.units, u);
       set({ cursor: p, inspectUid: u.uid, threatTiles: threat, tileInfo: null });
       return;
@@ -1142,6 +1153,7 @@ export const useGame = create<Store>((set, get) => ({
       pendingMovedFlag: false,
       attackTiles: new Set(),
       pendingWeapon: null,
+      mapAim: null,
       menuForUid: null,
       spiritForUid: null,
       inspectUid: null,
@@ -1161,10 +1173,11 @@ export const useGame = create<Store>((set, get) => ({
     } else {
       for (const e of s.units) {
         if (!e.alive || e.side !== 'enemy') continue;
+        if (s.missionCh.fog && !fogLit(s.units, e.pos)) continue; // can't lock what the sensors can't see
         if (weaponsAgainst(u, s.pendingMove, e, s.pendingMovedFlag).some((x) => x.id === w.id)) tiles.add(key(e.pos));
       }
     }
-    set({ pendingWeapon: w, attackTiles: tiles });
+    set({ pendingWeapon: w, attackTiles: tiles, mapAim: null });
   },
 
   chooseTarget: (uid) => {
@@ -1244,6 +1257,7 @@ export const useGame = create<Store>((set, get) => ({
       salvageQueue,
       kills: s.kills + killCount,
       pendingWeapon: null,
+      mapAim: null,
       attackTiles: new Set<string>(),
       menuForUid: null,
       pendingMove: null,
@@ -1304,6 +1318,7 @@ export const useGame = create<Store>((set, get) => ({
       killsByDef: tallyKills(s.killsByDef, deadEnemies(s.units, state.units)),
       kills: s.kills + deadEnemies(s.units, state.units).length,
       pendingWeapon: null,
+      mapAim: null,
       attackTiles: new Set<string>(),
       menuForUid: null,
       pendingMove: null,
@@ -1480,6 +1495,12 @@ function betterRank(prev: Rank | undefined, next: Rank): Rank {
 
 /** Cpt. Vossen always goes down carrying a cache — first downing in a mission guarantees the drop. */
 /** Enemy units destroyed between two snapshots — kills count only hostiles, never player losses. */
+/** fog-of-war sight radius — a tile/enemy is lit when any live player unit is this close */
+export const FOG_RANGE = 4;
+export function fogLit(units: UnitState[], p: Pos): boolean {
+  return units.some((u) => u.alive && u.side === 'player' && dist(u.pos, p) <= FOG_RANGE);
+}
+
 function deadEnemies(before: UnitState[], after: UnitState[]): UnitState[] {
   const afterAlive = new Set(after.filter((u) => u.alive).map((u) => u.uid));
   return before.filter((u) => u.side === 'enemy' && u.alive && !afterAlive.has(u.uid));
@@ -1557,7 +1578,7 @@ function simNextWave(set: SetFn, get: Get) {
   let log = push(s.log, `— Wave ${wave - 1} cleared — +${(wave - 1) * 150} pts`);
   log = push(log, `▲ WAVE ${wave}: ${news.length} hostiles warp in (Lv ${lvl}${wave % 4 === 0 ? ' · ALL ELITE' : ''}${wave % 3 === 0 ? ' + supply crate' : ''})`);
   const notice = `▲ WAVE ${wave} — ${news.length} HOSTILES INBOUND · ${s.kills * 50 + (wave - 1) * 150} PTS`;
-  set({ units, crates, simWave: wave, battle: null, phase: 'player', enemyBusy: false, selectedUid: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, pendingMove: null, attackTiles: new Set(), hazardWarn: [], notice, log });
+  set({ units, crates, simWave: wave, battle: null, phase: 'player', enemyBusy: false, selectedUid: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, mapAim: null, pendingMove: null, attackTiles: new Set(), hazardWarn: [], notice, log });
   setTimeout(() => set({ notice: null }), 2600);
 }
 
@@ -1948,7 +1969,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
     let dangerTiles = st.dangerTiles;
     if (st.dangerZone) {
       dangerTiles = new Set<string>();
-      for (const e of units.filter((u) => u.alive && u.side === 'enemy')) for (const t of threatTilesFor(st.map, units, e)) dangerTiles.add(t);
+      for (const e of units.filter((u) => u.alive && u.side === 'enemy' && !(st.missionCh.fog && !fogLit(units, u.pos)))) for (const t of threatTilesFor(st.map, units, e)) dangerTiles.add(t);
     }
     return {
       units,

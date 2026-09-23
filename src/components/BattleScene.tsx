@@ -481,7 +481,7 @@ function HitPlate({ unit, after, side, active, result }: { unit: UnitState; afte
           <ImpactText
             text={`${dmg}`}
             sub={result.crit ? 'CRITICAL!' : result.graze ? 'GRAZE' : result.destroyed ? 'DESTROYED!' : `${result.hitChance}%`}
-            color={result.crit ? '#ffd34d' : '#fff'}
+            color={result.crit ? '#ffd34d' : result.graze ? '#9fd8ff' : result.destroyed ? '#ff5a4a' : '#fff'}
           />
         ) : (
           <ImpactText text="MISS" sub={`${result.hitChance}%`} color="#9fd0ff" />
@@ -505,7 +505,7 @@ function CounterPlate({ unit, after, side, active, result }: { unit: UnitState; 
       {active &&
         result &&
         (result.hit ? (
-          <ImpactText text={`${dmg}`} sub={result.crit ? 'CRITICAL!' : result.destroyed ? 'DESTROYED!' : 'COUNTER'} color="#ff8a5c" />
+          <ImpactText text={`${dmg}`} sub={result.crit ? 'CRITICAL!' : result.destroyed ? 'DESTROYED!' : 'COUNTER'} color={result.crit ? '#ffd34d' : result.destroyed ? '#ff5a4a' : '#ff8a5c'} />
         ) : (
           <ImpactText text="MISS" sub="counter" color="#9fd0ff" />
         ))}

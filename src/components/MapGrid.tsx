@@ -3,8 +3,8 @@ import { Animated, Easing, PanResponder, Pressable, StyleSheet, Text, useWindowD
 import { Image } from 'expo-image';
 import { MECH_ART, TERRAIN_ART } from '../assets';
 import { TERRAIN_INFO } from '../game/data';
-import { key, same } from '../game/engine';
-import { useGame } from '../game/store';
+import { dist, key, same } from '../game/engine';
+import { fogLit, useGame } from '../game/store';
 import { MapDef, Pos, UnitState } from '../game/types';
 
 const COLS = 14;
@@ -26,6 +26,9 @@ const Tile = React.memo(function Tile({
   beacon,
   reach,
   hazard,
+  inBlast,
+  aimed,
+  inFog,
   onTap,
   rp,
 }: {
@@ -41,6 +44,12 @@ const Tile = React.memo(function Tile({
   beacon: boolean;
   reach: boolean;
   hazard: boolean;
+  /** inside the aimed MAP blast radius */
+  inBlast: boolean;
+  /** the MAP aim tile itself */
+  aimed: boolean;
+  /** fog-of-war dim — no player unit within sight range */
+  inFog: boolean;
   onTap: (p: Pos) => void;
   /** shared range-overlay shimmer — one Animated.Value for the whole board */
   rp: Animated.Value;
@@ -69,6 +78,12 @@ const Tile = React.memo(function Tile({
       {inDanger && !inMove && !inAtk && !inThreat && <View style={[styles.overlay, styles.dangerOv]} pointerEvents="none" />}
       {inMove && <Animated.View style={[styles.overlay, styles.moveOv, { opacity: rp.interpolate({ inputRange: [0, 1], outputRange: [0.7, 1.18] }) }]} pointerEvents="none" />}
       {inAtk && <Animated.View style={[styles.overlay, styles.atkOv, { opacity: rp.interpolate({ inputRange: [0, 1], outputRange: [0.75, 1.25] }) }]} pointerEvents="none" />}
+      {inBlast && (
+        <Animated.View style={[styles.overlay, styles.blastOv, { opacity: rp.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1.3] }) }]} pointerEvents="none">
+          {aimed && <Text style={styles.aimTag}>◎</Text>}
+        </Animated.View>
+      )}
+      {inFog && <View style={[styles.overlay, styles.fogOv]} pointerEvents="none" />}
     </Pressable>
   );
 });
@@ -184,6 +199,8 @@ export function MapGrid() {
   const crates = useGame((s) => s.crates);
   const selectedUid = useGame((s) => s.selectedUid);
   const pendingMove = useGame((s) => s.pendingMove);
+  const pendingWeapon = useGame((s) => s.pendingWeapon);
+  const mapAim = useGame((s) => s.mapAim);
   const walk = useGame((s) => s.walk);
   const tapTile = useGame((s) => s.tapTile);
   const { width, height } = useWindowDimensions();
@@ -265,6 +282,9 @@ export function MapGrid() {
             beacon={!!missionCh.seizePos && missionCh.seizePos.x === p.x && missionCh.seizePos.y === p.y}
             reach={!!missionCh.reachPos && missionCh.reachPos.x === p.x && missionCh.reachPos.y === p.y}
             hazard={hazardWarn.some((h) => h.x === p.x && h.y === p.y)}
+            inBlast={!!(mapAim && pendingWeapon?.mapRange != null && dist(p, mapAim) <= pendingWeapon.mapRange)}
+            aimed={!!mapAim && same(p, mapAim)}
+            inFog={!!missionCh.fog && !fogLit(units, p)}
             onTap={tapTile}
             rp={rp}
           />
@@ -275,7 +295,7 @@ export function MapGrid() {
           </View>
         )}
         {units
-          .filter((u) => u.alive)
+          .filter((u) => u.alive && !(missionCh.fog && u.side === 'enemy' && !fogLit(units, u.pos)))
           .map((u) => {
             const walking = walk && walk.uid === u.uid && walk.path.length > 1;
             if (walking) return <WalkingChip key={u.uid} path={walk!.path} tw={tw} th={th} cell={<UnitCell u={u} chip={chip} ghosting={false} />} />;
@@ -300,7 +320,7 @@ export function MapGrid() {
 
 const MINI_TW = 8;
 /** Corner overview — terrain tint, unit dots, objective & viewport markers. */
-function MiniMap({ map, units, missionCh, crates, panX, panY, bw, bh, vw, vh }: { map: MapDef; units: UnitState[]; missionCh: { seizePos?: Pos; reachPos?: Pos }; crates: { pos: Pos; itemId: string }[]; panX: number; panY: number; bw: number; bh: number; vw: number; vh: number }) {
+function MiniMap({ map, units, missionCh, crates, panX, panY, bw, bh, vw, vh }: { map: MapDef; units: UnitState[]; missionCh: { seizePos?: Pos; reachPos?: Pos; fog?: boolean }; crates: { pos: Pos; itemId: string }[]; panX: number; panY: number; bw: number; bh: number; vw: number; vh: number }) {
   const mw = map.cols * MINI_TW;
   const mh = map.rows * MINI_TW;
   const rectW = Math.min(mw, (vw / bw) * mw);
@@ -320,7 +340,7 @@ function MiniMap({ map, units, missionCh, crates, panX, panY, bw, bh, vw, vh }: 
         {missionCh.seizePos && <View style={[styles.miniDot, { left: missionCh.seizePos.x * MINI_TW + 1, top: missionCh.seizePos.y * MINI_TW + 1, width: 6, height: 6, backgroundColor: '#ffd34d', borderWidth: 1, borderColor: '#fff' }]} />}
         {missionCh.reachPos && <View style={[styles.miniDot, { left: missionCh.reachPos.x * MINI_TW + 1, top: missionCh.reachPos.y * MINI_TW + 1, width: 6, height: 6, backgroundColor: '#4de3ff', borderWidth: 1, borderColor: '#fff' }]} />}
         {units
-          .filter((u) => u.alive)
+          .filter((u) => u.alive && !(missionCh.fog && u.side === 'enemy' && !fogLit(units, u.pos)))
           .map((u) => (
             <View
               key={u.uid}
@@ -376,6 +396,9 @@ const styles = StyleSheet.create({
   overlay: { ...StyleSheet.absoluteFill },
   moveOv: { backgroundColor: 'rgba(70,140,255,0.4)' },
   atkOv: { backgroundColor: 'rgba(255,60,60,0.45)' },
+  blastOv: { backgroundColor: 'rgba(255,150,40,0.34)', borderWidth: 1, borderColor: 'rgba(255,180,70,0.9)', alignItems: 'center', justifyContent: 'center' },
+  aimTag: { color: '#ffcf6a', fontSize: 16, fontWeight: '900', textShadowColor: 'rgba(255,160,40,1)', textShadowRadius: 8 },
+  fogOv: { backgroundColor: 'rgba(4,7,14,0.58)' },
   threatOv: { backgroundColor: 'rgba(255,150,40,0.26)', borderWidth: 1, borderColor: 'rgba(255,150,40,0.35)' },
   hazardOv: { backgroundColor: 'rgba(255,90,30,0.22)', borderColor: 'rgba(255,140,60,0.9)', borderStyle: 'dashed' },
   dangerOv: { backgroundColor: 'rgba(255,50,50,0.16)' },

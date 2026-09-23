@@ -6,7 +6,7 @@ import { ITEMS, PARTS } from '../game/campaign';
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { bondMods } from '../game/bonds';
 import { bestCounterWeapon, critChance, damageOf, dist, formationBonus, hitChance, key, rallyBonus, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
-import { aliveEnemies, alivePlayers, useGame } from '../game/store';
+import { aliveEnemies, alivePlayers, fogLit, useGame } from '../game/store';
 import { SpiritId, UnitState } from '../game/types';
 
 /** active spirit flags on a unit, as display names */
@@ -70,7 +70,7 @@ export function SidePanel() {
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity onPress={() => setShowRoster((v) => !v)} style={{ flex: 1 }}>
           <Text style={styles.counts}>
-            Ally {alivePlayers(s).length} · Enemy {aliveEnemies(s).length} · ☠{s.kills}  {showRoster ? '▲' : '▼'}
+            Ally {alivePlayers(s).length} · Enemy {s.missionCh.fog ? `${aliveEnemies(s).filter((e) => fogLit(s.units, e.pos)).length}/${aliveEnemies(s).length}` : aliveEnemies(s).length} · ☠{s.kills}  {showRoster ? '▲' : '▼'}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={s.toggleDanger} style={[styles.dangerBtn, s.dangerZone && styles.dangerBtnOn]}>
@@ -248,7 +248,35 @@ export function SidePanel() {
               {s.pendingWeapon.name} · POW {s.pendingWeapon.power}
             </Text>
             {s.pendingWeapon.mapRange != null ? (
-              <Text style={styles.hint}>AREA WEAPON — tap a highlighted tile to drop the blast (hits every unit in radius {s.pendingWeapon.mapRange}, allies included!)</Text>
+              <>
+                <Text style={styles.hint}>
+                  {s.mapAim ? `BLAST ZONE AIMED — (${s.mapAim.x},${s.mapAim.y}) · radius ${s.pendingWeapon.mapRange}` : `AREA WEAPON — tap a highlighted tile to aim the blast (radius ${s.pendingWeapon.mapRange}, allies included!)`}
+                </Text>
+                {s.mapAim &&
+                  s.units
+                    .filter((e) => e.alive && e.uid !== unit.uid && dist(e.pos, s.mapAim!) <= (s.pendingWeapon!.mapRange ?? 0))
+                    .map((e) => (
+                      <View key={e.uid} style={[styles.tgtRow, e.side === 'player' && { borderColor: '#ff9a4d' }]}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.tgtName} numberOfLines={1}>
+                            {e.side === 'player' ? '⚠ ALLY — ' : ''}
+                            {e.def.name} {e.def.boss ? (e.phase2 ? 'Ω★' : '★') : ''}
+                          </Text>
+                          <Text style={styles.tgtHp}>
+                            HP {e.hp}/{e.def.maxHp} · WILL {e.will}
+                          </Text>
+                        </View>
+                        <View style={styles.tgtHitBox}>
+                          <Text style={[styles.tgtHit, { color: '#ffd34d' }]}>{hitChance(unit, e, s.pendingWeapon!, s.map)}%</Text>
+                          <Text style={styles.tgtDmg}>~{damageOf(unit, e, s.pendingWeapon!, s.map, false)}</Text>
+                        </View>
+                      </View>
+                    ))}
+                {s.mapAim && (
+                  <Btn label="FIRE ▸" sub="Commit the blast — every unit in the zone takes the hit" onPress={() => s.chooseMapTile(s.mapAim!)} accent="#ff9a4d" />
+                )}
+                {s.mapAim && <Text style={styles.hint}>…or tap another tile to re-aim</Text>}
+              </>
             ) : (
               <>
                 <Text style={styles.hint}>Pick a target — or tap one on the map</Text>
@@ -290,7 +318,7 @@ export function SidePanel() {
                   })}
               </>
             )}
-            <Btn label="BACK" onPress={() => useGame.setState({ pendingWeapon: null, attackTiles: new Set() })} accent="#666" />
+            <Btn label="BACK" onPress={() => useGame.setState({ pendingWeapon: null, attackTiles: new Set(), mapAim: null })} accent="#666" />
           </View>
         )}
 
@@ -342,18 +370,26 @@ export function SidePanel() {
             <ScrollView style={{ maxHeight: 92 }} nestedScrollEnabled>
               {s.units
                 .filter((u) => u.side === 'enemy' && u.alive)
-                .map((u) => (
-                  <View key={u.uid} style={styles.rosterRow}>
-                    <Text style={[styles.rosterName, { color: '#ffb0a0' }]} numberOfLines={1}>
-                      {u.def.boss || u.elite ? '★ ' : ''}
-                      {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>
-                    </Text>
-                    <View style={[styles.rosterBarTrack, { backgroundColor: '#2a1216' }]}>
-                      <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: '#ff5a5a' }]} />
+                .map((u) =>
+                  s.missionCh.fog && !fogLit(s.units, u.pos) ? (
+                    <View key={u.uid} style={styles.rosterRow}>
+                      <Text style={[styles.rosterName, { color: '#4a5a7a' }]} numberOfLines={1}>
+                        ??? — UNCONTACTED
+                      </Text>
                     </View>
-                    <Text style={styles.rosterHp}>{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
-                  </View>
-                ))}
+                  ) : (
+                    <View key={u.uid} style={styles.rosterRow}>
+                      <Text style={[styles.rosterName, { color: '#ffb0a0' }]} numberOfLines={1}>
+                        {u.def.boss || u.elite ? '★ ' : ''}
+                        {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>
+                      </Text>
+                      <View style={[styles.rosterBarTrack, { backgroundColor: '#2a1216' }]}>
+                        <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: '#ff5a5a' }]} />
+                      </View>
+                      <Text style={styles.rosterHp}>{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
+                    </View>
+                  ),
+                )}
             </ScrollView>
           </View>
         )}

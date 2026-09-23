@@ -190,6 +190,8 @@ export interface ChapterDef {
   routeTag?: string;
   /** VR simulator run — routing a wave spawns the next one; defeat settles the score */
   sim?: boolean;
+  /** fog of war: enemy units are hidden until a player unit is within FOG_RANGE */
+  fog?: boolean;
 }
 
 export const CHAPTERS: ChapterDef[] = chaptersJson as unknown as ChapterDef[];
@@ -615,6 +617,8 @@ export interface SideMissionDef {
   objective?: string;
   /** repeatable patrol op — never marked cleared, level scales with campaign progress */
   repeatable?: boolean;
+  /** fog of war: enemy units are hidden until a player unit is within FOG_RANGE */
+  fog?: boolean;
 }
 
 export const SIDE_MISSIONS: SideMissionDef[] = [
@@ -749,6 +753,7 @@ export const PATROL_MISSIONS: SideMissionDef[] = [
   { id: 'p3', name: "Throne's Shadow Watch", desc: 'The Emperor\'s vanguard tests our perimeter. Answer in kind.', unlockCh: 20, theme: 'fortress', lvl: 17, count: 7, rewardCr: 1500, repeatable: true, turnLimit: 9, objective: 'Rout all hostiles within 9 turns — or they slip away' },
   { id: 'p4', name: 'Ghost Relay Intercept', desc: 'A dead relay station keeps pinging the throne. Reach it before the garrison does.', unlockCh: 15, theme: 'ice', lvl: 14, count: 6, rewardCr: 1250, repeatable: true, objectiveType: 'seize', turnLimit: 8, objective: 'Seize the relay beacon within 8 turns — before the Empire silences it' },
   { id: 'p5', name: 'Karn Circuit', desc: 'Cataphract wolf-packs run the caldera rim hunting convoys. Break the pack.', unlockCh: 24, theme: 'lava', lvl: 20, count: 8, rewardCr: 1800, repeatable: true, turnLimit: 10, objective: 'Rout all hostiles within 10 turns — or they slip away' },
+  { id: 'p6', name: 'Blackout Watch', desc: 'A sensor dead-zone hangs over the frozen relay shelf. Hostiles only reveal at knife range.', unlockCh: 11, theme: 'ice', lvl: 12, count: 6, rewardCr: 1150, repeatable: true, fog: true, objective: 'Rout all hostiles — sensors blind beyond 4 tiles' },
 ];
 
 export const ALL_SIDE_MISSIONS: SideMissionDef[] = [...SIDE_MISSIONS, ...PATROL_MISSIONS];
@@ -837,5 +842,6 @@ export function sideAsChapter(m: SideMissionDef): ChapterDef {
     objective: m.objective ?? (m.boss ? 'Destroy the marked commander unit' : 'Rout all hostiles'),
     lines: [],
     rosterCh: m.unlockCh,
+    fog: m.fog,
   };
 }
