@@ -29,6 +29,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   resolve: { id: 'resolve', name: 'Resolve', cost: 50, desc: 'Kiai surge — Will instantly climbs to 150' },
   sunder: { id: 'sunder', name: 'Sunder', cost: 45, desc: 'Breacher field — enemies within 3 tiles lose 300 armor & 15 evade' },
   provoke: { id: 'provoke', name: 'Provoke', cost: 35, desc: 'War horn — enemies within 3 tiles are drawn to attack this unit next phase' },
+  cheer: { id: 'cheer', name: 'Cheer', cost: 30, desc: 'The most junior ally within 3 tiles gains double EXP on their next attack' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
@@ -96,7 +97,7 @@ export const PILOTS = {
   ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul'], faceColor: '#ffb347', trait: 'ace_instinct' }),
   mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse', 'fortune', 'trust'], faceColor: '#7ee7ff', trait: 'deadeye' }),
   gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor', 'sunder', 'provoke'], faceColor: '#ff9d9d', trait: 'siege_breaker' }),
-  orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless', 'lucky', 'mercy', 'purge'], faceColor: '#b6ff9d', trait: 'field_medic' }),
+  orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless', 'lucky', 'mercy', 'purge', 'cheer'], faceColor: '#b6ff9d', trait: 'field_medic' }),
   karg: P({ name: 'Col. Karg Draven', callsign: 'BOSS', melee: 75, ranged: 75, defense: 70, evade: 65, maxSp: 70, spirits: ['valor', 'strike'], faceColor: '#d0a0ff', lastWords: 'Rex is scrap... the Empire builds another. Always.', killQuip: 'Another Aegis relic for the pyre.' }),
   grunt: P({ name: 'Soldier', callsign: 'GR', melee: 56, ranged: 56, defense: 52, evade: 52, maxSp: 30, spirits: [], faceColor: '#bbbbbb' }),
   civ: P({ name: 'Convoy Crew', callsign: 'CVY', melee: 40, ranged: 40, defense: 40, evade: 40, maxSp: 0, spirits: [], faceColor: '#c8b090' }),
@@ -114,7 +115,9 @@ export const UNITS: Record<string, UnitDef> = {
   valstray_s: U({ id: 'valstray_s', name: 'Valstray Strider', title: 'X-Face Skyframe', color: '#3a8de0', accent: '#bfe4ff', maxHp: 5400, maxEn: 140, armor: 880, mobility: 148, moveRange: 8, moveType: 'air', weapons: [WEAPONS.beamSaber, WEAPONS.photonRifle, WEAPONS.vulcan, WEAPONS.arcCannon, WEAPONS.dawnCutter], pilot: PILOTS.ray }),
   arielis: U({ id: 'arielis', name: 'Arielis', title: 'X-Face Sniper', color: '#38b6c9', accent: '#c8f6ff', maxHp: 4600, maxEn: 160, armor: 900, mobility: 132, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.photonRifle, WEAPONS.vulcan, WEAPONS.twinBarrage, WEAPONS.railVolley, WEAPONS.starfallStrike], pilot: PILOTS.mira }),
   gruntborg: U({ id: 'gruntborg', name: 'Grunborg', title: 'Y-Face Heavy', color: '#c94f4f', accent: '#ffd0c0', maxHp: 7200, maxEn: 110, armor: 1400, mobility: 92, moveRange: 5, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.railgun, WEAPONS.gatling, WEAPONS.mapBuster, WEAPONS.thermoCharge, WEAPONS.omniBarrage, WEAPONS.ironChord], pilot: PILOTS.gara }),
-  zephyra: U({ id: 'zephyra', name: 'Zephyra', title: 'Z-Face Duelist', color: '#5fbf62', accent: '#d8ffd8', maxHp: 5400, maxEn: 150, armor: 1000, mobility: 126, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.chestBlaster, WEAPONS.vulcan, WEAPONS.flareField, WEAPONS.mapFlare, WEAPONS.mirageWaltz], pilot: PILOTS.orin, repairer: true, supplier: true }),
+  zephyra: U({ id: 'zephyra', name: 'Zephyra', title: 'Z-Face Duelist', color: '#5fbf62', accent: '#d8ffd8', maxHp: 5400, maxEn: 150, armor: 1000, mobility: 126, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.chestBlaster, WEAPONS.vulcan, WEAPONS.flareField, WEAPONS.mapFlare, WEAPONS.mirageWaltz], pilot: PILOTS.orin, repairer: true, supplier: true, transformInto: 'zephyra_w' }),
+  // Zephyra's skirmisher frame — a ghost on the field: faster, harder to pin, paper-thin
+  zephyra_w: U({ id: 'zephyra_w', name: 'Zephyra Wisp', title: 'Z-Face Ghost', color: '#8fe08f', accent: '#eaffea', maxHp: 5200, maxEn: 150, armor: 750, mobility: 158, moveRange: 8, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.chestBlaster, WEAPONS.flareField, WEAPONS.mirageWaltz], pilot: PILOTS.orin }),
   // --- enemy ---
   zolda: U({ id: 'zolda', name: 'Zolda', title: 'Imperial Mass Unit', color: '#6b6f7a', accent: '#c9ccd6', maxHp: 3800, maxEn: 100, armor: 850, mobility: 88, moveRange: 5, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod], pilot: PILOTS.grunt }),
   zoldaAir: U({ id: 'zolda_air', name: 'Zolda Flyer', title: 'Imperial Air Unit', color: '#7a6b6f', accent: '#d6c9cc', maxHp: 3400, maxEn: 110, armor: 700, mobility: 104, moveRange: 7, moveType: 'air', weapons: [WEAPONS.missilePods, WEAPONS.vulcan], pilot: PILOTS.grunt }),

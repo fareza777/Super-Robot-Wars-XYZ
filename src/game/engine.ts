@@ -28,7 +28,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
@@ -624,6 +624,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'sunder':
     case 'provoke':
       break; // area debuff is applied by the store pass
+    case 'cheer':
+      break; // the inspired ally is chosen by the store pass
     case 'snipe':
       u.snipeForNextAttack = true;
       break;

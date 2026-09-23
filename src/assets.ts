@@ -27,6 +27,7 @@ export const MECH_ART: Record<string, number> = {
   arielis: require('../assets/art/mech2_arielis.jpg'),
   gruntborg: require('../assets/art/mech2_gruntborg.jpg'),
   zephyra: require('../assets/art/mech2_zephyra.jpg'),
+  zephyra_w: require('../assets/art/mech2_zephyra_w.jpg'),
   zolda: require('../assets/art/mech2_zolda.jpg'),
   zolda_air: require('../assets/art/mech2_zoldaair.jpg'),
   kargan: require('../assets/art/mech2_kargan.jpg'),
