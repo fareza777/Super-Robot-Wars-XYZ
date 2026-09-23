@@ -41,7 +41,7 @@ export interface StatusFx {
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -158,6 +158,10 @@ export interface UnitState {
   followUpReady?: boolean;
   /** total damage dealt this mission (for the debrief MVP) */
   dmgDealt?: number;
+  /** crippling blow taken — move -2 for the rest of the battle */
+  crippled?: boolean;
+  /** Miracle spirit armed — survive the next fatal hit with 10 HP */
+  miracleArmed?: boolean;
 }
 
 export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def';
@@ -240,7 +244,7 @@ export interface GameSettings {
   animSpeed: 1 | 2;
   sound: boolean;
   music: boolean;
-  difficulty?: 'normal' | 'hard';
+  difficulty?: 'normal' | 'hard' | 'extreme';
 }
 
 export type ObjectiveType = 'rout' | 'survive' | 'boss' | 'protect' | 'seize' | 'reach';
@@ -265,6 +269,10 @@ export interface AttackResult {
   support?: { name: string; hit: boolean; damage: number; destroyed: boolean; hitChance: number };
   // pincer: a friendly unit mirrored across the target boosted this attack +10%
   pincer?: boolean;
+  /** Miracle spirit — the defender refused a fatal hit (10 HP left) */
+  miracle?: boolean;
+  /** this blow crippled the defender's frame (move -2) */
+  crippled?: boolean;
   // human-readable EXP/level-up events for the log
   expEvents: string[];
 }
@@ -277,6 +285,10 @@ export interface CounterResult {
   destroyed: boolean;
   hitChance: number;
   graze?: boolean;
+  /** Miracle spirit — survived this would-be fatal hit with 10 HP */
+  miracle?: boolean;
+  /** this blow crippled the attacker's frame (move -2) */
+  crippled?: boolean;
 }
 
 export interface BattleData {

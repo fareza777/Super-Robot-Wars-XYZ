@@ -318,14 +318,19 @@ function deployZone(map: MapDef): Set<string> {
 /** Ace mastery: pilots with >= 50 career kills get a permanent combat edge. */
 const ACE_MASTER_KILLS = 50;
 
-function hardEnemy(u: UnitState, difficulty: 'normal' | 'hard') {
-  if (difficulty !== 'hard') return;
-  u.def = { ...u.def, maxHp: Math.round(u.def.maxHp * 1.15), armor: Math.round(u.def.armor * 1.1), mobility: u.def.mobility + 8 };
-  u.hp = u.def.maxHp;
-  u.level += 2;
+function hardEnemy(u: UnitState, difficulty: 'normal' | 'hard' | 'extreme') {
+  if (difficulty === 'hard') {
+    u.def = { ...u.def, maxHp: Math.round(u.def.maxHp * 1.15), armor: Math.round(u.def.armor * 1.1), mobility: u.def.mobility + 8 };
+    u.hp = u.def.maxHp;
+    u.level += 2;
+  } else if (difficulty === 'extreme') {
+    u.def = { ...u.def, maxHp: Math.round(u.def.maxHp * 1.3), armor: Math.round(u.def.armor * 1.2), mobility: u.def.mobility + 14 };
+    u.hp = u.def.maxHp;
+    u.level += 4;
+  }
 }
 
-function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: UpgradeMap, wupg: WeaponUpgMap, deploySel: string[], ngPlus: number, parts: Record<string, string[]>, difficulty: 'normal' | 'hard' = 'normal', vossenAllied = false): { map: MapDef; units: UnitState[] } {
+function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: UpgradeMap, wupg: WeaponUpgMap, deploySel: string[], ngPlus: number, parts: Record<string, string[]>, difficulty: 'normal' | 'hard' | 'extreme' = 'normal', vossenAllied = false): { map: MapDef; units: UnitState[] } {
   const map = genMap(ch);
   const units: UnitState[] = [];
   let i = 0;
@@ -1384,6 +1389,10 @@ export const useGame = create<Store>((set, get) => ({
         )
       : log;
     if (result.support) log2 = push(log2, `⇒ ${result.support.name} support fire: ${result.support.hit ? `${result.support.damage}${result.support.destroyed ? ' — DESTROYED' : ''}` : 'missed'}`);
+    if (result.miracle) log2 = push(log2, `✦ MIRACLE — ${def.def.name} refuses to fall! (10 HP)`);
+    if (result.crippled) log2 = push(log2, `⚠ ${def.def.name} is CRIPPLED — move -2`);
+    if (result.counter?.miracle) log2 = push(log2, `✦ MIRACLE — ${att.def.name} refuses to fall! (10 HP)`);
+    if (result.counter?.crippled) log2 = push(log2, `⚠ ${att.def.name} is CRIPPLED — move -2`);
     // combination attack: the partner unit burns its own action joining the strike
     const partnerId = s.pendingWeapon.comboPartner;
     if (partnerId) {
@@ -1802,6 +1811,8 @@ function applyVictory(set: SetFn, get: Get) {
   const pilotProg = { ...s.pilotProg };
   const unitsLost = s.units.filter((u) => u.side === 'player' && !u.alive).length;
   const snowFox = s.snowFox || (s.missionCh.theme === 'snow' && s.blizzard);
+  // wrecked squad frames must be rebuilt — repair bill comes out of the reward
+  const repairBill = s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive).reduce((n, u) => n + u.level * 15, 0);
   const aceLines: string[] = [];
   for (const u of s.units) {
     if (u.side === 'player' && !u.npc) {
@@ -1818,7 +1829,7 @@ function applyVictory(set: SetFn, get: Get) {
   const eliteCr = s.units.filter((u) => u.side === 'enemy' && !u.alive && u.elite).length * 50;
   const side = s.sideId ? ALL_SIDE_MISSIONS.find((m) => m.id === s.sideId) : undefined;
   if (side) {
-    const reward = Math.round((side.rewardCr + s.kills * 150 + eliteCr) * (s.settings.difficulty === 'hard' ? 1.25 : 1)) + s.salvageCr;
+    const reward = Math.round((side.rewardCr + s.kills * 150 + eliteCr) * (s.settings.difficulty === 'hard' ? 1.25 : s.settings.difficulty === 'extreme' ? 1.5 : 1)) + s.salvageCr - repairBill;
     const credits = s.credits + reward;
     const inventory = side.rewardItem ? { ...s.inventory, [side.rewardItem]: (s.inventory[side.rewardItem] ?? 0) + 1 } : s.inventory;
     const sideCleared = side.repeatable ? s.sideCleared : [...s.sideCleared, side.id];
@@ -1845,13 +1856,13 @@ function applyVictory(set: SetFn, get: Get) {
       snowFox,
       debrief: null,
       salvageQueue: [],
-      log: aceLines.reduce((l, line) => push(l, line), push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''} · RANK ${rankS}${sRankNote ? ' · awarded 🛡 VETERAN PLATE' : ''}`)),
+      log: aceLines.reduce((l, line) => push(l, line), push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''} · RANK ${rankS}${sRankNote ? ' · awarded 🛡 VETERAN PLATE' : ''}${repairBill > 0 ? ` · 🔧 repair bill -${repairBill}cr` : ''}`)),
     });
     void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank, snowFox });
     return;
   }
   const ch = s.missionCh;
-  const reward = Math.round((800 + ch.id * 150 + s.kills * 150 + eliteCr) * (s.settings.difficulty === 'hard' ? 1.25 : 1)) + (ch.rewardBonus ?? 0);
+  const reward = Math.round((800 + ch.id * 150 + s.kills * 150 + eliteCr) * (s.settings.difficulty === 'hard' ? 1.25 : s.settings.difficulty === 'extreme' ? 1.5 : 1)) + (ch.rewardBonus ?? 0);
   // route-variant bonus item (e.g. Route B stealth salvage)
   const inventory = ch.bonusItem ? { ...s.inventory, [ch.bonusItem]: (s.inventory[ch.bonusItem] ?? 0) + 1 } : s.inventory;
   const clearedFinal = s.chapter + 1 >= CHAPTERS_COUNT;
@@ -1878,7 +1889,8 @@ function applyVictory(set: SetFn, get: Get) {
       log = push(log, `☆ Mastery missed — ${m.desc}`);
     }
   }
-  const credits = s.credits + reward + masteryCr + s.salvageCr + (clearedFinal ? 5000 : 0);
+  const credits = s.credits + reward + masteryCr + s.salvageCr + (clearedFinal ? 5000 : 0) - repairBill;
+  if (repairBill > 0) log = push(log, `🔧 ${s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive).length} frame(s) rebuilt — repair bill -${repairBill}cr`);
   const par = ch.surviveTurns ?? Math.max(6, Math.ceil((ch.count + (ch.boss ? 1 : 0)) * 1.1));
   const rank = battleRank(unitsLost, s.turn, par, lastMastery != null);
   const missionRank = { ...s.missionRank, [ch.id]: betterRank(s.missionRank[ch.id], rank) };

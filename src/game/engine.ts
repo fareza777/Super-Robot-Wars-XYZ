@@ -49,7 +49,7 @@ export function unitAt(units: UnitState[], p: Pos): UnitState | undefined {
 }
 
 export function moveRangeOf(u: UnitState): number {
-  return u.def.moveRange + (u.accelThisTurn ?? 0) + partBonus(u, 'move');
+  return Math.max(1, u.def.moveRange + (u.accelThisTurn ?? 0) + partBonus(u, 'move') - (u.crippled ? 2 : 0));
 }
 
 /** BFS over terrain move cost; blocked tiles occupied by other units. */
@@ -332,12 +332,24 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   if (result.hit) {
     def.hp = Math.max(0, def.hp - result.damage);
     att.dmgDealt = (att.dmgDealt ?? 0) + result.damage;
+    // Miracle spirit — refuse a fatal hit, stand at 10 HP (consumed)
+    if (result.destroyed && def.miracleArmed) {
+      result.destroyed = false;
+      result.miracle = true;
+      def.miracleArmed = false;
+      def.hp = 10;
+    }
   }
   if (result.hit && w.drain) att.hp = Math.min(att.def.maxHp, att.hp + Math.round(result.damage * 0.25));
   if (result.hit && def.alive && w.status && !result.graze) applyStatus(def, w.status);
   if (result.destroyed) {
     def.alive = false;
     att.kills += 1;
+  }
+  // crippling blow — survived a hit >= 40% of max HP: frame damaged, move -2
+  if (result.hit && def.alive && !def.crippled && result.damage >= def.def.maxHp * 0.4) {
+    def.crippled = true;
+    result.crippled = true;
   }
   if (!result.hit) def.dodges = (def.dodges ?? 0) + 1; // dodging costs — evasion decays through the phase
 
@@ -348,6 +360,16 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
     if (result.counter.hit) {
       att.hp = Math.max(0, att.hp - result.counter.damage);
       def.dmgDealt = (def.dmgDealt ?? 0) + result.counter.damage;
+      if (result.counter.destroyed && att.miracleArmed) {
+        result.counter.destroyed = false;
+        result.counter.miracle = true;
+        att.miracleArmed = false;
+        att.hp = 10;
+      }
+      if (att.alive && !att.crippled && result.counter.damage >= att.def.maxHp * 0.4) {
+        att.crippled = true;
+        result.counter.crippled = true;
+      }
     }
     if (result.counter.hit && cw.drain) def.hp = Math.min(def.def.maxHp, def.hp + Math.round(result.counter.damage * 0.25));
     if (result.counter.hit && att.alive && cw.status && !result.counter.graze) applyStatus(att, cw.status);
@@ -514,6 +536,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break;
     case 'flash':
       u.flashUntilEndOfEnemyPhase = true;
+      break;
+    case 'miracle':
+      u.miracleArmed = true;
       break;
     case 'snipe':
       u.snipeForNextAttack = true;

@@ -20,6 +20,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   fortune: { id: 'fortune', name: 'Fortune', cost: 30, desc: 'Next attack grants double EXP' },
   soul: { id: 'soul', name: 'Soul', cost: 60, desc: 'Next attack damage x2' },
   trust: { id: 'trust', name: 'Trust', cost: 25, desc: 'Heal the most wounded ally within 2 tiles for 30% HP' },
+  miracle: { id: 'miracle', name: 'Miracle', cost: 60, desc: 'Survive the next fatal hit with 10 HP — once' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
@@ -62,6 +63,8 @@ export const WEAPONS = {
   crimsonDuet: W({ id: 'crimson_duet', name: 'Crimson Duet', kind: 'melee', power: 4600, rangeMin: 1, rangeMax: 3, enCost: 30, ammo: null, hitMod: 28, critMod: 20, postMove: true, animSeed: 17, willReq: 110, comboPartner: 'vexiaX' }),
   // the two X-Face leads firing in perfect sync — the showpiece combination
   starfallStrike: W({ id: 'starfall_strike', name: 'Starfall Strike', kind: 'beam', power: 4800, rangeMin: 2, rangeMax: 5, enCost: 35, ammo: null, hitMod: 30, critMod: 15, postMove: false, animSeed: 26, willReq: 115, comboPartner: 'valstray' }),
+  ironChord: W({ id: 'iron_chord', name: 'Iron Chord', kind: 'melee', power: 4400, rangeMin: 1, rangeMax: 3, enCost: 28, ammo: null, hitMod: 26, critMod: 18, postMove: true, animSeed: 18, willReq: 110, comboPartner: 'raxdenR' }),
+  mirageWaltz: W({ id: 'mirage_waltz', name: 'Mirage Waltz', kind: 'funnel', power: 4700, rangeMin: 2, rangeMax: 6, enCost: 32, ammo: null, hitMod: 24, postMove: false, animSeed: 27, willReq: 115, comboPartner: 'vexiaX' }),
   // v1.8 hero weapons — one extra trick per mech
   arcCannon: W({ id: 'arc_cannon', name: 'Arc Cannon', kind: 'beam', power: 3200, rangeMin: 2, rangeMax: 5, enCost: 28, ammo: null, hitMod: 5, postMove: false, animSeed: 17, willReq: 105 }),
   thermoCharge: W({ id: 'thermo_charge', name: 'Thermobaric Charge', kind: 'missile', power: 3600, rangeMin: 1, rangeMax: 3, enCost: 0, ammo: 4, hitMod: 0, postMove: false, animSeed: 18, willReq: 110 }),
@@ -97,8 +100,8 @@ export const UNITS: Record<string, UnitDef> = {
   // --- player squad ---
   valstray: U({ id: 'valstray', name: 'Valstray', title: 'X-Face Vanguard', color: '#2f6fd0', accent: '#9fd0ff', maxHp: 5800, maxEn: 140, armor: 1050, mobility: 118, moveRange: 6, moveType: 'land', weapons: [WEAPONS.beamSaber, WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.twinBreaker, WEAPONS.arcCannon], pilot: PILOTS.ray }),
   arielis: U({ id: 'arielis', name: 'Arielis', title: 'X-Face Sniper', color: '#38b6c9', accent: '#c8f6ff', maxHp: 4600, maxEn: 160, armor: 900, mobility: 132, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.photonRifle, WEAPONS.vulcan, WEAPONS.twinBarrage, WEAPONS.railVolley, WEAPONS.starfallStrike], pilot: PILOTS.mira }),
-  gruntborg: U({ id: 'gruntborg', name: 'Grunborg', title: 'Y-Face Heavy', color: '#c94f4f', accent: '#ffd0c0', maxHp: 7200, maxEn: 110, armor: 1400, mobility: 92, moveRange: 5, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.railgun, WEAPONS.gatling, WEAPONS.mapBuster, WEAPONS.thermoCharge, WEAPONS.omniBarrage], pilot: PILOTS.gara }),
-  zephyra: U({ id: 'zephyra', name: 'Zephyra', title: 'Z-Face Duelist', color: '#5fbf62', accent: '#d8ffd8', maxHp: 5400, maxEn: 150, armor: 1000, mobility: 126, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.chestBlaster, WEAPONS.vulcan, WEAPONS.flareField, WEAPONS.mapFlare], pilot: PILOTS.orin, repairer: true, supplier: true }),
+  gruntborg: U({ id: 'gruntborg', name: 'Grunborg', title: 'Y-Face Heavy', color: '#c94f4f', accent: '#ffd0c0', maxHp: 7200, maxEn: 110, armor: 1400, mobility: 92, moveRange: 5, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.railgun, WEAPONS.gatling, WEAPONS.mapBuster, WEAPONS.thermoCharge, WEAPONS.omniBarrage, WEAPONS.ironChord], pilot: PILOTS.gara }),
+  zephyra: U({ id: 'zephyra', name: 'Zephyra', title: 'Z-Face Duelist', color: '#5fbf62', accent: '#d8ffd8', maxHp: 5400, maxEn: 150, armor: 1000, mobility: 126, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.chestBlaster, WEAPONS.vulcan, WEAPONS.flareField, WEAPONS.mapFlare, WEAPONS.mirageWaltz], pilot: PILOTS.orin, repairer: true, supplier: true }),
   // --- enemy ---
   zolda: U({ id: 'zolda', name: 'Zolda', title: 'Imperial Mass Unit', color: '#6b6f7a', accent: '#c9ccd6', maxHp: 3800, maxEn: 100, armor: 850, mobility: 88, moveRange: 5, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod], pilot: PILOTS.grunt }),
   zoldaAir: U({ id: 'zolda_air', name: 'Zolda Flyer', title: 'Imperial Air Unit', color: '#7a6b6f', accent: '#d6c9cc', maxHp: 3400, maxEn: 110, armor: 700, mobility: 104, moveRange: 7, moveType: 'air', weapons: [WEAPONS.missilePods, WEAPONS.vulcan], pilot: PILOTS.grunt }),

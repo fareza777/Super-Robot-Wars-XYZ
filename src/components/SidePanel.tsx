@@ -22,6 +22,8 @@ function buffNames(u: UnitState): string[] {
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.fortuneForNextAttack) names.push('FORTUNE');
   if (u.accelThisTurn) names.push('ACCEL');
+  if (u.miracleArmed) names.push('MIRACLE');
+  if (u.crippled) names.push('⛓CRIPPLED');
   return names;
 }
 
@@ -177,7 +179,7 @@ export function SidePanel() {
             )}
             {buffNames(unit).length > 0 && (
               <Text style={[styles.traitLine, { color: '#7de0ff' }]} numberOfLines={1}>
-                ✦ BUFFS: {buffNames(unit).join(' · ')}
+                ✦ STATUS: {buffNames(unit).join(' · ')}
               </Text>
             )}
             <Text style={styles.terrainLine}>{terrainDesc(s.map, unit.pos)}</Text>
@@ -468,7 +470,7 @@ export function SidePanel() {
             )}
             {buffNames(inspect).length > 0 && (
               <Text style={[styles.traitLine, { color: '#7de0ff' }]} numberOfLines={1}>
-                ✦ BUFFS: {buffNames(inspect).join(' · ')}
+                ✦ STATUS: {buffNames(inspect).join(' · ')}
               </Text>
             )}
             {inspect.def.resists && (

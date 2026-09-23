@@ -101,13 +101,14 @@ export function SettingsScreen() {
           />
         </Row>
 
-        <Row label="DIFFICULTY" sub="HARD: enemies +15% HP, +armor, +mobility">
-          <Seg<'normal' | 'hard'>
+        <Row label="DIFFICULTY" sub="HARD: +15% HP · EXTREME: +30% HP, +armor, +mobility, +4 Lv — rewards scale">
+          <Seg<'normal' | 'hard' | 'extreme'>
             value={st.difficulty ?? 'normal'}
             onPick={(v) => s.setSetting('difficulty', v)}
             options={[
               { v: 'normal', label: 'NORMAL' },
               { v: 'hard', label: 'HARD' },
+              { v: 'extreme', label: 'EXTREME' },
             ]}
           />
         </Row>
