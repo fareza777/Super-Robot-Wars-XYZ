@@ -224,6 +224,11 @@ function resolveHit(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, m
 }
 
 /** Rally trait: an allied unit with trait 'rally' within 2 tiles grants +8% hit (non-stacking). */
+/** ECM jamming: hostile jammer frames within 2 tiles degrade the attacker's targeting (-15 hit). */
+export function jammerPenalty(units: UnitState[], att: UnitState): number {
+  return units.some((u) => u.alive && u.side !== att.side && u.def.jammer === true && dist(u.pos, att.pos) <= 2) ? 15 : 0;
+}
+
 export function rallyBonus(units: UnitState[], u: UnitState): number {
   return units.some((a) => a.alive && a.side === u.side && a.uid !== u.uid && a.def.pilot.trait === 'rally' && dist(a.pos, u.pos) <= 2) ? 8 : 0;
 }
@@ -702,7 +707,7 @@ export function planEnemyActions(state: GameState): AiPlan[] {
       for (const p of players) {
         if (e.provokedTo && p.uid !== e.provokedTo) continue; // Provoke: locked onto the war horn
         for (const w of weaponsAgainst(e, tile, p, willMove(tile))) {
-          const hc = hitChance(e, p, w, map, rallyBonus(units, e) + formationBonus(units, e));
+          const hc = hitChance(e, p, w, map, rallyBonus(units, e) + formationBonus(units, e) - jammerPenalty(units, e));
           const dmg = damageOf(e, p, w, map, false);
           // convoy priority: protect-mission NPCs are the AI's preferred prey
           const score = dmg * (hc / 100) + (p.hp - dmg <= 0 ? 5000 : 0) + (p.escort ? 800 : 0) + w.power * 0.01;
@@ -757,7 +762,7 @@ export function planEnemyActions(state: GameState): AiPlan[] {
     for (const tile of moveTiles) {
       for (const e of enemies) {
         for (const w of weaponsAgainst(a, tile, e, willMove(tile))) {
-          const hc = hitChance(a, e, w, map, rallyBonus(units, a) + formationBonus(units, a));
+          const hc = hitChance(a, e, w, map, rallyBonus(units, a) + formationBonus(units, a) - jammerPenalty(units, a));
           const dmg = damageOf(a, e, w, map, false);
           const score = dmg * (hc / 100) + (e.hp - dmg <= 0 ? 5000 : 0) + w.power * 0.01;
           if (!best || score > best.score) best = { pos: tile, target: e, weapon: w, score };
@@ -789,6 +794,17 @@ export function defeatQuotes(before: UnitState[], after: UnitState[], killer?: U
     if (u.def.pilot.lastWords) lines.push(`☠ ${u.def.pilot.name}: "${u.def.pilot.lastWords}"`);
     else if (u.elite && u.side === 'enemy') lines.push(`★ ELITE DOWN — ${u.def.name}`);
     if (u.side === 'player' && killer?.def.pilot.killQuip) lines.push(`⚔ ${killer.def.pilot.name}: "${killer.def.pilot.killQuip}"`);
+    // avenge — the fall of a squadmate ignites the survivors' Will
+    if (u.side === 'player' && post) {
+      let n = 0;
+      for (const ally of after) {
+        if (ally.alive && ally.side === 'player' && !ally.npc && ally.uid !== post.uid && dist(ally.pos, post.pos) <= 3 && ally.will < 150) {
+          ally.will = Math.min(150, ally.will + 10);
+          n++;
+        }
+      }
+      if (n) lines.push(`⚔ AVENGE — ${u.def.pilot.name}'s fall ignites the squad (${n} pilot${n > 1 ? 's' : ''} +10 Will)`);
+    }
   }
   return lines;
 }

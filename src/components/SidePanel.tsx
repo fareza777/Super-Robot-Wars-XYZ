@@ -29,6 +29,7 @@ function buffNames(u: UnitState): string[] {
   if (u.crippled) names.push('⛓CRIPPLED');
   if (u.wounded) names.push('🩹WOUNDED');
   if (u.sundered) names.push('⭗SUNDERED');
+  if (u.def.jammer) names.push('📡JAMMER');
   return names;
 }
 

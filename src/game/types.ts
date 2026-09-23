@@ -90,6 +90,8 @@ export interface UnitDef {
   boss?: boolean;
   /** bodyguard frame — intercepts strikes aimed at an adjacent boss (within 2 tiles) */
   guardian?: boolean;
+  /** ECM suite — hostile units within 2 tiles take -15 hit */
+  jammer?: boolean;
   level?: number; // starting level (default 1)
   /** support frame: can REPAIR an adjacent ally (heal HP/EN) instead of attacking */
   repairer?: boolean;

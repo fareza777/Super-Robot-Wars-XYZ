@@ -35,7 +35,7 @@ import { BOND_EVENTS, MAX_BOND, bondKey, bondLevel, bondMods } from './bonds';
 /** full attacker mods: bond bonus + rally aura + formation adjacency (+5 hit per adjacent ally, max +10) */
 const modsFor = (bonds: Record<string, number>, units: UnitState[]) => (u: UnitState) => {
   const bm = bondMods(bonds, units, u);
-  return { hitBonus: bm.hitBonus + rallyBonus(units, u) + formationBonus(units, u), dmgMult: bm.dmgMult };
+  return { hitBonus: bm.hitBonus + rallyBonus(units, u) + formationBonus(units, u) - jammerPenalty(units, u), dmgMult: bm.dmgMult };
 };
 import { MISSION_SSS, SPIRITS, TERRAIN_INFO } from './data';
 import { bgm, setMusicEnabled, setSoundEnabled } from '../audio';
@@ -59,6 +59,7 @@ import {
   movementRange,
   partBonus,
   formationBonus,
+  jammerPenalty,
   phaseRecovery,
   planEnemyActions,
   rallyBonus,
@@ -1951,7 +1952,7 @@ function applyVictory(set: SetFn, get: Get) {
   const flawlessHon = s.flawlessHon || (!s.sideId && s.simWave === 0 && s.missionCh.id >= 10 && !s.units.some((u) => u.side === 'player' && !u.npc && !u.alive));
   // wrecked squad frames must be rebuilt — repair bill comes out of the reward
   const repairBill = s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive).reduce((n, u) => n + u.level * 15, 0);
-  const woundedIds = s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive).map((u) => u.def.id);
+  const woundedIds = s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive && !(u.parts ?? []).includes('escapePod')).map((u) => u.def.id);
   const aceLines: string[] = [];
   for (const u of s.units) {
     if (u.side === 'player' && !u.npc) {
