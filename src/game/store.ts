@@ -1885,6 +1885,10 @@ export const useGame = create<Store>((set, get) => ({
       set({ spiritForUid: null, log: push(s.log, 'Wish: no drained ally within 3 tiles') });
       return;
     }
+    if (sp === 'awaken' && !s.units.some((u) => u.alive && u.uid !== uid && u.side === 'player' && u.acted && dist(u.pos, target.pos) <= 3)) {
+      set({ spiritForUid: null, log: push(s.log, 'Awaken: no spent ally within 3 tiles') });
+      return;
+    }
     if (sp === 'emp' && !s.units.some((u) => u.alive && u.side === 'enemy' && dist(u.pos, target.pos) <= 4)) {
       set({ spiritForUid: null, log: push(s.log, 'EMP Burst: no enemy within 4 tiles') });
       return;
@@ -2058,13 +2062,24 @@ export const useGame = create<Store>((set, get) => ({
       }
       sanctLog = `\u26E9 SANCTUARY — the litany mends ${n} frames for 20% HP`;
     }
+    // awaken — rekindle the nearest spent ally within 3 tiles: they act again
+    let awakenLog: string | null = null;
+    if (sp === 'awaken') {
+      const c = units.find((x) => x.uid === uid)!;
+      const cand = units.filter((u2) => u2.alive && u2.side === 'player' && u2.uid !== uid && u2.acted && dist(u2.pos, c.pos) <= 3).sort((x, y) => dist(x.pos, c.pos) - dist(y.pos, c.pos))[0];
+      if (cand) {
+        cand.acted = false;
+        cand.moved = false;
+        awakenLog = `\u26A1 AWAKEN — ${cand.def.name} surges back into action`;
+      }
+    }
     const u = units.find((x) => x.uid === uid)!;
     const tiles = movementRange(s.map, units, u);
     set({
       units,
       spiritForUid: null,
       usedSupport: true,
-      log: trustLog || purgeLog || cheerLog || wishLog || gravityLog || decoyLog || hymnLog || empLog || phalanxLog || sanctLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), [trustLog, purgeLog, cheerLog, wishLog, gravityLog, decoyLog, hymnLog, empLog, phalanxLog, sanctLog].filter(Boolean).join(' · ')) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
+      log: trustLog || purgeLog || cheerLog || wishLog || gravityLog || decoyLog || hymnLog || empLog || phalanxLog || sanctLog || awakenLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), [trustLog, purgeLog, cheerLog, wishLog, gravityLog, decoyLog, hymnLog, empLog, phalanxLog, sanctLog, awakenLog].filter(Boolean).join(' · ')) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
       moveTiles: s.menuForUid ? new Map() : tiles,
     });
   },

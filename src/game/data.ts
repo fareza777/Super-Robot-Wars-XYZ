@@ -44,6 +44,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   relentless: { id: 'relentless', name: 'Relentless', cost: 35, desc: 'Blood in the water — +25% damage to enemies below half HP until the enemy phase ends' },
   reboot: { id: 'reboot', name: 'Reboot', cost: 45, desc: 'Restart the core — purge your own debuffs and restore 25% HP' },
   sanctuary: { id: 'sanctuary', name: 'Sanctuary', cost: 55, desc: 'Litany of the Ark — allies within 2 tiles recover 20% HP' },
+  awaken: { id: 'awaken', name: 'Awaken', cost: 70, desc: 'Second wind — the nearest spent ally within 3 tiles acts again' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
@@ -82,6 +83,7 @@ export const WEAPONS = {
   punch: W({ id: 'punch', name: 'Rocket Punch', kind: 'melee', power: 1900, rangeMin: 1, rangeMax: 3, enCost: 10, ammo: null, hitMod: 10, postMove: true, animSeed: 11 }),
   drillLancer: W({ id: 'drill_lancer', name: 'Drill Lancer', kind: 'melee', power: 2700, rangeMin: 1, rangeMax: 1, enCost: 12, ammo: null, hitMod: 5, critMod: 15, postMove: true, animSeed: 12, pierce: true }),
   vampEdge: W({ id: 'vamp_edge', name: 'Vampiric Edge', kind: 'melee', power: 2350, rangeMin: 1, rangeMax: 2, enCost: 14, ammo: null, hitMod: 8, critMod: 12, postMove: true, animSeed: 24, drain: true }),
+  soulReaver: W({ id: 'soul_reaver', name: 'Soul Reaver', kind: 'melee', power: 3000, rangeMin: 1, rangeMax: 2, enCost: 18, ammo: null, hitMod: 5, postMove: true, animSeed: 24, drain: true, willDrain: true }),
   funnelArray: W({ id: 'funnel_array', name: 'Funnel Array', kind: 'funnel', power: 2800, rangeMin: 2, rangeMax: 6, enCost: 25, ammo: null, hitMod: 10, postMove: false, animSeed: 13, willReq: 115 }),
   // combination attacks — need the partner unit standing adjacent & unacted
   twinBreaker: W({ id: 'twin_breaker', name: 'Twin Breaker', kind: 'melee', power: 4300, rangeMin: 1, rangeMax: 2, enCost: 25, ammo: null, hitMod: 30, critMod: 20, postMove: true, animSeed: 15, willReq: 110, comboPartner: 'gruntborg' }),

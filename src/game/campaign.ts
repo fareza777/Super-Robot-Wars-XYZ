@@ -166,7 +166,7 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   // unarmed loot hauler — flees the east edge on carrier missions; big salvage when downed
   cargoMule: U({ id: 'cargoMule', name: 'Supply Mule', title: 'Loot Carrier', color: '#4a4030', accent: '#ffe8a0', maxHp: 14000, maxEn: 0, armor: 500, mobility: 70, moveRange: 3, moveType: 'land', weapons: [], pilot: PILOTS.grunt, carrier: true }),
   holoDecoy: U({ id: 'holoDecoy', name: 'Holoreplica', title: 'Hardlight Decoy', color: '#223244', accent: '#7de8ff', maxHp: 1, maxEn: 0, armor: 0, mobility: 0, moveRange: 0, moveType: 'air', weapons: [], pilot: PILOTS.grunt }),
-  bloodyBaron: U({ id: 'bloodyBaron', name: 'Bloody Baron', title: 'Bounty Ace', color: '#5c1a1a', accent: '#ffb060', maxHp: 9000, maxEn: 170, armor: 1100, mobility: 155, moveRange: 8, moveType: 'air', weapons: [WEAPONS.railgun, WEAPONS.heatRod, WEAPONS.vampEdge], pilot: CAMPAIGN_PILOTS.baron, boss: true }),
+  bloodyBaron: U({ id: 'bloodyBaron', name: 'Bloody Baron', title: 'Bounty Ace', color: '#5c1a1a', accent: '#ffb060', maxHp: 9000, maxEn: 170, armor: 1100, mobility: 155, moveRange: 8, moveType: 'air', weapons: [WEAPONS.railgun, WEAPONS.heatRod, WEAPONS.soulReaver], pilot: CAMPAIGN_PILOTS.baron, boss: true }),
 };
 
 export const ALL_UNITS: Record<string, UnitDef> = { ...UNITS, ...CAMPAIGN_UNITS };
@@ -1048,6 +1048,8 @@ export const HONORS: HonorDef[] = [
   { id: 'h_attr', name: 'WAR OF ATTRITION', desc: 'Win a battle lasting fifteen turns or more', rewardCr: 700 },
   { id: 'h_void', name: 'VOID WALKER', desc: 'Win a mission in the void between worlds', rewardCr: 700 },
   { id: 'h_selfs', name: 'SELF SUFFICIENT', desc: 'Win a battle without calling resupply', rewardCr: 600 },
+  { id: 'h_dec', name: 'DECIMATION', desc: 'Destroy ten enemies in a single battle', rewardCr: 800 },
+  { id: 'h_last', name: 'LAST MAN', desc: 'Win with a single squad frame left standing', rewardCr: 800 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
@@ -1055,7 +1057,8 @@ export const HONORS: HonorDef[] = [
 export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; turn?: number;
 missionCh?: { theme?: string };
 usedResupply?: boolean;
-units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; side: string; hp?: number; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean; decoyHit?: boolean; iFieldKill?: boolean; mirrorWon?: boolean; arcKill?: boolean; blastKill?: boolean; lostAlly?: boolean; snipeKill?: boolean; rescuedPods?: string[]; bossRush?: boolean; chainCount?: number }): boolean {
+kills?: number;
+units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; side: string; hp?: number; wounded?: boolean; npc?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean; decoyHit?: boolean; iFieldKill?: boolean; mirrorWon?: boolean; arcKill?: boolean; blastKill?: boolean; lostAlly?: boolean; snipeKill?: boolean; rescuedPods?: string[]; bossRush?: boolean; chainCount?: number }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -1150,6 +1153,10 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.missionCh?.theme === 'void';
     case 'h_selfs':
       return s.usedResupply !== true;
+    case 'h_dec':
+      return (s.kills ?? 0) >= 10;
+    case 'h_last':
+      return (s.units ?? []).filter((u) => u.side === 'player' && u.alive && !u.npc).length === 1;
     case 'h_ghostd':
       return s.altKill === true;
     default:

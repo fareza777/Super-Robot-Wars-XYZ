@@ -437,6 +437,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   if (result.hit && def.alive) def.statuses = (def.statuses ?? []).filter((fx) => fx.id !== 'mark'); // paint spent by the strike
   if (result.hit && def.alive && w.status && !result.graze) applyStatus(def, w.status);
   if (result.hit && def.alive && w.breaker && !result.graze) def.sundered = true;
+  if (result.hit && def.alive && w.willDrain) def.will = Math.max(100, def.will - 5);
   // bash knockback — a landed hit hurls the survivor one tile away from the strike
   if (result.hit && def.alive && !result.destroyed && w.knockback) {
     const kx = Math.sign(def.pos.x - att.pos.x);
@@ -520,6 +521,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
     if (result.counter.hit && att.alive) att.statuses = (att.statuses ?? []).filter((fx) => fx.id !== 'mark');
     if (result.counter.hit && att.alive && cw.status && !result.counter.graze) applyStatus(att, cw.status);
     if (result.counter.hit && att.alive && cw.breaker && !result.counter.graze) att.sundered = true;
+    if (result.counter.hit && att.alive && cw.willDrain) att.will = Math.max(100, att.will - 5);
     if (result.counter.hit) att.exposed = false;
     if (result.counter.destroyed) {
       att.alive = false;
@@ -742,6 +744,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break;
     case 'sanctuary':
       break; // ally heal ring — applied by the store pass
+    case 'awaken':
+      break; // ally reactivation — applied by the store pass
     case 'reboot':
       u.statuses = [];
       u.hp = Math.min(u.def.maxHp, u.hp + Math.round(u.def.maxHp * 0.25));
