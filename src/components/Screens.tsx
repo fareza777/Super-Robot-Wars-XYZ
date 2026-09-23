@@ -115,6 +115,7 @@ export function EndScreen({ victory }: { victory: boolean }) {
   const chapter = useGame((s) => s.chapter);
   const kills = useGame((s) => s.kills);
   const lastReward = useGame((s) => s.lastReward);
+  const lastMastery = useGame((s) => s.lastMastery);
   const ngPlus = useGame((s) => s.ngPlus);
   const units = useGame((s) => s.units);
   // after the final chapter the save wraps to ch.0 — ngPlus>0 + chapter===0 means we just rolled NG+
@@ -133,6 +134,7 @@ export function EndScreen({ victory }: { victory: boolean }) {
           <Text style={styles.resultsRow}>TURNS  {turn}</Text>
           <Text style={styles.resultsRow}>ENEMY UNITS DESTROYED  {kills}</Text>
           <Text style={styles.resultsRow}>CREDITS EARNED  +{lastReward}</Text>
+          {lastMastery && <Text style={styles.resultsMastery}>★ MASTERY — {lastMastery}</Text>}
           {aces.slice(0, 3).map((u) => (
             <Text key={u.uid} style={styles.resultsAce}>
               ★ {u.def.pilot.name} — {u.kills} kills this mission
@@ -189,6 +191,7 @@ const styles = StyleSheet.create({
   squadUnit: { color: '#9fb0d0', fontSize: 9, marginTop: 1 },
   resultsBox: { backgroundColor: 'rgba(14,17,28,0.88)', borderWidth: 1, borderColor: '#ffd34d', borderRadius: 12, padding: 12, marginTop: 12, minWidth: 340 },
   resultsRow: { color: '#e6ecff', fontSize: 12.5, fontWeight: '800', letterSpacing: 1.5, marginTop: 4 },
+  resultsMastery: { color: '#ffd34d', fontSize: 13, fontWeight: '800', letterSpacing: 1.5, marginTop: 8, textAlign: 'center' },
   resultsAce: { color: '#ff9dbb', fontSize: 11, fontWeight: '700', marginTop: 4 },
   resultsNg: { color: '#ffd34d', fontSize: 12, fontWeight: '900', marginTop: 8, letterSpacing: 1 },
 });

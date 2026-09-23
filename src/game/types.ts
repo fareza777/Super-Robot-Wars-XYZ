@@ -26,7 +26,7 @@ export interface WeaponDef {
   comboPartner?: string;
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -104,6 +104,10 @@ export interface UnitState {
   aceMastery?: boolean;
   /** boss one-time spirit cast flag (Grit at <50% HP) */
   bossBuffed?: boolean;
+  /** boss phase-2: triggers at <50% HP — permanent armor/dmg buff for the rest of the fight */
+  phase2?: boolean;
+  /** Fortune spirit: next attack grants double EXP */
+  fortuneForNextAttack?: boolean;
 }
 
 export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def';

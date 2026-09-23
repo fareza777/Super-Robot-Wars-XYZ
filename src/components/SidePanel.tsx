@@ -77,8 +77,8 @@ export function SidePanel() {
           </View>
         )}
 
-        {/* weapon pick while menu open */}
-        {s.menuForUid && !s.pendingWeapon && unit && (
+        {/* weapon pick while menu open — hidden while the spirit submenu is up */}
+        {s.menuForUid && !s.pendingWeapon && !spiritUnit && unit && (
           <View style={styles.menu}>
             <Text style={styles.menuTitle}>ACTION</Text>
             {unit.def.weapons.map((w) => {
@@ -262,9 +262,14 @@ export function SidePanel() {
       </ScrollView>
 
       {s.phase === 'player' && !s.enemyBusy && (
-        <TouchableOpacity onPress={s.endTurn} style={styles.endTurn}>
-          <Text style={styles.endTurnTxt}>END TURN ▸</Text>
-        </TouchableOpacity>
+        <View>
+          <TouchableOpacity onPress={s.endTurn} style={styles.endTurn}>
+            <Text style={styles.endTurnTxt}>END TURN ▸</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={s.retreatMission} style={styles.retreat}>
+            <Text style={styles.retreatTxt}>◂ RETREAT MISSION</Text>
+          </TouchableOpacity>
+        </View>
       )}
     </View>
   );
@@ -307,6 +312,8 @@ const styles = StyleSheet.create({
   logLine: { color: '#9fb0d0', fontSize: 9, marginBottom: 2 },
   endTurn: { marginTop: 6, borderWidth: 1, borderColor: '#ffd34d', borderRadius: 6, paddingVertical: 7, alignItems: 'center', backgroundColor: '#26251a' },
   endTurnTxt: { color: '#ffd34d', fontWeight: '900', fontSize: 11, letterSpacing: 1 },
+  retreat: { marginTop: 4, borderWidth: 1, borderColor: '#3a4160', borderRadius: 6, paddingVertical: 4, alignItems: 'center', backgroundColor: '#14171f' },
+  retreatTxt: { color: '#8fa1c7', fontWeight: '800', fontSize: 9, letterSpacing: 1 },
   terrainLine: { color: '#7fd4a8', fontSize: 8.5, marginTop: 4, fontWeight: '700' },
   killsLine: { color: '#ff9dbb', fontSize: 8.5, marginTop: 3, fontWeight: '700' },
   tgtCnt: { color: '#ff9d8a', fontSize: 8.5, marginTop: 1, fontWeight: '700' },

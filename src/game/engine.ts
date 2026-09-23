@@ -138,7 +138,7 @@ function evadeOf(u: UnitState, map: MapDef): number {
 
 function armorOf(u: UnitState, map: MapDef): number {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
-  return u.def.armor + (u.level - 1) * 40 + t.def + (u.gritUntilEndOfEnemyPhase ? 400 : 0) + willArmor(u) + partBonus(u, 'armor');
+  return u.def.armor + (u.level - 1) * 40 + t.def + (u.gritUntilEndOfEnemyPhase ? 400 : 0) + willArmor(u) + partBonus(u, 'armor') + (u.phase2 ? 300 : 0);
 }
 
 function statFor(u: UnitState, w: WeaponDef): number {
@@ -167,6 +167,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   dmg = Math.round(dmg * (1 + partBonus(att, 'dmg') * 0.01 + (att.skills?.dmg ?? 0) * 0.015));
   dmg = Math.round(dmg * (1 - Math.min(0.5, (def.skills?.def ?? 0) * 0.015)));
   if (att.aceMastery) dmg = Math.round(dmg * 1.05);
+  if (att.phase2) dmg = Math.round(dmg * 1.15);
   return Math.round(dmg * dmgMult * willDmgMult(att));
 }
 
@@ -353,6 +354,11 @@ const MAX_LEVEL = 9;
 
 function awardExp(u: UnitState, amount: number, events: string[]) {
   if (!u.alive || u.level >= MAX_LEVEL) return;
+  if (u.fortuneForNextAttack) {
+    amount *= 2;
+    u.fortuneForNextAttack = false;
+    events.push(`${u.def.pilot.name} FORTUNE — double EXP!`);
+  }
   u.exp += amount;
   events.push(`${u.def.name} +${amount} EXP`);
   while (u.exp >= 100 && u.level < MAX_LEVEL) {
@@ -394,6 +400,18 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break;
     case 'zeal':
       u.will = Math.min(MAX_WILL, u.will + 15);
+      break;
+    case 'roar':
+      u.will = Math.min(MAX_WILL, u.will + 20);
+      break;
+    case 'bless':
+      u.hp = Math.min(u.def.maxHp, u.hp + Math.round(u.def.maxHp * 0.4));
+      break;
+    case 'vigor':
+      u.en = Math.min(u.def.maxEn, u.en + 40);
+      break;
+    case 'fortune':
+      u.fortuneForNextAttack = true;
       break;
     // 'rouse' and 'disrupt' affect neighbouring units — applied in store.castSpirit
   }

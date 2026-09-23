@@ -14,6 +14,10 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   zeal: { id: 'zeal', name: 'Zeal', cost: 10, desc: 'Will +15 (self)' },
   rouse: { id: 'rouse', name: 'Rouse', cost: 25, desc: 'Will +10 to allies within 2 tiles' },
   disrupt: { id: 'disrupt', name: 'Disrupt', cost: 25, desc: 'Will -10 to enemies within 2 tiles' },
+  bless: { id: 'bless', name: 'Bless', cost: 25, desc: 'Restore 40% HP (self)' },
+  vigor: { id: 'vigor', name: 'Vigor', cost: 20, desc: 'Restore +40 EN (self)' },
+  roar: { id: 'roar', name: 'Roar', cost: 15, desc: 'Will +20 (self)' },
+  fortune: { id: 'fortune', name: 'Fortune', cost: 30, desc: 'Next attack grants double EXP' },
 };
 
 // ---------- Weapons ----------
@@ -38,6 +42,11 @@ export const WEAPONS = {
   // combination attacks — need the partner unit standing adjacent & unacted
   twinBreaker: W({ id: 'twin_breaker', name: 'Twin Breaker', kind: 'melee', power: 4300, rangeMin: 1, rangeMax: 2, enCost: 25, ammo: null, hitMod: 30, postMove: true, animSeed: 15, willReq: 110, comboPartner: 'gruntborg' }),
   twinBarrage: W({ id: 'twin_barrage', name: 'Twin Barrage', kind: 'beam', power: 4500, rangeMin: 2, rangeMax: 6, enCost: 30, ammo: null, hitMod: 25, postMove: false, animSeed: 16, willReq: 115, comboPartner: 'zephyra' }),
+  // v1.8 hero weapons — one extra trick per mech
+  arcCannon: W({ id: 'arc_cannon', name: 'Arc Cannon', kind: 'beam', power: 3200, rangeMin: 2, rangeMax: 5, enCost: 28, ammo: null, hitMod: 5, postMove: false, animSeed: 17, willReq: 105 }),
+  thermoCharge: W({ id: 'thermo_charge', name: 'Thermobaric Charge', kind: 'missile', power: 3600, rangeMin: 1, rangeMax: 3, enCost: 0, ammo: 4, hitMod: 0, postMove: false, animSeed: 18, willReq: 110 }),
+  railVolley: W({ id: 'rail_volley', name: 'Railgun Volley', kind: 'gun', power: 2000, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 12, hitMod: 15, postMove: true, animSeed: 19 }),
+  flareField: W({ id: 'flare_field', name: 'Flare Field', kind: 'funnel', power: 2400, rangeMin: 1, rangeMax: 4, enCost: 20, ammo: null, hitMod: 15, postMove: true, animSeed: 20 }),
 };
 
 // ---------- Pilots ----------
@@ -45,10 +54,10 @@ export const WEAPONS = {
 const P = (p: PilotDef) => p;
 
 export const PILOTS = {
-  ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal'], faceColor: '#ffb347' }),
-  mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse'], faceColor: '#7ee7ff' }),
-  gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard'], faceColor: '#ff9d9d' }),
-  orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt'], faceColor: '#b6ff9d' }),
+  ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar'], faceColor: '#ffb347' }),
+  mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse', 'fortune'], faceColor: '#7ee7ff' }),
+  gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor'], faceColor: '#ff9d9d' }),
+  orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless'], faceColor: '#b6ff9d' }),
   karg: P({ name: 'Col. Karg Draven', callsign: 'BOSS', melee: 75, ranged: 75, defense: 70, evade: 65, maxSp: 70, spirits: ['valor', 'strike'], faceColor: '#d0a0ff' }),
   grunt: P({ name: 'Soldier', callsign: 'GR', melee: 56, ranged: 56, defense: 52, evade: 52, maxSp: 30, spirits: [], faceColor: '#bbbbbb' }),
 };
@@ -59,10 +68,10 @@ const U = (u: UnitDef) => u;
 
 export const UNITS: Record<string, UnitDef> = {
   // --- player squad ---
-  valstray: U({ id: 'valstray', name: 'Valstray', title: 'X-Face Vanguard', color: '#2f6fd0', accent: '#9fd0ff', maxHp: 5800, maxEn: 140, armor: 1050, mobility: 118, moveRange: 6, moveType: 'land', weapons: [WEAPONS.beamSaber, WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.twinBreaker], pilot: PILOTS.ray }),
-  arielis: U({ id: 'arielis', name: 'Arielis', title: 'X-Face Sniper', color: '#38b6c9', accent: '#c8f6ff', maxHp: 4600, maxEn: 160, armor: 900, mobility: 132, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.photonRifle, WEAPONS.vulcan, WEAPONS.twinBarrage], pilot: PILOTS.mira }),
-  gruntborg: U({ id: 'gruntborg', name: 'Grunborg', title: 'Y-Face Heavy', color: '#c94f4f', accent: '#ffd0c0', maxHp: 7200, maxEn: 110, armor: 1400, mobility: 92, moveRange: 5, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.railgun, WEAPONS.gatling, WEAPONS.mapBuster], pilot: PILOTS.gara }),
-  zephyra: U({ id: 'zephyra', name: 'Zephyra', title: 'Z-Face Duelist', color: '#5fbf62', accent: '#d8ffd8', maxHp: 5400, maxEn: 150, armor: 1000, mobility: 126, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.chestBlaster, WEAPONS.vulcan], pilot: PILOTS.orin, repairer: true }),
+  valstray: U({ id: 'valstray', name: 'Valstray', title: 'X-Face Vanguard', color: '#2f6fd0', accent: '#9fd0ff', maxHp: 5800, maxEn: 140, armor: 1050, mobility: 118, moveRange: 6, moveType: 'land', weapons: [WEAPONS.beamSaber, WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.twinBreaker, WEAPONS.arcCannon], pilot: PILOTS.ray }),
+  arielis: U({ id: 'arielis', name: 'Arielis', title: 'X-Face Sniper', color: '#38b6c9', accent: '#c8f6ff', maxHp: 4600, maxEn: 160, armor: 900, mobility: 132, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.photonRifle, WEAPONS.vulcan, WEAPONS.twinBarrage, WEAPONS.railVolley], pilot: PILOTS.mira }),
+  gruntborg: U({ id: 'gruntborg', name: 'Grunborg', title: 'Y-Face Heavy', color: '#c94f4f', accent: '#ffd0c0', maxHp: 7200, maxEn: 110, armor: 1400, mobility: 92, moveRange: 5, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.railgun, WEAPONS.gatling, WEAPONS.mapBuster, WEAPONS.thermoCharge], pilot: PILOTS.gara }),
+  zephyra: U({ id: 'zephyra', name: 'Zephyra', title: 'Z-Face Duelist', color: '#5fbf62', accent: '#d8ffd8', maxHp: 5400, maxEn: 150, armor: 1000, mobility: 126, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.chestBlaster, WEAPONS.vulcan, WEAPONS.flareField], pilot: PILOTS.orin, repairer: true }),
   // --- enemy ---
   zolda: U({ id: 'zolda', name: 'Zolda', title: 'Imperial Mass Unit', color: '#6b6f7a', accent: '#c9ccd6', maxHp: 3800, maxEn: 100, armor: 850, mobility: 88, moveRange: 5, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod], pilot: PILOTS.grunt }),
   zoldaAir: U({ id: 'zolda_air', name: 'Zolda Flyer', title: 'Imperial Air Unit', color: '#7a6b6f', accent: '#d6c9cc', maxHp: 3400, maxEn: 110, armor: 700, mobility: 104, moveRange: 7, moveType: 'air', weapons: [WEAPONS.missilePods, WEAPONS.vulcan], pilot: PILOTS.grunt }),

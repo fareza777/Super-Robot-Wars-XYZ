@@ -6,6 +6,7 @@ import { ART, AudioKey, MECH_ART, NPC_ART, PILOT_ART } from '../assets';
 import { play } from '../audio';
 import { ALL_UNITS, CHAPTERS_COUNT, ITEMS, MAX_PART_SLOTS, MAX_PILOT_SKILL, MAX_WEAPON_UPG, PARTS, PILOT_STATS, PLAYER_DEF_IDS, UPGRADE_STATS, WEAPON_UPG_POWER, chapterOf, rosterFor, weaponUpgCost } from '../game/campaign';
 import { BOND_EVENTS, MAX_BOND, bondLevel } from '../game/bonds';
+import { SPIRITS } from '../game/data';
 import { useGame } from '../game/store';
 
 type Tab = 'main' | 'merchant' | 'workshop' | 'chat' | 'mess';
@@ -206,8 +207,28 @@ export function HQScreen() {
           )}
           {wsTab === 'pilots' && (
             <>
+              {/* pilot dossier — face, level, career kills, spirits, bonds */}
+              <View style={styles.pilotCard}>
+                <ExpoImage cachePolicy="memory" source={PILOT_ART[selUnit]} style={styles.pilotCardFace} contentFit="cover" />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.pilotCardName}>{ALL_UNITS[selUnit].pilot.name}</Text>
+                  <Text style={styles.pilotCardSub}>
+                    {ALL_UNITS[selUnit].pilot.callsign} · Lv {s.pilotProg[selUnit]?.level ?? ALL_UNITS[selUnit].level ?? 1} · EXP {s.pilotProg[selUnit]?.exp ?? 0}/100
+                  </Text>
+                  <Text style={styles.pilotCardSub}>
+                    Career kills {s.pilotProg[selUnit]?.kills ?? 0}
+                    {(s.pilotProg[selUnit]?.kills ?? 0) >= 50 ? ' · ★ACE' : (s.pilotProg[selUnit]?.kills ?? 0) >= 25 ? ' · ACE' : ''} · PP {s.pilotProg[selUnit]?.pp ?? 0}
+                  </Text>
+                  <Text style={styles.pilotCardSub} numberOfLines={1}>
+                    Spirits: {ALL_UNITS[selUnit].pilot.spirits.map((id) => SPIRITS[id].name).join(' · ')}
+                  </Text>
+                  <Text style={styles.pilotCardSub} numberOfLines={1}>
+                    Bonds: {[...new Set(BOND_EVENTS.filter((ev) => ev.a === selUnit || ev.b === selUnit).map((ev) => (ev.a === selUnit ? ev.b : ev.a)))].map((pid) => `${ALL_UNITS[pid]?.pilot.callsign ?? '?'} Lv${bondLevel(s.bonds, selUnit, pid)}`).join(' · ') || '—'}
+                  </Text>
+                </View>
+              </View>
               <Text style={styles.pilotLine}>
-                {ALL_UNITS[selUnit].pilot.name} · PP {s.pilotProg[selUnit]?.pp ?? 0}
+                PILOT SKILLS · PP {s.pilotProg[selUnit]?.pp ?? 0}
               </Text>
               {PILOT_STATS.map((st) => {
                 const lvl = s.pilotProg[selUnit]?.skills?.[st.id] ?? 0;
@@ -416,6 +437,10 @@ const styles = StyleSheet.create({
   buyBtn: { backgroundColor: '#16324a', borderWidth: 1, borderColor: '#6fe0ff', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 7 },
   buyTxt: { color: '#6fe0ff', fontWeight: '900', fontSize: 12 },
   unitRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  pilotCard: { flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: 'rgba(12,15,26,0.85)', borderWidth: 1, borderColor: '#2a2f42', borderRadius: 10, padding: 10, marginBottom: 10 },
+  pilotCardFace: { width: 60, height: 60, borderRadius: 10, borderWidth: 1, borderColor: '#3a4160' },
+  pilotCardName: { color: '#ffd34d', fontSize: 13, fontWeight: '800', letterSpacing: 0.6 },
+  pilotCardSub: { color: '#9fb0d0', fontSize: 10, marginTop: 2 },
   unitChip: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1.5, borderColor: '#3a4160', borderRadius: 8, padding: 5, backgroundColor: '#0a0e1e', maxWidth: 130 },
   unitChipTxt: { color: '#fff', fontWeight: '700', fontSize: 10.5, flexShrink: 1 },
   lvlBarTrack: { flexDirection: 'row', gap: 3, marginTop: 6, flexWrap: 'wrap' },

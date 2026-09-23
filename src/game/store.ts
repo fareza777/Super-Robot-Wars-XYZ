@@ -39,6 +39,7 @@ import {
   findSupport,
   key,
   makeUnit,
+  MAX_WILL,
   MoveRec,
   movementRange,
   partBonus,
@@ -148,6 +149,7 @@ interface Store {
   eventsFired: string[]; // mid-battle event indexes already shown this mission
   deployTiles: Set<string>; // legal reposition tiles while in the deploy phase
   lastReward: number; // credits earned by the just-finished mission
+  lastMastery: string | null; // mastery objective earned on the just-finished mission (description)
   masteryDone: number[]; // chapter ids whose mastery challenge was achieved
   savedBattle: BattleSave | null; // resumable in-progress mission
   log: string[];
@@ -195,6 +197,7 @@ interface Store {
   castSpirit: (uid: string, s: SpiritId) => void;
   repairUnit: (uid: string, targetUid: string) => void;
   resumeBattle: () => void;
+  retreatMission: () => void;
   endTurn: () => void;
   finishBattle: () => void;
   restart: () => void;
@@ -416,6 +419,7 @@ export const useGame = create<Store>((set, get) => ({
   eventsFired: [],
   deployTiles: new Set<string>(),
   lastReward: 0,
+  lastMastery: null,
   masteryDone: [],
   savedBattle: null,
 
@@ -662,6 +666,12 @@ export const useGame = create<Store>((set, get) => ({
   finishDialog: () => {
     set({ phase: 'player' });
     void persistBattle(get());
+  },
+
+  // abandon the in-progress mission — autosave is discarded, back to the ops board
+  retreatMission: () => {
+    void clearBattleSave();
+    set({ phase: 'missions', sideId: null, savedBattle: null, battle: null, cursor: null, selectedUid: null, pendingMove: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, midDialog: null, units: [] });
   },
 
   resumeBattle: () => {
@@ -1173,6 +1183,7 @@ function applyVictory(set: SetFn, get: Get) {
   // SRW-point mastery: bonus challenge evaluated on the finishing turn
   let masteryCr = 0;
   let masteryDone = s.masteryDone;
+  let lastMastery: string | null = null;
   let log = s.log;
   const m = ch.mastery;
   if (m && !masteryDone.includes(ch.id)) {
@@ -1181,6 +1192,7 @@ function applyVictory(set: SetFn, get: Get) {
     if (turnsOk && aliveOk) {
       masteryCr = m.rewardCr;
       masteryDone = [...masteryDone, ch.id];
+      lastMastery = m.desc;
       log = push(log, `★ MASTERY — ${m.desc}: +${masteryCr} credits`);
     } else {
       log = push(log, `☆ Mastery missed — ${m.desc}`);
@@ -1197,6 +1209,7 @@ function applyVictory(set: SetFn, get: Get) {
     sideId: null,
     masteryDone,
     savedBattle: null,
+    lastMastery,
     lastReward: reward + masteryCr + (clearedFinal ? 5000 : 0),
     log: push(log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + masteryCr + 5000} credits` : `Mission complete! +${reward + masteryCr} credits`),
   });
@@ -1215,18 +1228,19 @@ async function runEnemyPhase(set: SetFn, get: Get) {
     const plan = remaining[0];
     if (!plan) break;
 
-    // boss self-cast: below 50% HP a boss casts Grit once per battle (SRW boss morale)
+    // boss self-cast + phase-2 transformation: below 50% HP the boss snaps once per
+    // battle — Grit spirit, permanent +300 armor / +15% damage / full Will, 15% heal
     {
       const boss = s.units.find((u) => u.uid === plan.unit.uid);
       if (boss?.def.boss && !boss.bossBuffed && boss.hp < boss.def.maxHp * 0.5) {
         set((st) => ({
           units: st.units.map((u) => {
             if (u.uid !== boss.uid) return u;
-            const c = { ...u, bossBuffed: true };
+            const c = { ...u, bossBuffed: true, phase2: true, will: MAX_WILL, hp: Math.min(u.def.maxHp, u.hp + Math.round(u.def.maxHp * 0.15)) };
             applySpirit(c, 'grit');
             return c;
           }),
-          log: push(st.log, `${boss.def.name} casts GRIT — armor hardens!`),
+          log: push(st.log, `⚠ PHASE SHIFT — ${boss.def.name} unleashes full power! Armor +300, Will MAX`),
         }));
         await sleep(700);
       }
