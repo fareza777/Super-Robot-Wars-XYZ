@@ -24,7 +24,7 @@ export interface WeaponDef {
   mapRange?: number;
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -96,6 +96,10 @@ export interface UnitState {
   pp: number;
   /** pilot skill allocation (persisted per pilot defId) */
   skills: PilotSkills;
+  /** ace mastery — career kills >= 50: permanent +5% hit/dmg/+5 evade */
+  aceMastery?: boolean;
+  /** boss one-time spirit cast flag (Grit at <50% HP) */
+  bossBuffed?: boolean;
 }
 
 export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def';
@@ -162,6 +166,7 @@ export interface GameSettings {
   animSpeed: 1 | 2;
   sound: boolean;
   music: boolean;
+  difficulty?: 'normal' | 'hard';
 }
 
 export type ObjectiveType = 'rout' | 'survive' | 'boss';

@@ -101,6 +101,17 @@ export function SettingsScreen() {
           />
         </Row>
 
+        <Row label="DIFFICULTY" sub="HARD: enemies +15% HP, +armor, +mobility">
+          <Seg<'normal' | 'hard'>
+            value={st.difficulty ?? 'normal'}
+            onPick={(v) => s.setSetting('difficulty', v)}
+            options={[
+              { v: 'normal', label: 'NORMAL' },
+              { v: 'hard', label: 'HARD' },
+            ]}
+          />
+        </Row>
+
         <Row label="SAVE DATA" sub="Erase campaign progress (settings kept)">
           <Pressable
             style={styles.danger}

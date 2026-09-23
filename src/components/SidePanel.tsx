@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ITEMS, PARTS } from '../game/campaign';
 import { SPIRITS } from '../game/data';
 import { bondMods } from '../game/bonds';
-import { bestCounterWeapon, damageOf, hitChance, key, terrainDesc, weaponsAgainst } from '../game/engine';
+import { bestCounterWeapon, critChance, damageOf, hitChance, key, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, useGame } from '../game/store';
 import { SpiritId } from '../game/types';
 
@@ -155,7 +155,7 @@ export function SidePanel() {
                             <View style={[styles.tgtBarFill, { width: `${(Math.max(0, e.hp - dmg) / e.def.maxHp) * 100}%`, backgroundColor: '#4dff7a' }]} />
                           </View>
                           <Text style={styles.tgtCnt} numberOfLines={1}>
-                            {cw ? `↩ CNT ~${cDmg} (${cHc}%)` : '↩ no counter in range'}
+                            {cw ? `↩ CNT ~${cDmg} (${cHc}%)` : '↩ no counter in range'} · CRIT {critChance(unit, e)}%
                           </Text>
                         </View>
                         <View style={styles.tgtHitBox}>

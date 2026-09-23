@@ -65,7 +65,7 @@ const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitSt
       <View style={[styles.lvTag, { borderColor: u.side === 'player' ? '#6db4ff' : '#ff6b6b' }]}>
         <Text style={styles.lvTxt}>Lv{u.level}</Text>
       </View>
-      {u.def.boss && <Text style={styles.bossTag}>ACE</Text>}
+      {u.def.boss ? <Text style={styles.bossTag}>ACE</Text> : u.aceMastery ? <Text style={[styles.bossTag, { color: '#6fe0ff' }]}>★ACE</Text> : null}
       {u.will > 100 && (
         <View style={[styles.willTag, u.will >= 130 && { borderColor: '#ffd34d' }]}>
           <Text style={[styles.willTxt, u.will >= 130 && { color: '#ffd34d' }]}>◈{u.will}</Text>

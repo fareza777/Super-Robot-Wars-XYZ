@@ -133,7 +133,7 @@ export function attackTiles(map: MapDef, from: Pos, w: WeaponDef, u?: UnitState)
 
 function evadeOf(u: UnitState, map: MapDef): number {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
-  return u.def.mobility + u.def.pilot.evade + (u.level - 1) * 2 + t.eva + (u.focusUntilEndOfEnemyPhase ? 30 : 0) + willEvade(u) + partBonus(u, 'mobility') + partBonus(u, 'evade') * 1.8 + (u.skills?.evade ?? 0);
+  return u.def.mobility + u.def.pilot.evade + (u.level - 1) * 2 + t.eva + (u.focusUntilEndOfEnemyPhase ? 30 : 0) + willEvade(u) + partBonus(u, 'mobility') + partBonus(u, 'evade') * 1.8 + (u.skills?.evade ?? 0) + (u.aceMastery ? 5 : 0);
 }
 
 function armorOf(u: UnitState, map: MapDef): number {
@@ -154,7 +154,7 @@ export const NO_MODS: CombatMods = { hitBonus: 0, dmgMult: 1 };
 export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, hitBonus = 0): number {
   if (def.flashUntilEndOfEnemyPhase) return 0; // Flash: guaranteed dodge
   if (att.strikeForNextAttack) return 100;
-  const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus + willHitBonus(att) + partBonus(att, 'hit') + (att.skills?.hit ?? 0) - evadeOf(def, map) * 0.55;
+  const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus + willHitBonus(att) + partBonus(att, 'hit') + (att.skills?.hit ?? 0) + (att.aceMastery ? 5 : 0) - evadeOf(def, map) * 0.55;
   return Math.max(10, Math.min(100, Math.round(raw)));
 }
 
@@ -166,11 +166,13 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (def.guardUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.5);
   dmg = Math.round(dmg * (1 + partBonus(att, 'dmg') * 0.01 + (att.skills?.dmg ?? 0) * 0.015));
   dmg = Math.round(dmg * (1 - Math.min(0.5, (def.skills?.def ?? 0) * 0.015)));
+  if (att.aceMastery) dmg = Math.round(dmg * 1.05);
   return Math.round(dmg * dmgMult * willDmgMult(att));
 }
 
 const rnd = () => Math.random() * 100;
-const critRoll = (att: UnitState, def: UnitState) => rnd() < Math.max(5, 8 + (att.def.mobility - def.def.mobility) * 0.2);
+export const critChance = (att: UnitState, def: UnitState) => Math.max(5, Math.round(8 + (att.def.mobility - def.def.mobility) * 0.2));
+const critRoll = (att: UnitState, def: UnitState) => rnd() < critChance(att, def);
 
 interface SimAttack {
   hit: boolean;
@@ -390,6 +392,10 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'snipe':
       u.snipeForNextAttack = true;
       break;
+    case 'zeal':
+      u.will = Math.min(MAX_WILL, u.will + 15);
+      break;
+    // 'rouse' and 'disrupt' affect neighbouring units — applied in store.castSpirit
   }
 }
 

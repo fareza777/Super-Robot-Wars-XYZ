@@ -225,7 +225,17 @@ function deployZone(map: MapDef): Set<string> {
   return out;
 }
 
-function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: UpgradeMap, wupg: WeaponUpgMap, deploySel: string[], ngPlus: number, parts: Record<string, string[]>): { map: MapDef; units: UnitState[] } {
+/** Ace mastery: pilots with >= 50 career kills get a permanent combat edge. */
+const ACE_MASTER_KILLS = 50;
+
+function hardEnemy(u: UnitState, difficulty: 'normal' | 'hard') {
+  if (difficulty !== 'hard') return;
+  u.def = { ...u.def, maxHp: Math.round(u.def.maxHp * 1.15), armor: Math.round(u.def.armor * 1.1), mobility: u.def.mobility + 8 };
+  u.hp = u.def.maxHp;
+  u.level += 2;
+}
+
+function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: UpgradeMap, wupg: WeaponUpgMap, deploySel: string[], ngPlus: number, parts: Record<string, string[]>, difficulty: 'normal' | 'hard' = 'normal'): { map: MapDef; units: UnitState[] } {
   const map = genMap(ch);
   const units: UnitState[] = [];
   let i = 0;
@@ -239,6 +249,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
       u.pp = prog.pp ?? 0;
       u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, ...(prog.skills ?? {}) };
       if ((prog.kills ?? 0) >= ACE_KILLS) u.will = 130; // ace pilots start hot
+      if ((prog.kills ?? 0) >= ACE_MASTER_KILLS) u.aceMastery = true;
     }
     u.parts = (parts[s.defId] ?? []).slice(0, MAX_PART_SLOTS);
     applyUpgrades(u, upgrades, wupg);
@@ -256,6 +267,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
     const u = makeUnit(s.defId, 'enemy', s.pos, `e${i++}`);
     u.level = enemyLevelOf(ch, s.defId);
     ngEnemy(u, ngPlus);
+    hardEnemy(u, difficulty);
     units.push(u);
   }
   return { map, units };
@@ -272,6 +284,25 @@ async function persistSettings(s: GameSettings) {
   try {
     await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
   } catch {}
+}
+
+const DROP_POOL: (keyof typeof ITEMS)[] = ['repairKit', 'enCell', 'ammoBox', 'spiritWing', 'valorPill', 'megaKit'];
+/** Enemies occasionally drop supplies — 25% chance per kill. */
+function rollDrop(): keyof typeof ITEMS | null {
+  return Math.random() < 0.25 ? DROP_POOL[Math.floor(Math.random() * DROP_POOL.length)] : null;
+}
+/** Roll salvage drops for `n` kills — returns updated inventory + log lines. */
+function dropsForKills(n: number, inventory: Record<string, number>): { inventory: Record<string, number>; lines: string[] } {
+  const lines: string[] = [];
+  let inv = inventory;
+  for (let i = 0; i < n; i++) {
+    const drop = rollDrop();
+    if (drop) {
+      inv = { ...inv, [drop]: (inv[drop] ?? 0) + 1 };
+      lines.push(`Salvaged ${ITEMS[drop].name} from the wreck`);
+    }
+  }
+  return { inventory: inv, lines };
 }
 
 /** Tiles the unit threatens: move range + max weapon reach from each tile. */
@@ -370,7 +401,7 @@ export const useGame = create<Store>((set, get) => ({
     const m = SIDE_MISSIONS.find((x) => x.id === id);
     if (!m || s.chapter < m.unlockCh || s.sideCleared.includes(id)) return;
     const ch = sideAsChapter(m);
-    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts);
+    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
     set({ phase: 'player', sideId: id, missionCh: ch, map, units, kills: 0, turn: 1, bossWarned: false, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set(), midDialog: null, eventsFired: [] });
   },
   replayStory: () => set({ phase: 'onboarding' }),
@@ -559,7 +590,7 @@ export const useGame = create<Store>((set, get) => ({
   startMission: () => {
     const s = get();
     const ch = chapterOf(s.chapter);
-    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, s.deploySel, s.ngPlus, s.parts);
+    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, s.deploySel, s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
     const zone = deployZone(map);
     // paint the deploy zone with the move-range overlay so the player sees where units can go
     const zoneTiles = new Map<string, MoveRec>();
@@ -769,10 +800,20 @@ export const useGame = create<Store>((set, get) => ({
       : log;
     if (result.support) log2 = push(log2, `⇒ ${result.support.name} support fire: ${result.support.hit ? `${result.support.damage}${result.support.destroyed ? ' — DESTROYED' : ''}` : 'missed'}`);
     for (const e of result.expEvents) log2 = push(log2, e);
+    const killCount = (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0) + (result.support?.destroyed ? 1 : 0);
+    let inventory = s.inventory;
+    for (let i = 0; i < killCount; i++) {
+      const drop = rollDrop();
+      if (drop) {
+        inventory = { ...inventory, [drop]: (inventory[drop] ?? 0) + 1 };
+        log2 = push(log2, `Salvaged ${ITEMS[drop].name} from the wreck`);
+      }
+    }
     const common = {
       units: state.units,
       log: log2,
-      kills: s.kills + (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0) + (result.support?.destroyed ? 1 : 0),
+      inventory,
+      kills: s.kills + killCount,
       pendingWeapon: null,
       attackTiles: new Set<string>(),
       menuForUid: null,
@@ -878,6 +919,17 @@ export const useGame = create<Store>((set, get) => ({
       applySpirit(c, sp);
       return c;
     });
+    // area spirits — rouse/disrupt affect neighbours within 2 tiles
+    if (sp === 'rouse' || sp === 'disrupt') {
+      const src = units.find((x) => x.uid === uid)!;
+      for (const u2 of units) {
+        if (u2.uid === uid || !u2.alive) continue;
+        const d = Math.abs(u2.pos.x - src.pos.x) + Math.abs(u2.pos.y - src.pos.y);
+        if (d > 2) continue;
+        if (sp === 'rouse' && u2.side === src.side) u2.will = Math.min(150, u2.will + 10);
+        if (sp === 'disrupt' && u2.side !== src.side) u2.will = Math.max(100, u2.will - 10);
+      }
+    }
     const u = units.find((x) => x.uid === uid)!;
     const tiles = movementRange(s.map, units, u);
     set({
@@ -1010,6 +1062,23 @@ async function runEnemyPhase(set: SetFn, get: Get) {
     const plan = remaining[0];
     if (!plan) break;
 
+    // boss self-cast: below 50% HP a boss casts Grit once per battle (SRW boss morale)
+    {
+      const boss = s.units.find((u) => u.uid === plan.unit.uid);
+      if (boss?.def.boss && !boss.bossBuffed && boss.hp < boss.def.maxHp * 0.5) {
+        set((st) => ({
+          units: st.units.map((u) => {
+            if (u.uid !== boss.uid) return u;
+            const c = { ...u, bossBuffed: true };
+            applySpirit(c, 'grit');
+            return c;
+          }),
+          log: push(st.log, `${boss.def.name} casts GRIT — armor hardens!`),
+        }));
+        await sleep(700);
+      }
+    }
+
     // move unit — animate the walk along its BFS path
     {
       const cur0 = get();
@@ -1062,7 +1131,13 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         );
       const rxnLog = (l: string[]) => (reaction === 'defend' ? push(l, `${def.def.name} braces — damage halved`) : reaction === 'evade' ? push(l, `${def.def.name} goes evasive (-30% hit)`) : l);
       if (cur.settings.battleMode === 'off') {
-        set((st) => ({ units: state.units, kills: st.kills + (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0), log: rxnLog(mkLog(st.log)) }));
+        set((st) => {
+          const kc = (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0);
+          const d = dropsForKills(kc, st.inventory);
+          let l = mkLog(st.log);
+          for (const x of d.lines) l = push(l, x);
+          return { units: state.units, kills: st.kills + kc, inventory: d.inventory, log: rxnLog(l) };
+        });
         const end = checkEnd(get().units, get().missionCh, get().turn);
         if (end) {
           if (end === 'victory') applyVictory(set, get);
@@ -1072,13 +1147,20 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         await sleep(120);
         continue;
       }
-      set((st) => ({
-        units: state.units,
-        phase: 'battle',
-        kills: st.kills + (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0),
-        log: rxnLog(mkLog(st.log)),
-        battle: { attacker: { ...att }, defender: { ...def }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: plan.weapon!, result, warning },
-      }));
+      set((st) => {
+        const kc = (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0);
+        const d = dropsForKills(kc, st.inventory);
+        let l = mkLog(st.log);
+        for (const x of d.lines) l = push(l, x);
+        return {
+          units: state.units,
+          phase: 'battle',
+          kills: st.kills + kc,
+          inventory: d.inventory,
+          log: rxnLog(l),
+          battle: { attacker: { ...att }, defender: { ...def }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: plan.weapon!, result, warning },
+        };
+      });
       // wait for player-visible battle anim to finish (finishBattle returns phase to 'enemy' since enemyBusy)
       await waitFor(() => get().battle === null);
       const end = checkEnd(get().units, get().missionCh, get().turn);
