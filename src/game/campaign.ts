@@ -98,6 +98,8 @@ export const CAMPAIGN_PILOTS = {
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.' }),
   veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.' }),
+  // recurring rival ace — hunts the squad across the war, always comes back for a rematch
+  vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.' }),
   vaelp: P({ name: 'Emperor Vael', callsign: 'THRONE', melee: 82, ranged: 84, defense: 76, evade: 72, maxSp: 90, spirits: ['strike', 'valor', 'focus', 'guard'], faceColor: '#ffe08a', trait: 'sovereign', lastWords: 'Impossible... I AM the Throne—' }),
 };
 
@@ -122,6 +124,8 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   vexiaX: U({ id: 'vexiaX', name: 'Vexia Custom', title: 'Ark Interceptor', color: '#2a8a9a', accent: '#a0f0ff', maxHp: 5200, maxEn: 150, armor: 880, mobility: 142, moveRange: 7, moveType: 'air', weapons: [WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.vulcan, WEAPONS.voidLance], pilot: CAMPAIGN_PILOTS.veep, level: 7 }),
   // act-3 fast striker — drains HP on hit, high evade, hunts stragglers
   cataphract: U({ id: 'cataphract', name: 'Karn Cataphract', title: 'Shadow Striker', color: '#2e2e3a', accent: '#a0a0ff', maxHp: 4200, maxEn: 120, armor: 650, mobility: 158, moveRange: 8, moveType: 'air', weapons: [WEAPONS.vampEdge, WEAPONS.plasmaEdge], pilot: PILOTS.grunt }),
+  // Cpt. Vossen's personal frame — recurring ace, guaranteed salvage drop when downed
+  vossDrake: U({ id: 'vossDrake', name: 'Drake Eclipse', title: 'Rival Ace', color: '#3a2030', accent: '#ff6a5a', maxHp: 9800, maxEn: 160, armor: 1350, mobility: 150, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.plasmaEdge, WEAPONS.missilePods], pilot: CAMPAIGN_PILOTS.vossen, boss: true, level: 8 }),
 };
 
 export const ALL_UNITS: Record<string, UnitDef> = { ...UNITS, ...CAMPAIGN_UNITS };
@@ -160,6 +164,8 @@ export interface ChapterDef {
   bossLevel?: number;
   objectiveType?: 'rout' | 'survive' | 'boss' | 'protect' | 'seize' | 'reach';
   surviveTurns?: number;
+  /** rout/boss/seize/reach only: defeat if the objective isn't met by this turn */
+  turnLimit?: number;
   /** protect missions: turns the NPC convoy must stay alive */
   protectTurns?: number;
   /** seize missions: beacon tile a player unit must occupy to win (filled by genMap) */
@@ -182,6 +188,8 @@ export interface ChapterDef {
   bonusItem?: ItemId;
   /** route flavor tag shown under the chapter name */
   routeTag?: string;
+  /** VR simulator run — routing a wave spawns the next one; defeat settles the score */
+  sim?: boolean;
 }
 
 export const CHAPTERS: ChapterDef[] = chaptersJson as unknown as ChapterDef[];
@@ -538,7 +546,7 @@ export function genMap(ch: ChapterDef): MapDef {
   };
 }
 
-function enemyComp(ch: ChapterDef): string[] {
+export function enemyComp(ch: ChapterDef): string[] {
   const comp: string[] = [];
   const fill = ch.act === 1 ? 'zolda' : ch.act === 2 ? 'vexia' : 'nightmare';
   const alt = ch.act === 1 ? 'zoldaAir' : ch.act === 2 ? 'nightmare' : 'bulwark';
@@ -546,10 +554,13 @@ function enemyComp(ch: ChapterDef): string[] {
   const fast = ch.act === 3 ? 'cataphract' : 'lancer';
   for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : fill);
   if (ch.boss) comp.push(ch.boss);
+  // Cpt. Vossen ambushes the squad on these chapters — a recurring ace duelist
+  if ([6, 13, 19, 26].includes(ch.id)) comp.push('vossDrake');
   return comp;
 }
 
 export function enemyLevelOf(ch: ChapterDef, defId: string): number {
+  if (defId === 'vossDrake') return ch.lvl + 2; // the ace always out-levels the field
   return ch.boss === defId ? ch.bossLevel ?? ch.lvl + 2 : ch.lvl;
 }
 
@@ -570,6 +581,8 @@ export interface SideMissionDef {
   rewardItem?: ItemId;
   objectiveType?: 'rout' | 'survive' | 'seize';
   surviveTurns?: number;
+  /** rout/seize objectives: defeat if not met within this many turns */
+  turnLimit?: number;
   objective?: string;
   /** repeatable patrol op — never marked cleared, level scales with campaign progress */
   repeatable?: boolean;
@@ -702,9 +715,9 @@ export const SIDE_MISSIONS: SideMissionDef[] = [
 
 /** Repeatable patrol operations — always replayable, level scales with campaign progress. */
 export const PATROL_MISSIONS: SideMissionDef[] = [
-  { id: 'p1', name: 'Drift Wolves Patrol', desc: 'Imperial stragglers harass the belt lanes. Run them off — again and again.', unlockCh: 7, theme: 'void', lvl: 8, count: 5, rewardCr: 800, repeatable: true, objective: 'Rout all hostiles' },
-  { id: 'p2', name: 'Ash Belt Sweep', desc: 'Scavenger packs regroup in the Glass Desert whenever we look away.', unlockCh: 13, theme: 'desert', lvl: 12, count: 6, rewardCr: 1100, repeatable: true, objective: 'Rout all hostiles' },
-  { id: 'p3', name: "Throne's Shadow Watch", desc: 'The Emperor\'s vanguard tests our perimeter. Answer in kind.', unlockCh: 20, theme: 'fortress', lvl: 17, count: 7, rewardCr: 1500, repeatable: true, objective: 'Rout all hostiles' },
+  { id: 'p1', name: 'Drift Wolves Patrol', desc: 'Imperial stragglers harass the belt lanes. Run them off — again and again.', unlockCh: 7, theme: 'void', lvl: 8, count: 5, rewardCr: 800, repeatable: true, turnLimit: 7, objective: 'Rout all hostiles within 7 turns — or they slip away' },
+  { id: 'p2', name: 'Ash Belt Sweep', desc: 'Scavenger packs regroup in the Glass Desert whenever we look away.', unlockCh: 13, theme: 'desert', lvl: 12, count: 6, rewardCr: 1100, repeatable: true, turnLimit: 8, objective: 'Rout all hostiles within 8 turns — or they slip away' },
+  { id: 'p3', name: "Throne's Shadow Watch", desc: 'The Emperor\'s vanguard tests our perimeter. Answer in kind.', unlockCh: 20, theme: 'fortress', lvl: 17, count: 7, rewardCr: 1500, repeatable: true, turnLimit: 9, objective: 'Rout all hostiles within 9 turns — or they slip away' },
 ];
 
 export const ALL_SIDE_MISSIONS: SideMissionDef[] = [...SIDE_MISSIONS, ...PATROL_MISSIONS];
@@ -783,6 +796,7 @@ export function sideAsChapter(m: SideMissionDef): ChapterDef {
     bossLevel: m.boss ? m.lvl + 2 : undefined,
     objectiveType: m.objectiveType ?? (m.boss ? 'boss' : 'rout'),
     surviveTurns: m.surviveTurns,
+    turnLimit: m.turnLimit,
     objective: m.objective ?? (m.boss ? 'Destroy the marked commander unit' : 'Rout all hostiles'),
     lines: [],
     rosterCh: m.unlockCh,

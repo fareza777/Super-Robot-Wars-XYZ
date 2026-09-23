@@ -125,6 +125,15 @@ export function EndScreen({ victory }: { victory: boolean }) {
   const lastRank = useGame((s) => s.lastRank);
   const ngPlus = useGame((s) => s.ngPlus);
   const units = useGame((s) => s.units);
+  const missionCh = useGame((s) => s.missionCh);
+  const simWave = useGame((s) => s.simWave);
+  const simBest = useGame((s) => s.simBest);
+  const finishSim = useGame((s) => s.finishSim);
+  const sim = !!missionCh.sim && !victory;
+  const simScore = kills * 50 + (simWave - 1) * 150;
+  React.useEffect(() => {
+    if (sim) finishSim();
+  }, [sim]);
   // after the final chapter the save wraps to ch.0 — ngPlus>0 + chapter===0 means we just rolled NG+
   const justUnlockedNg = victory && ngPlus > 0 && chapter === 0;
   const aces = units.filter((u) => u.side === 'player' && u.kills >= 5).sort((a, b) => b.kills - a.kills);
@@ -133,10 +142,24 @@ export function EndScreen({ victory }: { victory: boolean }) {
     <View style={styles.center}>
       <Image cachePolicy="memory" source={victory ? ART.titleKey : ART.story[1]} style={StyleSheet.absoluteFill} contentFit="cover" />
       <LinearGradient colors={['rgba(3,5,14,0.55)', 'rgba(3,5,14,0.94)']} style={StyleSheet.absoluteFill} />
-      <Text style={[styles.title, { color: victory ? '#ffd34d' : '#ff5a5a', fontSize: 40 }]}>{justUnlockedNg ? 'CAMPAIGN COMPLETE' : victory ? 'MISSION COMPLETE' : 'MISSION FAILED'}</Text>
+      <Text style={[styles.title, { color: victory ? '#ffd34d' : sim ? '#c8a8ff' : '#ff5a5a', fontSize: 40 }]}>{justUnlockedNg ? 'CAMPAIGN COMPLETE' : victory ? 'MISSION COMPLETE' : sim ? 'SIMULATION OVER' : 'MISSION FAILED'}</Text>
       <Text style={styles.briefSub}>
-        {justUnlockedNg ? 'The Steel Throne has fallen — the skies are free.' : victory ? `Cleared in ${turn} turns` : 'Your squad was wiped out'}
+        {justUnlockedNg ? 'The Steel Throne has fallen — the skies are free.' : victory ? `Cleared in ${turn} turns` : sim ? `The squad held through ${simWave} wave${simWave === 1 ? '' : 's'}` : 'Your squad was wiped out'}
       </Text>
+      {sim && (
+        <View style={styles.resultsBox}>
+          <Text style={styles.resultsRow}>WAVES CLEARED  {simWave - 1}</Text>
+          <Text style={styles.resultsRow}>UNITS DESTROYED  {kills}</Text>
+          <Text style={styles.resultsRow}>SCORE  {simScore} PTS</Text>
+          <Text style={styles.resultsRow}>CREDITS EARNED  +{Math.round(simScore / 4)}</Text>
+          <Text style={[styles.resultsAce, { color: '#c8a8ff' }]}>{simScore > 0 && simScore >= simBest ? '★ NEW RECORD' : `BEST ${simBest} PTS`}</Text>
+          {mvp && (mvp.dmgDealt ?? 0) > 0 && (
+            <Text style={[styles.resultsAce, { color: '#ffd34d' }]}>
+              ♛ MVP — {mvp.def.pilot.name} · {mvp.dmgDealt} dmg dealt
+            </Text>
+          )}
+        </View>
+      )}
       {victory && (
         <View style={styles.resultsBox}>
           <Text style={styles.resultsRow}>TURNS  {turn}</Text>
@@ -180,11 +203,11 @@ export function EndScreen({ victory }: { victory: boolean }) {
         style={styles.bigBtn}
         onPress={() => {
           play('ui_confirm');
-          if (victory) gotoHq();
+          if (victory || sim) gotoHq();
           else gotoBriefing();
         }}
       >
-        <Text style={styles.bigBtnTxt}>{victory ? 'RETURN TO HQ ▸' : 'RETRY ▸'}</Text>
+        <Text style={styles.bigBtnTxt}>{victory || sim ? 'RETURN TO HQ ▸' : 'RETRY ▸'}</Text>
       </TouchableOpacity>
     </View>
   );

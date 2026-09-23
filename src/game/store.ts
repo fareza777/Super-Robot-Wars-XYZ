@@ -25,6 +25,7 @@ import {
   missionOf,
   rosterFor,
   sideAsChapter,
+  enemyComp,
   upgradedStat,
   weaponUpgCost,
 } from './campaign';
@@ -90,6 +91,7 @@ export interface SaveData {
   route?: 'a' | 'b' | null; // route split chosen after ch.15
   honorsClaimed?: string[];
   missionRank?: Record<string, 'S' | 'A' | 'B' | 'C'>; // HONORS achievement ids whose credit bounty was claimed
+  simBest?: number; // VR simulator high score
 }
 
 /** Serialized mid-battle snapshot — lets the player leave a mission and resume it later. */
@@ -189,6 +191,9 @@ interface Store {
   honorsClaimed: string[]; // HONORS ids already claimed
   missionRank: Record<number, 'S' | 'A' | 'B' | 'C'>; // best battle rank per chapter id (side missions use 1000+idx)
   lastRank: 'S' | 'A' | 'B' | 'C' | null; // rank earned on the mission just finished
+  simWave: number; // VR simulator — current wave (0 when not in a sim run)
+  simSettled: boolean; // VR simulator — payout already applied for this run
+  simBest: number; // VR simulator high score (persisted)
   log: string[];
   enemyBusy: boolean;
   screenShake: number;
@@ -241,6 +246,8 @@ interface Store {
   chooseRoute: (r: 'a' | 'b') => void;
   resumeBattle: () => void;
   retreatMission: () => void;
+  startSim: () => void; // VR simulator — endless-wave score run
+  finishSim: () => void; // settle score + credits once per sim run
   endTurn: () => void;
   finishBattle: () => void;
   clearDebrief: () => void;
@@ -366,7 +373,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
 const BATTLE_SAVE_KEY = 'srwxyz_battle_v1';
 
 async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank'>>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank };
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -374,6 +381,7 @@ async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upg
 
 /** Snapshot the live mission so it can be resumed after leaving to HQ. */
 async function persistBattle(s: Store) {
+  if (s.missionCh.sim) return; // VR runs are a single sitting — never autosaved
   const data: BattleSave = {
     sideId: s.sideId,
     missionCh: s.missionCh,
@@ -519,6 +527,9 @@ export const useGame = create<Store>((set, get) => ({
   honorsClaimed: [],
   missionRank: {} as Record<number, 'S' | 'A' | 'B' | 'C'>,
   lastRank: null as 'S' | 'A' | 'B' | 'C' | null,
+  simWave: 0,
+  simSettled: false,
+  simBest: 0,
   hint: null,
   hintsSeen: [],
 
@@ -577,9 +588,46 @@ export const useGame = create<Store>((set, get) => ({
     const ch = sideAsChapter({ ...m, lvl });
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
     void clearBattleSave();
-    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`${m.repeatable ? 'PATROL OP' : 'SIDE QUEST'}: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
+    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, simWave: 0, log: [`${m.repeatable ? 'PATROL OP' : 'SIDE QUEST'}: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
     setTimeout(() => set({ notice: null }), 2400);
     void persistBattle(get());
+  },
+
+  // VR SIMULATOR — endless-wave combat drill. Rout a wave, a bigger one warps in.
+  // Score = kills*50 + 150 per cleared wave; payout = score/4 credits. No autosave.
+  startSim: () => {
+    const s = get();
+    const themes = ['void', 'desert', 'fortress', 'ice', 'ruins', 'snow'];
+    const lvl = Math.max(6, s.chapter); // sim difficulty scales with campaign progress
+    const ch: ChapterDef = {
+      id: 2000,
+      name: 'VR Simulation',
+      subtitle: 'ENDLESS WAVE PROTOCOL',
+      act: 3,
+      theme: themes[Math.floor(Math.random() * themes.length)],
+      lvl,
+      count: 4,
+      objectiveType: 'rout',
+      objective: 'Survive escalating waves — payout scales with score',
+      sim: true,
+      lines: [],
+    };
+    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
+    // VR runs are ephemeral and never autosave — keep any prior mission snapshot
+    // so the ops board still offers RESUME for it after the run ends.
+    set({ phase: 'player', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: s.savedBattle, simWave: 1, simSettled: false, log: ['▲ VR SIMULATION — WAVE 1', `Objective: ${ch.objective}`, 'Waves escalate. The run ends when the squad falls.'], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], notice: '▲ VR SIMULATION — WAVE 1' });
+    setTimeout(() => set({ notice: null }), 2600);
+  },
+
+  // settle the run exactly once: score -> credits payout, best score persists
+  finishSim: () => {
+    const s = get();
+    if (!s.missionCh.sim || s.simSettled) return;
+    const score = s.kills * 50 + (s.simWave - 1) * 150;
+    const payout = Math.round(score / 4);
+    const simBest = Math.max(s.simBest, score);
+    set({ simSettled: true, simBest, credits: s.credits + payout });
+    void persist({ ...s, credits: s.credits + payout });
   },
   replayStory: () => set({ phase: 'onboarding' }),
   gotoSettings: () => set({ phase: 'settings' }),
@@ -597,7 +645,7 @@ export const useGame = create<Store>((set, get) => ({
       await AsyncStorage.removeItem(SAVE_KEY);
       await AsyncStorage.removeItem(BATTLE_SAVE_KEY);
     } catch {}
-    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null });
+    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0 });
   },
 
   toggleDeploy: (defId) => {
@@ -674,7 +722,7 @@ export const useGame = create<Store>((set, get) => ({
       const raw = await AsyncStorage.getItem(SAVE_KEY);
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
-      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {} });
+      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {}, simBest: d.simBest ?? 0 });
     } catch {}
     try {
       const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
@@ -827,7 +875,12 @@ export const useGame = create<Store>((set, get) => ({
   },
 
   // abandon the in-progress mission — autosave is discarded, back to the ops board
+  // (in VR mode, retreating settles the run through the standard sim-over screen)
   retreatMission: () => {
+    if (get().missionCh.sim) {
+      set({ phase: 'defeat', battle: null, cursor: null, selectedUid: null, pendingMove: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, midDialog: null });
+      return;
+    }
     void clearBattleSave();
     set({ phase: 'missions', sideId: null, savedBattle: null, battle: null, cursor: null, selectedUid: null, pendingMove: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, midDialog: null, units: [] });
   },
@@ -1168,6 +1221,11 @@ export const useGame = create<Store>((set, get) => ({
         salvageQueue = [...salvageQueue, ITEMS[drop].name];
       }
     }
+    if (vossenDowned(s.units, state.units)) {
+      inventory = { ...inventory, megaKit: (inventory.megaKit ?? 0) + 1 };
+      log2 = push(log2, "Cpt. Vossen's wreck spills a cache — Mega Repair Kit acquired");
+      salvageQueue = [...salvageQueue, ITEMS.megaKit.name];
+    }
     const common = {
       units: state.units,
       log: log2,
@@ -1217,9 +1275,18 @@ export const useGame = create<Store>((set, get) => ({
     for (const sp of result.splash!) log2 = push(log2, `  ${sp.name}: ${sp.hit ? `${sp.damage}${sp.destroyed ? ' — DESTROYED' : ''}` : 'missed'}`);
     for (const e of result.expEvents) log2 = push(log2, e);
     for (const q of defeatQuotes(s.units, state.units)) log2 = push(log2, q);
+    let inventory = s.inventory;
+    let salvageQueue = s.salvageQueue;
+    if (vossenDowned(s.units, state.units)) {
+      inventory = { ...inventory, megaKit: (inventory.megaKit ?? 0) + 1 };
+      log2 = push(log2, "Cpt. Vossen's wreck spills a cache — Mega Repair Kit acquired");
+      salvageQueue = [...salvageQueue, ITEMS.megaKit.name];
+    }
     const common = {
       units: state.units,
       log: log2,
+      inventory,
+      salvageQueue,
       kills: s.kills + (result.destroyed ? 1 : 0) + result.splash!.filter((x) => x.destroyed).length,
       pendingWeapon: null,
       attackTiles: new Set<string>(),
@@ -1396,8 +1463,60 @@ function betterRank(prev: Rank | undefined, next: Rank): Rank {
   return prev && RANK_ORDER[prev] >= RANK_ORDER[next] ? prev : next;
 }
 
+/** Cpt. Vossen always goes down carrying a cache — first downing in a mission guarantees the drop. */
+function vossenDowned(before: UnitState[], after: UnitState[]): boolean {
+  const wasUp = before.some((u) => u.def.id === 'vossDrake' && u.alive);
+  const isUp = after.some((u) => u.def.id === 'vossDrake' && u.alive);
+  return wasUp && !isUp;
+}
+
+/** VR simulator: routing a wave warps in a bigger one and restores the squad a little. */
+function simNextWave(set: SetFn, get: Get) {
+  const s = get();
+  const wave = s.simWave + 1;
+  const lvl = s.missionCh.lvl + wave;
+  const comp = enemyComp({ ...s.missionCh, count: Math.min(3 + wave, 8), boss: undefined });
+  const occupied = new Set(s.units.filter((u) => u.alive).map((u) => key(u.pos)));
+  const free: Pos[] = [];
+  for (let x = Math.max(0, s.map.cols - 6); x < s.map.cols; x++)
+    for (let y = 0; y < s.map.rows; y++) {
+      const p = { x, y };
+      const t = TERRAIN_INFO[terrainAt(s.map, p)];
+      if (t.passable.land && !t.hpDmg && !occupied.has(key(p))) free.push(p);
+    }
+  for (let i = free.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [free[i], free[j]] = [free[j], free[i]];
+  }
+  const news: UnitState[] = [];
+  comp.forEach((defId, i) => {
+    const pos = free[i] ?? { x: s.map.cols - 1, y: i };
+    const u = makeUnit(defId, 'enemy', pos, `sim${wave}-${i}`);
+    u.level = lvl;
+    ngEnemy(u, s.ngPlus);
+    hardEnemy(u, s.settings.difficulty ?? 'normal');
+    if (wave % 4 === 0) {
+      u.elite = true;
+      u.def = { ...u.def, name: `Elite ${u.def.name}`, accent: '#ffd34d', maxHp: Math.round(u.def.maxHp * 1.2), armor: u.def.armor + 150, mobility: u.def.mobility + 8 };
+      u.hp = u.def.maxHp;
+    }
+    news.push(u);
+  });
+  const healed = s.units.map((u) => (u.side !== 'player' || !u.alive ? u : { ...u, hp: Math.min(u.def.maxHp, u.hp + Math.round(u.def.maxHp * 0.25)), en: Math.min(u.def.maxEn, u.en + 30), moved: false, acted: false }));
+  const units = healed.concat(news);
+  let log = push(s.log, `— Wave ${wave - 1} cleared — +${(wave - 1) * 150} pts`);
+  log = push(log, `▲ WAVE ${wave}: ${news.length} hostiles warp in (Lv ${lvl}${wave % 4 === 0 ? ' · ALL ELITE' : ''})`);
+  const notice = `▲ WAVE ${wave} — ${news.length} HOSTILES INBOUND`;
+  set({ units, simWave: wave, battle: null, phase: 'player', enemyBusy: false, selectedUid: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, pendingMove: null, attackTiles: new Set(), hazardWarn: [], notice, log });
+  setTimeout(() => set({ notice: null }), 2600);
+}
+
 function applyVictory(set: SetFn, get: Get) {
   const s = get();
+  if (s.missionCh.sim) {
+    simNextWave(set, get);
+    return;
+  }
   const pilotProg = { ...s.pilotProg };
   const unitsLost = s.units.filter((u) => u.side === 'player' && !u.alive).length;
   const aceLines: string[] = [];
@@ -1813,6 +1932,7 @@ export const aliveEnemies = (s: Store) => s.units.filter((u) => u.alive && u.sid
 // mid-battle autosave — whenever the game settles into the player phase with changed
 // units, snapshot the mission so RESUME BATTLE always offers the latest turn state
 useGame.subscribe((s, prev) => {
+  if (s.missionCh.sim) return; // VR runs never produce resumable battle saves
   if (s.phase !== 'player' || s.battle || s.midDialog || s.enemyBusy) return;
   if (prev.phase === 'player' && prev.units === s.units) return;
   const b: BattleSave = {

@@ -28,6 +28,7 @@ export function MissionSelect() {
         {/* main campaign */}
         <View style={styles.col}>
           <Text style={styles.colTitle}>MAIN CAMPAIGN</Text>
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 10 }}>
           {s.savedBattle && (
             <Pressable style={styles.resumeCard} onPress={s.resumeBattle}>
               <LinearGradient colors={['rgba(58,32,8,0.95)', 'rgba(20,12,4,0.95)']} style={StyleSheet.absoluteFill} />
@@ -55,6 +56,32 @@ export function MissionSelect() {
               <Text style={styles.mainDeployTxt}>{done ? 'ALL CLEAR' : 'DEPLOY ▸'}</Text>
             </View>
           </Pressable>
+
+          {/* VR simulator — endless-wave score run, unlocks after the first arc */}
+          {(() => {
+            const locked = s.chapter < 5;
+            return (
+              <Pressable style={[styles.simCard, locked && { opacity: 0.45 }]} onPress={locked ? undefined : s.startSim} disabled={locked}>
+                <LinearGradient colors={['rgba(28,14,48,0.95)', 'rgba(10,10,30,0.95)']} style={StyleSheet.absoluteFill} />
+                <View style={styles.sideTop}>
+                  <Text style={styles.simName}>VR SIMULATOR</Text>
+                  {locked && <Text style={styles.lockTag}>CLEAR CH.5</Text>}
+                </View>
+                <Text style={styles.sideDesc}>{locked ? '???' : 'Endless combat drill — waves escalate until the squad falls.'}</Text>
+                {!locked && (
+                  <Text style={styles.sideMeta}>
+                    SCALES TO LV {Math.max(6, s.chapter)} · PAYOUT = SCORE/4{s.simBest > 0 ? ` · BEST ${s.simBest}` : ''}
+                  </Text>
+                )}
+                {!locked && (
+                  <View style={[styles.goBtn, { alignSelf: 'flex-start', marginTop: 8 }]}>
+                    <Text style={styles.goTxt}>JACK IN ▸</Text>
+                  </View>
+                )}
+              </Pressable>
+            );
+          })()}
+          </ScrollView>
         </View>
 
         {/* side quests */}
@@ -78,7 +105,7 @@ export function MissionSelect() {
                     <Text style={styles.sideDesc}>{locked ? '???' : m.desc}</Text>
                     {!locked && (
                       <Text style={styles.sideMeta}>
-                        LV {m.repeatable ? `${Math.max(m.lvl, s.chapter)} (scales)` : m.lvl} · {m.count + (m.boss ? 1 : 0)} hostiles · Reward {m.rewardCr} CR{m.rewardItem ? ` + ${m.rewardItem === 'ammoBox' ? 'Ammo Box' : m.rewardItem === 'enCell' ? 'EN Cell' : m.rewardItem === 'megaKit' ? 'Mega Repair Kit' : 'Spirit Wing'}` : ''}
+                        LV {m.repeatable ? `${Math.max(m.lvl, s.chapter)} (scales)` : m.lvl} · {m.count + (m.boss ? 1 : 0)} hostiles{m.turnLimit ? ` · ⌛${m.turnLimit}T` : ''} · Reward {m.rewardCr} CR{m.rewardItem ? ` + ${m.rewardItem === 'ammoBox' ? 'Ammo Box' : m.rewardItem === 'enCell' ? 'EN Cell' : m.rewardItem === 'megaKit' ? 'Mega Repair Kit' : 'Spirit Wing'}` : ''}
                       </Text>
                     )}
                   </View>
@@ -107,7 +134,7 @@ const styles = StyleSheet.create({
   cols: { position: 'absolute', top: 56, left: 18, right: 18, bottom: 30, flexDirection: 'row', gap: 14 },
   col: { flex: 1 },
   colTitle: { color: '#8fa0c8', fontWeight: '900', fontSize: 11, letterSpacing: 2.5, marginBottom: 8 },
-  mainCard: { borderRadius: 12, borderWidth: 2, borderColor: '#4dff7a', overflow: 'hidden', padding: 16, minHeight: 220 },
+  mainCard: { borderRadius: 12, borderWidth: 2, borderColor: '#4dff7a', overflow: 'hidden', padding: 16, minHeight: 190 },
   mainCh: { color: '#4dff7a', fontWeight: '900', fontSize: 12, letterSpacing: 2.5 },
   mainName: { color: '#fff', fontWeight: '900', fontSize: 19, letterSpacing: 1, marginTop: 6 },
   mainSub: { color: '#b8c8e8', fontSize: 11.5, marginTop: 4 },
@@ -132,4 +159,6 @@ const styles = StyleSheet.create({
   resumeBtn: { marginTop: 10, alignSelf: 'flex-start', backgroundColor: '#3a2408', borderWidth: 1.5, borderColor: '#ffaa2f', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 7 },
   resumeBtnTxt: { color: '#ffaa2f', fontWeight: '900', fontSize: 12, letterSpacing: 1.5 },
   masteryLine: { color: '#ffd34d', fontSize: 10.5, marginTop: 6, fontWeight: '700', letterSpacing: 0.5 },
+  simCard: { borderRadius: 12, borderWidth: 1.5, borderColor: '#a06fff', overflow: 'hidden', padding: 14, marginTop: 10 },
+  simName: { color: '#c8a8ff', fontWeight: '900', fontSize: 12.5, letterSpacing: 2 },
 });

@@ -43,6 +43,7 @@ export const MECH_ART: Record<string, number> = {
   lancer: require('../assets/art/mech2_lancer.jpg'),
   cataphract: require('../assets/art/mech2_cataphract.jpg'),
   bulwark: require('../assets/art/mech2_bulwark.jpg'),
+  vossDrake: require('../assets/art/mech2_vossdrake.jpg'),
   arklander: require('../assets/art/mech2_bulwark.jpg'),
   arkmilitia: require('../assets/art/mech2_warden.jpg'),
 };
@@ -86,6 +87,7 @@ export const PILOT_ART: Record<string, number> = {
   lancer: require('../assets/art/face_grunt.jpg'),
   cataphract: require('../assets/art/face_grunt.jpg'),
   bulwark: require('../assets/art/face_grunt.jpg'),
+  vossDrake: require('../assets/art/face_vossen.jpg'),
   arklander: require('../assets/art/npcface_mechanic.jpg'),
   arkmilitia: require('../assets/art/npcface_mechanic.jpg'),
 };

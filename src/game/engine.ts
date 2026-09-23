@@ -606,6 +606,8 @@ export interface EndObjective {
   protectTurns?: number;
   seizePos?: Pos;
   reachPos?: Pos;
+  /** rout/boss/seize/reach only: fail if the objective isn't met by this turn */
+  turnLimit?: number;
 }
 
 /** SRW support attack: an ally adjacent to the attacker and in range of the defender chips in (55% dmg, no counter, doesn't consume its turn). */
@@ -659,7 +661,7 @@ export function checkEnd(units: UnitState[], obj?: EndObjective | null, turn?: n
   if (type === 'boss') {
     // win as soon as the boss unit falls, regardless of remaining grunts
     if (!units.some((u) => u.alive && u.side === 'enemy' && u.def.boss)) return 'victory';
-    return null;
+    return timedOut(obj, turn) ? 'defeat' : null;
   }
   if (type === 'survive') {
     if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
@@ -676,17 +678,21 @@ export function checkEnd(units: UnitState[], obj?: EndObjective | null, turn?: n
     const bp = obj?.seizePos;
     if (bp && units.some((u) => u.alive && u.side === 'player' && u.pos.x === bp.x && u.pos.y === bp.y)) return 'victory';
     if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
-    return null;
+    return timedOut(obj, turn) ? 'defeat' : null;
   }
   if (type === 'reach') {
     // reach missions: land a unit on the extraction tile, or rout the blockade
     const rp = obj?.reachPos;
     if (rp && units.some((u) => u.alive && u.side === 'player' && u.pos.x === rp.x && u.pos.y === rp.y)) return 'victory';
     if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
-    return null;
+    return timedOut(obj, turn) ? 'defeat' : null;
   }
   if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
-  return null;
+  return timedOut(obj, turn) ? 'defeat' : null;
+}
+
+function timedOut(obj: EndObjective | null | undefined, turn?: number): boolean {
+  return !!obj?.turnLimit && (turn ?? 0) > obj.turnLimit;
 }
 
 /** Start-of-own-phase recovery: base EN regen + terrain effects (heal on base/city, burn on lava). */

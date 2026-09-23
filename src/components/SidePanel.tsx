@@ -88,6 +88,20 @@ export function SidePanel() {
           <Text style={styles.objTxt}>➤ REACH THE EXTRACTION POINT{unitOnReach ? ' — THERE!' : ` · (${s.missionCh.reachPos?.x},${s.missionCh.reachPos?.y})`}</Text>
         </View>
       )}
+      {s.missionCh.sim && (
+        <View style={styles.objCard}>
+          <Text style={[styles.objTxt, { color: '#c8a8ff' }]}>
+            ▲ VR WAVE {s.simWave} · SCORE {s.kills * 50 + (s.simWave - 1) * 150} PTS
+          </Text>
+        </View>
+      )}
+      {!!s.missionCh.turnLimit && objType !== 'survive' && objType !== 'protect' && !s.missionCh.sim && (
+        <View style={styles.objCard}>
+          <Text style={[styles.objTxt, s.turn >= (s.missionCh.turnLimit ?? 99) - 1 && { color: '#ff8080' }]}>
+            ⌛ ROUT BY TURN {s.missionCh.turnLimit} · {Math.max(0, (s.missionCh.turnLimit ?? 0) - s.turn + 1)} LEFT
+          </Text>
+        </View>
+      )}
 
       <ScrollView style={styles.body} contentContainerStyle={{ paddingBottom: 6 }}>
         {unit && (
