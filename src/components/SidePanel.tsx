@@ -37,6 +37,7 @@ export function SidePanel() {
   const unit = s.menuForUid ? s.units.find((u) => u.uid === s.menuForUid) : s.selectedUid ? s.units.find((u) => u.uid === s.selectedUid) : undefined;
   const spiritUnit = s.spiritForUid ? s.units.find((u) => u.uid === s.spiritForUid) : undefined;
   const inspect = s.inspectUid ? s.units.find((u) => u.uid === s.inspectUid) : undefined;
+  const allActed = s.units.length > 0 && s.units.every((u) => u.side !== 'player' || !u.alive || u.acted);
 
   return (
     <View style={styles.panel}>
@@ -55,7 +56,7 @@ export function SidePanel() {
               <Image cachePolicy="memory" source={PILOT_ART[unit.def.id]} style={styles.face} contentFit="cover" />
               <View style={{ flex: 1 }}>
                 <Text style={styles.unitName} numberOfLines={1}>
-                  {unit.def.name}
+                  {unit.def.name}{unit.phase2 ? ' Ω' : ''}
                 </Text>
                 <Text style={styles.pilotName} numberOfLines={1}>
                   {unit.def.pilot.name} · Lv{unit.level}
@@ -174,7 +175,7 @@ export function SidePanel() {
                       <TouchableOpacity key={e.uid} onPress={() => s.chooseTarget(e.uid)} style={[styles.tgtRow, kill && styles.tgtRowKill]}>
                         <View style={{ flex: 1 }}>
                           <Text style={styles.tgtName} numberOfLines={1}>
-                            {e.def.name} {e.def.boss ? '★' : ''}
+                            {e.def.name} {e.def.boss ? (e.phase2 ? 'Ω★' : '★') : ''}
                           </Text>
                           <Text style={styles.tgtHp}>
                             HP {e.hp}/{e.def.maxHp} · WILL {e.will}
@@ -221,7 +222,7 @@ export function SidePanel() {
               <Image cachePolicy="memory" source={PILOT_ART[inspect.def.id]} style={[styles.face, { borderColor: '#ff6b6b' }]} contentFit="cover" />
               <View style={{ flex: 1 }}>
                 <Text style={styles.unitName} numberOfLines={1}>
-                  {inspect.def.name} {inspect.def.boss ? '★' : ''}
+                  {inspect.def.name} {inspect.def.boss ? (inspect.phase2 ? 'Ω★' : '★') : ''}
                 </Text>
                 <Text style={styles.pilotName} numberOfLines={1}>
                   {inspect.def.pilot.name} · Lv{inspect.level}
@@ -263,8 +264,8 @@ export function SidePanel() {
 
       {s.phase === 'player' && !s.enemyBusy && (
         <View>
-          <TouchableOpacity onPress={s.endTurn} style={styles.endTurn}>
-            <Text style={styles.endTurnTxt}>END TURN ▸</Text>
+          <TouchableOpacity onPress={s.endTurn} style={[styles.endTurn, allActed && styles.endTurnReady]}>
+            <Text style={styles.endTurnTxt}>{allActed ? 'END TURN ▸ ALL UNITS ACTED' : 'END TURN ▸'}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={s.retreatMission} style={styles.retreat}>
             <Text style={styles.retreatTxt}>◂ RETREAT MISSION</Text>
@@ -311,6 +312,7 @@ const styles = StyleSheet.create({
   logBox: { marginTop: 7, backgroundColor: '#0c0e16', borderRadius: 6, padding: 6, minHeight: 60 },
   logLine: { color: '#9fb0d0', fontSize: 9, marginBottom: 2 },
   endTurn: { marginTop: 6, borderWidth: 1, borderColor: '#ffd34d', borderRadius: 6, paddingVertical: 7, alignItems: 'center', backgroundColor: '#26251a' },
+  endTurnReady: { borderWidth: 2, backgroundColor: 'rgba(255,211,77,0.22)' },
   endTurnTxt: { color: '#ffd34d', fontWeight: '900', fontSize: 11, letterSpacing: 1 },
   retreat: { marginTop: 4, borderWidth: 1, borderColor: '#3a4160', borderRadius: 6, paddingVertical: 4, alignItems: 'center', backgroundColor: '#14171f' },
   retreatTxt: { color: '#8fa1c7', fontWeight: '800', fontSize: 9, letterSpacing: 1 },

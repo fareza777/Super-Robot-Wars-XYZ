@@ -100,6 +100,8 @@ export interface BattleAnim {
   result: AttackResult;
   /** waiting on the player's defender reaction choice — scene shows the reaction bar, no anims yet */
   needsReaction?: boolean;
+  /** uid of an adjacent unacted ally eligible to cover the defender this prompt */
+  coverUid?: string;
   /** first contact with this boss this mission — scene flashes a WARNING card */
   warning?: string;
 }
@@ -455,7 +457,8 @@ export const useGame = create<Store>((set, get) => ({
     const ch = sideAsChapter(m);
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
     void clearBattleSave();
-    set({ phase: 'player', sideId: id, missionCh: ch, map, units, kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set(), midDialog: null, eventsFired: [] });
+    set({ phase: 'player', sideId: id, missionCh: ch, map, units, kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set(), midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
+    setTimeout(() => set({ notice: null }), 2400);
     void persistBattle(get());
   },
   replayStory: () => set({ phase: 'onboarding' }),
@@ -664,7 +667,8 @@ export const useGame = create<Store>((set, get) => ({
     set({ phase: 'deploy', sideId: null, missionCh: ch, map, units, kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set(), midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
   },
   finishDialog: () => {
-    set({ phase: 'player' });
+    set({ phase: 'player', notice: 'PLAYER PHASE — TURN 1' });
+    setTimeout(() => set({ notice: null }), 2400);
     void persistBattle(get());
   },
 
@@ -1056,6 +1060,11 @@ export const useGame = create<Store>((set, get) => ({
       set({ spiritForUid: null });
       return;
     }
+    // Trust needs a wounded ally in reach — refuse without spending SP
+    if (sp === 'trust' && !s.units.some((u) => u.alive && u.uid !== uid && u.side === target.side && dist(u.pos, target.pos) <= 2 && u.hp < u.def.maxHp)) {
+      set({ spiritForUid: null, log: push(s.log, 'Trust: no wounded ally within 2 tiles') });
+      return;
+    }
     const units = s.units.map((u) => {
       if (u.uid !== uid) return u;
       const c = { ...u };
@@ -1073,12 +1082,24 @@ export const useGame = create<Store>((set, get) => ({
         if (sp === 'disrupt' && u2.side !== src.side) u2.will = Math.max(100, u2.will - 10);
       }
     }
+    // trust — heal the most wounded ally within 2 tiles for 30% HP
+    let trustLog: string | null = null;
+    if (sp === 'trust') {
+      const src = units.find((x) => x.uid === uid)!;
+      const tgt = units
+        .filter((u2) => u2.alive && u2.uid !== uid && u2.side === src.side && dist(u2.pos, src.pos) <= 2 && u2.hp < u2.def.maxHp)
+        .sort((a, b) => a.hp / a.def.maxHp - b.hp / b.def.maxHp)[0];
+      if (tgt) {
+        tgt.hp = Math.min(tgt.def.maxHp, tgt.hp + Math.round(tgt.def.maxHp * 0.3));
+        trustLog = `Trust restores ${tgt.def.name} +30% HP`;
+      }
+    }
     const u = units.find((x) => x.uid === uid)!;
     const tiles = movementRange(s.map, units, u);
     set({
       units,
       spiritForUid: null,
-      log: push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
+      log: trustLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), trustLog) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
       moveTiles: s.menuForUid ? new Map() : tiles,
     });
   },
@@ -1241,7 +1262,9 @@ async function runEnemyPhase(set: SetFn, get: Get) {
             return c;
           }),
           log: push(st.log, `⚠ PHASE SHIFT — ${boss.def.name} unleashes full power! Armor +300, Will MAX`),
+          notice: `⚠ PHASE SHIFT — ${boss.def.name.toUpperCase()}`,
         }));
+        setTimeout(() => set({ notice: null }), 3200);
         await sleep(700);
       }
     }
@@ -1263,40 +1286,59 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       const cur = get();
       const att = cur.units.find((u) => u.uid === plan.unit.uid)!;
       const def = cur.units.find((u) => u.uid === plan.target!.uid)!;
-      // player-controlled defender picks a reaction — SRW's counter/defend/evade choice
+      // player-controlled defender picks a reaction — SRW's counter/defend/evade/cover choice
       let reaction: Reaction = 'counter';
       let warning: string | undefined;
+      let coverUid: string | undefined;
       if (att.def.boss && !cur.bossWarned) warning = `${att.def.name} — ${att.def.pilot.name}`;
       if (def.side === 'player' && cur.settings.battleMode !== 'off') {
+        // an adjacent ally that hasn't acted can intercept the blow (SRW cover)
+        coverUid = cur.units
+          .filter((u) => u.alive && u.side === 'player' && !u.acted && u.uid !== def.uid && dist(u.pos, def.pos) === 1)
+          .sort((a, b) => b.hp - a.hp)[0]?.uid;
         set((st) => ({
           phase: 'battle',
           battleReaction: null,
           bossWarned: st.bossWarned || !!warning,
-          battle: { attacker: { ...att }, defender: { ...def }, attackerAfter: att, defenderAfter: def, weapon: plan.weapon!, result: { hit: false, crit: false, damage: 0, destroyed: false, hitChance: 0, counter: null, expEvents: [] }, needsReaction: true, warning },
+          battle: { attacker: { ...att }, defender: { ...def }, attackerAfter: att, defenderAfter: def, weapon: plan.weapon!, result: { hit: false, crit: false, damage: 0, destroyed: false, hitChance: 0, counter: null, expEvents: [] }, needsReaction: true, warning, coverUid },
         }));
         await waitFor(() => get().battleReaction !== null, 5500);
         reaction = get().battleReaction ?? 'counter';
+        if (reaction === 'cover' && !coverUid) reaction = 'counter';
       }
       if (warning) set({ bossWarned: true });
-      const { state, result } = applyAttack({ map: cur.map, units: cur.units, turn: cur.turn }, att.uid, def.uid, plan.weapon.id, (u) => bondMods(cur.bonds, cur.units, u), reaction);
+      const defUid = reaction === 'cover' ? coverUid! : def.uid;
+      const { state, result } = applyAttack({ map: cur.map, units: cur.units, turn: cur.turn }, att.uid, defUid, plan.weapon.id, (u) => bondMods(cur.bonds, cur.units, u), reaction);
+      if (reaction === 'cover' && coverUid) {
+        const ci = state.units.findIndex((u) => u.uid === coverUid);
+        if (ci >= 0) state.units[ci] = { ...state.units[ci], acted: true };
+      }
       const attAfter = state.units.find((u) => u.uid === att.uid)!;
-      const defAfter = state.units.find((u) => u.uid === def.uid)!;
+      const defAfter = state.units.find((u) => u.uid === defUid)!;
+      const tgtName = defAfter.def.name;
       const mkLog = (l: string[]) =>
         result.expEvents.reduce(
           (ll, e) => push(ll, e),
           result.counter
             ? push(
                 l,
-                `${att.def.name} hits ${def.def.name} for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''} · ${def.def.name} counters for ${result.counter.damage}${result.counter.destroyed ? ' — DESTROYED' : ''}`,
+                `${att.def.name} hits ${tgtName} for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''} · ${tgtName} counters for ${result.counter.damage}${result.counter.destroyed ? ' — DESTROYED' : ''}`,
               )
             : push(
                 l,
                 result.hit
-                  ? `${att.def.name} hits ${def.def.name} for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''}`
-                  : `${att.def.name} missed ${def.def.name}`,
+                  ? `${att.def.name} hits ${tgtName} for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''}`
+                  : `${att.def.name} missed ${tgtName}`,
               ),
         );
-      const rxnLog = (l: string[]) => (reaction === 'defend' ? push(l, `${def.def.name} braces — damage halved`) : reaction === 'evade' ? push(l, `${def.def.name} goes evasive (-30% hit)`) : l);
+      const rxnLog = (l: string[]) =>
+        reaction === 'defend'
+          ? push(l, `${tgtName} braces — damage halved`)
+          : reaction === 'evade'
+            ? push(l, `${tgtName} goes evasive (-30% hit)`)
+            : reaction === 'cover'
+              ? push(l, `${tgtName} covers ${def.def.name} — intercepts the blow (-30% dmg)`)
+              : l;
       if (cur.settings.battleMode === 'off') {
         set((st) => {
           const kc = (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0);
@@ -1314,6 +1356,8 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         await sleep(120);
         continue;
       }
+      // the scene shows whoever actually took the hit — the covering ally when covered
+      const defForScene = reaction === 'cover' && coverUid ? (cur.units.find((u) => u.uid === coverUid) ?? def) : def;
       set((st) => {
         const kc = (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0);
         const d = dropsForKills(kc, st.inventory);
@@ -1325,7 +1369,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
           kills: st.kills + kc,
           inventory: d.inventory,
           log: rxnLog(l),
-          battle: { attacker: { ...att }, defender: { ...def }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: plan.weapon!, result, warning },
+          battle: { attacker: { ...att }, defender: { ...defForScene }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: plan.weapon!, result, warning },
         };
       });
       // wait for player-visible battle anim to finish (finishBattle returns phase to 'enemy' since enemyBusy)
@@ -1407,6 +1451,10 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       // survive-objective reached its turn limit — resolve outside this updater
       pendingVictory = true;
       return { units, turn: nextTurn, midDialog, eventsFired };
+    }
+    if (!notice && end !== 'defeat') {
+      notice = `PLAYER PHASE — TURN ${nextTurn}`;
+      setTimeout(() => set({ notice: null }), 2400);
     }
     return {
       units,

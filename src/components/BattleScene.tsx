@@ -220,11 +220,14 @@ export function BattleScene() {
       {!!battle.warning && (battle.needsReaction || stage <= 1) && <WarningCard text={battle.warning} />}
 
       {/* defender reaction prompt — the player picks how to answer the incoming attack */}
-      {battle.needsReaction && <ReactionBar attacker={atk} defender={def} weapon={battle.weapon} />}
+      {battle.needsReaction && <ReactionBar attacker={atk} defender={def} weapon={battle.weapon} coverUid={battle.coverUid} />}
 
       {/* reaction banners for AI-chosen defend/evade */}
       {!battle.needsReaction && stage <= 2 && battle.result.reaction === 'defend' && <Banner text="DEFEND" color="#7ee7ff" />}
       {!battle.needsReaction && stage <= 2 && battle.result.reaction === 'evade' && <Banner text="EVADE" color="#b6ff9d" />}
+      {!battle.needsReaction && stage <= 2 && battle.result.reaction === 'cover' && <Banner text="COVER" color="#ffd34d" />}
+      {/* killing blow on a boss — the dramatic finish */}
+      {!battle.needsReaction && stage >= 3 && battle.result.destroyed && def.def.boss && <Banner text="★ FINISH ★" color="#ffd34d" />}
 
       {/* MAP weapon blast list */}
       {!!battle.result.splash?.length && stage >= 2 && stage <= 4 && (
@@ -444,7 +447,7 @@ function NamePlate({ unit, hp, side }: { unit: UnitState; hp?: number; side: 'le
       <Image cachePolicy="memory" source={PILOT_ART[unit.def.id]} style={styles.plateFace} contentFit="cover" />
       <View style={{ flex: 1 }}>
         <Text style={styles.plateName} numberOfLines={1}>
-          {unit.def.name} · {unit.def.pilot.callsign} · Lv{unit.level}
+          {unit.def.name}{unit.phase2 ? ' Ω' : ''} · {unit.def.pilot.callsign} · Lv{unit.level}
         </Text>
         <View style={styles.plateBarTrack}>
           <View style={[styles.plateBarFill, { width: `${pct * 100}%`, backgroundColor: pct > 0.5 ? '#4dff7a' : pct > 0.25 ? '#ffd34d' : '#ff5a5a' }]} />
@@ -855,7 +858,7 @@ function WarningCard({ text }: { text: string }) {
 }
 
 /** Defender reaction pick — COUNTER / DEFEND / EVADE with a live auto-counter countdown. */
-function ReactionBar({ attacker, defender, weapon }: { attacker: UnitState; defender: UnitState; weapon: WeaponDef }) {
+function ReactionBar({ attacker, defender, weapon, coverUid }: { attacker: UnitState; defender: UnitState; weapon: WeaponDef; coverUid?: string }) {
   const { width } = useWindowDimensions();
   const setReaction = useGame((s) => s.setReaction);
   const battle = useGame((s) => s.battle);
@@ -877,8 +880,9 @@ function ReactionBar({ attacker, defender, weapon }: { attacker: UnitState; defe
   const cw = bestCounterWeapon(defNow, attNow.pos);
   const cDmg = cw ? damageOf(defNow, attNow, cw, map, false, bmD.dmgMult) : 0;
   const cHc = cw ? hitChance(defNow, attNow, cw, map, bmD.hitBonus) : 0;
+  const cover = coverUid ? units.find((u) => u.uid === coverUid) : undefined;
 
-  const W = Math.min(620, width * 0.78);
+  const W = Math.min(cover ? 760 : 620, width * 0.86);
   const Btn2 = ({ label, sub, color, onPress }: { label: string; sub: string; color: string; onPress: () => void }) => (
     <Pressable onPress={onPress} style={{ flex: 1, borderWidth: 1.5, borderColor: color, borderRadius: 10, backgroundColor: 'rgba(10,14,30,0.9)', paddingVertical: 9, alignItems: 'center' }}>
       <Text style={{ color, fontSize: 15, fontWeight: '900', letterSpacing: 2 }}>{label}</Text>
@@ -898,6 +902,7 @@ function ReactionBar({ attacker, defender, weapon }: { attacker: UnitState; defe
           <Btn2 label="COUNTER" sub={cw ? `${cw.name} · ~${cDmg} (${cHc}%)` : 'no weapon in range'} color="#ff8a5c" onPress={() => setReaction('counter')} />
           <Btn2 label="DEFEND" sub="damage halved · no counter" color="#7ee7ff" onPress={() => setReaction('defend')} />
           <Btn2 label="EVADE" sub="-30% enemy hit · no counter" color="#b6ff9d" onPress={() => setReaction('evade')} />
+          {cover && <Btn2 label="COVER" sub={`${cover.def.pilot.name} intercepts · -30% dmg`} color="#ffd34d" onPress={() => setReaction('cover')} />}
         </View>
         <View style={{ height: 3, backgroundColor: '#141828', borderRadius: 2, marginTop: 9, overflow: 'hidden' }}>
           <Animated.View style={{ height: 3, width: countdown.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }), backgroundColor: '#ffd34d' }} />

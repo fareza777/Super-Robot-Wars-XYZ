@@ -52,12 +52,14 @@ const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitSt
           {
             width: chip,
             height: chip,
-            borderColor: u.def.boss ? '#ffd34d' : u.side === 'player' ? '#6db4ff' : '#ff6b6b',
+            borderColor: u.phase2 ? '#ff3030' : u.def.boss ? '#ffd34d' : u.side === 'player' ? '#6db4ff' : '#ff6b6b',
+            borderWidth: u.phase2 ? 2.5 : 1.5,
             opacity: u.acted || ghosting ? 0.45 : 1,
           },
         ]}
       >
         <Image cachePolicy="memory" source={MECH_ART[u.def.id]} style={[StyleSheet.absoluteFill, u.side === 'enemy' && { transform: [{ scaleX: -1 }] }]} contentFit="cover" />
+        {u.phase2 && <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,40,40,0.18)' }]} />}
       </View>
       <View style={[styles.hpBarBg, { width: chip * 0.9 }]}>
         <View style={[styles.hpBar, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.side === 'player' ? '#4dff7a' : '#ff5a5a' }]} />
@@ -65,7 +67,7 @@ const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitSt
       <View style={[styles.lvTag, { borderColor: u.side === 'player' ? '#6db4ff' : '#ff6b6b' }]}>
         <Text style={styles.lvTxt}>Lv{u.level}</Text>
       </View>
-      {u.def.boss ? <Text style={styles.bossTag}>ACE</Text> : u.aceMastery ? <Text style={[styles.bossTag, { color: '#6fe0ff' }]}>★ACE</Text> : null}
+      {u.def.boss ? <Text style={[styles.bossTag, u.phase2 && { color: '#ff5050' }]}>{u.phase2 ? 'Ω ACE' : 'ACE'}</Text> : u.aceMastery ? <Text style={[styles.bossTag, { color: '#6fe0ff' }]}>★ACE</Text> : null}
       {u.will > 100 && (
         <View style={[styles.willTag, u.will >= 130 && { borderColor: '#ffd34d' }]}>
           <Text style={[styles.willTxt, u.will >= 130 && { color: '#ffd34d' }]}>◈{u.will}</Text>

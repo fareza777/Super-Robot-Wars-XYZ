@@ -26,7 +26,7 @@ export interface WeaponDef {
   comboPartner?: string;
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -108,6 +108,8 @@ export interface UnitState {
   phase2?: boolean;
   /** Fortune spirit: next attack grants double EXP */
   fortuneForNextAttack?: boolean;
+  /** Soul spirit: next attack deals 2x damage */
+  soulForNextAttack?: boolean;
 }
 
 export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def';
@@ -179,7 +181,7 @@ export interface GameSettings {
 
 export type ObjectiveType = 'rout' | 'survive' | 'boss';
 
-export type Reaction = 'counter' | 'defend' | 'evade';
+export type Reaction = 'counter' | 'defend' | 'evade' | 'cover';
 
 export interface AttackResult {
   hit: boolean;

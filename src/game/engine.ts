@@ -163,6 +163,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   let dmg = Math.max(120, Math.round(raw));
   if (crit) dmg = Math.round(dmg * 1.3);
   if (att.valorForNextAttack) dmg = Math.round(dmg * 1.5);
+  if (att.soulForNextAttack) dmg = Math.round(dmg * 2);
   if (def.guardUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.5);
   dmg = Math.round(dmg * (1 + partBonus(att, 'dmg') * 0.01 + (att.skills?.dmg ?? 0) * 0.015));
   dmg = Math.round(dmg * (1 - Math.min(0.5, (def.skills?.def ?? 0) * 0.015)));
@@ -216,6 +217,7 @@ export function aiPickReaction(att: UnitState, def: UnitState, w: WeaponDef, map
 export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, attMods: CombatMods = NO_MODS, defMods: CombatMods = NO_MODS, reaction: Reaction = 'counter'): AttackResult {
   const first = resolveHit(att, def, w, map, reaction === 'evade' ? { ...attMods, hitBonus: attMods.hitBonus - 30 } : attMods);
   if (reaction === 'defend' && first.hit) first.damage = Math.round(first.damage * 0.5);
+  if (reaction === 'cover' && first.hit) first.damage = Math.round(first.damage * 0.7);
   let counter: AttackResult['counter'] = null;
   if (!first.destroyed && reaction === 'counter') {
     // defender counter with its strongest in-range weapon (even if it "acted")
@@ -296,6 +298,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   att.strikeForNextAttack = false;
   att.valorForNextAttack = false;
   att.snipeForNextAttack = false;
+  att.soulForNextAttack = false;
   def.flashUntilEndOfEnemyPhase = false; // consumed by this attack whether it hit or not
 
   // Will: +1 for engaging, +1 for taking a hit, +4 per kill; PP: +3 per kill
@@ -413,7 +416,10 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'fortune':
       u.fortuneForNextAttack = true;
       break;
-    // 'rouse' and 'disrupt' affect neighbouring units — applied in store.castSpirit
+    case 'soul':
+      u.soulForNextAttack = true;
+      break;
+    // 'rouse', 'disrupt' and 'trust' affect neighbouring units — applied in store.castSpirit
   }
 }
 
@@ -511,6 +517,7 @@ export function applySupportStrike(
   sup.strikeForNextAttack = false;
   sup.valorForNextAttack = false;
   sup.snipeForNextAttack = false;
+  sup.soulForNextAttack = false;
   if (r.hit) def.hp = Math.max(0, def.hp - r.damage);
   const destroyed = r.hit && def.hp <= 0;
   if (destroyed) {
