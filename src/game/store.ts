@@ -93,6 +93,7 @@ export interface SaveData {
   missionRank?: Record<string, 'S' | 'A' | 'B' | 'C'>; // HONORS achievement ids whose credit bounty was claimed
   simBest?: number; // VR simulator high score
   vossenDefeated?: boolean; // NEMESIS honor — Drake Eclipse shot down at least once
+  killsByDef?: Record<string, number>; // enemies destroyed per frame id — codex tally
 }
 
 /** Serialized mid-battle snapshot — lets the player leave a mission and resume it later. */
@@ -196,6 +197,7 @@ interface Store {
   simSettled: boolean; // VR simulator — payout already applied for this run
   simBest: number; // VR simulator high score (persisted)
   vossenDefeated: boolean; // Cpt. Vossen shot down at least once (persisted — NEMESIS honor)
+  killsByDef: Record<string, number>; // enemy frames destroyed per def id — codex tally (persisted)
   log: string[];
   enemyBusy: boolean;
   screenShake: number;
@@ -375,7 +377,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
 const BATTLE_SAVE_KEY = 'srwxyz_battle_v1';
 
 async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank'>>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated };
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated, killsByDef: useGame.getState().killsByDef };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -533,6 +535,7 @@ export const useGame = create<Store>((set, get) => ({
   simSettled: false,
   simBest: 0,
   vossenDefeated: false,
+  killsByDef: {} as Record<string, number>,
   hint: null,
   hintsSeen: [],
 
@@ -648,7 +651,7 @@ export const useGame = create<Store>((set, get) => ({
       await AsyncStorage.removeItem(SAVE_KEY);
       await AsyncStorage.removeItem(BATTLE_SAVE_KEY);
     } catch {}
-    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false });
+    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false, killsByDef: {} });
   },
 
   toggleDeploy: (defId) => {
@@ -702,6 +705,7 @@ export const useGame = create<Store>((set, get) => ({
       missionRank: {} as Record<number, 'S' | 'A' | 'B' | 'C'>,
       lastRank: null as 'S' | 'A' | 'B' | 'C' | null,
       vossenDefeated: false,
+      killsByDef: {} as Record<string, number>,
     };
     void clearBattleSave();
     set({ ...fresh, hasSave: true, kills: 0, phase: 'prologue' });
@@ -726,7 +730,7 @@ export const useGame = create<Store>((set, get) => ({
       const raw = await AsyncStorage.getItem(SAVE_KEY);
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
-      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {}, simBest: d.simBest ?? 0, vossenDefeated: d.vossenDefeated ?? false });
+      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {}, simBest: d.simBest ?? 0, vossenDefeated: d.vossenDefeated ?? false, killsByDef: d.killsByDef ?? {} });
     } catch {}
     try {
       const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
@@ -1214,7 +1218,8 @@ export const useGame = create<Store>((set, get) => ({
     }
     for (const e of result.expEvents) log2 = push(log2, e);
     for (const q of defeatQuotes(s.units, state.units)) log2 = push(log2, q);
-    const killCount = (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0) + (result.support?.destroyed ? 1 : 0);
+    const dead = deadEnemies(s.units, state.units);
+    const killCount = dead.length;
     let inventory = s.inventory;
     let salvageQueue = s.salvageQueue;
     for (let i = 0; i < killCount; i++) {
@@ -1242,6 +1247,7 @@ export const useGame = create<Store>((set, get) => ({
       pendingMove: null,
       selectedUid: null,
       vossenDefeated: s.vossenDefeated || vossenDowned(s.units, state.units),
+      killsByDef: tallyKills(s.killsByDef, dead),
     };
     if (s.settings.battleMode === 'off') {
       const end = checkEnd(state.units, s.missionCh, s.turn);
@@ -1293,7 +1299,8 @@ export const useGame = create<Store>((set, get) => ({
       inventory,
       salvageQueue,
       vossenDefeated: s.vossenDefeated || vossenDowned(s.units, state.units),
-      kills: s.kills + (result.destroyed ? 1 : 0) + result.splash!.filter((x) => x.destroyed).length,
+      killsByDef: tallyKills(s.killsByDef, deadEnemies(s.units, state.units)),
+      kills: s.kills + deadEnemies(s.units, state.units).length,
       pendingWeapon: null,
       attackTiles: new Set<string>(),
       menuForUid: null,
@@ -1470,6 +1477,18 @@ function betterRank(prev: Rank | undefined, next: Rank): Rank {
 }
 
 /** Cpt. Vossen always goes down carrying a cache — first downing in a mission guarantees the drop. */
+/** Enemy units destroyed between two snapshots — kills count only hostiles, never player losses. */
+function deadEnemies(before: UnitState[], after: UnitState[]): UnitState[] {
+  const afterAlive = new Set(after.filter((u) => u.alive).map((u) => u.uid));
+  return before.filter((u) => u.side === 'enemy' && u.alive && !afterAlive.has(u.uid));
+}
+function tallyKills(acc: Record<string, number>, dead: UnitState[]): Record<string, number> {
+  if (!dead.length) return acc;
+  const next = { ...acc };
+  for (const u of dead) next[u.def.id] = (next[u.def.id] ?? 0) + 1;
+  return next;
+}
+
 function vossenDowned(before: UnitState[], after: UnitState[]): boolean {
   const wasUp = before.some((u) => u.def.id === 'vossDrake' && u.alive);
   const isUp = after.some((u) => u.def.id === 'vossDrake' && u.alive);
@@ -1512,7 +1531,7 @@ function simNextWave(set: SetFn, get: Get) {
   const units = healed.concat(news);
   let log = push(s.log, `— Wave ${wave - 1} cleared — +${(wave - 1) * 150} pts`);
   log = push(log, `▲ WAVE ${wave}: ${news.length} hostiles warp in (Lv ${lvl}${wave % 4 === 0 ? ' · ALL ELITE' : ''})`);
-  const notice = `▲ WAVE ${wave} — ${news.length} HOSTILES INBOUND`;
+  const notice = `▲ WAVE ${wave} — ${news.length} HOSTILES INBOUND · ${s.kills * 50 + (wave - 1) * 150} PTS`;
   set({ units, simWave: wave, battle: null, phase: 'player', enemyBusy: false, selectedUid: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, pendingMove: null, attackTiles: new Set(), hazardWarn: [], notice, log });
   setTimeout(() => set({ notice: null }), 2600);
 }
@@ -1726,12 +1745,12 @@ async function runEnemyPhase(set: SetFn, get: Get) {
               : l;
       if (cur.settings.battleMode === 'off') {
         set((st) => {
-          const kc = (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0);
+          const kc = deadEnemies(cur.units, state.units).length;
           const d = dropsForKills(kc, st.inventory);
           let l = mkLog(st.log);
           for (const x of d.lines) l = push(l, x);
           for (const q of defeatQuotes(cur.units, state.units)) l = push(l, q);
-          return { units: state.units, kills: st.kills + kc, inventory: d.inventory, salvageQueue: [...st.salvageQueue, ...d.names], log: rxnLog(l) };
+          return { units: state.units, kills: st.kills + kc, killsByDef: tallyKills(st.killsByDef, deadEnemies(cur.units, state.units)), inventory: d.inventory, salvageQueue: [...st.salvageQueue, ...d.names], log: rxnLog(l) };
         });
         const end = checkEnd(get().units, get().missionCh, get().turn);
         if (end) {
@@ -1745,7 +1764,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       // the scene shows whoever actually took the hit — the covering ally when covered
       const defForScene = reaction === 'cover' && coverUid ? (cur.units.find((u) => u.uid === coverUid) ?? def) : def;
       set((st) => {
-        const kc = (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0);
+        const kc = deadEnemies(cur.units, state.units).length;
         const d = dropsForKills(kc, st.inventory);
         let l = mkLog(st.log);
         for (const x of d.lines) l = push(l, x);
@@ -1754,6 +1773,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
           units: state.units,
           phase: 'battle',
           kills: st.kills + kc,
+          killsByDef: tallyKills(st.killsByDef, deadEnemies(cur.units, state.units)),
           inventory: d.inventory,
           salvageQueue: [...st.salvageQueue, ...d.names],
           log: rxnLog(l),
@@ -1893,7 +1913,10 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       return { units, turn: nextTurn, midDialog, eventsFired, hazardWarn };
     }
     if (!notice && end !== 'defeat') {
-      notice = `PLAYER PHASE — TURN ${nextTurn}`;
+      notice =
+        st.missionCh.turnLimit != null && nextTurn === st.missionCh.turnLimit
+          ? `⚠ FINAL TURN — objective expires after this phase`
+          : `PLAYER PHASE — TURN ${nextTurn}`;
       setTimeout(() => set({ notice: null }), 2400);
     }
     // refresh the danger-zone overlay for the new positions while it stays enabled

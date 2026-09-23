@@ -449,6 +449,8 @@ const CODEX_ALLY_IDS = [...PLAYER_DEF_IDS, 'raxdenR', 'vexiaX'];
 /** Codex entry — one frame: art, stats, armament, pilot. */
 function CodexRow({ id, ally }: { id: string; ally: boolean }) {
   const d = ALL_UNITS[id];
+  const killsByDef = useGame((st) => st.killsByDef);
+  const tally = killsByDef[id] ?? 0;
   return (
     <View style={styles.codexRow}>
       <ExpoImage cachePolicy="memory" source={MECH_ART[id]} style={styles.codexThumb} contentFit="cover" contentPosition="top center" />
@@ -462,6 +464,7 @@ function CodexRow({ id, ally }: { id: string; ally: boolean }) {
         </Text>
         <Text style={styles.shopDesc}>
           HP {d.maxHp} · EN {d.maxEn} · ARM {d.armor} · MOB {d.mobility}
+          {!ally && tally > 0 ? ` · ✕ ×${tally} destroyed` : ''}
         </Text>
         <Text style={styles.codexWep} numberOfLines={1}>
           {d.weapons.map((w) => w.name).join(' · ')}
