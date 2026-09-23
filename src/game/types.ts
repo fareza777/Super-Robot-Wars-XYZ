@@ -43,7 +43,7 @@ export interface StatusFx {
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -164,6 +164,10 @@ export interface UnitState {
   dmgDealt?: number;
   /** crippling blow taken — move -2 for the rest of the battle */
   crippled?: boolean;
+  /** pilot wounded in a previous sortie — -15% hit & damage this battle */
+  wounded?: boolean;
+  /** breacher field victim — armor & evade permanently reduced this battle */
+  sundered?: boolean;
   /** Miracle spirit armed — survive the next fatal hit with 10 HP */
   miracleArmed?: boolean;
   /** Vanish spirit — enemies cannot target this unit until the flag clears */

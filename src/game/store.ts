@@ -98,6 +98,7 @@ export interface SaveData {
   killsByDef?: Record<string, number>; // enemies destroyed per frame id — codex tally
   snowFox?: boolean; // WHITEOUT honor — won during a blizzard turn
   extremeWon?: boolean; // OVERLORD honor — won a mission on EXTREME
+  wounded?: string[]; // pilot def ids flying wounded (downed last mission)
   shepHon?: boolean; // SHEPHERD honor — convoy reached safety unscathed
   flawlessHon?: boolean; // FLAWLESS honor — no unit lost on a Ch.10+ mission
   maxHitEver?: number; // ANNIHILATOR honor — biggest single hit ever landed
@@ -213,6 +214,7 @@ interface Store {
   simBest: number; // VR simulator high score (persisted)
   vossenDefeated: boolean; // Cpt. Vossen shot down at least once (persisted — NEMESIS honor)
   killsByDef: Record<string, number>; // enemy frames destroyed per def id — codex tally (persisted)
+  wounded: string[]; // pilots downed in the previous battle — sortie weakened
   snowFox: boolean;
   extremeWon: boolean;
   shepHon: boolean;
@@ -250,6 +252,7 @@ interface Store {
   loadSave: () => Promise<void>;
   gotoHq: () => void;
   buyItem: (itemId: string) => void;
+  sellItem: (itemId: string) => void;
   upgradeStat: (defId: string, statId: string) => void;
   useItem: (uid: string, itemId: string) => void;
   tapTile: (p: Pos) => void;
@@ -338,7 +341,7 @@ function hardEnemy(u: UnitState, difficulty: 'normal' | 'hard' | 'extreme') {
   }
 }
 
-function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: UpgradeMap, wupg: WeaponUpgMap, deploySel: string[], ngPlus: number, parts: Record<string, string[]>, difficulty: 'normal' | 'hard' | 'extreme' = 'normal', vossenAllied = false): { map: MapDef; units: UnitState[] } {
+function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: UpgradeMap, wupg: WeaponUpgMap, deploySel: string[], ngPlus: number, parts: Record<string, string[]>, difficulty: 'normal' | 'hard' | 'extreme' = 'normal', vossenAllied = false, woundedIds: string[] = []): { map: MapDef; units: UnitState[] } {
   const map = genMap(ch);
   const units: UnitState[] = [];
   let i = 0;
@@ -358,6 +361,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
       if (earned.length) u.bonusSpirits = earned;
     }
     u.parts = (parts[s.defId] ?? []).slice(0, MAX_PART_SLOTS);
+    u.wounded = woundedIds.includes(s.defId);
     applyUpgrades(u, upgrades, wupg);
     // flat stat parts raise the frame itself
     const hpB = partBonus(u, 'hp');
@@ -436,8 +440,8 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
 
 const BATTLE_SAVE_KEY = 'srwxyz_battle_v1';
 
-async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank' | 'snowFox' | 'extremeWon' | 'shepHon' | 'flawlessHon' | 'maxHitEver'>>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated, killsByDef: useGame.getState().killsByDef, snowFox: useGame.getState().snowFox, extremeWon: useGame.getState().extremeWon, shepHon: useGame.getState().shepHon, flawlessHon: useGame.getState().flawlessHon, maxHitEver: useGame.getState().maxHitEver };
+async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank' | 'snowFox' | 'extremeWon' | 'shepHon' | 'flawlessHon' | 'maxHitEver' | 'wounded'>>) {
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated, killsByDef: useGame.getState().killsByDef, snowFox: useGame.getState().snowFox, extremeWon: useGame.getState().extremeWon, shepHon: useGame.getState().shepHon, flawlessHon: useGame.getState().flawlessHon, maxHitEver: useGame.getState().maxHitEver, wounded: useGame.getState().wounded };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -627,6 +631,7 @@ export const useGame = create<Store>((set, get) => ({
   simBest: 0,
   vossenDefeated: false,
   killsByDef: {} as Record<string, number>,
+  wounded: [] as string[],
   snowFox: false,
     extremeWon: false,
     shepHon: false,
@@ -717,7 +722,7 @@ export const useGame = create<Store>((set, get) => ({
       lines: [],
     };
     // no guest ace in the simulator — it would inflate scores
-    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal', false);
+    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal', false, s.wounded);
     // VR runs are ephemeral and never autosave — keep any prior mission snapshot
     // so the ops board still offers RESUME for it after the run ends.
     set({ phase: 'player', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: s.savedBattle, simWave: 1, simSettled: false, log: ['▲ VR SIMULATION — WAVE 1', `Objective: ${ch.objective}`, 'Waves escalate. The run ends when the squad falls.'], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], notice: '▲ VR SIMULATION — WAVE 1' });
@@ -750,7 +755,7 @@ export const useGame = create<Store>((set, get) => ({
       await AsyncStorage.removeItem(SAVE_KEY);
       await AsyncStorage.removeItem(BATTLE_SAVE_KEY);
     } catch {}
-    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false, killsByDef: {}, snowFox: false, extremeWon: false, shepHon: false, flawlessHon: false, maxHitEver: 0 });
+    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false, killsByDef: {}, snowFox: false, extremeWon: false, shepHon: false, flawlessHon: false, maxHitEver: 0, wounded: [] });
   },
 
   toggleDeploy: (defId) => {
@@ -831,7 +836,7 @@ export const useGame = create<Store>((set, get) => ({
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
       set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {}, simBest: d.simBest ?? 0, vossenDefeated: d.vossenDefeated ?? false, snowFox: d.snowFox ?? false,
-    extremeWon: d.extremeWon ?? false, shepHon: d.shepHon ?? false, flawlessHon: d.flawlessHon ?? false, killsByDef: d.killsByDef ?? {}, maxHitEver: d.maxHitEver ?? 0 });
+    extremeWon: d.extremeWon ?? false, shepHon: d.shepHon ?? false, flawlessHon: d.flawlessHon ?? false, killsByDef: d.killsByDef ?? {}, maxHitEver: d.maxHitEver ?? 0, wounded: d.wounded ?? [] });
     } catch {}
     try {
       const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
@@ -865,6 +870,18 @@ export const useGame = create<Store>((set, get) => ({
     if (!item || s.credits < item.price) return;
     const inventory = { ...s.inventory, [itemId]: (s.inventory[itemId] ?? 0) + 1 };
     const credits = s.credits - item.price;
+    set({ credits, inventory });
+    void persist({ ...s, credits, inventory });
+  },
+
+  sellItem: (itemId) => {
+    const s = get();
+    const item = ITEMS[itemId];
+    const owned = s.inventory[itemId] ?? 0;
+    if (!item || owned <= 0) return;
+    const inventory = { ...s.inventory, [itemId]: owned - 1 };
+    if (inventory[itemId] <= 0) delete inventory[itemId];
+    const credits = s.credits + Math.round(item.price * 0.5);
     set({ credits, inventory });
     void persist({ ...s, credits, inventory });
   },
@@ -984,7 +1001,7 @@ export const useGame = create<Store>((set, get) => ({
     const ch = missionOf(s.chapter, s.route);
     const allied = (s.killsByDef['vossDrake'] ?? 0) >= 2;
     const cellGranted = allied && grantDrakeCell(set, get);
-    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, s.deploySel, s.ngPlus, s.parts, s.settings.difficulty ?? 'normal', allied);
+    const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, s.deploySel, s.ngPlus, s.parts, s.settings.difficulty ?? 'normal', allied, s.wounded);
     const zone = deployZone(map);
     // paint the deploy zone with the move-range overlay so the player sees where units can go
     const zoneTiles = new Map<string, MoveRec>();
@@ -1682,14 +1699,15 @@ export const useGame = create<Store>((set, get) => ({
       return c;
     });
     // area spirits — rouse/disrupt affect neighbours within 2 tiles
-    if (sp === 'rouse' || sp === 'disrupt') {
+    if (sp === 'rouse' || sp === 'disrupt' || sp === 'sunder') {
       const src = units.find((x) => x.uid === uid)!;
       for (const u2 of units) {
         if (u2.uid === uid || !u2.alive) continue;
         const d = Math.abs(u2.pos.x - src.pos.x) + Math.abs(u2.pos.y - src.pos.y);
-        if (d > 2) continue;
+        if (d > (sp === 'sunder' ? 3 : 2)) continue;
         if (sp === 'rouse' && u2.side === src.side) u2.will = Math.min(150, u2.will + 10);
         if (sp === 'disrupt' && u2.side !== src.side) u2.will = Math.max(100, u2.will - 10);
+        if (sp === 'sunder' && u2.side !== src.side) u2.sundered = true;
       }
     }
     // purge — cleanse self and adjacent allies of cripple + status debuffs
@@ -1932,6 +1950,7 @@ function applyVictory(set: SetFn, get: Get) {
   const flawlessHon = s.flawlessHon || (!s.sideId && s.simWave === 0 && s.missionCh.id >= 10 && !s.units.some((u) => u.side === 'player' && !u.npc && !u.alive));
   // wrecked squad frames must be rebuilt — repair bill comes out of the reward
   const repairBill = s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive).reduce((n, u) => n + u.level * 15, 0);
+  const woundedIds = s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive).map((u) => u.def.id);
   const aceLines: string[] = [];
   for (const u of s.units) {
     if (u.side === 'player' && !u.npc) {
@@ -1977,9 +1996,10 @@ function applyVictory(set: SetFn, get: Get) {
       shepHon,
       flawlessHon,
       maxHitEver,
+      wounded: woundedIds,
       debrief: null,
       salvageQueue: [],
-      log: aceLines.reduce((l, line) => push(l, line), push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''} · RANK ${rankS}${sRankNote ? ' · awarded 🛡 VETERAN PLATE' : ''}${repairBill > 0 ? ` · 🔧 repair bill -${repairBill}cr` : ''}`)),
+      log: aceLines.reduce((l, line) => push(l, line), push(push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''} · RANK ${rankS}${sRankNote ? ' · awarded 🛡 VETERAN PLATE' : ''}${repairBill > 0 ? ` · 🔧 repair bill -${repairBill}cr` : ''}`), `${woundedIds.length ? `🩹 ${woundedIds.length} pilot(s) wounded — reduced effectiveness next sortie` : ''}`).filter(Boolean)),
     });
     void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank, snowFox, extremeWon, shepHon, flawlessHon, maxHitEver });
     return;
@@ -2044,10 +2064,13 @@ function applyVictory(set: SetFn, get: Get) {
     shepHon,
     flawlessHon,
     maxHitEver,
+    wounded: woundedIds,
     lastReward: reward + masteryCr + (clearedFinal ? 5000 : 0),
     debrief: DEBRIEFS[ch.id] ?? null,
     salvageQueue: [],
-    log: push(log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + masteryCr + 5000} credits` : `Mission complete! +${reward + masteryCr} credits · RANK ${rank}`),
+    log: woundedIds.length
+      ? push(push(log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + masteryCr + 5000} credits` : `Mission complete! +${reward + masteryCr} credits · RANK ${rank}`), `🩹 ${woundedIds.length} pilot${woundedIds.length > 1 ? 's' : ''} wounded — they sortie at reduced effectiveness next battle`)
+      : push(log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + masteryCr + 5000} credits` : `Mission complete! +${reward + masteryCr} credits · RANK ${rank}`),
   });
   void clearBattleSave();
   void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route, missionRank, snowFox, extremeWon, shepHon, flawlessHon, maxHitEver });

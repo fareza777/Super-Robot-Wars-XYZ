@@ -133,13 +133,13 @@ export function attackTiles(map: MapDef, from: Pos, w: WeaponDef, u?: UnitState)
 
 function evadeOf(u: UnitState, map: MapDef): number {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
-  return u.def.mobility + u.def.pilot.evade + (u.level - 1) * 2 + t.eva + (u.focusUntilEndOfEnemyPhase ? 30 : 0) + willEvade(u) + partBonus(u, 'mobility') + partBonus(u, 'evade') * 1.8 + (u.skills?.evade ?? 0) + (u.aceMastery ? 5 : 0) - (u.dodges ?? 0) * 8;
+  return u.def.mobility + u.def.pilot.evade + (u.level - 1) * 2 + t.eva + (u.focusUntilEndOfEnemyPhase ? 30 : 0) + willEvade(u) + partBonus(u, 'mobility') + partBonus(u, 'evade') * 1.8 + (u.skills?.evade ?? 0) + (u.aceMastery ? 5 : 0) - (u.dodges ?? 0) * 8 - (u.sundered ? 15 : 0);
 }
 
 function armorOf(u: UnitState, map: MapDef): number {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
   const base = u.def.armor + (u.level - 1) * 40 + t.def + (u.gritUntilEndOfEnemyPhase ? 400 : 0) + willArmor(u) + partBonus(u, 'armor') + (u.phase2 ? 300 : 0);
-  return Math.round(base * (u.statuses?.some((s) => s.id === 'break') ? 0.7 : 1));
+  return Math.round((base - (u.sundered ? 300 : 0)) * (u.statuses?.some((s) => s.id === 'break') ? 0.7 : 1));
 }
 
 /** status applied on a landed hit — refreshes the same debuff instead of stacking */
@@ -163,7 +163,7 @@ export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: Map
   const trait = att.def.pilot.trait;
   const traitHit = (trait === 'deadeye' ? 8 : 0) + (trait === 'falcon_wing' && def.def.moveType === 'air' ? 10 : 0) + (trait === 'crimson_fury' && att.hp < att.def.maxHp / 2 ? 8 : 0);
   const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus + traitHit + willHitBonus(att) + partBonus(att, 'hit') + (att.skills?.hit ?? 0) + (att.aceMastery ? 5 : 0) - evadeOf(def, map) * 0.55;
-  return Math.max(10, Math.min(100, Math.round(raw)));
+  return Math.max(10, Math.min(100, Math.round(raw * (att.wounded ? 0.85 : 1))));
 }
 
 export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, crit: boolean, dmgMult = 1): number {
@@ -178,6 +178,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   dmg = Math.round(dmg * (1 - Math.min(0.5, (def.skills?.def ?? 0) * 0.015)));
   dmg = Math.round(dmg * Math.max(0.4, 1 + partBonus(def, 'dmgTaken') * 0.01));
   if (att.aceMastery) dmg = Math.round(dmg * 1.05);
+  if (att.wounded) dmg = Math.round(dmg * 0.85);
   if (att.phase2) dmg = Math.round(dmg * 1.15);
   const trait = att.def.pilot.trait;
   if (trait === 'ace_instinct' && att.will >= 130) dmg = Math.round(dmg * 1.12);
@@ -600,6 +601,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'resolve':
       u.will = 150;
       break;
+    case 'sunder':
+      break; // area debuff is applied by the store pass
     case 'snipe':
       u.snipeForNextAttack = true;
       break;

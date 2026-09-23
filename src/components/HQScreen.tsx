@@ -109,6 +109,11 @@ export function HQScreen() {
                   </Text>
                   <Text style={styles.shopDesc}>{it.desc}</Text>
                 </View>
+                {owned > 0 && (
+                  <Pressable style={[styles.buyBtn, { borderColor: '#c9945a' }]} onPress={() => s.sellItem(it.id)}>
+                    <Text style={styles.buyTxt}>SELL +{Math.round(it.price * 0.5)}</Text>
+                  </Pressable>
+                )}
                 <Pressable style={[styles.buyBtn, !afford && { opacity: 0.35 }]} onPress={() => s.buyItem(it.id)} disabled={!afford}>
                   <Text style={styles.buyTxt}>{it.price} CR</Text>
                 </Pressable>

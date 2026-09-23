@@ -27,6 +27,8 @@ function buffNames(u: UnitState): string[] {
   if (u.againOnKill) names.push('⚡OVRDRV');
   if (u.mercyArmed) names.push('🕊MERCY');
   if (u.crippled) names.push('⛓CRIPPLED');
+  if (u.wounded) names.push('🩹WOUNDED');
+  if (u.sundered) names.push('⭗SUNDERED');
   return names;
 }
 

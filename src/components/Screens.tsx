@@ -80,6 +80,7 @@ export function BriefingScreen() {
   const chapter = useGame((s) => s.chapter);
   const pilotProg = useGame((s) => s.pilotProg);
   const deploySel = useGame((s) => s.deploySel);
+  const woundedPilots = useGame((s) => s.wounded);
   const toggleDeploy = useGame((s) => s.toggleDeploy);
   const hard = useGame((s) => (s.settings.difficulty ?? 'normal') === 'hard');
   const route = useGame((s) => s.route);
@@ -123,6 +124,7 @@ export function BriefingScreen() {
                 <Image cachePolicy="memory" source={PILOT_ART[id]} style={[styles.squadFace, on && { borderColor: '#4dff7a', borderWidth: 2 }]} contentFit="cover" />
                 <Text style={[styles.squadName, !on && { color: '#667' }]}>{d.pilot.callsign} · Lv{prog?.level ?? d.level ?? 1}</Text>
                 <Text style={styles.squadUnit} numberOfLines={1}>{d.name}</Text>
+                {woundedPilots.includes(id) && <Text style={{ color: '#ff9d9d', fontSize: 9, fontWeight: '800', letterSpacing: 1 }}>🩹 WOUNDED</Text>}
                 <Text style={styles.deployMark}>{on ? '▣ IN' : '▢ OUT'}</Text>
               </Pressable>
             );
