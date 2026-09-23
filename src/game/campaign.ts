@@ -166,6 +166,8 @@ export interface ChapterDef {
   surviveTurns?: number;
   /** rout/boss/seize/reach only: defeat if the objective isn't met by this turn */
   turnLimit?: number;
+  /** hero clause: if a unit with this def id sorties and is destroyed, the mission fails */
+  requiredDefId?: string;
   /** protect missions: turns the NPC convoy must stay alive */
   protectTurns?: number;
   /** seize missions: beacon tile a player unit must occupy to win (filled by genMap) */
@@ -610,7 +612,7 @@ export interface SideMissionDef {
   boss?: string;
   rewardCr: number;
   rewardItem?: ItemId;
-  objectiveType?: 'rout' | 'survive' | 'seize';
+  objectiveType?: 'rout' | 'survive' | 'seize' | 'reach';
   surviveTurns?: number;
   /** rout/seize objectives: defeat if not met within this many turns */
   turnLimit?: number;
@@ -753,6 +755,8 @@ export const PATROL_MISSIONS: SideMissionDef[] = [
   { id: 'p3', name: "Throne's Shadow Watch", desc: 'The Emperor\'s vanguard tests our perimeter. Answer in kind.', unlockCh: 20, theme: 'fortress', lvl: 17, count: 7, rewardCr: 1500, repeatable: true, turnLimit: 9, objective: 'Rout all hostiles within 9 turns — or they slip away' },
   { id: 'p4', name: 'Ghost Relay Intercept', desc: 'A dead relay station keeps pinging the throne. Reach it before the garrison does.', unlockCh: 15, theme: 'ice', lvl: 14, count: 6, rewardCr: 1250, repeatable: true, objectiveType: 'seize', turnLimit: 8, objective: 'Seize the relay beacon within 8 turns — before the Empire silences it' },
   { id: 'p5', name: 'Karn Circuit', desc: 'Cataphract wolf-packs run the caldera rim hunting convoys. Break the pack.', unlockCh: 24, theme: 'lava', lvl: 20, count: 8, rewardCr: 1800, repeatable: true, turnLimit: 10, objective: 'Rout all hostiles within 10 turns — or they slip away' },
+  { id: 'p7', name: 'Dead Runner', desc: 'A courier frame carries stolen throne codes through the ruins. Get a unit to the drop point before they torch it.', unlockCh: 18, theme: 'ruins', lvl: 16, count: 7, rewardCr: 1400, repeatable: true, objectiveType: 'reach', turnLimit: 8, objective: 'Reach the extraction ➤ within 8 turns — or rout the blockade' },
+  { id: 'p8', name: 'Night Passage', desc: 'Sensors are blind in the darkside channel. Slip a unit through the blockade line.', unlockCh: 24, theme: 'void', lvl: 20, count: 8, rewardCr: 1900, repeatable: true, objectiveType: 'reach', turnLimit: 9, fog: true, objective: 'Reach the extraction ➤ within 9 turns — sensors blind beyond 4 tiles' },
   { id: 'p6', name: 'Blackout Watch', desc: 'A sensor dead-zone hangs over the frozen relay shelf. Hostiles only reveal at knife range.', unlockCh: 11, theme: 'ice', lvl: 12, count: 6, rewardCr: 1150, repeatable: true, fog: true, objective: 'Rout all hostiles — sensors blind beyond 4 tiles' },
 ];
 

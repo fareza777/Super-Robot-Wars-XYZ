@@ -72,6 +72,11 @@ export function BriefingScreen() {
           </Text>
         )}
         {hard && <Text style={{ color: '#ff8a5c', fontSize: 11, fontWeight: '800', letterSpacing: 1.5, marginTop: 4 }}>▲ HARD MODE — enemies +15% · mission rewards +25%</Text>}
+        {ch.requiredDefId && (
+          <Text style={{ color: '#ff5a4a', fontSize: 11, fontWeight: '800', letterSpacing: 1.2, marginTop: 4 }}>
+            ⚠ {ALL_UNITS[ch.requiredDefId]?.name.toUpperCase()} MUST SURVIVE — losing it ends the mission
+          </Text>
+        )}
         <Text style={styles.deployLbl}>DEPLOY SQUAD — tap to toggle ({deploySel.length}/{roster.length})</Text>
         <View style={styles.squadRow}>
           {roster.map((id) => {
@@ -121,6 +126,7 @@ export function EndScreen({ victory }: { victory: boolean }) {
   const chapter = useGame((s) => s.chapter);
   const kills = useGame((s) => s.kills);
   const lastReward = useGame((s) => s.lastReward);
+  const lastSalvage = useGame((s) => s.lastSalvage);
   const lastMastery = useGame((s) => s.lastMastery);
   const lastRank = useGame((s) => s.lastRank);
   const ngPlus = useGame((s) => s.ngPlus);
@@ -165,6 +171,7 @@ export function EndScreen({ victory }: { victory: boolean }) {
           <Text style={styles.resultsRow}>TURNS  {turn}</Text>
           <Text style={styles.resultsRow}>ENEMY UNITS DESTROYED  {kills}</Text>
           <Text style={styles.resultsRow}>CREDITS EARNED  +{lastReward}</Text>
+          {lastSalvage > 0 && <Text style={styles.resultsRow}>SECTOR INCOME  +{lastSalvage}</Text>}
           {lastRank && (
             <View style={styles.rankRow}>
               <Text style={styles.rankLbl}>BATTLE RANK</Text>

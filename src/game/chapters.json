@@ -960,7 +960,7 @@
   "count": 8,
   "boss": "warden",
   "bossLevel": 26,
-  "objective": "Defeat Gate Warden Bram.",
+  "objective": "Defeat Gate Warden Bram. \u2014 the Valstray must survive",
   "lines": [
    {
     "speaker": "warden",
@@ -988,7 +988,8 @@
    "desc": "Clear without losing a unit",
    "keepAll": true,
    "rewardCr": 900
-  }
+  },
+  "requiredDefId": "valstray"
  },
  {
   "id": 26,
@@ -998,7 +999,7 @@
   "theme": "fortress",
   "lvl": 26,
   "count": 10,
-  "objective": "Fight through the first wave of the Imperial royal guard.",
+  "objective": "Fight through the first wave of the Imperial royal guard. \u2014 the Valstray must survive",
   "lines": [
    {
     "speaker": "zephyra",
@@ -1025,7 +1026,8 @@
    "desc": "Clear within 12 turns",
    "maxTurns": 12,
    "rewardCr": 1120
-  }
+  },
+  "requiredDefId": "valstray"
  },
  {
   "id": 27,
@@ -1074,7 +1076,7 @@
   "count": 9,
   "boss": "kargan",
   "bossLevel": 28,
-  "objective": "Karg Draven fights his last duel \u2014 end it, once and for all.",
+  "objective": "Karg Draven fights his last duel \u2014 end it, once and for all. \u2014 the Valstray must survive",
   "lines": [
    {
     "speaker": "kargan",
@@ -1101,7 +1103,8 @@
    "desc": "Clear without losing a unit",
    "keepAll": true,
    "rewardCr": 900
-  }
+  },
+  "requiredDefId": "valstray"
  },
  {
   "id": 29,
@@ -1151,7 +1154,7 @@
   "count": 8,
   "boss": "emperor",
   "bossLevel": 30,
-  "objective": "Defeat Emperor Vael and end the war.",
+  "objective": "Defeat Emperor Vael and end the war. \u2014 the Valstray must survive",
   "lines": [
    {
     "speaker": "emperor",
@@ -1179,6 +1182,7 @@
    "desc": "Clear without losing a unit",
    "keepAll": true,
    "rewardCr": 900
-  }
+  },
+  "requiredDefId": "valstray"
  }
 ]

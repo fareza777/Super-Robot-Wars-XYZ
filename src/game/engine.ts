@@ -187,8 +187,8 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
 }
 
 const rnd = () => Math.random() * 100;
-export const critChance = (att: UnitState, def: UnitState) => Math.max(5, Math.round(8 + (att.def.mobility - def.def.mobility) * 0.2));
-const critRoll = (att: UnitState, def: UnitState) => rnd() < critChance(att, def);
+export const critChance = (att: UnitState, def: UnitState, w?: WeaponDef) => Math.max(5, Math.round(8 + (att.def.mobility - def.def.mobility) * 0.2 + (w?.critMod ?? 0)));
+const critRoll = (att: UnitState, def: UnitState, w?: WeaponDef) => rnd() < critChance(att, def, w);
 
 interface SimAttack {
   hit: boolean;
@@ -212,7 +212,7 @@ function resolveHit(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, m
     }
     return { hit: false, crit: false, damage: 0, hitChance: hc, destroyed: false };
   }
-  const crit = critRoll(att, def);
+  const crit = critRoll(att, def, w);
   const damage = damageOf(att, def, w, map, crit, mods.dmgMult);
   return { hit: true, crit, damage, hitChance: hc, destroyed: def.hp - damage <= 0 };
 }
@@ -606,6 +606,8 @@ export interface EndObjective {
   protectTurns?: number;
   seizePos?: Pos;
   reachPos?: Pos;
+  /** hero clause: when this def id is fielded and destroyed, the mission fails */
+  requiredDefId?: string;
   /** rout/boss/seize/reach only: fail if the objective isn't met by this turn */
   turnLimit?: number;
 }
@@ -657,6 +659,8 @@ export function applySupportStrike(
 
 export function checkEnd(units: UnitState[], obj?: EndObjective | null, turn?: number): 'victory' | 'defeat' | null {
   if (!units.some((u) => u.alive && u.side === 'player')) return 'defeat';
+  // hero clause — if the required sortie was fielded and destroyed, the mission is lost
+  if (obj?.requiredDefId && units.some((u) => u.side === 'player' && u.def.id === obj.requiredDefId) && !units.some((u) => u.alive && u.side === 'player' && u.def.id === obj.requiredDefId)) return 'defeat';
   const type = obj?.objectiveType ?? 'rout';
   if (type === 'boss') {
     // win as soon as the boss unit falls, regardless of remaining grunts

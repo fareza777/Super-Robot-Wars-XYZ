@@ -20,6 +20,8 @@ export interface WeaponDef {
   enCost: number;
   ammo: number | null; // null = unlimited (EN-only weapon)
   hitMod: number; // percentage points
+  /** bonus crit chance (percentage points) — melee blades & lances run hot */
+  critMod?: number;
   postMove: boolean; // usable after moving (P weapons)
   animSeed: number; // slight visual variation
   /** SRW kiai: minimum will required to fire this weapon */

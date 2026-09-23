@@ -40,26 +40,26 @@ export const TRAITS: Record<TraitId, { name: string; desc: string }> = {
 const W = (w: WeaponDef) => w;
 
 export const WEAPONS = {
-  beamSaber: W({ id: 'beam_saber', name: 'Beam Saber', kind: 'melee', power: 2300, rangeMin: 1, rangeMax: 1, enCost: 5, ammo: null, hitMod: 15, postMove: true, animSeed: 1 }),
+  beamSaber: W({ id: 'beam_saber', name: 'Beam Saber', kind: 'melee', power: 2300, rangeMin: 1, rangeMax: 1, enCost: 5, ammo: null, hitMod: 15, critMod: 15, postMove: true, animSeed: 1 }),
   photonRifle: W({ id: 'photon_rifle', name: 'Photon Rifle', kind: 'beam', power: 1800, rangeMin: 1, rangeMax: 5, enCost: 10, ammo: null, hitMod: 5, postMove: true, animSeed: 2 }),
   missilePods: W({ id: 'missile_pods', name: 'Missile Pods', kind: 'missile', power: 1500, rangeMin: 2, rangeMax: 6, enCost: 0, ammo: 8, hitMod: -5, postMove: true, animSeed: 3 }),
   gatling: W({ id: 'gatling', name: 'Arm Gatling', kind: 'gun', power: 1200, rangeMin: 1, rangeMax: 3, enCost: 0, ammo: 20, hitMod: 10, postMove: true, animSeed: 4 }),
-  plasmaEdge: W({ id: 'plasma_edge', name: 'Plasma Edge', kind: 'melee', power: 2900, rangeMin: 1, rangeMax: 2, enCost: 15, ammo: null, hitMod: 10, postMove: true, animSeed: 5 }),
+  plasmaEdge: W({ id: 'plasma_edge', name: 'Plasma Edge', kind: 'melee', power: 2900, rangeMin: 1, rangeMax: 2, enCost: 15, ammo: null, hitMod: 10, critMod: 12, postMove: true, animSeed: 5 }),
   megaBeam: W({ id: 'mega_beam', name: 'Mega Beam Launcher', kind: 'beam', power: 3400, rangeMin: 3, rangeMax: 7, enCost: 40, ammo: null, hitMod: -15, postMove: false, animSeed: 6, willReq: 115 }),
   vulcan: W({ id: 'vulcan', name: 'Head Vulcan', kind: 'gun', power: 800, rangeMin: 1, rangeMax: 2, enCost: 0, ammo: 30, hitMod: 25, postMove: true, animSeed: 7 }),
   railgun: W({ id: 'railgun', name: 'Linear Railgun', kind: 'gun', power: 2600, rangeMin: 2, rangeMax: 6, enCost: 20, ammo: 10, hitMod: 0, postMove: true, animSeed: 8, pierce: true }),
-  heatRod: W({ id: 'heat_rod', name: 'Heat Rod', kind: 'melee', power: 2100, rangeMin: 1, rangeMax: 2, enCost: 8, ammo: null, hitMod: 10, postMove: true, animSeed: 9, status: 'burn' }),
+  heatRod: W({ id: 'heat_rod', name: 'Heat Rod', kind: 'melee', power: 2100, rangeMin: 1, rangeMax: 2, enCost: 8, ammo: null, hitMod: 10, critMod: 10, postMove: true, animSeed: 9, status: 'burn' }),
   stasisRay: W({ id: 'stasis_ray', name: 'Stasis Ray', kind: 'beam', power: 1600, rangeMin: 2, rangeMax: 5, enCost: 12, ammo: null, hitMod: 12, postMove: true, animSeed: 23, status: 'stun' }),
   chestBlaster: W({ id: 'chest_blaster', name: 'Chest Blaster', kind: 'beam', power: 3100, rangeMin: 1, rangeMax: 4, enCost: 30, ammo: null, hitMod: -5, postMove: false, animSeed: 10, willReq: 115 }),
   mapBuster: W({ id: 'map_buster', name: 'MAP: Buster Mortar', kind: 'missile', power: 2200, rangeMin: 2, rangeMax: 5, enCost: 0, ammo: 3, hitMod: -10, postMove: false, animSeed: 14, willReq: 110, mapRange: 1 }),
   punch: W({ id: 'punch', name: 'Rocket Punch', kind: 'melee', power: 1900, rangeMin: 1, rangeMax: 3, enCost: 10, ammo: null, hitMod: 10, postMove: true, animSeed: 11 }),
-  drillLancer: W({ id: 'drill_lancer', name: 'Drill Lancer', kind: 'melee', power: 2700, rangeMin: 1, rangeMax: 1, enCost: 12, ammo: null, hitMod: 5, postMove: true, animSeed: 12, pierce: true }),
-  vampEdge: W({ id: 'vamp_edge', name: 'Vampiric Edge', kind: 'melee', power: 2350, rangeMin: 1, rangeMax: 2, enCost: 14, ammo: null, hitMod: 8, postMove: true, animSeed: 24, drain: true }),
+  drillLancer: W({ id: 'drill_lancer', name: 'Drill Lancer', kind: 'melee', power: 2700, rangeMin: 1, rangeMax: 1, enCost: 12, ammo: null, hitMod: 5, critMod: 15, postMove: true, animSeed: 12, pierce: true }),
+  vampEdge: W({ id: 'vamp_edge', name: 'Vampiric Edge', kind: 'melee', power: 2350, rangeMin: 1, rangeMax: 2, enCost: 14, ammo: null, hitMod: 8, critMod: 12, postMove: true, animSeed: 24, drain: true }),
   funnelArray: W({ id: 'funnel_array', name: 'Funnel Array', kind: 'funnel', power: 2800, rangeMin: 2, rangeMax: 6, enCost: 25, ammo: null, hitMod: 10, postMove: false, animSeed: 13, willReq: 115 }),
   // combination attacks — need the partner unit standing adjacent & unacted
-  twinBreaker: W({ id: 'twin_breaker', name: 'Twin Breaker', kind: 'melee', power: 4300, rangeMin: 1, rangeMax: 2, enCost: 25, ammo: null, hitMod: 30, postMove: true, animSeed: 15, willReq: 110, comboPartner: 'gruntborg' }),
+  twinBreaker: W({ id: 'twin_breaker', name: 'Twin Breaker', kind: 'melee', power: 4300, rangeMin: 1, rangeMax: 2, enCost: 25, ammo: null, hitMod: 30, critMod: 20, postMove: true, animSeed: 15, willReq: 110, comboPartner: 'gruntborg' }),
   twinBarrage: W({ id: 'twin_barrage', name: 'Twin Barrage', kind: 'beam', power: 4500, rangeMin: 2, rangeMax: 6, enCost: 30, ammo: null, hitMod: 25, postMove: false, animSeed: 16, willReq: 115, comboPartner: 'zephyra' }),
-  crimsonDuet: W({ id: 'crimson_duet', name: 'Crimson Duet', kind: 'melee', power: 4600, rangeMin: 1, rangeMax: 3, enCost: 30, ammo: null, hitMod: 28, postMove: true, animSeed: 17, willReq: 110, comboPartner: 'vexiaX' }),
+  crimsonDuet: W({ id: 'crimson_duet', name: 'Crimson Duet', kind: 'melee', power: 4600, rangeMin: 1, rangeMax: 3, enCost: 30, ammo: null, hitMod: 28, critMod: 20, postMove: true, animSeed: 17, willReq: 110, comboPartner: 'vexiaX' }),
   // v1.8 hero weapons — one extra trick per mech
   arcCannon: W({ id: 'arc_cannon', name: 'Arc Cannon', kind: 'beam', power: 3200, rangeMin: 2, rangeMax: 5, enCost: 28, ammo: null, hitMod: 5, postMove: false, animSeed: 17, willReq: 105 }),
   thermoCharge: W({ id: 'thermo_charge', name: 'Thermobaric Charge', kind: 'missile', power: 3600, rangeMin: 1, rangeMax: 3, enCost: 0, ammo: 4, hitMod: 0, postMove: false, animSeed: 18, willReq: 110 }),
@@ -67,7 +67,7 @@ export const WEAPONS = {
   flareField: W({ id: 'flare_field', name: 'Flare Field', kind: 'funnel', power: 2400, rangeMin: 1, rangeMax: 4, enCost: 20, ammo: null, hitMod: 15, postMove: true, animSeed: 20, status: 'burn' }),
   mapFlare: W({ id: 'map_flare', name: 'MAP: Flare Burst', kind: 'funnel', power: 1900, rangeMin: 2, rangeMax: 5, enCost: 45, ammo: null, hitMod: -5, postMove: false, animSeed: 20, willReq: 105, mapRange: 1 }),
   militiaRifle: W({ id: 'militia_rifle', name: 'Defense Rifle', kind: 'gun', power: 1500, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 12, hitMod: 8, postMove: true, animSeed: 21 }),
-  voidLance: W({ id: 'void_lance', name: 'Void Lance', kind: 'beam', power: 3300, rangeMin: 2, rangeMax: 7, enCost: 32, ammo: null, hitMod: 0, postMove: false, animSeed: 25, willReq: 115, pierce: true }),
+  voidLance: W({ id: 'void_lance', name: 'Void Lance', kind: 'beam', power: 3300, rangeMin: 2, rangeMax: 7, enCost: 32, ammo: null, hitMod: 0, critMod: 8, postMove: false, animSeed: 25, willReq: 115, pierce: true }),
 };
 
 // ---------- Pilots ----------

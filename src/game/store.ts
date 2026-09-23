@@ -110,6 +110,7 @@ export interface BattleSave {
   log: string[];
   crates?: { pos: Pos; itemId: string }[];
   hazardWarn?: Pos[];
+  salvageCr?: number;
 }
 
 /** Pilots with this many career kills deploy at raised will (ace bonus). */
@@ -163,6 +164,7 @@ interface Store {
   tileInfo: Pos | null;
   threatTiles: Set<string>;
   kills: number; // enemies destroyed this mission
+  salvageCr: number; // sector income accrued this mission (units holding base/city tiles)
   cursor: Pos | null;
   selectedUid: string | null;
   moveTiles: Map<string, MoveRec>;
@@ -186,6 +188,7 @@ interface Store {
   eventsFired: string[]; // mid-battle event indexes already shown this mission
   deployTiles: Set<string>; // legal reposition tiles while in the deploy phase
   lastReward: number; // credits earned by the just-finished mission
+  lastSalvage: number; // sector income included in that reward
   lastMastery: string | null; // mastery objective earned on the just-finished mission (description)
   masteryDone: number[]; // chapter ids whose mastery challenge was achieved
   savedBattle: BattleSave | null; // resumable in-progress mission
@@ -401,6 +404,7 @@ async function persistBattle(s: Store) {
     log: s.log.slice(-30),
     crates: s.crates,
     hazardWarn: s.hazardWarn,
+    salvageCr: s.salvageCr,
   };
   try {
     await AsyncStorage.setItem(BATTLE_SAVE_KEY, JSON.stringify(data));
@@ -517,6 +521,7 @@ export const useGame = create<Store>((set, get) => ({
   threatTiles: new Set<string>(),
   hazardWarn: [],
   kills: 0,
+  salvageCr: 0,
   ngPlus: 0,
   battleReaction: null,
   bossWarned: false,
@@ -525,6 +530,7 @@ export const useGame = create<Store>((set, get) => ({
   eventsFired: [],
   deployTiles: new Set<string>(),
   lastReward: 0,
+  lastSalvage: 0,
   lastMastery: null,
   masteryDone: [],
   savedBattle: null,
@@ -597,7 +603,7 @@ export const useGame = create<Store>((set, get) => ({
     const ch = sideAsChapter({ ...m, lvl });
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
     void clearBattleSave();
-    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, simWave: 0, log: [`${m.repeatable ? 'PATROL OP' : 'SIDE QUEST'}: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
+    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, simWave: 0, log: [`${m.repeatable ? 'PATROL OP' : 'SIDE QUEST'}: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1' });
     setTimeout(() => set({ notice: null }), 2400);
     void persistBattle(get());
   },
@@ -624,7 +630,7 @@ export const useGame = create<Store>((set, get) => ({
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal');
     // VR runs are ephemeral and never autosave — keep any prior mission snapshot
     // so the ops board still offers RESUME for it after the run ends.
-    set({ phase: 'player', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: s.savedBattle, simWave: 1, simSettled: false, log: ['▲ VR SIMULATION — WAVE 1', `Objective: ${ch.objective}`, 'Waves escalate. The run ends when the squad falls.'], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], notice: '▲ VR SIMULATION — WAVE 1' });
+    set({ phase: 'player', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: s.savedBattle, simWave: 1, simSettled: false, log: ['▲ VR SIMULATION — WAVE 1', `Objective: ${ch.objective}`, 'Waves escalate. The run ends when the squad falls.'], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], notice: '▲ VR SIMULATION — WAVE 1' });
     setTimeout(() => set({ notice: null }), 2600);
   },
 
@@ -661,6 +667,7 @@ export const useGame = create<Store>((set, get) => ({
     const s = get();
     const has = s.deploySel.includes(defId);
     if (has && s.deploySel.length <= 1) return; // keep at least one unit deployed
+    if (has && missionOf(s.chapter, s.route).requiredDefId === defId) return; // hero clause — the required unit always sorties
     set({ deploySel: has ? s.deploySel.filter((d) => d !== defId) : [...s.deploySel, defId] });
   },
 
@@ -876,7 +883,7 @@ export const useGame = create<Store>((set, get) => ({
       zoneTiles.set(k, { pos: { x, y }, cost: 0 });
     }
     void clearBattleSave();
-    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
+    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
   },
   finishDialog: () => {
     set({ phase: 'player', notice: 'PLAYER PHASE — TURN 1' });
@@ -1604,7 +1611,7 @@ function applyVictory(set: SetFn, get: Get) {
   const eliteCr = s.units.filter((u) => u.side === 'enemy' && !u.alive && u.elite).length * 50;
   const side = s.sideId ? ALL_SIDE_MISSIONS.find((m) => m.id === s.sideId) : undefined;
   if (side) {
-    const reward = Math.round((side.rewardCr + s.kills * 150 + eliteCr) * (s.settings.difficulty === 'hard' ? 1.25 : 1));
+    const reward = Math.round((side.rewardCr + s.kills * 150 + eliteCr) * (s.settings.difficulty === 'hard' ? 1.25 : 1)) + s.salvageCr;
     const credits = s.credits + reward;
     const inventory = side.rewardItem ? { ...s.inventory, [side.rewardItem]: (s.inventory[side.rewardItem] ?? 0) + 1 } : s.inventory;
     const sideCleared = side.repeatable ? s.sideCleared : [...s.sideCleared, side.id];
@@ -1620,6 +1627,7 @@ function applyVictory(set: SetFn, get: Get) {
       pilotProg,
       sideId: null,
       lastReward: reward,
+      lastSalvage: s.salvageCr,
       lastRank: rankS,
       missionRank,
       debrief: null,
@@ -1657,7 +1665,7 @@ function applyVictory(set: SetFn, get: Get) {
       log = push(log, `☆ Mastery missed — ${m.desc}`);
     }
   }
-  const credits = s.credits + reward + masteryCr + (clearedFinal ? 5000 : 0);
+  const credits = s.credits + reward + masteryCr + s.salvageCr + (clearedFinal ? 5000 : 0);
   const par = ch.surviveTurns ?? Math.max(6, Math.ceil((ch.count + (ch.boss ? 1 : 0)) * 1.1));
   const rank = battleRank(unitsLost, s.turn, par, lastMastery != null);
   const missionRank = { ...s.missionRank, [ch.id]: betterRank(s.missionRank[ch.id], rank) };
@@ -1676,6 +1684,7 @@ function applyVictory(set: SetFn, get: Get) {
     savedBattle: null,
     lastMastery,
     lastRank: rank,
+    lastSalvage: s.salvageCr,
     missionRank,
     lastReward: reward + masteryCr + (clearedFinal ? 5000 : 0),
     debrief: DEBRIEFS[ch.id] ?? null,
@@ -1848,6 +1857,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
   let pendingVictory = false;
   set((st) => {
     const recovered: string[] = [];
+    let sectorCr = 0;
     const units = st.units.map((u) => {
       const c = { ...u };
       if (c.side === 'player') clearTransientForOwnPhase(c);
@@ -1879,6 +1889,12 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         const r = phaseRecovery(c, st.map);
         if (r.hpGain > 0) recovered.push(`${c.def.name} +${r.hpGain} HP`);
         if (r.hpLoss > 0) recovered.push(`${c.def.name} -${r.hpLoss} HP (burning terrain)`);
+        // sector income — a unit holding a base/city tile draws a stipend each player phase
+        const tt = TERRAIN_INFO[terrainAt(st.map, c.pos)];
+        if (c.side === 'player' && (tt.hpRegen ?? 0) > 0) {
+          sectorCr += 40;
+          recovered.push(`${c.def.name} secures the sector +40cr`);
+        }
       }
       return c;
     });
@@ -1956,7 +1972,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
     if (end === 'victory') {
       // survive-objective reached its turn limit — resolve outside this updater
       pendingVictory = true;
-      return { units, turn: nextTurn, midDialog, eventsFired, hazardWarn };
+      return { units, turn: nextTurn, midDialog, eventsFired, hazardWarn, salvageCr: st.salvageCr + sectorCr };
     }
     if (!notice && end !== 'defeat') {
       notice =
@@ -1982,6 +1998,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       eventsFired,
       dangerTiles,
       hazardWarn,
+      salvageCr: st.salvageCr + sectorCr,
     };
   });
   if (pendingVictory) applyVictory(set, get);
@@ -2023,6 +2040,7 @@ useGame.subscribe((s, prev) => {
     log: s.log.slice(-30),
     crates: s.crates,
     hazardWarn: s.hazardWarn,
+    salvageCr: s.salvageCr,
   };
   useGame.setState({ savedBattle: b });
   try {

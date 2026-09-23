@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Image } from 'expo-image';
 import { PILOT_ART } from '../assets';
-import { ITEMS, PARTS } from '../game/campaign';
+import { ALL_UNITS, ITEMS, PARTS } from '../game/campaign';
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { bondMods } from '../game/bonds';
 import { bestCounterWeapon, critChance, damageOf, dist, formationBonus, hitChance, key, rallyBonus, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
@@ -104,6 +104,11 @@ export function SidePanel() {
           <Text style={styles.objTxt}>➤ REACH THE EXTRACTION POINT{unitOnReach ? ' — THERE!' : ` · (${s.missionCh.reachPos?.x},${s.missionCh.reachPos?.y})`}</Text>
         </View>
       )}
+      {!!s.missionCh.requiredDefId && s.units.some((u) => u.side === 'player' && u.def.id === s.missionCh.requiredDefId) && (
+        <View style={styles.objCard}>
+          <Text style={[styles.objTxt, { color: '#ff8a5c' }]}>⚠ {ALL_UNITS[s.missionCh.requiredDefId]?.name.toUpperCase() ?? 'HERO'} MUST SURVIVE</Text>
+        </View>
+      )}
       {s.missionCh.sim && (
         <View style={styles.objCard}>
           <Text style={[styles.objTxt, { color: '#c8a8ff' }]}>
@@ -193,7 +198,7 @@ export function SidePanel() {
                                 ? 'PARTNER ACTED'
                                 : 'PARTNER NOT ADJACENT'
                             : null;
-              const stat = `POW ${w.power} · R${w.rangeMin}-${w.rangeMax}${w.mapRange != null ? ` · AREA ${w.mapRange}` : ''}${w.willReq ? ` · W${w.willReq}` : ''}${w.ammo != null ? ` · ×${ammoLeft}` : ` · EN ${w.enCost}`}${w.pierce ? ' · ◆PIERCE' : ''}${w.drain ? ' · ✚DRAIN' : ''}`;
+              const stat = `POW ${w.power} · R${w.rangeMin}-${w.rangeMax}${w.mapRange != null ? ` · AREA ${w.mapRange}` : ''}${w.willReq ? ` · W${w.willReq}` : ''}${w.ammo != null ? ` · ×${ammoLeft}` : ` · EN ${w.enCost}`}${w.critMod ? ` · CRIT+${w.critMod}` : ''}${w.pierce ? ' · ◆PIERCE' : ''}${w.drain ? ' · ✚DRAIN' : ''}`;
               return (
                 <Btn
                   key={w.id}
@@ -430,6 +435,7 @@ export function SidePanel() {
                 ⚔ {w.name} · POW {w.power} · R{w.rangeMin}-{w.rangeMax}
                 {w.mapRange != null ? ` · AREA ${w.mapRange}` : ''}
                 {w.willReq ? ` · W${w.willReq}` : ''}
+                {w.critMod ? ` · CRIT+${w.critMod}` : ''}
                 {w.ammo != null ? ` · ×${inspect.ammo[w.id] ?? 0}` : ` · EN ${w.enCost}`}
                 {w.pierce ? ' · ◆PIERCE' : ''}
                 {w.drain ? ' · ✚DRAIN' : ''}
