@@ -42,6 +42,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   frenzy: { id: 'frenzy', name: 'Frenzy', cost: 40, desc: 'Push the reactor — your weapons cost no EN for the rest of this turn' },
   breach: { id: 'breach', name: 'Breach', cost: 45, desc: 'Overload the cutter — your next attack ignores all enemy armor' },
   relentless: { id: 'relentless', name: 'Relentless', cost: 35, desc: 'Blood in the water — +25% damage to enemies below half HP until the enemy phase ends' },
+  reboot: { id: 'reboot', name: 'Reboot', cost: 45, desc: 'Restart the core — purge your own debuffs and restore 25% HP' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
@@ -97,6 +98,7 @@ export const WEAPONS = {
   flareField: W({ id: 'flare_field', name: 'Flare Field', kind: 'funnel', power: 2400, rangeMin: 1, rangeMax: 4, enCost: 20, ammo: null, hitMod: 15, postMove: true, animSeed: 20, status: 'burn' }),
   flareDart: W({ id: 'flare_dart', name: 'Flare Dart', kind: 'beam', power: 1600, rangeMin: 2, rangeMax: 5, enCost: 12, ammo: null, hitMod: 10, postMove: true, animSeed: 21, status: 'mark' }),
   havocMortar: W({ id: 'havoc_mortar', name: 'Havoc Mortar', kind: 'missile', power: 2000, rangeMin: 3, rangeMax: 6, enCost: 16, ammo: null, hitMod: -5, postMove: false, animSeed: 4, status: 'supp' }),
+  nullChord: W({ id: 'null_chord', name: 'Null Chord', kind: 'beam', power: 800, rangeMin: 1, rangeMax: 3, enCost: 8, ammo: null, hitMod: 10, postMove: true, animSeed: 22, status: 'supp' }),
   mapFlare: W({ id: 'map_flare', name: 'MAP: Flare Burst', kind: 'funnel', power: 1900, rangeMin: 2, rangeMax: 5, enCost: 45, ammo: null, hitMod: -5, postMove: false, animSeed: 20, willReq: 105, mapRange: 1 }),
   mapShelling: W({ id: 'map_shelling', name: 'MAP: Siege Howitzer', kind: 'missile', power: 2400, rangeMin: 2, rangeMax: 6, enCost: 40, ammo: null, hitMod: -10, postMove: false, animSeed: 25, mapRange: 1 }),
   mapCataclysm: W({ id: 'map_cataclysm', name: 'MAP: Void Cataclysm', kind: 'funnel', power: 2800, rangeMin: 2, rangeMax: 6, enCost: 60, ammo: null, hitMod: -5, postMove: false, animSeed: 26, mapRange: 2 }),

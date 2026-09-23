@@ -123,7 +123,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -153,7 +153,7 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   // act-3 fast striker — drains HP on hit, high evade, hunts stragglers
   cataphract: U({ id: 'cataphract', name: 'Karn Cataphract', title: 'Shadow Striker', color: '#2e2e3a', accent: '#a0a0ff', maxHp: 4200, maxEn: 120, armor: 650, mobility: 158, moveRange: 8, moveType: 'air', weapons: [WEAPONS.vampEdge, WEAPONS.plasmaEdge], pilot: PILOTS.grunt, resists: { beam: 0.4 }, jammer: true }),
   // act-2/3 support frame — mends wounded allies instead of pressing the attack
-  medic: U({ id: 'medic', name: 'Vesper Choir', title: 'Imperial Medic', color: '#3a4a52', accent: '#a0ffd8', maxHp: 4000, maxEn: 100, armor: 700, mobility: 140, moveRange: 6, moveType: 'air', weapons: [WEAPONS.vulcan], pilot: PILOTS.grunt, medic: true }),
+  medic: U({ id: 'medic', name: 'Vesper Choir', title: 'Imperial Medic', color: '#3a4a52', accent: '#a0ffd8', maxHp: 4000, maxEn: 100, armor: 700, mobility: 140, moveRange: 6, moveType: 'air', weapons: [WEAPONS.nullChord, WEAPONS.vulcan], pilot: PILOTS.grunt, medic: true }),
   // act-3 artillery — a dead-zone siege cannon: devastating at range, blind up close
   ballista: U({ id: 'ballista', name: 'Valkyr Ballista', title: 'Siege Artillery', color: '#4a3a52', accent: '#e0b070', maxHp: 4600, maxEn: 90, armor: 800, mobility: 92, moveRange: 4, moveType: 'land', weapons: [WEAPONS.siegeRain, WEAPONS.vulcan], pilot: PILOTS.grunt }),
   // Cpt. Vossen's personal frame — recurring ace, guaranteed salvage drop when downed
@@ -1043,11 +1043,13 @@ export const HONORS: HonorDef[] = [
   { id: 'h_solo', name: 'SOLO WING', desc: 'A single squad frame scores every player kill (3 or more)', rewardCr: 900 },
   { id: 'h_arty', name: 'ARTILLERY HUNTER', desc: 'Destroy two Valkyr Ballista siege frames', rewardCr: 700 },
   { id: 'h_attr', name: 'WAR OF ATTRITION', desc: 'Win a battle lasting fifteen turns or more', rewardCr: 700 },
+  { id: 'h_void', name: 'VOID WALKER', desc: 'Win a mission in the void between worlds', rewardCr: 700 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
 /** Whether an honor's condition is currently met. */
 export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; turn?: number;
+missionCh?: { theme?: string };
 units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; side: string; hp?: number; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean; decoyHit?: boolean; iFieldKill?: boolean; mirrorWon?: boolean; arcKill?: boolean; blastKill?: boolean; lostAlly?: boolean; snipeKill?: boolean; rescuedPods?: string[]; bossRush?: boolean; chainCount?: number }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
@@ -1139,6 +1141,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.killsByDef?.ballista ?? 0) >= 2;
     case 'h_attr':
       return (s.turn ?? 0) >= 15;
+    case 'h_void':
+      return s.missionCh?.theme === 'void';
     case 'h_ghostd':
       return s.altKill === true;
     default:

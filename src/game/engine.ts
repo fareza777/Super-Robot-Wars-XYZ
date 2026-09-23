@@ -738,6 +738,10 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'relentless':
       u.relentlessUntilEndOfEnemyPhase = true;
       break;
+    case 'reboot':
+      u.statuses = [];
+      u.hp = Math.min(u.def.maxHp, u.hp + Math.round(u.def.maxHp * 0.25));
+      break;
     case 'expose':
       break; // enemies in radius are marked by the store pass
     case 'overdrive':

@@ -2206,7 +2206,7 @@ function simNextWave(set: SetFn, get: Get) {
   const mirror = wave % 5 === 0 && wave % 10 !== 0;
   // every 10th wave a Σ boss construct warps in alone
   const bossWave = wave % 10 === 0;
-  const BOSS_CYCLE = ['kargan', 'moorin', 'serka', 'warden', 'bloodyBaron'];
+  const BOSS_CYCLE = ['kargan', 'moorin', 'serka', 'warden', 'bloodyBaron', 'empress', 'emperor'];
   const comp = bossWave ? [BOSS_CYCLE[Math.floor(wave / 10 - 1) % BOSS_CYCLE.length]] : mirror ? s.units.filter((u) => u.alive && u.side === 'player' && !u.npc).map((u) => u.def.id) : enemyComp({ ...s.missionCh, count: Math.min(3 + wave, 8), boss: undefined });
   const occupied = new Set(s.units.filter((u) => u.alive).map((u) => key(u.pos)));
   const free: Pos[] = [];
