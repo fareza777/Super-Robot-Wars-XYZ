@@ -72,7 +72,7 @@ function Debrief() {
   const clear = useGame((s) => s.clearDebrief);
   const phase = useGame((s) => s.phase);
   if (!lines?.length || phase !== 'hq') return null;
-  return <DialogScene lines={lines.map((l) => ({ speaker: l.speaker, text: l.text }))} tag="POST-MISSION DEBRIEF" bg={ART.hqBg} onDone={clear} />;
+  return <DialogScene lines={lines.map((l) => ({ speaker: l.speaker, text: l.text, voice: l.voice as never }))} tag="POST-MISSION DEBRIEF" bg={ART.hqBg} onDone={clear} />;
 }
 
 export default function App() {

@@ -4,7 +4,7 @@ import { Image as ExpoImage } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART, AudioKey, MECH_ART, NPC_ART, PILOT_ART } from '../assets';
 import { play } from '../audio';
-import { ALL_UNITS, CHAPTERS_COUNT, ITEMS, MAX_PART_SLOTS, MAX_PILOT_SKILL, MAX_WEAPON_UPG, PARTS, PILOT_STATS, PLAYER_DEF_IDS, UPGRADE_STATS, WEAPON_UPG_POWER, chapterOf, rosterFor, weaponUpgCost } from '../game/campaign';
+import { ALL_UNITS, CHAPTERS, CHAPTERS_COUNT, ITEMS, MAX_PART_SLOTS, MAX_PILOT_SKILL, MAX_WEAPON_UPG, PARTS, PILOT_STATS, PLAYER_DEF_IDS, SIDE_MISSIONS, UPGRADE_STATS, WEAPON_UPG_POWER, chapterOf, rosterFor, weaponUpgCost } from '../game/campaign';
 import { BOND_EVENTS, MAX_BOND, bondLevel } from '../game/bonds';
 import { SPIRITS } from '../game/data';
 import { useGame } from '../game/store';
@@ -360,6 +360,18 @@ export function HQScreen() {
                 .map((id) => (
                   <CodexRow key={id} id={id} ally={false} />
                 ))}
+              <Text style={[styles.panelTitle, { marginTop: 14 }]}>SERVICE RECORD</Text>
+              <View style={styles.recordBox}>
+                <Text style={styles.recordRow}>CAMPAIGN — chapter {Math.min(s.chapter, CHAPTERS_COUNT)}/{CHAPTERS_COUNT} cleared{s.ngPlus > 0 ? ` · NG+ cycle ${s.ngPlus}` : ''}</Text>
+                <Text style={styles.recordRow}>MASTERY — {s.masteryDone.length}/{CHAPTERS.filter((c) => c.mastery).length} ★ earned</Text>
+                <Text style={styles.recordRow}>SIDE QUESTS — {s.sideCleared.length}/{SIDE_MISSIONS.length} cleared</Text>
+                <Text style={styles.recordRow}>BOND EVENTS — {s.bondSeen.length}/{BOND_EVENTS.length} seen</Text>
+                <Text style={styles.recordRow}>
+                  TOTAL KILLS — {Object.values(s.pilotProg).reduce((n, p) => n + (p.kills ?? 0), 0)} ·{' '}
+                  {Object.values(s.pilotProg).filter((p) => (p.kills ?? 0) >= 50).length} ace pilot(s)
+                </Text>
+                <Text style={styles.recordRow}>CREDITS ON HAND — ◆ {s.credits}</Text>
+              </View>
             </ScrollView>
             <Pressable style={styles.backBtn} onPress={() => setTab('main')}>
               <Text style={styles.backTxt}>◂ BACK TO HQ</Text>
@@ -538,4 +550,6 @@ const styles = StyleSheet.create({
   codexWep: { color: '#c8b060', fontSize: 10, marginTop: 3 },
   codexSpirit: { color: '#b09ae8', fontSize: 10, marginTop: 2 },
   codexSide: { borderWidth: 1, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 },
+  recordBox: { backgroundColor: 'rgba(12,15,26,0.85)', borderWidth: 1, borderColor: '#2a2f42', borderRadius: 10, padding: 12, gap: 6 },
+  recordRow: { color: '#c8d4f0', fontSize: 11.5, fontWeight: '700', letterSpacing: 0.6 },
 });

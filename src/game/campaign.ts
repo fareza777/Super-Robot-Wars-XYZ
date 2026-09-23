@@ -111,6 +111,9 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   empress: U({ id: 'empress', name: 'Empress Ascendant', title: 'True Void Form', color: '#7a3f8e', accent: '#ffe0ff', maxHp: 11000, maxEn: 220, armor: 1250, mobility: 146, moveRange: 7, moveType: 'air', weapons: [WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.chestBlaster], pilot: CAMPAIGN_PILOTS.serkap, boss: true }),
   warden: U({ id: 'warden', name: 'Gate Warden', title: 'Ancient Guardian', color: '#7a5a30', accent: '#ffe0a8', maxHp: 12000, maxEn: 140, armor: 1600, mobility: 90, moveRange: 4, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.bramp, boss: true }),
   emperor: U({ id: 'emperor', name: 'Throne of Vael', title: 'The Emperor', color: '#e8d8a0', accent: '#fff8d8', maxHp: 15000, maxEn: 240, armor: 1500, mobility: 130, moveRange: 6, moveType: 'air', weapons: [WEAPONS.chestBlaster, WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.vaelp, boss: true }),
+  // --- late-wave line frames ---
+  lancer: U({ id: 'lancer', name: 'Wolfen Lance', title: 'Strike Cavalry', color: '#4a3a2e', accent: '#ff9060', maxHp: 3600, maxEn: 120, armor: 700, mobility: 150, moveRange: 7, moveType: 'land', weapons: [WEAPONS.plasmaEdge, WEAPONS.vulcan], pilot: PILOTS.grunt }),
+  bulwark: U({ id: 'bulwark', name: 'Rampart Bulwark', title: 'Siege Anchor', color: '#3a4438', accent: '#ffe060', maxHp: 8200, maxEn: 80, armor: 1700, mobility: 55, moveRange: 3, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod], pilot: PILOTS.grunt }),
   // --- player reinforcements (join at arc boundaries) ---
   raxdenR: U({ id: 'raxdenR', name: 'Raxden Crimson', title: 'Defected Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.plasmaEdge, WEAPONS.railgun, WEAPONS.vulcan], pilot: CAMPAIGN_PILOTS.raxp, level: 5 }),
   vexiaX: U({ id: 'vexiaX', name: 'Vexia Custom', title: 'Ark Interceptor', color: '#2a8a9a', accent: '#a0f0ff', maxHp: 5200, maxEn: 150, armor: 880, mobility: 142, moveRange: 7, moveType: 'air', weapons: [WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.vulcan], pilot: CAMPAIGN_PILOTS.veep, level: 7 }),
@@ -277,36 +280,36 @@ const MID_EVENTS: Record<number, MapDef['events']> = {
 };
 
 /** Post-mission debrief scenes keyed by chapter id — play over the HQ screen after victory. */
-export const DEBRIEFS: Record<number, { speaker: string; text: string }[]> = {
+export const DEBRIEFS: Record<number, { speaker: string; text: string; voice?: string }[]> = {
   1: [
-    { speaker: 'npc_captain', text: 'Good work, squad. The Kargan line is broken — the corridor to the colony road is ours.' },
-    { speaker: 'valstray', text: 'First sortie, first scars. The Ark is still standing — that is what counts.' },
+    { speaker: 'npc_captain', voice: 'db_1_0' as never, text: 'Good work, squad. The Kargan line is broken — the corridor to the colony road is ours.' },
+    { speaker: 'valstray', voice: 'db_1_1' as never, text: 'First sortie, first scars. The Ark is still standing — that is what counts.' },
   ],
-  2: [{ speaker: 'npc_mechanic', text: 'Frames came back dented but whole. Get me two hours and they will fly like new.' }],
+  2: [{ speaker: 'npc_mechanic', voice: 'db_2_0' as never, text: 'Frames came back dented but whole. Get me two hours and they will fly like new.' }],
   5: [
-    { speaker: 'raxden', text: '...Heh. So this is what it is like to lose to people who actually believe in something.' },
-    { speaker: 'npc_captain', text: 'Raxden Crimson stands down. Secure his frame — and treat the pilot with respect.' },
+    { speaker: 'raxden', voice: 'db_5_0' as never, text: '...Heh. So this is what it is like to lose to people who actually believe in something.' },
+    { speaker: 'npc_captain', voice: 'db_5_1' as never, text: 'Raxden Crimson stands down. Secure his frame — and treat the pilot with respect.' },
   ],
   10: [
-    { speaker: 'npc_captain', text: 'Moorin is down. The orbit gate is open — next stop, the sky itself.' },
-    { speaker: 'arielis', text: 'Whatever waits above us is worse than anything below. Rest while you can, Ray.' },
+    { speaker: 'npc_captain', voice: 'db_10_0' as never, text: 'Moorin is down. The orbit gate is open — next stop, the sky itself.' },
+    { speaker: 'arielis', voice: 'db_10_1' as never, text: 'Whatever waits above us is worse than anything below. Rest while you can, Ray.' },
   ],
-  11: [{ speaker: 'raxdenR', text: 'First sortie in an Ark frame. Strange — fighting for something feels heavier than fighting for a throne.' }],
+  11: [{ speaker: 'raxdenR', voice: 'db_11_0' as never, text: 'First sortie in an Ark frame. Strange — fighting for something feels heavier than fighting for a throne.' }],
   15: [
-    { speaker: 'npc_captain', text: 'The Void Empress is down. One throne left — and the man sitting on it knows we are coming.' },
-    { speaker: 'gruntborg', text: 'Then let us not keep the Emperor waiting.' },
+    { speaker: 'npc_captain', voice: 'db_15_0' as never, text: 'The Void Empress is down. One throne left — and the man sitting on it knows we are coming.' },
+    { speaker: 'gruntborg', voice: 'db_15_1' as never, text: 'Then let us not keep the Emperor waiting.' },
   ],
   20: [
-    { speaker: 'gruntborg', text: 'Still breathing. Still flying. Someone pour me something when we dock.' },
-    { speaker: 'zephyra', text: 'Doctor cleared you for engine coolant only, old man.' },
+    { speaker: 'gruntborg', voice: 'db_20_0' as never, text: 'Still breathing. Still flying. Someone pour me something when we dock.' },
+    { speaker: 'zephyra', voice: 'db_20_1' as never, text: 'Doctor cleared you for engine coolant only, old man.' },
   ],
-  21: [{ speaker: 'vexiaX', text: 'Falcon Squadron is aboard, Commander. We fly for the Ark now — prove it was worth the risk.' }],
+  21: [{ speaker: 'vexiaX', voice: 'db_21_0' as never, text: 'Falcon Squadron is aboard, Commander. We fly for the Ark now — prove it was worth the risk.' }],
   25: [
-    { speaker: 'npc_captain', text: 'The Gate Warden has fallen. The Throne is ahead — whatever happens next, I am proud of every one of you.' },
+    { speaker: 'npc_captain', voice: 'db_25_0' as never, text: 'The Gate Warden has fallen. The Throne is ahead — whatever happens next, I am proud of every one of you.' },
   ],
   30: [
-    { speaker: 'npc_captain', text: 'It is over. The Steel Throne is empty — tonight, the empire releases its grip on the colonies.' },
-    { speaker: 'valstray', text: 'For everyone we carried this far... we made it. All units — stand down and come home.' },
+    { speaker: 'npc_captain', voice: 'db_30_0' as never, text: 'It is over. The Steel Throne is empty — tonight, the empire releases its grip on the colonies.' },
+    { speaker: 'valstray', voice: 'db_30_1' as never, text: 'For everyone we carried this far... we made it. All units — stand down and come home.' },
   ],
 };
 
@@ -394,9 +397,10 @@ export function genMap(ch: ChapterDef): MapDef {
 function enemyComp(ch: ChapterDef): string[] {
   const comp: string[] = [];
   const fill = ch.act === 1 ? 'zolda' : ch.act === 2 ? 'vexia' : 'nightmare';
-  const alt = ch.act === 1 ? 'zoldaAir' : ch.act === 2 ? 'nightmare' : 'zoldaTank';
+  const alt = ch.act === 1 ? 'zoldaAir' : ch.act === 2 ? 'nightmare' : 'bulwark';
   const heavy = ch.act === 1 ? 'zoldaTank' : 'nightmare';
-  for (let i = 0; i < ch.count; i++) comp.push(i % 3 === 2 ? alt : i % 4 === 3 ? heavy : fill);
+  const fast = 'lancer';
+  for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : fill);
   if (ch.boss) comp.push(ch.boss);
   return comp;
 }
