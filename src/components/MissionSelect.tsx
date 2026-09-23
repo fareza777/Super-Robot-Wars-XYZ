@@ -105,7 +105,7 @@ export function MissionSelect() {
                     <Text style={styles.sideDesc}>{locked ? '???' : m.desc}</Text>
                     {!locked && (
                       <Text style={styles.sideMeta}>
-                        {m.objectiveType === 'seize' ? '⌖' : m.objectiveType === 'survive' ? '🛡' : m.boss ? '◆' : '⚔'} LV {m.repeatable ? `${Math.max(m.lvl, s.chapter)} (scales)` : m.lvl} · {m.count + (m.boss ? 1 : 0)} hostiles{m.turnLimit ? ` · ⌛${m.turnLimit}T` : ''} · Reward {m.rewardCr} CR{m.rewardItem ? ` + ${ITEMS[m.rewardItem].name}` : ''}
+                        {m.objectiveType === 'seize' ? '⌖' : m.objectiveType === 'hunt' ? '☠' : m.objectiveType === 'survive' ? '🛡' : m.boss ? '◆' : '⚔'} LV {m.repeatable ? `${Math.max(m.lvl, s.chapter)} (scales)` : m.lvl} · {m.count + (m.boss ? 1 : 0)} hostiles{m.turnLimit ? ` · ⌛${m.turnLimit}T` : ''} · Reward {m.rewardCr} CR{m.rewardItem ? ` + ${ITEMS[m.rewardItem].name}` : ''}
                       </Text>
                     )}
                   </View>

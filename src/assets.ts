@@ -36,6 +36,7 @@ export const MECH_ART: Record<string, number> = {
   nightmare: require('../assets/art/mech2_nightmare.jpg'),
   phantom: require('../assets/art/mech2_phantom.jpg'),
   holoDecoy: require('../assets/art/mech2_phantom.jpg'),
+  bloodyBaron: require('../assets/art/mech2_cataphract.jpg'),
   raxden: require('../assets/art/mech2_raxden.jpg'),
   moorin: require('../assets/art/mech2_moorin.jpg'),
   serka: require('../assets/art/mech2_serka.jpg'),

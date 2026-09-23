@@ -868,13 +868,15 @@ export function defeatQuotes(before: UnitState[], after: UnitState[], killer?: U
 }
 
 export interface EndObjective {
-  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect' | 'seize' | 'reach' | 'escort';
+  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect' | 'seize' | 'reach' | 'escort' | 'hunt';
   surviveTurns?: number;
   protectTurns?: number;
   seizePos?: Pos;
   reachPos?: Pos;
   /** hero clause: when this def id is fielded and destroyed, the mission fails */
   requiredDefId?: string;
+  /** hunt objective: the marked ace's def id — it falling wins the mission */
+  huntId?: string;
   /** rout/boss/seize/reach only: fail if the objective isn't met by this turn */
   turnLimit?: number;
 }
@@ -944,6 +946,12 @@ export function checkEnd(units: UnitState[], obj?: EndObjective | null, turn?: n
     if (!units.some((u) => u.alive && u.escort)) return 'defeat';
     if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
     return (turn ?? 0) > (obj?.protectTurns ?? 8) ? 'victory' : null;
+  }
+  if (type === 'hunt') {
+    // hunt objective: the marked ace falling wins — routing the whole pack also wins
+    if (!units.some((u) => u.alive && u.def.id === obj?.huntId)) return 'victory';
+    if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
+    return timedOut(obj, turn) ? 'defeat' : null;
   }
   if (type === 'seize') {
     // a player unit standing on the beacon wins; routing the defenders also wins

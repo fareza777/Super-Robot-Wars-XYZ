@@ -109,6 +109,20 @@ export function SidePanel() {
           <Text style={styles.objTxt}>⌖ SEIZE THE BEACON{unitOnBeacon ? ' — SECURED!' : ` · (${s.missionCh.seizePos?.x},${s.missionCh.seizePos?.y})`}</Text>
         </View>
       )}
+      {objType === 'hunt' && (
+        <View style={styles.objCard}>
+          {(() => {
+            const prey = s.units.find((u) => u.def.id === s.missionCh.huntId);
+            if (prey?.alive) return (
+              <>
+                <Text style={[styles.objTxt, { color: '#ffb060' }]}>☠ HUNT: {prey.def.name.toUpperCase()} · ({prey.pos.x},{prey.pos.y})</Text>
+                <Bar label="TARGET" val={prey.hp} max={prey.def.maxHp} color="#ff8a5c" />
+              </>
+            );
+            return <Text style={[styles.objTxt, { color: '#7dff9d' }]}>☠ TARGET ELIMINATED</Text>;
+          })()}
+        </View>
+      )}
       {objType === 'reach' && (
         <View style={styles.objCard}>
           <Text style={styles.objTxt}>➤ REACH THE EXTRACTION POINT{unitOnReach ? ' — THERE!' : ` · (${s.missionCh.reachPos?.x},${s.missionCh.reachPos?.y})`}</Text>

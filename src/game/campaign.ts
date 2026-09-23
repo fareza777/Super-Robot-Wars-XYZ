@@ -119,6 +119,7 @@ export const CAMPAIGN_PILOTS = {
   raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
+  baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
   veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
@@ -155,6 +156,7 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   // unarmed loot hauler — flees the east edge on carrier missions; big salvage when downed
   cargoMule: U({ id: 'cargoMule', name: 'Supply Mule', title: 'Loot Carrier', color: '#4a4030', accent: '#ffe8a0', maxHp: 14000, maxEn: 0, armor: 500, mobility: 70, moveRange: 3, moveType: 'land', weapons: [], pilot: PILOTS.grunt, carrier: true }),
   holoDecoy: U({ id: 'holoDecoy', name: 'Holoreplica', title: 'Hardlight Decoy', color: '#223244', accent: '#7de8ff', maxHp: 1, maxEn: 0, armor: 0, mobility: 0, moveRange: 0, moveType: 'air', weapons: [], pilot: PILOTS.grunt }),
+  bloodyBaron: U({ id: 'bloodyBaron', name: 'Bloody Baron', title: 'Bounty Ace', color: '#5c1a1a', accent: '#ffb060', maxHp: 9000, maxEn: 170, armor: 1100, mobility: 155, moveRange: 8, moveType: 'air', weapons: [WEAPONS.railgun, WEAPONS.heatRod, WEAPONS.vampEdge], pilot: CAMPAIGN_PILOTS.baron, boss: true }),
 };
 
 export const ALL_UNITS: Record<string, UnitDef> = { ...UNITS, ...CAMPAIGN_UNITS };
@@ -219,7 +221,9 @@ export interface ChapterDef {
   count: number;
   boss?: string;
   bossLevel?: number;
-  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect' | 'seize' | 'reach' | 'escort';
+  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect' | 'seize' | 'reach' | 'escort' | 'hunt';
+  /** hunt missions: def id of the marked ace — its destruction wins */
+  huntId?: string;
   surviveTurns?: number;
   /** rout/boss/seize/reach only: defeat if the objective isn't met by this turn */
   turnLimit?: number;
@@ -802,7 +806,8 @@ export interface SideMissionDef {
   boss?: string;
   rewardCr: number;
   rewardItem?: ItemId;
-  objectiveType?: 'rout' | 'survive' | 'seize' | 'reach' | 'escort';
+  objectiveType?: 'rout' | 'survive' | 'seize' | 'reach' | 'escort' | 'hunt';
+  huntId?: string;
   surviveTurns?: number;
   /** rout/seize objectives: defeat if not met within this many turns */
   turnLimit?: number;
@@ -947,6 +952,7 @@ export const PATROL_MISSIONS: SideMissionDef[] = [
   { id: 'p3', name: "Throne's Shadow Watch", desc: 'The Emperor\'s vanguard tests our perimeter. Answer in kind.', unlockCh: 20, theme: 'fortress', lvl: 17, count: 7, rewardCr: 1500, repeatable: true, turnLimit: 9, objective: 'Rout all hostiles within 9 turns — or they slip away' },
   { id: 'p4', name: 'Ghost Relay Intercept', desc: 'A dead relay station keeps pinging the throne. Reach it before the garrison does.', unlockCh: 15, theme: 'ice', lvl: 14, count: 6, rewardCr: 1250, repeatable: true, objectiveType: 'seize', turnLimit: 8, objective: 'Seize the relay beacon within 8 turns — before the Empire silences it' },
   { id: 'p5', name: 'Karn Circuit', desc: 'Cataphract wolf-packs run the caldera rim hunting convoys. Break the pack.', unlockCh: 24, theme: 'lava', lvl: 20, count: 8, rewardCr: 1800, repeatable: true, turnLimit: 10, objective: 'Rout all hostiles within 10 turns — or they slip away' },
+  { id: 'p6', name: 'Marked for Death', desc: 'The Bloody Baron hunts the squad for sport — a bounty ace with a crimson frame. Turn the hunt around.', unlockCh: 22, theme: 'ruins', lvl: 18, count: 5, rewardCr: 2200, repeatable: true, objectiveType: 'hunt', huntId: 'bloodyBaron', boss: 'bloodyBaron', turnLimit: 9, objective: 'Destroy the Bloody Baron within 9 turns — or rout his pack' },
   { id: 'p7', name: 'Dead Runner', desc: 'A courier frame carries stolen throne codes through the ruins. Get a unit to the drop point before they torch it.', unlockCh: 18, theme: 'ruins', lvl: 16, count: 7, rewardCr: 1400, repeatable: true, objectiveType: 'reach', turnLimit: 8, objective: 'Reach the extraction ➤ within 8 turns — or rout the blockade' },
   { id: 'p9', name: 'Caravan Robbery', desc: 'Imperial supply mules haul throne gold through the dunes. Raid the caravan before it clears the pass.', unlockCh: 14, theme: 'desert', lvl: 13, count: 5, rewardCr: 1500, repeatable: true, carrier: true, objective: 'Destroy the Supply Mule before it escapes east — or rout the escort' },
   { id: 'p8', name: 'Night Passage', desc: 'Sensors are blind in the darkside channel. Slip a unit through the blockade line.', unlockCh: 24, theme: 'void', lvl: 20, count: 8, rewardCr: 1900, repeatable: true, objectiveType: 'reach', turnLimit: 9, fog: true, objective: 'Reach the extraction ➤ within 9 turns — sensors blind beyond 4 tiles' },
@@ -1093,6 +1099,7 @@ export function sideAsChapter(m: SideMissionDef): ChapterDef {
     lines: [],
     rosterCh: m.unlockCh,
     fog: m.fog,
+    huntId: m.huntId,
     carrier: m.carrier,
   };
 }
