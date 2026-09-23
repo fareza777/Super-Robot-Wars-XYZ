@@ -94,14 +94,14 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.' }),
-  moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.' }),
-  serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
+  serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
-  bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.' }),
+  bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
-  vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.' }),
-  vaelp: P({ name: 'Emperor Vael', callsign: 'THRONE', melee: 82, ranged: 84, defense: 76, evade: 72, maxSp: 90, spirits: ['strike', 'valor', 'focus', 'guard'], faceColor: '#ffe08a', trait: 'sovereign', lastWords: 'Impossible... I AM the Throne—' }),
+  vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
+  vaelp: P({ name: 'Emperor Vael', callsign: 'THRONE', melee: 82, ranged: 84, defense: 76, evade: 72, maxSp: 90, spirits: ['strike', 'valor', 'focus', 'guard'], faceColor: '#ffe08a', trait: 'sovereign', lastWords: 'Impossible... I AM the Throne—', killQuip: 'Kneel before the Throne — or break.' }),
 };
 
 // merged pilot lookup (unit.def.pilot stays typed as PilotDef)
@@ -318,6 +318,8 @@ const REINFORCE: Record<number, { turn: number; comp: string[] }> = {
   14: { turn: 4, comp: ['vexia', 'vexia', 'nightmare'] },
   19: { turn: 3, comp: ['nightmare', 'zoldaTank'] },
   22: { turn: 4, comp: ['nightmare', 'nightmare'] },
+  // p10 'Last Stand Ridge' patrol (side id 1017) — a second wave crests the pass mid-siege
+  1017: { turn: 3, comp: ['zolda', 'zoldaAir', 'zoldaTank'] },
   26: { turn: 3, comp: ['nightmare', 'zoldaTank', 'nightmare'] },
   30: { turn: 2, comp: ['nightmare', 'nightmare'] },
 };
@@ -810,6 +812,7 @@ export const PATROL_MISSIONS: SideMissionDef[] = [
   { id: 'p9', name: 'Caravan Robbery', desc: 'Imperial supply mules haul throne gold through the dunes. Raid the caravan before it clears the pass.', unlockCh: 14, theme: 'desert', lvl: 13, count: 5, rewardCr: 1500, repeatable: true, carrier: true, objective: 'Destroy the Supply Mule before it escapes east — or rout the escort' },
   { id: 'p8', name: 'Night Passage', desc: 'Sensors are blind in the darkside channel. Slip a unit through the blockade line.', unlockCh: 24, theme: 'void', lvl: 20, count: 8, rewardCr: 1900, repeatable: true, objectiveType: 'reach', turnLimit: 9, fog: true, objective: 'Reach the extraction ➤ within 9 turns — sensors blind beyond 4 tiles' },
   { id: 'p6', name: 'Blackout Watch', desc: 'A sensor dead-zone hangs over the frozen relay shelf. Hostiles only reveal at knife range.', unlockCh: 11, theme: 'ice', lvl: 12, count: 6, rewardCr: 1150, repeatable: true, fog: true, objective: 'Rout all hostiles — sensors blind beyond 4 tiles' },
+  { id: 'p10', name: 'Last Stand Ridge', desc: 'The ridge garrison is dug in and holding. Reinforcements keep cresting the pass — outlast them.', unlockCh: 22, theme: 'mountain', lvl: 19, count: 8, rewardCr: 1700, repeatable: true, objectiveType: 'survive', surviveTurns: 6, objective: 'Survive 6 turns against the ridge garrison' },
 ];
 
 export const ALL_SIDE_MISSIONS: SideMissionDef[] = [...SIDE_MISSIONS, ...PATROL_MISSIONS];

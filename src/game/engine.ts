@@ -306,12 +306,24 @@ export interface GameState {
   turn: number;
 }
 
+/** pincer attack — a same-side unit on the tile mirrored across the target adds +10% damage */
+export function hasPincer(units: UnitState[], att: UnitState, def: UnitState): boolean {
+  const dx = def.pos.x - att.pos.x;
+  const dy = def.pos.y - att.pos.y;
+  if (dx === 0 && dy === 0) return false;
+  const mirror = { x: def.pos.x + Math.sign(dx), y: def.pos.y + Math.sign(dy) };
+  return units.some((u) => u.alive && u.side === att.side && u.uid !== att.uid && same(u.pos, mirror));
+}
+
 export function applyAttack(state: GameState, attackerUid: string, defenderUid: string, weaponId: string, mods?: (u: UnitState) => CombatMods, reaction: Reaction = 'counter'): { state: GameState; result: AttackResult } {
   const units = state.units.map((u) => ({ ...u, ammo: { ...u.ammo } }));
   const att = units.find((u) => u.uid === attackerUid)!;
   const def = units.find((u) => u.uid === defenderUid)!;
   const w = att.def.weapons.find((x) => x.id === weaponId)!;
-  const result = simulateAttack(att, def, w, state.map, mods ? mods(att) : NO_MODS, mods ? mods(def) : NO_MODS, reaction);
+  const pin = hasPincer(units, att, def);
+  const attMods0 = mods ? mods(att) : NO_MODS;
+  const result0 = simulateAttack(att, def, w, state.map, pin ? { ...attMods0, dmgMult: attMods0.dmgMult * 1.1 } : attMods0, mods ? mods(def) : NO_MODS, reaction);
+  const result: AttackResult = { ...result0, pincer: pin };
 
   att.en = Math.max(0, att.en - w.enCost);
   if (w.ammo != null) att.ammo[w.id] = (att.ammo[w.id] ?? 0) - 1;
@@ -650,7 +662,7 @@ export function planEnemyActions(state: GameState): AiPlan[] {
 }
 
 /** Log lines for units destroyed between two snapshots — boss last words + elite bounty callout. */
-export function defeatQuotes(before: UnitState[], after: UnitState[]): string[] {
+export function defeatQuotes(before: UnitState[], after: UnitState[], killer?: UnitState): string[] {
   const lines: string[] = [];
   for (const u of before) {
     if (!u.alive) continue;
@@ -658,6 +670,7 @@ export function defeatQuotes(before: UnitState[], after: UnitState[]): string[] 
     if (!post || post.alive) continue;
     if (u.def.pilot.lastWords) lines.push(`☠ ${u.def.pilot.name}: "${u.def.pilot.lastWords}"`);
     else if (u.elite && u.side === 'enemy') lines.push(`★ ELITE DOWN — ${u.def.name}`);
+    if (u.side === 'player' && killer?.def.pilot.killQuip) lines.push(`⚔ ${killer.def.pilot.name}: "${killer.def.pilot.killQuip}"`);
   }
   return lines;
 }

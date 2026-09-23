@@ -1264,7 +1264,7 @@ export const useGame = create<Store>((set, get) => ({
       for (const sp of result.splash ?? []) log = push(log, `  ${sp.name}: ${sp.hit ? `${sp.damage}${sp.destroyed ? ' — DESTROYED' : ''}` : 'missed'}`);
       if (chainBonus) log = push(log, `⛓ CHAIN ×${chain} — +${chainBonus}cr bonus salvage`);
       for (const e of result.expEvents) log = push(log, e);
-      for (const q of defeatQuotes(s.units, state.units)) log = push(log, q);
+      for (const q of defeatQuotes(s.units, state.units, att)) log = push(log, q);
       const attAfter = state.units.find((u) => u.uid === att.uid)!;
       const defAfter = state.units.find((u) => u.uid === uid)!;
       const dead = deadEnemies(s.units, state.units);
@@ -1320,7 +1320,7 @@ export const useGame = create<Store>((set, get) => ({
     let log = push(
       s.log,
       result.hit
-        ? `${att.def.name} hits ${def.def.name} with ${s.pendingWeapon.name} for ${result.damage}${result.crit ? ' CRIT!' : ''}${result.destroyed ? ' — DESTROYED' : ''}`
+        ? `${att.def.name} hits ${def.def.name} with ${s.pendingWeapon.name} for ${result.damage}${result.crit ? ' CRIT!' : ''}${result.pincer ? ' ⇄PIN' : ''}${result.destroyed ? ' — DESTROYED' : ''}`
         : `${att.def.name} missed ${def.def.name} (${result.hitChance}%)`,
     );
     if (reaction === 'defend') log = push(log, `${def.def.name} braces — damage halved`);
@@ -1345,7 +1345,7 @@ export const useGame = create<Store>((set, get) => ({
       }
     }
     for (const e of result.expEvents) log2 = push(log2, e);
-    for (const q of defeatQuotes(s.units, state.units)) log2 = push(log2, q);
+    for (const q of defeatQuotes(s.units, state.units, att)) log2 = push(log2, q);
     const dead = deadEnemies(s.units, state.units);
     const killCount = dead.length;
     // kill-chain: every kill beyond the first on the same turn pays bonus salvage
@@ -1433,7 +1433,7 @@ export const useGame = create<Store>((set, get) => ({
     let log2 = push(s.log, `${att.def.name} fires ${w.name} — ${result.splash!.length + 1} units in the blast`);
     for (const sp of result.splash!) log2 = push(log2, `  ${sp.name}: ${sp.hit ? `${sp.damage}${sp.destroyed ? ' — DESTROYED' : ''}` : 'missed'}`);
     for (const e of result.expEvents) log2 = push(log2, e);
-    for (const q of defeatQuotes(s.units, state.units)) log2 = push(log2, q);
+    for (const q of defeatQuotes(s.units, state.units, att)) log2 = push(log2, q);
     let inventory = s.inventory;
     let salvageQueue = s.salvageQueue;
     if (vossenDowned(s.units, state.units)) {
@@ -1983,7 +1983,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
           const d = dropsForKills(kc, st.inventory);
           let l = mkLog(st.log);
           for (const x of d.lines) l = push(l, x);
-          for (const q of defeatQuotes(cur.units, state.units)) l = push(l, q);
+          for (const q of defeatQuotes(cur.units, state.units, att)) l = push(l, q);
           return { units: state.units, kills: st.kills + kc, killsByDef: tallyKills(st.killsByDef, deadEnemies(cur.units, state.units)), inventory: d.inventory, salvageQueue: [...st.salvageQueue, ...d.names], log: rxnLog(l) };
         });
         const end = checkEnd(get().units, get().missionCh, get().turn);
@@ -2002,7 +2002,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         const d = dropsForKills(kc, st.inventory);
         let l = mkLog(st.log);
         for (const x of d.lines) l = push(l, x);
-        for (const q of defeatQuotes(cur.units, state.units)) l = push(l, q);
+        for (const q of defeatQuotes(cur.units, state.units, att)) l = push(l, q);
         return {
           units: state.units,
           phase: 'battle',

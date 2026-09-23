@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS } from '../game/campaign';
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { bondMods } from '../game/bonds';
-import { bestCounterWeapon, critChance, damageOf, dist, formationBonus, hitChance, key, rallyBonus, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
+import { bestCounterWeapon, critChance, damageOf, dist, formationBonus, hasPincer, hitChance, key, rallyBonus, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, fogLit, useGame } from '../game/store';
 import { SpiritId, UnitState } from '../game/types';
 
@@ -321,8 +321,9 @@ export function SidePanel() {
                   .map((e) => {
                     const bm = bondMods(s.bonds, s.units, unit);
                     const fb = formationBonus(s.units, unit);
+                    const pin = hasPincer(s.units, unit, e);
                     const hc = hitChance(unit, e, s.pendingWeapon!, s.map, bm.hitBonus + rallyBonus(s.units, unit) + fb);
-                    const dmg = damageOf(unit, e, s.pendingWeapon!, s.map, false, bm.dmgMult);
+                    const dmg = damageOf(unit, e, s.pendingWeapon!, s.map, false, bm.dmgMult * (pin ? 1.1 : 1));
                     const kill = e.hp - dmg <= 0;
                     const cw = bestCounterWeapon(e, s.pendingMove!);
                     const cDmg = cw ? damageOf(e, unit, cw, s.map, false) : 0;
@@ -342,7 +343,7 @@ export function SidePanel() {
                             <View style={[styles.tgtBarFill, { width: `${(Math.max(0, e.hp - dmg) / e.def.maxHp) * 100}%`, backgroundColor: '#4dff7a' }]} />
                           </View>
                           <Text style={styles.tgtCnt} numberOfLines={1}>
-                            {cw ? `↩ CNT ~${cDmg} (${cHc}%)` : '↩ no counter in range'} · CRIT {critChance(unit, e)}%{fb > 0 ? ` · ▣FORM +${fb}` : ''}
+                            {cw ? `↩ CNT ~${cDmg} (${cHc}%)` : '↩ no counter in range'} · CRIT {critChance(unit, e)}%{fb > 0 ? ` · ▣FORM +${fb}` : ''}{pin ? ' · ⇄PIN +10%' : ''}
                             {(e.def.resists?.[s.pendingWeapon!.kind] ?? 0) > 0 ? ` · 🛡RES −${Math.round((e.def.resists![s.pendingWeapon!.kind] ?? 0) * 100)}%` : ''}
                           </Text>
                         </View>

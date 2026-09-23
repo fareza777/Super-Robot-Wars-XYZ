@@ -67,6 +67,8 @@ export interface PilotDef {
   trait?: TraitId;
   /** spoken when this pilot's unit is destroyed (bosses) */
   lastWords?: string;
+  /** taunt spoken when this pilot destroys a player unit (bosses/aces) */
+  killQuip?: string;
 }
 
 export interface UnitDef {
@@ -260,6 +262,8 @@ export interface AttackResult {
   splash?: { uid: string; name: string; hit: boolean; damage: number; destroyed: boolean; hitChance: number }[];
   // SRW support attack — an adjacent ally chips in after the main strike (55% dmg, no counter)
   support?: { name: string; hit: boolean; damage: number; destroyed: boolean; hitChance: number };
+  // pincer: a friendly unit mirrored across the target boosted this attack +10%
+  pincer?: boolean;
   // human-readable EXP/level-up events for the log
   expEvents: string[];
 }
