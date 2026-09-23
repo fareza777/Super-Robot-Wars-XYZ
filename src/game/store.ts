@@ -988,6 +988,10 @@ export const useGame = create<Store>((set, get) => ({
         case 'sp':
           c.sp = Math.min(c.def.pilot.maxSp, c.sp + item.amount);
           break;
+        case 'purge':
+          c.statuses = [];
+          c.crippled = false;
+          break;
         case 'valor':
           c.valorForNextAttack = true;
           break;
@@ -1401,6 +1405,7 @@ export const useGame = create<Store>((set, get) => ({
       const overkillCr = Math.floor(dead.reduce((n, d) => n + (d.overkillDealt ?? 0), 0) / 50);
       if (overkillCr) log = push(log, `⚡ OVERKILL — +${overkillCr}cr salvage`);
       let inventory = s.inventory;
+      let partsOwned = s.partsOwned;
       let salvageQueue = s.salvageQueue;
       for (const d of dead) {
         const drop = rollDrop(d.elite);
@@ -1408,6 +1413,13 @@ export const useGame = create<Store>((set, get) => ({
           inventory = { ...inventory, [drop]: (inventory[drop] ?? 0) + 1 };
           log = push(log, `Salvaged ${ITEMS[drop].name} from the wreck`);
           salvageQueue = [...salvageQueue, ITEMS[drop].name];
+        }
+        if (d.def.boss) {
+          const pool = Object.keys(PARTS).filter((id) => !PARTS[id].unique);
+          const partId = pool[Math.floor(Math.random() * pool.length)];
+          partsOwned = [...partsOwned, partId];
+          log = push(log, `▣ BOSS SALVAGE — ${PARTS[partId].name} recovered from the wreck`);
+          salvageQueue = [...salvageQueue, `▣ ${PARTS[partId].name}`];
         }
       }
       const lucky = applyLucky(state.units, att.uid, dead);
@@ -1422,6 +1434,7 @@ export const useGame = create<Store>((set, get) => ({
         units: state.units,
         log,
         inventory,
+        partsOwned,
         salvageQueue,
         kills: s.kills + killCount,
         chainTurn: killCount > 0 ? s.turn : s.chainTurn,
@@ -1516,6 +1529,7 @@ export const useGame = create<Store>((set, get) => ({
     const quip = bondQuip(s, att, dead);
     if (quip) log2 = push(log2, `♥ ${quip}`);
     let inventory = s.inventory;
+    let partsOwned = s.partsOwned;
     let salvageQueue = s.salvageQueue;
     for (const d of dead) {
       const drop = rollDrop(d.elite);
@@ -1523,6 +1537,13 @@ export const useGame = create<Store>((set, get) => ({
         inventory = { ...inventory, [drop]: (inventory[drop] ?? 0) + 1 };
         log2 = push(log2, `Salvaged ${ITEMS[drop].name} from the wreck`);
         salvageQueue = [...salvageQueue, ITEMS[drop].name];
+      }
+      if (d.def.boss) {
+        const pool = Object.keys(PARTS).filter((id) => !PARTS[id].unique);
+        const partId = pool[Math.floor(Math.random() * pool.length)];
+        partsOwned = [...partsOwned, partId];
+        log2 = push(log2, `▣ BOSS SALVAGE — ${PARTS[partId].name} recovered from the wreck`);
+        salvageQueue = [...salvageQueue, `▣ ${PARTS[partId].name}`];
       }
     }
     const lucky = applyLucky(state.units, att.uid, dead);
@@ -1552,6 +1573,7 @@ export const useGame = create<Store>((set, get) => ({
       units: state.units,
       log: log2,
       inventory,
+      partsOwned,
       salvageQueue,
       kills: s.kills + killCount,
       chainTurn: killCount > 0 ? s.turn : s.chainTurn,
@@ -1613,6 +1635,7 @@ export const useGame = create<Store>((set, get) => ({
     for (const e of result.expEvents) log2 = push(log2, e);
     for (const q of defeatQuotes(s.units, state.units, att)) log2 = push(log2, q);
     let inventory = s.inventory;
+    let partsOwned = s.partsOwned;
     let salvageQueue = s.salvageQueue;
     if (vossenDowned(s.units, state.units)) {
       inventory = { ...inventory, megaKit: (inventory.megaKit ?? 0) + 1 };
@@ -1630,6 +1653,13 @@ export const useGame = create<Store>((set, get) => ({
         log2 = push(log2, `Salvaged ${ITEMS[drop].name} from the wreck`);
         salvageQueue = [...salvageQueue, ITEMS[drop].name];
       }
+      if (d.def.boss) {
+        const pool = Object.keys(PARTS).filter((id) => !PARTS[id].unique);
+        const partId = pool[Math.floor(Math.random() * pool.length)];
+        partsOwned = [...partsOwned, partId];
+        log2 = push(log2, `▣ BOSS SALVAGE — ${PARTS[partId].name} recovered from the wreck`);
+        salvageQueue = [...salvageQueue, `▣ ${PARTS[partId].name}`];
+      }
     }
     const lucky = applyLucky(state.units, att.uid, mapDead);
     if (lucky.cr) log2 = push(log2, `☘ LUCKY — +${lucky.cr}cr bonus salvage`);
@@ -1646,6 +1676,7 @@ export const useGame = create<Store>((set, get) => ({
       units: state.units,
       log: log2,
       inventory,
+      partsOwned,
       salvageQueue,
       vossenDefeated: s.vossenDefeated || vossenDowned(s.units, state.units),
       killsByDef: tallyKills(s.killsByDef, deadEnemies(s.units, state.units)),
@@ -1735,6 +1766,10 @@ export const useGame = create<Store>((set, get) => ({
       set({ spiritForUid: null, log: push(s.log, 'Wish: no drained ally within 3 tiles') });
       return;
     }
+    if (sp === 'gravity' && !s.units.some((u) => u.alive && u.side === 'enemy' && dist(u.pos, target.pos) <= 3)) {
+      set({ spiritForUid: null, log: push(s.log, 'Gravity Well: no enemy within 3 tiles') });
+      return;
+    }
     if (sp === 'cheer' && !s.units.some((u) => u.alive && u.uid !== uid && u.side === target.side && dist(u.pos, target.pos) <= 3)) {
       set({ spiritForUid: null, log: push(s.log, 'Cheer: no ally within 3 tiles') });
       return;
@@ -1788,6 +1823,19 @@ export const useGame = create<Store>((set, get) => ({
         wishLog = `Wish restores ${tgt.def.name} +30 SP`;
       }
     }
+    // gravity — every enemy within 3 tiles is anchored in place next phase
+    let gravityLog: string | null = null;
+    if (sp === 'gravity') {
+      const src = units.find((x) => x.uid === uid)!;
+      let n = 0;
+      for (const u2 of units) {
+        if (u2.alive && u2.side === 'enemy' && dist(u2.pos, src.pos) <= 3) {
+          u2.anchored = true;
+          n++;
+        }
+      }
+      gravityLog = `Gravity Well anchors ${n} hostile frame${n === 1 ? '' : 's'} — no movement next phase`;
+    }
     // cheer — the most junior ally within 3 tiles is inspired: double EXP next attack
     let cheerLog: string | null = null;
     if (sp === 'cheer') {
@@ -1818,7 +1866,7 @@ export const useGame = create<Store>((set, get) => ({
       units,
       spiritForUid: null,
       usedSupport: true,
-      log: trustLog || purgeLog || cheerLog || wishLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), [trustLog, purgeLog, cheerLog, wishLog].filter(Boolean).join(' · ')) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
+      log: trustLog || purgeLog || cheerLog || wishLog || gravityLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), [trustLog, purgeLog, cheerLog, wishLog, gravityLog].filter(Boolean).join(' · ')) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
       moveTiles: s.menuForUid ? new Map() : tiles,
     });
   },
@@ -2544,6 +2592,8 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         eventsFired.push(String(idx));
       }
     }
+    // Gravity Well lifts as the new player phase begins
+    for (const v of units) if (v.anchored) v.anchored = false;
     // tile hazards: tiles telegraphed last round detonate now (never lethal — leaves 1 HP)
     const hzLabel = st.missionCh.theme === 'fortress' || st.missionCh.theme === 'moon' ? 'artillery barrage' : st.missionCh.theme === 'lava' ? 'magma surge' : 'ion storm';
     for (const hz of st.hazardWarn) {

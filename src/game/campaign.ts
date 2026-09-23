@@ -9,7 +9,7 @@ export interface ItemDef {
   name: string;
   desc: string;
   price: number;
-  apply: 'hp' | 'en' | 'ammo' | 'sp' | 'valor' | 'willAll' | 'healArea';
+  apply: 'hp' | 'en' | 'ammo' | 'sp' | 'valor' | 'willAll' | 'healArea' | 'purge';
   amount: number;
 }
 
@@ -22,6 +22,7 @@ export const ITEMS: Record<string, ItemDef> = {
   valorPill: { id: 'valorPill', name: 'Valor Pill', desc: 'Next attack damage x1.5', price: 600, apply: 'valor', amount: 0 },
   rallyBanner: { id: 'rallyBanner', name: 'Rally Banner', desc: '+10 Will to every ally', price: 900, apply: 'willAll', amount: 10 },
   repairDrone: { id: 'repairDrone', name: 'Repair Drone', desc: 'Heal 30% HP — unit + allies within 2 tiles', price: 750, apply: 'healArea', amount: 30 },
+  ventKit: { id: 'ventKit', name: 'Emergency Vent', desc: 'Purge cripple and all status debuffs', price: 700, apply: 'purge', amount: 0 },
 };
 
 export type ItemId = keyof typeof ITEMS;
@@ -114,7 +115,7 @@ export const CAMPAIGN_PILOTS = {
   raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),

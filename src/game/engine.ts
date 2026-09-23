@@ -629,6 +629,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break; // the inspired ally is chosen by the store pass
     case 'wish':
       break; // the restored ally is chosen by the store pass
+    case 'gravity':
+      break; // anchored enemies are marked by the store pass
     case 'snipe':
       u.snipeForNextAttack = true;
       break;
@@ -709,7 +711,7 @@ export function planEnemyActions(state: GameState): AiPlan[] {
       const occ = unitAt(units, p);
       return (!occ || occ.uid === e.uid) && !claimed.has(key(p));
     });
-    const tiles = holding ? moveTiles.filter((p) => same(p, e.pos)) : guarding ? moveTiles.filter((p) => dist(p, bp!) <= 3) : moveTiles;
+    const tiles = e.anchored ? moveTiles.filter((p) => same(p, e.pos)) : holding ? moveTiles.filter((p) => same(p, e.pos)) : guarding ? moveTiles.filter((p) => dist(p, bp!) <= 3) : moveTiles;
     // morale: a badly damaged line unit may break off and fall back instead of attacking
     if (!e.def.boss && !e.elite && !holding && e.hp <= e.def.maxHp * 0.25 && state.turn > 2 && Math.random() < 0.55) {
       const flee = (moveTiles.length ? moveTiles : [e.pos]).slice().sort((a, b) => {
