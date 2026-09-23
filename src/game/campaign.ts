@@ -74,6 +74,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'esave', name: 'E-Save', desc: '-4% weapon EN cost per point' },
   { id: 'hitrun', name: 'Hit & Run', desc: 'Strike, then keep moving — one rank unlocks move-after-attack' },
   { id: 'crit', name: 'Veteran', desc: '+2% critical chance per point' },
+  { id: 'scavenger', name: 'Scavenger', desc: 'Restores 4 EN per point on every kill' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -112,7 +113,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
@@ -127,6 +128,7 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   zoldaTank: U({ id: 'zoldaTank', name: 'Zolda Bastion', title: 'Imperial Heavy', color: '#5c6b52', accent: '#b8c4a8', maxHp: 5200, maxEn: 90, armor: 1300, mobility: 70, moveRange: 4, moveType: 'land', weapons: [WEAPONS.railgun, WEAPONS.heatRod], pilot: PILOTS.grunt }),
   vexia: U({ id: 'vexia', name: 'Vexia', title: 'Imperial Interceptor', color: '#4a6b8a', accent: '#c0e0ff', maxHp: 4400, maxEn: 130, armor: 800, mobility: 138, moveRange: 7, moveType: 'air', weapons: [WEAPONS.photonRifle, WEAPONS.vulcan], pilot: PILOTS.grunt }),
   nightmare: U({ id: 'nightmare', name: 'Nightmare', title: 'Royal Guard', color: '#5a2f3a', accent: '#ffb0c0', maxHp: 6800, maxEn: 140, armor: 1150, mobility: 122, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.missilePods, WEAPONS.stasisRay], pilot: PILOTS.grunt, guardian: true }),
+  phantom: U({ id: 'phantom', name: 'Phantom Shade', title: 'Stealth Stalker', color: '#232336', accent: '#a0a8ff', maxHp: 3600, maxEn: 130, armor: 620, mobility: 172, moveRange: 8, moveType: 'air', weapons: [WEAPONS.heatRod, WEAPONS.vulcan, WEAPONS.missilePods], pilot: PILOTS.grunt, stealth: true }),
   raxden: U({ id: 'raxden', name: 'Raxden Crimson', title: 'Custom Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.plasmaEdge, WEAPONS.railgun, WEAPONS.vulcan], pilot: CAMPAIGN_PILOTS.raxp, boss: true }),
   moorin: U({ id: 'moorin', name: 'Moorin Anvil', title: 'Imperial General', color: '#4a5a48', accent: '#d0e0c0', maxHp: 9800, maxEn: 160, armor: 1500, mobility: 96, moveRange: 5, moveType: 'land', weapons: [WEAPONS.megaBeam, WEAPONS.gatling, WEAPONS.punch], pilot: CAMPAIGN_PILOTS.moorinp, boss: true }),
   serka: U({ id: 'serka', name: 'Serka Vanta', title: 'Void Empress', color: '#5a2f6e', accent: '#e0b8ff', maxHp: 8200, maxEn: 190, armor: 1000, mobility: 140, moveRange: 7, moveType: 'air', weapons: [WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.serkap, boss: true }),
@@ -740,7 +742,8 @@ export function enemyComp(ch: ChapterDef): string[] {
   const alt = ch.act === 1 ? 'zoldaAir' : ch.act === 2 ? 'nightmare' : 'bulwark';
   const heavy = ch.act === 1 ? 'zoldaTank' : 'nightmare';
   const fast = ch.act === 3 ? 'cataphract' : 'lancer';
-  for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : fill);
+  const ghost = ch.act === 3 ? 'phantom' : 'vexia';
+  for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : i % 7 === 6 ? ghost : fill);
   if (ch.boss) comp.push(ch.boss);
   // Cpt. Vossen ambushes the squad on these chapters — a recurring ace duelist
   if ([6, 13, 19, 26].includes(ch.id)) comp.push('vossDrake');

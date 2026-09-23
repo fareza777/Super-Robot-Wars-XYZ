@@ -28,7 +28,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
@@ -188,6 +188,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (crit) dmg = Math.round(dmg * 1.3);
   if (att.valorForNextAttack) dmg = Math.round(dmg * 1.5);
   if (att.soulForNextAttack) dmg = Math.round(dmg * 2);
+  if (att.gutsForNextAttack && att.hp < att.def.maxHp / 2) dmg = Math.round(dmg * 1.75);
   if (def.guardUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.5);
   dmg = Math.round(dmg * (1 + partBonus(att, 'dmg') * 0.01 + (att.skills?.dmg ?? 0) * 0.015));
   dmg = Math.round(dmg * (1 - Math.min(0.5, (def.skills?.def ?? 0) * 0.015)));
@@ -254,6 +255,11 @@ export function formationBonus(units: UnitState[], u: UnitState): number {
   let n = 0;
   for (const a of units) if (a.alive && a.side === u.side && a.uid !== u.uid && dist(a.pos, u.pos) <= 1) n++;
   return Math.min(n * 5, 10);
+}
+
+/** Stealth frames are invisible on the field until a non-enemy unit closes within 3 tiles. */
+export function isStealthHidden(u: UnitState, units: UnitState[]): boolean {
+  return u.side === 'enemy' && u.def.stealth === true && !units.some((p) => p.alive && p.side !== 'enemy' && dist(p.pos, u.pos) <= 3);
 }
 
 export function bestCounterWeapon(def: UnitState, attPos: Pos): WeaponDef | undefined {
@@ -452,15 +458,23 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   }
   att.strikeForNextAttack = false;
   att.valorForNextAttack = false;
+  att.gutsForNextAttack = false;
   att.snipeForNextAttack = false;
   att.soulForNextAttack = false;
+  att.gutsForNextAttack = false;
   def.flashUntilEndOfEnemyPhase = false; // consumed by this attack whether it hit or not
 
   // Will: +1 for engaging, +1 for taking a hit, +4 per kill; PP: +3 per kill
   willGain(att, 1 + (result.counter?.hit ? 1 : 0) + (result.destroyed ? 4 : 0));
   willGain(def, (result.hit ? 1 : 0) + (result.counter?.hit ? 1 : 0) + (result.counter?.destroyed ? 4 : 0));
-  if (result.destroyed) att.pp += 3;
-  if (result.counter?.destroyed) def.pp += 3;
+  if (result.destroyed) {
+    att.pp += 3;
+    if (att.skills?.scavenger) att.en = Math.min(att.def.maxEn, att.en + (att.skills.scavenger ?? 0) * 4);
+  }
+  if (result.counter?.destroyed) {
+    def.pp += 3;
+    if (def.skills?.scavenger) def.en = Math.min(def.def.maxEn, def.en + (def.skills.scavenger ?? 0) * 4);
+  }
 
   // EXP: +30 for a landed hit, +70 for a kill (counter kills award the countering unit)
   result.expEvents = [];
@@ -485,6 +499,7 @@ export function applyMapAttack(state: GameState, attackerUid: string, targetTile
   att.acted = true;
   att.strikeForNextAttack = false;
   att.valorForNextAttack = false;
+  att.gutsForNextAttack = false;
 
   let hits = 0;
   let kills = 0;
@@ -529,7 +544,9 @@ export function applyAllAttack(state: GameState, attackerUid: string, weaponId: 
   att.acted = true;
   att.strikeForNextAttack = false;
   att.valorForNextAttack = false;
+  att.gutsForNextAttack = false;
   att.soulForNextAttack = false;
+  att.gutsForNextAttack = false;
 
   let hits = 0;
   let kills = 0;
@@ -610,6 +627,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break;
     case 'miracle':
       u.miracleArmed = true;
+      break;
+    case 'guts':
+      u.gutsForNextAttack = true;
       break;
     case 'overdrive':
       u.againOnKill = true;

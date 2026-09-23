@@ -3,7 +3,7 @@ import { Animated, Easing, PanResponder, Pressable, StyleSheet, Text, useWindowD
 import { Image } from 'expo-image';
 import { MECH_ART, PILOT_ART, TERRAIN_ART } from '../assets';
 import { TERRAIN_INFO } from '../game/data';
-import { dist, key, same } from '../game/engine';
+import { dist, isStealthHidden, key, same } from '../game/engine';
 import { fogLit, useGame } from '../game/store';
 import { MapDef, Pos, UnitState } from '../game/types';
 
@@ -309,7 +309,7 @@ export function MapGrid() {
           </View>
         )}
         {units
-          .filter((u) => u.alive && !(missionCh.fog && u.side === 'enemy' && !fogLit(units, u.pos)))
+          .filter((u) => u.alive && !(missionCh.fog && u.side === 'enemy' && !fogLit(units, u.pos)) && !isStealthHidden(u, units))
           .map((u) => {
             const walking = walk && walk.uid === u.uid && walk.path.length > 1;
             if (walking) return <WalkingChip key={u.uid} path={walk!.path} tw={tw} th={th} cell={<UnitCell u={u} chip={chip} ghosting={false} />} />;
@@ -354,7 +354,7 @@ function MiniMap({ map, units, missionCh, crates, panX, panY, bw, bh, vw, vh }: 
         {missionCh.seizePos && <View style={[styles.miniDot, { left: missionCh.seizePos.x * MINI_TW + 1, top: missionCh.seizePos.y * MINI_TW + 1, width: 6, height: 6, backgroundColor: '#ffd34d', borderWidth: 1, borderColor: '#fff' }]} />}
         {missionCh.reachPos && <View style={[styles.miniDot, { left: missionCh.reachPos.x * MINI_TW + 1, top: missionCh.reachPos.y * MINI_TW + 1, width: 6, height: 6, backgroundColor: '#4de3ff', borderWidth: 1, borderColor: '#fff' }]} />}
         {units
-          .filter((u) => u.alive && !(missionCh.fog && u.side === 'enemy' && !fogLit(units, u.pos)))
+          .filter((u) => u.alive && !(missionCh.fog && u.side === 'enemy' && !fogLit(units, u.pos)) && !isStealthHidden(u, units))
           .map((u) => (
             <View
               key={u.uid}

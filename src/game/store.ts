@@ -43,6 +43,7 @@ import { bgm, setMusicEnabled, setSoundEnabled } from '../audio';
 import {
   aiPickReaction,
   applyAttack,
+  isStealthHidden,
   applyAllAttack,
   applyMapAttack,
   applySpirit,
@@ -361,7 +362,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
       u.level = prog.level;
       u.exp = prog.exp;
       u.pp = prog.pp ?? 0;
-      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, ...(prog.skills ?? {}) };
+      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, ...(prog.skills ?? {}) };
       if ((prog.kills ?? 0) >= ACE_KILLS) u.will = 130; // ace pilots start hot
       if ((prog.kills ?? 0) >= ACE_MASTER_KILLS) u.aceMastery = true;
       // career-kill milestones: extra spirits the pilot learned along the war
@@ -927,7 +928,7 @@ export const useGame = create<Store>((set, get) => ({
     const s = get();
     const prog = s.pilotProg[defId];
     if (!prog || (prog.pp ?? 0) < 1) return;
-    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, ...(prog.skills ?? {}) };
+    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, ...(prog.skills ?? {}) };
     if (skills[statId] >= MAX_PILOT_SKILL) return;
     skills[statId] += 1;
     const pilotProg = { ...s.pilotProg, [defId]: { ...prog, pp: (prog.pp ?? 0) - 1, skills } };
@@ -1240,7 +1241,7 @@ export const useGame = create<Store>((set, get) => ({
         return;
       }
       const t = unitAt(s.units, p);
-      if (t && t.side === 'enemy' && s.attackTiles.has(key(p))) {
+      if (t && t.side === 'enemy' && s.attackTiles.has(key(p)) && !isStealthHidden(t, s.units)) {
         get().chooseTarget(t.uid);
       }
       return;
@@ -1252,7 +1253,7 @@ export const useGame = create<Store>((set, get) => ({
     const u = unitAt(s.units, p);
 
     // tap an enemy: inspect card + threat-range overlay (fog hides uncontacted hostiles)
-    if (u && (u.side === 'enemy' || u.npc) && !s.selectedUid && !(s.missionCh.fog && u.side === 'enemy' && !fogLit(s.units, u.pos))) {
+    if (u && (u.side === 'enemy' || u.npc) && !s.selectedUid && !(s.missionCh.fog && u.side === 'enemy' && !fogLit(s.units, u.pos)) && !isStealthHidden(u, s.units)) {
       const threat = threatTilesFor(s.map, s.units, u);
       set({ cursor: p, inspectUid: u.uid, threatTiles: threat, tileInfo: null });
       return;

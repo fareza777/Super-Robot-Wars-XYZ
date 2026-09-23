@@ -32,6 +32,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   cheer: { id: 'cheer', name: 'Cheer', cost: 30, desc: 'The most junior ally within 3 tiles gains double EXP on their next attack' },
   wish: { id: 'wish', name: 'Wish', cost: 50, desc: 'The most drained ally within 3 tiles regains +30 SP' },
   gravity: { id: 'gravity', name: 'Gravity Well', cost: 50, desc: 'Enemies within 3 tiles are anchored — they cannot move next phase' },
+  guts: { id: 'guts', name: 'Guts', cost: 40, desc: 'Berserker surge — next attack deals +75% damage while under half HP' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

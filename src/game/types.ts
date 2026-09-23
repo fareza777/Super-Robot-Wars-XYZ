@@ -45,7 +45,7 @@ export interface StatusFx {
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -94,6 +94,8 @@ export interface UnitDef {
   guardian?: boolean;
   /** ECM suite — hostile units within 2 tiles take -15 hit */
   jammer?: boolean;
+  /** stealth frame — invisible on the field until a hostile closes within 3 tiles */
+  stealth?: boolean;
   /** transformable frame — swaps into this def via the TRANSFORM action */
   transformInto?: string;
   level?: number; // starting level (default 1)
@@ -172,6 +174,8 @@ export interface UnitState {
   crippled?: boolean;
   /** Gravity Well — frame is anchored and cannot move next enemy phase */
   anchored?: boolean;
+  /** Guts — next attack deals +75% damage while under half HP */
+  gutsForNextAttack?: boolean;
   /** pilot wounded in a previous sortie — -15% hit & damage this battle */
   wounded?: boolean;
   /** breacher field victim — armor & evade permanently reduced this battle */
@@ -196,7 +200,7 @@ export interface UnitState {
   overkillDealt?: number;
 }
 
-export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit';
+export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger';
 export type PilotSkills = Record<PilotSkillId, number>;
 
 /** SRW-style enhancement parts equippable on a mecha. */
