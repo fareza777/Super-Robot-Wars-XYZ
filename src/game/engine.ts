@@ -148,7 +148,7 @@ export function attackTiles(map: MapDef, from: Pos, w: WeaponDef, u?: UnitState)
 
 function evadeOf(u: UnitState, map: MapDef): number {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
-  return u.def.mobility + u.def.pilot.evade + (u.level - 1) * 2 + t.eva + (u.focusUntilEndOfEnemyPhase ? 30 : 0) + willEvade(u) + partBonus(u, 'mobility') + partBonus(u, 'evade') * 1.8 + (u.skills?.evade ?? 0) + (u.aceMastery ? 5 : 0) - (u.dodges ?? 0) * 8 - (u.sundered ? 15 : 0);
+  return u.def.mobility + u.def.pilot.evade + (u.level - 1) * 2 + t.eva + (u.focusUntilEndOfEnemyPhase ? 30 : 0) + (u.hymnUntilEndOfEnemyPhase ? 15 : 0) + willEvade(u) + partBonus(u, 'mobility') + partBonus(u, 'evade') * 1.8 + (u.skills?.evade ?? 0) + (u.aceMastery ? 5 : 0) - (u.dodges ?? 0) * 8 - (u.sundered ? 15 : 0);
 }
 
 function armorOf(u: UnitState, map: MapDef): number {
@@ -177,7 +177,7 @@ export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: Map
   if (att.strikeForNextAttack) return 100;
   const trait = att.def.pilot.trait;
   const traitHit = (trait === 'deadeye' ? 8 : 0) + (trait === 'falcon_wing' && def.def.moveType === 'air' ? 10 : 0) + (trait === 'crimson_fury' && att.hp < att.def.maxHp / 2 ? 8 : 0);
-  const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus + traitHit + willHitBonus(att) + partBonus(att, 'hit') + (att.skills?.hit ?? 0) + (att.aceMastery ? 5 : 0) + (def.exposed ? 20 : 0) - evadeOf(def, map) * 0.55;
+  const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus + traitHit + willHitBonus(att) + partBonus(att, 'hit') + (att.skills?.hit ?? 0) + (att.aceMastery ? 5 : 0) + (att.hymnUntilEndOfEnemyPhase ? 15 : 0) + (def.exposed ? 20 : 0) - evadeOf(def, map) * 0.55;
   return Math.max(10, Math.min(100, Math.round(raw * (att.wounded ? 0.85 : 1))));
 }
 
@@ -692,6 +692,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'decoy':
       // store spawns the holoreplica unit next to the caster
       break;
+    case 'hymn':
+      break; // squad anthem — the store flags every ally
     case 'expose':
       break; // enemies in radius are marked by the store pass
     case 'overdrive':
@@ -749,6 +751,7 @@ export function clearTransientForOwnPhase(u: UnitState): void {
   u.acted = false;
   u.followUpReady = false;
   u.overwatch = false;
+  u.hymnUntilEndOfEnemyPhase = false;
   u.dodges = 0;
 }
 

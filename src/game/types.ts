@@ -53,7 +53,7 @@ export interface StatusFx {
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy' | 'hymn';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -116,6 +116,8 @@ export interface UnitDef {
   resists?: Partial<Record<WeaponKind, number>>;
   /** loot carrier: flees east each enemy phase; kill it before it leaves the map */
   carrier?: boolean;
+  /** field medic — restores the most wounded ally within 3 tiles at its activation instead of attacking */
+  medic?: boolean;
 }
 
 export interface UnitState {
@@ -134,6 +136,8 @@ export interface UnitState {
   alive: boolean;
   // spirit effects active until next own phase (or one-shot)
   focusUntilEndOfEnemyPhase?: boolean;
+  /** Hymn — squad anthem: +15 hit & +15 evade until end of enemy phase */
+  hymnUntilEndOfEnemyPhase?: boolean;
   gritUntilEndOfEnemyPhase?: boolean;
   guardUntilEndOfEnemyPhase?: boolean;
   strikeForNextAttack?: boolean;
