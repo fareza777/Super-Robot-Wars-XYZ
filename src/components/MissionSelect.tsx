@@ -28,12 +28,28 @@ export function MissionSelect() {
         {/* main campaign */}
         <View style={styles.col}>
           <Text style={styles.colTitle}>MAIN CAMPAIGN</Text>
+          {s.savedBattle && (
+            <Pressable style={styles.resumeCard} onPress={s.resumeBattle}>
+              <LinearGradient colors={['rgba(58,32,8,0.95)', 'rgba(20,12,4,0.95)']} style={StyleSheet.absoluteFill} />
+              <Text style={styles.resumeTitle}>⚔ BATTLE IN PROGRESS</Text>
+              <Text style={styles.resumeName}>{s.savedBattle.missionCh.name.toUpperCase()}</Text>
+              <Text style={styles.resumeMeta}>
+                Turn {s.savedBattle.turn} · {s.savedBattle.units.filter((u) => u.side === 'player' && u.alive).length} allies · {s.savedBattle.units.filter((u) => u.side === 'enemy' && u.alive).length} hostiles
+              </Text>
+              <View style={styles.resumeBtn}>
+                <Text style={styles.resumeBtnTxt}>RESUME ▸</Text>
+              </View>
+            </Pressable>
+          )}
           <Pressable style={[styles.mainCard, done && { opacity: 0.55 }]} onPress={done ? undefined : s.gotoBriefing} disabled={done}>
             <LinearGradient colors={['rgba(20,40,24,0.95)', 'rgba(8,14,24,0.95)']} style={StyleSheet.absoluteFill} />
             <Text style={styles.mainCh}>{done ? 'CAMPAIGN COMPLETE' : `CHAPTER ${ch.id}`}</Text>
             <Text style={styles.mainName}>{ch.name.toUpperCase()}</Text>
             <Text style={styles.mainSub}>{ch.subtitle}</Text>
             <Text style={styles.mainObj}>◈ {ch.objective}</Text>
+            {ch.mastery && (
+              <Text style={styles.masteryLine}>{s.masteryDone.includes(ch.id) ? '★' : '☆'} MASTERY: {ch.mastery.desc}{s.masteryDone.includes(ch.id) ? ' ✓' : ''}</Text>
+            )}
             <View style={styles.mainDeploy}>
               <Text style={styles.mainDeployTxt}>{done ? 'ALL CLEAR' : 'DEPLOY ▸'}</Text>
             </View>
@@ -104,4 +120,11 @@ const styles = StyleSheet.create({
   sideMeta: { color: '#ffd34d', fontSize: 9.5, marginTop: 5, letterSpacing: 0.5 },
   goBtn: { backgroundColor: '#16324a', borderWidth: 1, borderColor: '#6fe0ff', borderRadius: 7, paddingHorizontal: 12, paddingVertical: 8 },
   goTxt: { color: '#6fe0ff', fontWeight: '900', fontSize: 11.5 },
+  resumeCard: { borderRadius: 12, borderWidth: 2, borderColor: '#ffaa2f', overflow: 'hidden', padding: 14, marginBottom: 10 },
+  resumeTitle: { color: '#ffaa2f', fontWeight: '900', fontSize: 11, letterSpacing: 2 },
+  resumeName: { color: '#fff', fontWeight: '900', fontSize: 15, letterSpacing: 0.5, marginTop: 4 },
+  resumeMeta: { color: '#d8c8a8', fontSize: 10.5, marginTop: 4 },
+  resumeBtn: { marginTop: 10, alignSelf: 'flex-start', backgroundColor: '#3a2408', borderWidth: 1.5, borderColor: '#ffaa2f', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 7 },
+  resumeBtnTxt: { color: '#ffaa2f', fontWeight: '900', fontSize: 12, letterSpacing: 1.5 },
+  masteryLine: { color: '#ffd34d', fontSize: 10.5, marginTop: 6, fontWeight: '700', letterSpacing: 0.5 },
 });

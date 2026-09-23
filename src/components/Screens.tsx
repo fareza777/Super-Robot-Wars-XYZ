@@ -63,6 +63,11 @@ export function BriefingScreen() {
 
       <View style={styles.briefBox}>
         <Text style={styles.briefTxt}>{ch.objective}</Text>
+        {ch.mastery && (
+          <Text style={{ color: '#ffd34d', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginTop: 2 }}>
+            ★ MASTERY: {ch.mastery.desc} — +{ch.mastery.rewardCr}cr
+          </Text>
+        )}
         <Text style={styles.deployLbl}>DEPLOY SQUAD — tap to toggle ({deploySel.length}/{roster.length})</Text>
         <View style={styles.squadRow}>
           {roster.map((id) => {

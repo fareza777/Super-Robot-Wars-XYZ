@@ -153,6 +153,8 @@ export interface ChapterDef {
   objectiveType?: 'rout' | 'survive' | 'boss';
   surviveTurns?: number;
   objective: string;
+  /** SRW-point style bonus challenge — award credits when the mission ends meeting it */
+  mastery?: { desc: string; maxTurns?: number; keepAll?: boolean; rewardCr: number };
   lines: { speaker: string; text: string; voice?: string }[];
   /** overrides roster gating (used by side missions whose ids are off-chapter) */
   rosterCh?: number;

@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ITEMS, PARTS } from '../game/campaign';
 import { SPIRITS } from '../game/data';
 import { bondMods } from '../game/bonds';
-import { bestCounterWeapon, critChance, damageOf, hitChance, key, terrainDesc, weaponsAgainst } from '../game/engine';
+import { bestCounterWeapon, critChance, damageOf, dist, hitChance, key, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, useGame } from '../game/store';
 import { SpiritId } from '../game/types';
 
@@ -87,12 +87,31 @@ export function SidePanel() {
               const noAmmo = ammoLeft != null && ammoLeft <= 0;
               const noPost = !w.postMove && s.pendingMovedFlag;
               const noWill = (w.willReq ?? 0) > unit.will;
+              const partner = w.comboPartner ? s.units.find((p) => p.def.id === w.comboPartner && p.side === 'player' && p.alive) : undefined;
+              const partnerHere = w.comboPartner ? partner && dist(partner.pos, unit.pos) === 1 && !partner.acted : true;
               const hitsAny =
                 w.mapRange != null
                   ? true // any tile in range is aim-able; the blast may still catch foes
                   : s.units.some((e) => e.alive && e.side === 'enemy' && weaponsAgainst(unit, s.pendingMove!, e, s.pendingMovedFlag).some((x) => x.id === w.id));
-              const disabled = noEn || noAmmo || noPost || noWill || !hitsAny;
-              const reason = noEn ? 'NEED EN' : noAmmo ? 'NO AMMO' : noPost ? 'CAN\'T AFTER MOVE' : noWill ? `NEED WILL ${w.willReq}` : !hitsAny ? 'NO TARGET' : null;
+              const disabled = noEn || noAmmo || noPost || noWill || !hitsAny || !partnerHere;
+              const reason =
+                noEn
+                  ? 'NEED EN'
+                  : noAmmo
+                    ? 'NO AMMO'
+                    : noPost
+                      ? 'CAN\'T AFTER MOVE'
+                      : noWill
+                        ? `NEED WILL ${w.willReq}`
+                        : !hitsAny
+                          ? 'NO TARGET'
+                          : w.comboPartner
+                            ? !partner
+                              ? 'PARTNER MISSING'
+                              : partner.acted
+                                ? 'PARTNER ACTED'
+                                : 'PARTNER NOT ADJACENT'
+                            : null;
               const stat = `POW ${w.power} · R${w.rangeMin}-${w.rangeMax}${w.mapRange != null ? ` · AREA ${w.mapRange}` : ''}${w.willReq ? ` · W${w.willReq}` : ''}${w.ammo != null ? ` · ×${ammoLeft}` : ` · EN ${w.enCost}`}`;
               return (
                 <Btn
@@ -105,6 +124,17 @@ export function SidePanel() {
                 />
               );
             })}
+            {unit.def.repairer &&
+              s.units.some((t) => t.alive && t.side === 'player' && t.uid !== unit.uid && dist(t.pos, unit.pos) <= 2 && (t.hp < t.def.maxHp || t.en < t.def.maxEn)) && (
+                <>
+                  <Text style={styles.menuTitle}>REPAIR</Text>
+                  {s.units
+                    .filter((t) => t.alive && t.side === 'player' && t.uid !== unit.uid && dist(t.pos, unit.pos) <= 2 && (t.hp < t.def.maxHp || t.en < t.def.maxEn))
+                    .map((t) => (
+                      <Btn key={t.uid} label={`✚ ${t.def.name}`} sub={`HP ${t.hp}/${t.def.maxHp} · EN ${t.en}/${t.def.maxEn} — heal 40% HP +30 EN`} onPress={() => s.repairUnit(unit.uid, t.uid)} accent="#4dff9d" />
+                    ))}
+                </>
+              )}
             {unit.def.pilot.spirits.length > 0 && <Btn label="✦ SPIRIT COMMANDS" sub={`SP ${unit.sp}`} onPress={() => s.openSpirits(unit.uid)} accent="#c9a0ff" />}
             {Object.values(ITEMS).some((it) => (s.inventory[it.id] ?? 0) > 0) && (
               <>

@@ -35,6 +35,9 @@ export const WEAPONS = {
   punch: W({ id: 'punch', name: 'Rocket Punch', kind: 'melee', power: 1900, rangeMin: 1, rangeMax: 3, enCost: 10, ammo: null, hitMod: 10, postMove: true, animSeed: 11 }),
   drillLancer: W({ id: 'drill_lancer', name: 'Drill Lancer', kind: 'melee', power: 2700, rangeMin: 1, rangeMax: 1, enCost: 12, ammo: null, hitMod: 5, postMove: true, animSeed: 12 }),
   funnelArray: W({ id: 'funnel_array', name: 'Funnel Array', kind: 'funnel', power: 2800, rangeMin: 2, rangeMax: 6, enCost: 25, ammo: null, hitMod: 10, postMove: false, animSeed: 13, willReq: 115 }),
+  // combination attacks — need the partner unit standing adjacent & unacted
+  twinBreaker: W({ id: 'twin_breaker', name: 'Twin Breaker', kind: 'melee', power: 4300, rangeMin: 1, rangeMax: 2, enCost: 25, ammo: null, hitMod: 30, postMove: true, animSeed: 15, willReq: 110, comboPartner: 'gruntborg' }),
+  twinBarrage: W({ id: 'twin_barrage', name: 'Twin Barrage', kind: 'beam', power: 4500, rangeMin: 2, rangeMax: 6, enCost: 30, ammo: null, hitMod: 25, postMove: false, animSeed: 16, willReq: 115, comboPartner: 'zephyra' }),
 };
 
 // ---------- Pilots ----------
@@ -56,10 +59,10 @@ const U = (u: UnitDef) => u;
 
 export const UNITS: Record<string, UnitDef> = {
   // --- player squad ---
-  valstray: U({ id: 'valstray', name: 'Valstray', title: 'X-Face Vanguard', color: '#2f6fd0', accent: '#9fd0ff', maxHp: 5800, maxEn: 140, armor: 1050, mobility: 118, moveRange: 6, moveType: 'land', weapons: [WEAPONS.beamSaber, WEAPONS.photonRifle, WEAPONS.missilePods], pilot: PILOTS.ray }),
-  arielis: U({ id: 'arielis', name: 'Arielis', title: 'X-Face Sniper', color: '#38b6c9', accent: '#c8f6ff', maxHp: 4600, maxEn: 160, armor: 900, mobility: 132, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.photonRifle, WEAPONS.vulcan], pilot: PILOTS.mira }),
+  valstray: U({ id: 'valstray', name: 'Valstray', title: 'X-Face Vanguard', color: '#2f6fd0', accent: '#9fd0ff', maxHp: 5800, maxEn: 140, armor: 1050, mobility: 118, moveRange: 6, moveType: 'land', weapons: [WEAPONS.beamSaber, WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.twinBreaker], pilot: PILOTS.ray }),
+  arielis: U({ id: 'arielis', name: 'Arielis', title: 'X-Face Sniper', color: '#38b6c9', accent: '#c8f6ff', maxHp: 4600, maxEn: 160, armor: 900, mobility: 132, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.photonRifle, WEAPONS.vulcan, WEAPONS.twinBarrage], pilot: PILOTS.mira }),
   gruntborg: U({ id: 'gruntborg', name: 'Grunborg', title: 'Y-Face Heavy', color: '#c94f4f', accent: '#ffd0c0', maxHp: 7200, maxEn: 110, armor: 1400, mobility: 92, moveRange: 5, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.railgun, WEAPONS.gatling, WEAPONS.mapBuster], pilot: PILOTS.gara }),
-  zephyra: U({ id: 'zephyra', name: 'Zephyra', title: 'Z-Face Duelist', color: '#5fbf62', accent: '#d8ffd8', maxHp: 5400, maxEn: 150, armor: 1000, mobility: 126, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.chestBlaster, WEAPONS.vulcan], pilot: PILOTS.orin }),
+  zephyra: U({ id: 'zephyra', name: 'Zephyra', title: 'Z-Face Duelist', color: '#5fbf62', accent: '#d8ffd8', maxHp: 5400, maxEn: 150, armor: 1000, mobility: 126, moveRange: 6, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.chestBlaster, WEAPONS.vulcan], pilot: PILOTS.orin, repairer: true }),
   // --- enemy ---
   zolda: U({ id: 'zolda', name: 'Zolda', title: 'Imperial Mass Unit', color: '#6b6f7a', accent: '#c9ccd6', maxHp: 3800, maxEn: 100, armor: 850, mobility: 88, moveRange: 5, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod], pilot: PILOTS.grunt }),
   zoldaAir: U({ id: 'zolda_air', name: 'Zolda Flyer', title: 'Imperial Air Unit', color: '#7a6b6f', accent: '#d6c9cc', maxHp: 3400, maxEn: 110, armor: 700, mobility: 104, moveRange: 7, moveType: 'air', weapons: [WEAPONS.missilePods, WEAPONS.vulcan], pilot: PILOTS.grunt }),

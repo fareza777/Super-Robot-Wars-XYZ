@@ -22,6 +22,8 @@ export interface WeaponDef {
   willReq?: number;
   /** MAP weapon: radius in tiles around the aimed tile; hits every unit in the blast (no counters) */
   mapRange?: number;
+  /** combination attack: requires this partner unit adjacent & unacted; both consume their turn */
+  comboPartner?: string;
 }
 
 export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt';
@@ -61,6 +63,8 @@ export interface UnitDef {
   pilot: PilotDef;
   boss?: boolean;
   level?: number; // starting level (default 1)
+  /** support frame: can REPAIR an adjacent ally (heal HP/EN) instead of attacking */
+  repairer?: boolean;
 }
 
 export interface UnitState {
