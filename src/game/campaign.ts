@@ -50,6 +50,7 @@ export const PARTS: Record<string, PartDef> = {
   ventCore: { id: 'ventCore', name: 'Vent Core', desc: '+10 EN regenerated each turn', price: 950, enRegen: 10 },
   nanoWeave: { id: 'nanoWeave', name: 'Nano-Weave Frame', desc: '+8% max HP regenerated each turn', price: 1600, hpRegen: 8 },
   sensor: { id: 'sensor', name: 'Sensor Array', desc: 'Reveals stealth enemies within 5 tiles', price: 800 },
+  salvageArm: { id: 'salvageArm', name: 'Salvage Arm', desc: '+25% salvage drop chance while any equipped frame stands (squad-wide)', price: 1200 },
   iField: { id: 'iField', name: 'I-Field Emitter', desc: 'Cuts incoming damage below 1400 to 20%', price: 3000, barrier: 1400 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
@@ -539,6 +540,18 @@ export const DUEL_BANTER: Record<string, { speaker: string; text: string }[]> = 
   'vexiaX|warden': [
     { speaker: 'warden', text: 'I have held this gate for three hundred years, child of the Empire. You will not be the one to open it.' },
     { speaker: 'vexiaX', text: 'I deserted that Empire for a reason, Warden. The gate opens today — one way or another.' },
+  ],
+  'valstray|vossDrake': [
+    { speaker: 'vossDrake', text: 'The pup who outflew my squadron twice. You want a rivalry, Ardent? Here I am — catch me if your frame can.' },
+    { speaker: 'valstray', text: 'I never asked for a rival, Vossen. But if the Drake wants a leash — I am the one holding it.' },
+  ],
+  'valstray|bloodyBaron': [
+    { speaker: 'bloodyBaron', text: 'X-1 Valstray. The bounty on this frame would buy me a small moon. Nothing personal — strictly business.' },
+    { speaker: 'valstray', text: 'The Empire puts a price on everything, Baron. Mine is higher than you can afford.' },
+  ],
+  'vexiaX|bloodyBaron': [
+    { speaker: 'bloodyBaron', text: 'The Imperial deserter. Your old command still pays for defectors — dead or alive. I prefer the paperwork light.' },
+    { speaker: 'vexiaX', text: 'Then you will die doing light paperwork, Baron. I left that Empire — I do not go back in a crate.' },
   ],
   'raxdenR|emperor': [
     { speaker: 'emperor', text: 'Captain Daver. I promoted you with my own hands — and you point them at me now?' },

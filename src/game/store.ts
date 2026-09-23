@@ -506,8 +506,12 @@ async function persistSettings(s: GameSettings) {
 
 const DROP_POOL: (keyof typeof ITEMS)[] = ['repairKit', 'enCell', 'ammoBox', 'spiritWing', 'valorPill', 'megaKit'];
 /** Enemies occasionally drop supplies — 25% chance per kill. */
-function rollDrop(force = false): keyof typeof ITEMS | null {
-  return force || Math.random() < 0.25 ? DROP_POOL[Math.floor(Math.random() * DROP_POOL.length)] : null;
+function rollDrop(force = false, bonusPct = 0): keyof typeof ITEMS | null {
+  return force || Math.random() < 0.25 + bonusPct / 100 ? DROP_POOL[Math.floor(Math.random() * DROP_POOL.length)] : null;
+}
+/** Salvage Arm part — squad-wide +25% drop chance while an equipped frame stands. */
+function dropBonusPct(units: UnitState[]): number {
+  return units.some((u) => u.alive && u.parts?.includes('salvageArm')) ? 25 : 0;
 }
 /** Lucky spirit — the next kill yields guaranteed supplies and +25cr salvage per enemy level. */
 /** Overdrive spirit — a kill refunds the attacker's action (consumed on use). */
@@ -534,12 +538,12 @@ function applyLucky(units: UnitState[], attackerUid: string, dead: UnitState[]):
   return { cr: dead.reduce((n, d) => n + d.level * 25, 0), drop: DROP_POOL[Math.floor(Math.random() * DROP_POOL.length)] };
 }
 /** Roll salvage drops for `n` kills — returns updated inventory + log lines + item names for the map toast. */
-function dropsForKills(n: number, inventory: Record<string, number>): { inventory: Record<string, number>; lines: string[]; names: string[] } {
+function dropsForKills(n: number, inventory: Record<string, number>, bonusPct = 0): { inventory: Record<string, number>; lines: string[]; names: string[] } {
   const lines: string[] = [];
   const names: string[] = [];
   let inv = inventory;
   for (let i = 0; i < n; i++) {
-    const drop = rollDrop();
+    const drop = rollDrop(false, bonusPct);
     if (drop) {
       inv = { ...inv, [drop]: (inv[drop] ?? 0) + 1 };
       lines.push(`Salvaged ${ITEMS[drop].name} from the wreck`);
@@ -1189,7 +1193,7 @@ export const useGame = create<Store>((set, get) => ({
     });
     let inventory = s.inventory;
     let salvageQueue = s.salvageQueue;
-    const drop = rollDrop();
+    const drop = rollDrop(false, dropBonusPct(get().units));
     if (drop) {
       inventory = { ...inventory, [drop]: (inventory[drop] ?? 0) + 1 };
       salvageQueue = [...salvageQueue, ITEMS[drop].name];
@@ -1440,7 +1444,7 @@ export const useGame = create<Store>((set, get) => ({
       let partsOwned = s.partsOwned;
       let salvageQueue = s.salvageQueue;
       for (const d of dead) {
-        const drop = rollDrop(d.elite);
+        const drop = rollDrop(d.elite, dropBonusPct(s.units));
         if (drop) {
           inventory = { ...inventory, [drop]: (inventory[drop] ?? 0) + 1 };
           log = push(log, `Salvaged ${ITEMS[drop].name} from the wreck`);
@@ -1566,7 +1570,7 @@ export const useGame = create<Store>((set, get) => ({
     let altFlag = s.altKill;
     let iFieldF = s.iFieldKill || dead.some((d) => (d.def.barrier ?? 0) > 0 || partBonus(d, 'barrier') > 0);
     for (const d of dead) {
-      const drop = rollDrop(d.elite);
+      const drop = rollDrop(d.elite, dropBonusPct(s.units));
       if (drop) {
         inventory = { ...inventory, [drop]: (inventory[drop] ?? 0) + 1 };
         log2 = push(log2, `Salvaged ${ITEMS[drop].name} from the wreck`);
@@ -1596,7 +1600,7 @@ export const useGame = create<Store>((set, get) => ({
     let carrierCr = 0;
     if (dead.some((d) => d.def.carrier)) {
       carrierCr = 600;
-      const drop = rollDrop() ?? 'repairKit';
+      const drop = rollDrop(false, dropBonusPct(s.units)) ?? 'repairKit';
       inventory = { ...inventory, [drop]: (inventory[drop] ?? 0) + 1 };
       log2 = push(log2, `💰 CARRIER DOWN — crews crack the cargo hold: +${carrierCr}cr + ${ITEMS[drop].name}`);
       salvageQueue = [...salvageQueue, ITEMS[drop].name];
@@ -1686,7 +1690,7 @@ export const useGame = create<Store>((set, get) => ({
     const mapDead = deadEnemies(s.units, state.units);
     if (mapDead.length > 0 && att.baseDefId && att.def.id !== att.baseDefId) altFlag = true;
     for (const d of mapDead) {
-      const drop = rollDrop(d.elite);
+      const drop = rollDrop(d.elite, dropBonusPct(s.units));
       if (drop) {
         inventory = { ...inventory, [drop]: (inventory[drop] ?? 0) + 1 };
         log2 = push(log2, `Salvaged ${ITEMS[drop].name} from the wreck`);
@@ -2076,8 +2080,11 @@ function simNextWave(set: SetFn, get: Get) {
   const wave = s.simWave + 1;
   const lvl = s.missionCh.lvl + wave;
   // every 5th wave is MIRROR PROTOCOL — the simulator clones your own squad against you
-  const mirror = wave % 5 === 0;
-  const comp = mirror ? s.units.filter((u) => u.alive && u.side === 'player' && !u.npc).map((u) => u.def.id) : enemyComp({ ...s.missionCh, count: Math.min(3 + wave, 8), boss: undefined });
+  const mirror = wave % 5 === 0 && wave % 10 !== 0;
+  // every 10th wave a Σ boss construct warps in alone
+  const bossWave = wave % 10 === 0;
+  const BOSS_CYCLE = ['kargan', 'moorin', 'serka', 'warden', 'bloodyBaron'];
+  const comp = bossWave ? [BOSS_CYCLE[Math.floor(wave / 10 - 1) % BOSS_CYCLE.length]] : mirror ? s.units.filter((u) => u.alive && u.side === 'player' && !u.npc).map((u) => u.def.id) : enemyComp({ ...s.missionCh, count: Math.min(3 + wave, 8), boss: undefined });
   const occupied = new Set(s.units.filter((u) => u.alive).map((u) => key(u.pos)));
   const free: Pos[] = [];
   for (let x = Math.max(0, s.map.cols - 6); x < s.map.cols; x++)
@@ -2106,6 +2113,12 @@ function simNextWave(set: SetFn, get: Get) {
       u.def = { ...u.def, name: `Σ ${u.def.name}`, accent: '#ff5a7a' };
       u.elite = true;
     }
+    if (bossWave) {
+      u.def = { ...u.def, name: `Σ ${u.def.name}`, accent: '#ff5a7a' };
+      u.level = lvl + 4;
+      u.elite = true;
+      u.hp = u.def.maxHp;
+    }
     news.push(u);
   });
   const mirrorCleared = s.simWave > 0 && s.simWave % 5 === 0;
@@ -2118,8 +2131,8 @@ function simNextWave(set: SetFn, get: Get) {
     crates = [...s.crates, { pos: free[news.length], itemId: crateItems[Math.floor(Math.random() * crateItems.length)] }];
   }
   let log = push(s.log, `— Wave ${wave - 1} cleared — +${(wave - 1) * 150} pts`);
-  log = push(log, mirror ? `▲ MIRROR WAVE ${wave} — Σ protocol: your own squad, reversed` : `▲ WAVE ${wave}: ${news.length} hostiles warp in (Lv ${lvl}${wave % 4 === 0 ? ' · ALL ELITE' : ''}${wave % 3 === 0 ? ' + supply crate' : ''})`);
-  const notice = mirror ? `▲ MIRROR WAVE ${wave} — Σ PROTOCOL · ${s.kills * 50 + (wave - 1) * 150} PTS` : `▲ WAVE ${wave} — ${news.length} HOSTILES INBOUND · ${s.kills * 50 + (wave - 1) * 150} PTS`;
+  log = push(log, bossWave ? `▲ Σ BOSS WAVE ${wave} — a construct of the Empire\'s finest` : mirror ? `▲ MIRROR WAVE ${wave} — Σ protocol: your own squad, reversed` : `▲ WAVE ${wave}: ${news.length} hostiles warp in (Lv ${lvl}${wave % 4 === 0 ? ' · ALL ELITE' : ''}${wave % 3 === 0 ? ' + supply crate' : ''})`);
+  const notice = bossWave ? `⚠ Σ BOSS WAVE ${wave} · ${s.kills * 50 + (wave - 1) * 150} PTS` : mirror ? `▲ MIRROR WAVE ${wave} — Σ PROTOCOL · ${s.kills * 50 + (wave - 1) * 150} PTS` : `▲ WAVE ${wave} — ${news.length} HOSTILES INBOUND · ${s.kills * 50 + (wave - 1) * 150} PTS`;
   set({ units, crates, simWave: wave, mirrorWon: s.mirrorWon || mirrorCleared, battle: null, phase: 'player', enemyBusy: false, selectedUid: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, mapAim: null, pendingMove: null, attackTiles: new Set(), hazardWarn: [], blizzard: false, notice, log });
   setTimeout(() => set({ notice: null }), 2600);
 }
@@ -2501,7 +2514,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       if (cur.settings.battleMode === 'off') {
         set((st) => {
           const kc = deadEnemies(cur.units, state.units).length;
-          const d = dropsForKills(kc, st.inventory);
+          const d = dropsForKills(kc, st.inventory, dropBonusPct(st.units));
           let l = mkLog(st.log);
           for (const x of d.lines) l = push(l, x);
           for (const q of defeatQuotes(cur.units, state.units, att)) l = push(l, q);
@@ -2520,7 +2533,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       const defForScene = reaction === 'cover' && coverUid ? (cur.units.find((u) => u.uid === coverUid) ?? def) : def;
       set((st) => {
         const kc = deadEnemies(cur.units, state.units).length;
-        const d = dropsForKills(kc, st.inventory);
+        const d = dropsForKills(kc, st.inventory, dropBonusPct(st.units));
         let l = mkLog(st.log);
         for (const x of d.lines) l = push(l, x);
         for (const q of defeatQuotes(cur.units, state.units, att)) l = push(l, q);
