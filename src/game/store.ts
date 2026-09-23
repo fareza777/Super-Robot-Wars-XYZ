@@ -551,7 +551,7 @@ export const useGame = create<Store>((set, get) => ({
     const bonds = seen ? s.bonds : { ...s.bonds, [bondKey(ev.a, ev.b)]: Math.min(MAX_BOND, bondLevel(s.bonds, ev.a, ev.b) + 1) };
     const bondSeen = seen ? s.bondSeen : [...s.bondSeen, ev.id];
     set({ phase: 'hq', bondEventId: null, bonds, bondSeen });
-    void persist({ chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds, bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus });
+    void persist({ chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds, bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, route: s.route });
   },
 
   startSideMission: (id) => {
@@ -1355,8 +1355,15 @@ function scheduleWalkClear(set: SetFn, get: Get, uid: string, len: number) {
 function applyVictory(set: SetFn, get: Get) {
   const s = get();
   const pilotProg = { ...s.pilotProg };
+  const aceLines: string[] = [];
   for (const u of s.units) {
-    if (u.side === 'player' && !u.npc) pilotProg[u.def.id] = { level: u.level, exp: u.exp, kills: (pilotProg[u.def.id]?.kills ?? 0) + u.kills, pp: u.pp, skills: u.skills };
+    if (u.side === 'player' && !u.npc) {
+      const prev = pilotProg[u.def.id]?.kills ?? 0;
+      const total = prev + u.kills;
+      pilotProg[u.def.id] = { level: u.level, exp: u.exp, kills: total, pp: u.pp, skills: u.skills };
+      if (prev < ACE_KILLS && total >= ACE_KILLS) aceLines.push(`★ ${u.def.pilot.name} is now an ACE (${total} career kills) — deploys at WILL 130`);
+      if (prev < ACE_MASTER_KILLS && total >= ACE_MASTER_KILLS) aceLines.push(`★★ ${u.def.pilot.name} attained ACE MASTERY (${total} kills) — permanent +5% hit/dmg, +5 evade`);
+    }
   }
   // each elite destroyed pays a bounty on top of the standard kill credit
   const eliteCr = s.units.filter((u) => u.side === 'enemy' && !u.alive && u.elite).length * 50;
@@ -1377,9 +1384,9 @@ function applyVictory(set: SetFn, get: Get) {
       lastReward: reward,
       debrief: null,
       salvageQueue: [],
-      log: push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''}`),
+      log: aceLines.reduce((l, line) => push(l, line), push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''}`)),
     });
-    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus });
+    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route });
     return;
   }
   const ch = s.missionCh;
@@ -1411,6 +1418,7 @@ function applyVictory(set: SetFn, get: Get) {
     }
   }
   const credits = s.credits + reward + masteryCr + (clearedFinal ? 5000 : 0);
+  for (const line of aceLines) log = push(log, line);
   set({
     battle: null,
     phase: 'victory',
@@ -1429,7 +1437,7 @@ function applyVictory(set: SetFn, get: Get) {
     log: push(log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + masteryCr + 5000} credits` : `Mission complete! +${reward + masteryCr} credits`),
   });
   void clearBattleSave();
-  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone });
+  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route });
 }
 
 async function runEnemyPhase(set: SetFn, get: Get) {

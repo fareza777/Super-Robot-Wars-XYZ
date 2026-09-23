@@ -54,7 +54,7 @@ export function SidePanel() {
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity onPress={() => setShowRoster((v) => !v)} style={{ flex: 1 }}>
           <Text style={styles.counts}>
-            Ally {alivePlayers(s).length} · Enemy {aliveEnemies(s).length}  {showRoster ? '▲' : '▼'}
+            Ally {alivePlayers(s).length} · Enemy {aliveEnemies(s).length} · ☠{s.kills}  {showRoster ? '▲' : '▼'}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={s.toggleDanger} style={[styles.dangerBtn, s.dangerZone && styles.dangerBtnOn]}>
@@ -158,7 +158,7 @@ export function SidePanel() {
                                 ? 'PARTNER ACTED'
                                 : 'PARTNER NOT ADJACENT'
                             : null;
-              const stat = `POW ${w.power} · R${w.rangeMin}-${w.rangeMax}${w.mapRange != null ? ` · AREA ${w.mapRange}` : ''}${w.willReq ? ` · W${w.willReq}` : ''}${w.ammo != null ? ` · ×${ammoLeft}` : ` · EN ${w.enCost}`}`;
+              const stat = `POW ${w.power} · R${w.rangeMin}-${w.rangeMax}${w.mapRange != null ? ` · AREA ${w.mapRange}` : ''}${w.willReq ? ` · W${w.willReq}` : ''}${w.ammo != null ? ` · ×${ammoLeft}` : ` · EN ${w.enCost}`}${w.pierce ? ' · ◆PIERCE' : ''}${w.drain ? ' · ✚DRAIN' : ''}`;
               return (
                 <Btn
                   key={w.id}
@@ -354,6 +354,8 @@ export function SidePanel() {
                 {w.mapRange != null ? ` · AREA ${w.mapRange}` : ''}
                 {w.willReq ? ` · W${w.willReq}` : ''}
                 {w.ammo != null ? ` · ×${inspect.ammo[w.id] ?? 0}` : ` · EN ${w.enCost}`}
+                {w.pierce ? ' · ◆PIERCE' : ''}
+                {w.drain ? ' · ✚DRAIN' : ''}
               </Text>
             ))}
             <Text style={styles.terrainLine}>{terrainDesc(s.map, inspect.pos)}</Text>

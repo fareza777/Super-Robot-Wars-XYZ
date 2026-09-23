@@ -566,6 +566,9 @@ export interface SideMissionDef {
   boss?: string;
   rewardCr: number;
   rewardItem?: ItemId;
+  objectiveType?: 'rout' | 'survive' | 'seize';
+  surviveTurns?: number;
+  objective?: string;
 }
 
 export const SIDE_MISSIONS: SideMissionDef[] = [
@@ -579,6 +582,9 @@ export const SIDE_MISSIONS: SideMissionDef[] = [
     count: 5,
     rewardCr: 1400,
     rewardItem: 'ammoBox',
+    objectiveType: 'survive',
+    surviveTurns: 5,
+    objective: 'Hold the pass until the convoy clears — survive 5 turns',
   },
   {
     id: 's2',
@@ -601,6 +607,8 @@ export const SIDE_MISSIONS: SideMissionDef[] = [
     count: 7,
     rewardCr: 2000,
     rewardItem: 'enCell',
+    objectiveType: 'seize',
+    objective: 'Capture the derelict emitter — move any unit onto the beacon',
   },
   {
     id: 's4',
@@ -646,6 +654,9 @@ export const SIDE_MISSIONS: SideMissionDef[] = [
     count: 7,
     rewardCr: 2400,
     rewardItem: 'megaKit',
+    objectiveType: 'survive',
+    surviveTurns: 6,
+    objective: 'Hold the flooded fortress until the tide lifts — survive 6 turns',
   },
   {
     id: 's8',
@@ -697,8 +708,9 @@ export function sideAsChapter(m: SideMissionDef): ChapterDef {
     count: m.count,
     boss: m.boss,
     bossLevel: m.boss ? m.lvl + 2 : undefined,
-    objectiveType: m.boss ? 'boss' : 'rout',
-    objective: m.boss ? 'Destroy the marked commander unit' : 'Rout all hostiles',
+    objectiveType: m.objectiveType ?? (m.boss ? 'boss' : 'rout'),
+    surviveTurns: m.surviveTurns,
+    objective: m.objective ?? (m.boss ? 'Destroy the marked commander unit' : 'Rout all hostiles'),
     lines: [],
     rosterCh: m.unlockCh,
   };
