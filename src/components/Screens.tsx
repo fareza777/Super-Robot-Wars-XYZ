@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART, PILOT_ART } from '../assets';
 import { play } from '../audio';
-import { CHAPTERS_COUNT, chapterOf, missionOf, rosterFor, ALL_UNITS, ROUTE_INFO } from '../game/campaign';
+import { CHAPTERS_COUNT, ChapterDef, chapterOf, missionOf, rosterFor, ALL_UNITS, ROUTE_INFO, genMap } from '../game/campaign';
+import { TERRAIN_INFO } from '../game/data';
 import { useGame } from '../game/store';
 
 export function TitleScreen() {
@@ -44,6 +45,35 @@ export function TitleScreen() {
   );
 }
 
+/** Tiny tactical map preview in the briefing — terrain, spawns, objective markers. genMap is seeded per chapter so this matches the real field. */
+function BriefingMap({ ch }: { ch: ChapterDef }) {
+  const map = useMemo(() => genMap(ch), [ch]);
+  const CW = 8;
+  const dot = (x: number, y: number, color: string, i: number | string) => (
+    <View key={`d${i}`} style={{ position: 'absolute', left: x * CW - 1, top: y * CW - 1, width: CW + 2, height: CW + 2, borderRadius: 99, backgroundColor: color, borderWidth: 1, borderColor: '#fff' }} />
+  );
+  return (
+    <View style={{ alignItems: 'center' }}>
+      <View style={{ width: map.cols * CW, height: map.rows * CW, borderWidth: 1, borderColor: '#2a3a5a', borderRadius: 4, overflow: 'hidden' }}>
+        {map.terrain.map((row, y) => (
+          <View key={y} style={{ flexDirection: 'row' }}>
+            {row.map((t, x) => (
+              <View key={x} style={{ width: CW, height: CW, backgroundColor: TERRAIN_INFO[t].color }} />
+            ))}
+          </View>
+        ))}
+        {map.playerSpawns.map((s, i) => dot(s.pos.x, s.pos.y, '#4d9dff', `p${i}`))}
+        {(map.allySpawns ?? []).map((s, i) => dot(s.pos.x, s.pos.y, '#7dff9d', `a${i}`))}
+        {map.enemySpawns.map((s, i) => dot(s.pos.x, s.pos.y, ALL_UNITS[s.defId]?.boss ? '#ffd34d' : s.elite ? '#ffb84d' : '#ff5a5a', `e${i}`))}
+        {(map.crates ?? []).map((s, i) => dot(s.pos.x, s.pos.y, '#ffe14d', `c${i}`))}
+        {map.beaconPos && dot(map.beaconPos.x, map.beaconPos.y, '#ffd34d', 'b')}
+        {map.reachPos && dot(map.reachPos.x, map.reachPos.y, '#6fe0ff', 'r')}
+      </View>
+      <Text style={{ color: '#7f95c0', fontSize: 7.5, fontWeight: '800', letterSpacing: 1.5, marginTop: 3 }}>FIELD MAP · blue=you red=hostile</Text>
+    </View>
+  );
+}
+
 export function BriefingScreen() {
   const startMission = useGame((s) => s.startMission);
   const gotoHq = useGame((s) => s.gotoHq);
@@ -65,18 +95,23 @@ export function BriefingScreen() {
       {ch.routeTag && <Text style={{ color: '#9fd8ff', fontSize: 11, fontWeight: '800', letterSpacing: 2, marginTop: 2 }}>{ch.routeTag}</Text>}
 
       <View style={styles.briefBox}>
-        <Text style={styles.briefTxt}>{ch.objective}</Text>
-        {ch.mastery && (
-          <Text style={{ color: '#ffd34d', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginTop: 2 }}>
-            ★ MASTERY: {ch.mastery.desc} — +{ch.mastery.rewardCr}cr
-          </Text>
-        )}
-        {hard && <Text style={{ color: '#ff8a5c', fontSize: 11, fontWeight: '800', letterSpacing: 1.5, marginTop: 4 }}>▲ HARD MODE — enemies +15% · mission rewards +25%</Text>}
-        {ch.requiredDefId && (
-          <Text style={{ color: '#ff5a4a', fontSize: 11, fontWeight: '800', letterSpacing: 1.2, marginTop: 4 }}>
-            ⚠ {ALL_UNITS[ch.requiredDefId]?.name.toUpperCase()} MUST SURVIVE — losing it ends the mission
-          </Text>
-        )}
+        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.briefTxt}>{ch.objective}</Text>
+            {ch.mastery && (
+              <Text style={{ color: '#ffd34d', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginTop: 2 }}>
+                ★ MASTERY: {ch.mastery.desc} — +{ch.mastery.rewardCr}cr
+              </Text>
+            )}
+            {hard && <Text style={{ color: '#ff8a5c', fontSize: 11, fontWeight: '800', letterSpacing: 1.5, marginTop: 4 }}>▲ HARD MODE — enemies +15% · mission rewards +25%</Text>}
+            {ch.requiredDefId && (
+              <Text style={{ color: '#ff5a4a', fontSize: 11, fontWeight: '800', letterSpacing: 1.2, marginTop: 4 }}>
+                ⚠ {ALL_UNITS[ch.requiredDefId]?.name.toUpperCase()} MUST SURVIVE — losing it ends the mission
+              </Text>
+            )}
+          </View>
+          <BriefingMap ch={ch} />
+        </View>
         <Text style={styles.deployLbl}>DEPLOY SQUAD — tap to toggle ({deploySel.length}/{roster.length})</Text>
         <View style={styles.squadRow}>
           {roster.map((id) => {

@@ -133,7 +133,7 @@ export function attackTiles(map: MapDef, from: Pos, w: WeaponDef, u?: UnitState)
 
 function evadeOf(u: UnitState, map: MapDef): number {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
-  return u.def.mobility + u.def.pilot.evade + (u.level - 1) * 2 + t.eva + (u.focusUntilEndOfEnemyPhase ? 30 : 0) + willEvade(u) + partBonus(u, 'mobility') + partBonus(u, 'evade') * 1.8 + (u.skills?.evade ?? 0) + (u.aceMastery ? 5 : 0);
+  return u.def.mobility + u.def.pilot.evade + (u.level - 1) * 2 + t.eva + (u.focusUntilEndOfEnemyPhase ? 30 : 0) + willEvade(u) + partBonus(u, 'mobility') + partBonus(u, 'evade') * 1.8 + (u.skills?.evade ?? 0) + (u.aceMastery ? 5 : 0) - (u.dodges ?? 0) * 8;
 }
 
 function armorOf(u: UnitState, map: MapDef): number {
@@ -322,6 +322,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
     def.alive = false;
     att.kills += 1;
   }
+  if (!result.hit) def.dodges = (def.dodges ?? 0) + 1; // dodging costs — evasion decays through the phase
 
   if (result.counter) {
     const cw = result.counter.weapon;
@@ -337,6 +338,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
       att.alive = false;
       def.kills += 1;
     }
+    if (!result.counter.hit) att.dodges = (att.dodges ?? 0) + 1;
   }
 
   att.moved = true;
@@ -398,6 +400,8 @@ export function applyMapAttack(state: GameState, attackerUid: string, targetTile
         att.pp += 3;
         kills++;
       }
+    } else {
+      t.dodges = (t.dodges ?? 0) + 1;
     }
   });
   willGain(att, 1 + kills * 4);
@@ -484,6 +488,7 @@ export function clearTransientForOwnPhase(u: UnitState): void {
   u.moved = false;
   u.acted = false;
   u.followUpReady = false;
+  u.dodges = 0;
 }
 
 // ---------- Enemy AI ----------
@@ -651,6 +656,7 @@ export function applySupportStrike(
     sup.kills += 1;
     sup.pp += 3;
   }
+  if (!r.hit) def.dodges = (def.dodges ?? 0) + 1;
   willGain(sup, 1 + (destroyed ? 4 : 0));
   const expEvents: string[] = [];
   awardExp(sup, destroyed ? 70 : 15, expEvents);

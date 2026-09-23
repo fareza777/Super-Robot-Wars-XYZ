@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, PanResponder, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
-import { MECH_ART, TERRAIN_ART } from '../assets';
+import { MECH_ART, PILOT_ART, TERRAIN_ART } from '../assets';
 import { TERRAIN_INFO } from '../game/data';
 import { dist, key, same } from '../game/engine';
 import { fogLit, useGame } from '../game/store';
@@ -123,6 +123,11 @@ const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitSt
       >
         <Image cachePolicy="memory" source={MECH_ART[u.def.id]} style={[StyleSheet.absoluteFill, u.side === 'enemy' && { transform: [{ scaleX: -1 }] }]} contentFit="cover" />
         {u.phase2 && <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,40,40,0.18)' }]} />}
+        {u.side === 'player' && !u.npc && PILOT_ART[u.def.id] && (
+          <View style={styles.faceBadge}>
+            <Image cachePolicy="memory" source={PILOT_ART[u.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" />
+          </View>
+        )}
       </View>
       <View style={[styles.hpBarBg, { width: chip * 0.9 }]}>
         <View style={[styles.hpBar, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.side === 'player' ? '#4dff7a' : '#ff5a5a' }]} />
@@ -409,6 +414,7 @@ const styles = StyleSheet.create({
   statusTag: { position: 'absolute', bottom: 3, left: 2, color: '#ffb44d', fontSize: 9, fontWeight: '800', textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
   unitWrap: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
   chip: { borderRadius: 6, overflow: 'hidden', borderWidth: 1.5, backgroundColor: '#0a0e1e' },
+  faceBadge: { position: 'absolute', bottom: 3, left: 2, width: '34%', aspectRatio: 1, borderRadius: 999, borderWidth: 1, borderColor: '#6db4ff', overflow: 'hidden', backgroundColor: '#0a0e1e' },
   hpBarBg: { position: 'absolute', bottom: 0, height: 3, backgroundColor: '#111', borderRadius: 1 },
   hpBar: { height: 3, borderRadius: 1 },
   lvTag: {

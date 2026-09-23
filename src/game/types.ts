@@ -142,6 +142,8 @@ export interface UnitState {
   armed?: boolean;
   /** active debuffs (burn/stun/break) — ticked at the start of the unit's own phase */
   statuses?: StatusFx[];
+  /** evasion decay — dodges this phase; each further dodge attempt is 8% harder */
+  dodges?: number;
   /** afterburner part: may attack once more after destroying a target, once per turn */
   followUpReady?: boolean;
   /** total damage dealt this mission (for the debrief MVP) */

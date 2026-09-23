@@ -1058,7 +1058,7 @@ function ReactionBar({ attacker, defender, weapon, coverUid }: { attacker: UnitS
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
           <Btn2 label="COUNTER" sub={cw ? `${cw.name} · ~${cDmg} (${cHc}%)` : 'no weapon in range'} color="#ff8a5c" onPress={() => setReaction('counter')} />
           <Btn2 label="DEFEND" sub="damage halved · no counter" color="#7ee7ff" onPress={() => setReaction('defend')} />
-          <Btn2 label="EVADE" sub="-30% enemy hit · no counter" color="#b6ff9d" onPress={() => setReaction('evade')} />
+          <Btn2 label="EVADE" sub={`-30% enemy hit${(defNow.dodges ?? 0) > 0 ? ` · EV decayed ×${defNow.dodges}` : ''} · no counter`} color="#b6ff9d" onPress={() => setReaction('evade')} />
           {cover && <Btn2 label="COVER" sub={`${cover.def.pilot.name} intercepts · -30% dmg`} color="#ffd34d" onPress={() => setReaction('cover')} />}
         </View>
         <View style={{ height: 3, backgroundColor: '#141828', borderRadius: 2, marginTop: 9, overflow: 'hidden' }}>

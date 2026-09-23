@@ -1445,8 +1445,8 @@ export const useGame = create<Store>((set, get) => ({
     void persistBattle(get());
     const healed: string[] = [];
     const units = s.units.map((u) => {
-      if (u.side !== 'enemy' || !u.alive) return u;
-      const c = { ...u };
+      if (u.side !== 'enemy' || !u.alive) return u.side === 'player' && (u.dodges ?? 0) > 0 ? { ...u, dodges: 0 } : u; // evasion decay resets as each side's phase begins
+      const c = { ...u, dodges: 0 };
       const r = phaseRecovery(c, s.map);
       if (r.hpGain > 0) healed.push(`${c.def.name} +${r.hpGain} HP`);
       if (r.hpLoss > 0) healed.push(`${c.def.name} -${r.hpLoss} HP (burning terrain)`);
@@ -1574,7 +1574,7 @@ function simNextWave(set: SetFn, get: Get) {
     }
     news.push(u);
   });
-  const healed = s.units.map((u) => (u.side !== 'player' || !u.alive ? u : { ...u, hp: Math.min(u.def.maxHp, u.hp + Math.round(u.def.maxHp * 0.25)), en: Math.min(u.def.maxEn, u.en + 30), moved: false, acted: false }));
+  const healed = s.units.map((u) => (u.side !== 'player' || !u.alive ? u : { ...u, hp: Math.min(u.def.maxHp, u.hp + Math.round(u.def.maxHp * 0.25)), en: Math.min(u.def.maxEn, u.en + 30), moved: false, acted: false, dodges: 0 }));
   const units = healed.concat(news);
   // every 3rd wave a supply crate warps in with the hostiles
   let crates = s.crates;
@@ -1864,6 +1864,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       else {
         c.moved = false;
         c.acted = false;
+        c.dodges = 0;
       }
       if (c.alive && c.statuses && c.statuses.length) {
         // status effects tick once per round: burn bleeds HP, stun eats the unit's phase, break shreds armor
