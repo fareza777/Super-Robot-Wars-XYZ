@@ -183,6 +183,8 @@ export interface UnitState {
   crippled?: boolean;
   /** Gravity Well — frame is anchored and cannot move next enemy phase */
   anchored?: boolean;
+  /** overwatch stance: fires on the first hostile that enters range during the enemy phase */
+  overwatch?: boolean;
   /** Guts — next attack deals +75% damage while under half HP */
   gutsForNextAttack?: boolean;
   /** Exposed — painted by targeting data: next hit lands +20 hit and +25% damage */

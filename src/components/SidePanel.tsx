@@ -313,6 +313,7 @@ export function SidePanel() {
                 accent="#7ec8ff"
               />
             )}
+            <Btn label="\u25CF OVRWATCH" sub="hold — auto-fire on first foe in range" onPress={s.overwatchUnit} accent="#7ec8ff" />
             <Btn label="WAIT" onPress={s.waitUnit} />
             <Btn label="CANCEL" onPress={s.cancel} accent="#666" />
           </View>

@@ -71,6 +71,7 @@ import {
   terrainAt,
   unitAt,
   usableWeapons,
+  rangeMaxOf,
   weaponsAgainst,
 } from './engine';
 import { AttackResult, GameSettings, MapDef, Phase, PilotSkillId, PilotSkills, Pos, Reaction, SpiritId, StatusFx, UnitState, WeaponDef } from './types';
@@ -287,6 +288,7 @@ interface Store {
   chooseMapTile: (p: Pos) => void;
   setReaction: (r: Reaction) => void;
   waitUnit: () => void;
+  overwatchUnit: () => void;
   transformUnit: (uid: string) => void;
   openSpirits: (uid: string) => void;
   beginMission: () => void; // deploy phase -> chapter dialog
@@ -1803,6 +1805,15 @@ export const useGame = create<Store>((set, get) => ({
     set({ units, menuForUid: null, pendingMove: null, selectedUid: null, moveTiles: new Map(), inspectUid: null, threatTiles: new Set() });
   },
 
+  overwatchUnit: () => {
+    const s = get();
+    if (!s.menuForUid) return;
+    const uid = s.menuForUid;
+    const name = s.units.find((u) => u.uid === uid)?.def.name;
+    const units = s.units.map((u) => (u.uid === uid ? { ...u, acted: true, moved: true, overwatch: true } : u));
+    set({ units, menuForUid: null, pendingMove: null, selectedUid: null, moveTiles: new Map(), inspectUid: null, threatTiles: new Set(), log: push(s.log, `\u25CF ${name} holds fire — overwatch arc armed`) });
+  },
+
   openSpirits: (uid) => set({ spiritForUid: uid }),
 
   beginMission: () => {
@@ -2404,6 +2415,41 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         setTimeout(() => set({ notice: null }), 2600);
         await sleep(700);
         continue; // no attack — it's off the map
+      }
+    }
+
+    // overwatch volley — a defender on standby snaps a shot at the first hostile in arc
+    {
+      const cur = get();
+      const foe = cur.units.find((u) => u.uid === plan.unit.uid);
+      const inArc = (u: UnitState, t: Pos) => (w: WeaponDef) => !w.mapRange && dist(u.pos, t) >= w.rangeMin && dist(u.pos, t) <= rangeMaxOf(u, w);
+      const ow = foe?.alive === true ? cur.units.find((u) => u.alive && u.overwatch === true && u.side === 'player' && !u.npc && usableWeapons(u).some(inArc(u, foe.pos))) : undefined;
+      const owW = ow ? usableWeapons(ow).filter(inArc(ow, foe!.pos)).sort((a, b) => b.power - a.power)[0] : undefined;
+      if (ow && owW && foe) {
+        const { state, result } = applyAttack({ map: cur.map, units: cur.units, turn: cur.turn, blizzard: cur.blizzard }, ow.uid, foe.uid, owW.id, modsFor(cur.bonds, cur.units), 'evade');
+        const wi = state.units.findIndex((u) => u.uid === ow.uid);
+        if (wi >= 0) state.units[wi] = { ...state.units[wi], overwatch: false };
+        const dead = deadEnemies(cur.units, state.units);
+        let log2 = push(cur.log, `\u25CF OVERWATCH — ${ow.def.name} snaps ${owW.name} at the intruder${result.hit ? ` for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''}` : ' — missed'}`);
+        let inventory = cur.inventory;
+        let salvageQueue = cur.salvageQueue;
+        for (const d of dead) {
+          const drop = rollDrop(d.elite, dropBonusPct(cur.units));
+          if (drop) {
+            inventory = { ...inventory, [drop]: (inventory[drop] ?? 0) + 1 };
+            log2 = push(log2, `Salvaged ${ITEMS[drop].name} from the wreck`);
+            salvageQueue = [...salvageQueue, ITEMS[drop].name];
+          }
+        }
+        set({ units: state.units, kills: cur.kills + dead.length, killsByDef: tallyKills(cur.killsByDef, dead), inventory, salvageQueue, log: log2, notice: `\u25CF OVERWATCH — ${ow.def.name}` });
+        setTimeout(() => set({ notice: null }), 1900);
+        await sleep(520);
+        const end = checkEnd(get().units, get().missionCh, get().turn);
+        if (end) {
+          if (end === 'victory') applyVictory(set, get);
+          else set({ phase: end, enemyBusy: false });
+          return;
+        }
       }
     }
 

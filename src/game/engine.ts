@@ -748,6 +748,7 @@ export function clearTransientForOwnPhase(u: UnitState): void {
   u.moved = false;
   u.acted = false;
   u.followUpReady = false;
+  u.overwatch = false;
   u.dodges = 0;
 }
 
