@@ -341,6 +341,13 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
       def.miracleArmed = false;
       def.hp = 10;
     }
+    // Mercy spirit — pull the killing blow, leave the foe at 10 HP (capture setup)
+    if (result.destroyed && att.mercyArmed && def.side === 'enemy' && !def.def.boss) {
+      result.destroyed = false;
+      result.mercy = true;
+      att.mercyArmed = false;
+      def.hp = 10;
+    }
     if (result.destroyed) {
       def.overkillDealt = Math.max(0, result.damage - hpBefore);
       result.overkill = def.overkillDealt;
@@ -560,6 +567,12 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'miracle':
       u.miracleArmed = true;
       break;
+    case 'overdrive':
+      u.againOnKill = true;
+      break;
+    case 'mercy':
+      u.mercyArmed = true;
+      break;
     case 'snipe':
       u.snipeForNextAttack = true;
       break;
@@ -606,6 +619,9 @@ interface AiPlan {
   weapon?: WeaponDef;
   /** morale break — a battered grunt withdraws instead of pressing the attack */
   fleeing?: boolean;
+  /** MAP barrage — aim point + weapon when a blast beats a single shot */
+  mapAim?: Pos;
+  mapWeapon?: WeaponDef;
 }
 
 /** For each enemy unit pick: best tile in range that can attack the weakest-hit player unit; else move toward nearest player. */
@@ -661,6 +677,28 @@ export function planEnemyActions(state: GameState): AiPlan[] {
           if (!best || score > best.score) best = { pos: tile, target: p, weapon: w, score };
         }
       }
+    }
+    // MAP barrage — a clustered formation is worth more than any single shot:
+    // hit >=2 players while catching no allies and the siege weapon fires instead
+    let mapPlan: { pos: Pos; aim: Pos; weapon: WeaponDef; hits: number } | null = null;
+    for (const tile of tiles) {
+      for (const w of usableWeapons(e)) {
+        if (w.mapRange == null) continue;
+        if (!same(tile, e.pos) && !w.postMove) continue;
+        for (const p of players) {
+          const d = dist(tile, p.pos);
+          if (d < w.rangeMin || d > rangeMaxOf(e, w)) continue;
+          const blast = units.filter((u) => u.alive && dist(u.pos, p.pos) <= (w.mapRange ?? 0));
+          const ps = blast.filter((u) => u.side === 'player' && !u.vanishUntilEndOfEnemyPhase).length;
+          const es = blast.filter((u) => u.side === 'enemy' && u.uid !== e.uid).length;
+          if (ps >= 2 && es === 0 && (!mapPlan || ps > mapPlan.hits)) mapPlan = { pos: tile, aim: { ...p.pos }, weapon: w, hits: ps };
+        }
+      }
+    }
+    if (mapPlan && (!best || mapPlan.hits >= 3 || (mapPlan.hits >= 2 && best.score < 3200))) {
+      claimed.add(key(mapPlan.pos));
+      plans.push({ unit: e, moveTo: mapPlan.pos, mapAim: mapPlan.aim, mapWeapon: mapPlan.weapon });
+      continue;
     }
     if (best) {
       claimed.add(key(best.pos));

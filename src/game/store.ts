@@ -482,6 +482,17 @@ function rollDrop(force = false): keyof typeof ITEMS | null {
   return force || Math.random() < 0.25 ? DROP_POOL[Math.floor(Math.random() * DROP_POOL.length)] : null;
 }
 /** Lucky spirit — the next kill yields guaranteed supplies and +25cr salvage per enemy level. */
+/** Overdrive spirit — a kill refunds the attacker's action (consumed on use). */
+function applyOverdrive(units: UnitState[], attackerUid: string, kills: number, log: string[]): string[] {
+  if (kills <= 0) return log;
+  const att = units.find((u) => u.uid === attackerUid);
+  if (!att?.alive || !att.againOnKill) return log;
+  att.againOnKill = false;
+  att.acted = false;
+  att.moved = true;
+  return push(log, `⚡ OVERDRIVE — ${att.def.name} presses the attack again!`);
+}
+
 function applyLucky(units: UnitState[], attackerUid: string, dead: UnitState[]): { cr: number; drop?: keyof typeof ITEMS } {
   const att = units.find((u) => u.uid === attackerUid);
   if (!att?.luckyForNextKill || dead.length === 0) return { cr: 0 };
@@ -1359,6 +1370,7 @@ export const useGame = create<Store>((set, get) => ({
         log = push(log, `Salvaged ${ITEMS[lucky.drop].name} — Lucky's blessing`);
         salvageQueue = [...salvageQueue, ITEMS[lucky.drop].name];
       }
+      log = applyOverdrive(state.units, att.uid, killCount, log);
       const common = {
         units: state.units,
         log,
@@ -1428,6 +1440,7 @@ export const useGame = create<Store>((set, get) => ({
       : log;
     if (result.support) log2 = push(log2, `⇒ ${result.support.name} support fire: ${result.support.hit ? `${result.support.damage}${result.support.destroyed ? ' — DESTROYED' : ''}` : 'missed'}`);
     if (result.miracle) log2 = push(log2, `✦ MIRACLE — ${def.def.name} refuses to fall! (10 HP)`);
+    if (result.mercy) log2 = push(log2, `🕊 MERCY — ${def.def.name} spared at 10 HP — the crew can board the frame`);
     if (result.crippled) log2 = push(log2, `⚠ ${def.def.name} is CRIPPLED — move -2`);
     if (result.counter?.miracle) log2 = push(log2, `✦ MIRACLE — ${att.def.name} refuses to fall! (10 HP)`);
     if (result.counter?.crippled) log2 = push(log2, `⚠ ${att.def.name} is CRIPPLED — move -2`);
@@ -1470,6 +1483,7 @@ export const useGame = create<Store>((set, get) => ({
       log2 = push(log2, `Salvaged ${ITEMS[lucky.drop].name} — Lucky's blessing`);
       salvageQueue = [...salvageQueue, ITEMS[lucky.drop].name];
     }
+    log2 = applyOverdrive(state.units, att.uid, killCount, log2);
     if (vossenDowned(s.units, state.units)) {
       inventory = { ...inventory, megaKit: (inventory.megaKit ?? 0) + 1 };
       log2 = push(log2, "Cpt. Vossen's wreck spills a cache — Mega Repair Kit acquired");
@@ -1566,6 +1580,7 @@ export const useGame = create<Store>((set, get) => ({
       log2 = push(log2, `Salvaged ${ITEMS[lucky.drop].name} — Lucky's blessing`);
       salvageQueue = [...salvageQueue, ITEMS[lucky.drop].name];
     }
+    log2 = applyOverdrive(state.units, att.uid, mapKills, log2);
     const mapChain = mapKills > 0 ? (s.turn === s.chainTurn ? s.chainCount + mapKills : mapKills) : s.chainCount;
     const mapChainBonus = mapChain > 1 && mapKills > 0 ? 30 * mapChain : 0;
     if (mapChainBonus) log2 = push(log2, `⛓ CHAIN ×${mapChain} — +${mapChainBonus}cr bonus salvage`);
@@ -2090,6 +2105,65 @@ async function runEnemyPhase(set: SetFn, get: Get) {
         await sleep(700);
         continue; // no attack — it's off the map
       }
+    }
+
+    // enemy MAP barrage — a siege unit blasts the clustered formation (no counters)
+    if (plan.mapAim && plan.mapWeapon) {
+      const cur = get();
+      const att = cur.units.find((u) => u.uid === plan.unit.uid)!;
+      const mw = plan.mapWeapon;
+      const aim = plan.mapAim;
+      const targets = cur.units
+        .filter((u) => u.alive && u.uid !== att.uid && dist(u.pos, aim) <= (mw.mapRange ?? 0))
+        .sort((a, b) => dist(a.pos, aim) - dist(b.pos, aim));
+      if (!targets.length) {
+        set((st) => ({ units: st.units.map((u) => (u.uid === att.uid ? { ...u, acted: true } : u)) }));
+        await sleep(120);
+        continue;
+      }
+      const primary = targets[0];
+      const { state, result } = applyMapAttack({ map: cur.map, units: cur.units, turn: cur.turn }, att.uid, aim, mw.id, modsFor(cur.bonds, cur.units));
+      let log2 = push(cur.log, `☄ MAP BARRAGE — ${att.def.name} fires ${mw.name}: ${targets.length} units in the blast`);
+      const primaryRes = targets[0].uid;
+      log2 = push(log2, `  ${primary.def.name}: ${result.hit ? `${result.damage}${result.destroyed ? ' — DESTROYED' : ''}` : 'missed'}`);
+      for (const sp of result.splash ?? []) log2 = push(log2, `  ${sp.name}: ${sp.hit ? `${sp.damage}${sp.destroyed ? ' — DESTROYED' : ''}` : 'missed'}`);
+      for (const q of defeatQuotes(cur.units, state.units, att)) log2 = push(log2, q);
+      if (cur.settings.battleMode === 'off') {
+        set({ units: state.units, log: log2, notice: `☄ MAP BARRAGE — ${att.def.name}` });
+        setTimeout(() => set({ notice: null }), 2400);
+        const end = checkEnd(get().units, get().missionCh, get().turn);
+        if (end) {
+          if (end === 'victory') applyVictory(set, get);
+          else set({ phase: end, enemyBusy: false });
+          return;
+        }
+        await sleep(160);
+        continue;
+      }
+      set({
+        units: state.units,
+        phase: 'battle',
+        log: log2,
+        notice: `☄ MAP BARRAGE — ${att.def.name}`,
+        battle: {
+          attacker: { ...att },
+          defender: { ...primary },
+          attackerAfter: state.units.find((u) => u.uid === att.uid)!,
+          defenderAfter: state.units.find((u) => u.uid === primaryRes) ?? primary,
+          weapon: mw,
+          result,
+        },
+      });
+      await waitFor(() => get().battle === null);
+      set({ notice: null });
+      const end = checkEnd(get().units, get().missionCh, get().turn);
+      if (end) {
+        if (end === 'victory') applyVictory(set, get);
+        else set({ phase: end, enemyBusy: false });
+        return;
+      }
+      await sleep(180);
+      continue;
     }
 
     if (plan.target && plan.weapon) {

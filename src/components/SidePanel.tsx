@@ -24,6 +24,8 @@ function buffNames(u: UnitState): string[] {
   if (u.accelThisTurn) names.push('ACCEL');
   if (u.miracleArmed) names.push('MIRACLE');
   if (u.luckyForNextKill) names.push('☘LUCKY');
+  if (u.againOnKill) names.push('⚡OVRDRV');
+  if (u.mercyArmed) names.push('🕊MERCY');
   if (u.crippled) names.push('⛓CRIPPLED');
   return names;
 }

@@ -104,10 +104,10 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -122,12 +122,12 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   raxden: U({ id: 'raxden', name: 'Raxden Crimson', title: 'Custom Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.plasmaEdge, WEAPONS.railgun, WEAPONS.vulcan], pilot: CAMPAIGN_PILOTS.raxp, boss: true }),
   moorin: U({ id: 'moorin', name: 'Moorin Anvil', title: 'Imperial General', color: '#4a5a48', accent: '#d0e0c0', maxHp: 9800, maxEn: 160, armor: 1500, mobility: 96, moveRange: 5, moveType: 'land', weapons: [WEAPONS.megaBeam, WEAPONS.gatling, WEAPONS.punch], pilot: CAMPAIGN_PILOTS.moorinp, boss: true }),
   serka: U({ id: 'serka', name: 'Serka Vanta', title: 'Void Empress', color: '#5a2f6e', accent: '#e0b8ff', maxHp: 8200, maxEn: 190, armor: 1000, mobility: 140, moveRange: 7, moveType: 'air', weapons: [WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.serkap, boss: true }),
-  empress: U({ id: 'empress', name: 'Empress Ascendant', title: 'True Void Form', color: '#7a3f8e', accent: '#ffe0ff', maxHp: 11000, maxEn: 220, armor: 1250, mobility: 146, moveRange: 7, moveType: 'air', weapons: [WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.chestBlaster], pilot: CAMPAIGN_PILOTS.serkap, boss: true, resists: { beam: 0.3, funnel: 0.3 } }),
+  empress: U({ id: 'empress', name: 'Empress Ascendant', title: 'True Void Form', color: '#7a3f8e', accent: '#ffe0ff', maxHp: 11000, maxEn: 220, armor: 1250, mobility: 146, moveRange: 7, moveType: 'air', weapons: [WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.chestBlaster, WEAPONS.mapCataclysm], pilot: CAMPAIGN_PILOTS.serkap, boss: true, resists: { beam: 0.3, funnel: 0.3 } }),
   warden: U({ id: 'warden', name: 'Gate Warden', title: 'Ancient Guardian', color: '#7a5a30', accent: '#ffe0a8', maxHp: 12000, maxEn: 140, armor: 1600, mobility: 90, moveRange: 4, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.bramp, boss: true }),
   emperor: U({ id: 'emperor', name: 'Throne of Vael', title: 'The Emperor', color: '#e8d8a0', accent: '#fff8d8', maxHp: 15000, maxEn: 240, armor: 1500, mobility: 130, moveRange: 6, moveType: 'air', weapons: [WEAPONS.chestBlaster, WEAPONS.funnelArray, WEAPONS.megaBeam, WEAPONS.plasmaEdge], pilot: CAMPAIGN_PILOTS.vaelp, boss: true }),
   // --- late-wave line frames ---
   lancer: U({ id: 'lancer', name: 'Wolfen Lance', title: 'Strike Cavalry', color: '#4a3a2e', accent: '#ff9060', maxHp: 3600, maxEn: 120, armor: 700, mobility: 150, moveRange: 7, moveType: 'land', weapons: [WEAPONS.drillLancer, WEAPONS.plasmaEdge, WEAPONS.vulcan], pilot: PILOTS.grunt }),
-  bulwark: U({ id: 'bulwark', name: 'Rampart Bulwark', title: 'Siege Anchor', color: '#3a4438', accent: '#ffe060', maxHp: 8200, maxEn: 80, armor: 1700, mobility: 55, moveRange: 3, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod, WEAPONS.vampEdge], pilot: PILOTS.grunt, resists: { gun: 0.3, missile: 0.3, melee: 0.25 } }),
+  bulwark: U({ id: 'bulwark', name: 'Rampart Bulwark', title: 'Siege Anchor', color: '#3a4438', accent: '#ffe060', maxHp: 8200, maxEn: 80, armor: 1700, mobility: 55, moveRange: 3, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod, WEAPONS.vampEdge, WEAPONS.mapShelling], pilot: PILOTS.grunt, resists: { gun: 0.3, missile: 0.3, melee: 0.25 } }),
   // unarmed civilian convoy — escort objective on protect chapters
   arklander: U({ id: 'arklander', name: 'Arklander Convoy', title: 'Civilian Transport', color: '#5a5148', accent: '#e0d0a8', maxHp: 3400, maxEn: 0, armor: 350, mobility: 40, moveRange: 0, moveType: 'land', weapons: [], pilot: PILOTS.civ }),
   // --- player reinforcements (join at arc boundaries) ---
@@ -862,6 +862,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_overlord', name: 'OVERLORD', desc: 'Win any mission on EXTREME difficulty', rewardCr: 1500 },
   { id: 'h_shepherd', name: 'SHEPHERD', desc: 'Finish an escort mission with the convoy unscathed', rewardCr: 1100 },
   { id: 'h_flawless', name: 'FLAWLESS', desc: 'Clear a main chapter at Ch.10+ without losing a single unit', rewardCr: 1400 },
+  { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -914,6 +915,8 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return s.shepHon === true;
     case 'h_flawless':
       return s.flawlessHon === true;
+    case 'h_acecorps':
+      return kills.filter((p) => (p.kills ?? 0) >= 25).length >= 3;
     default:
       return false;
   }

@@ -43,7 +43,7 @@ export interface StatusFx {
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -168,6 +168,10 @@ export interface UnitState {
   vanishUntilEndOfEnemyPhase?: boolean;
   /** Lucky spirit — the next kill yields a guaranteed drop and bonus salvage */
   luckyForNextKill?: boolean;
+  /** Overdrive spirit — act again after landing a kill (consumed) */
+  againOnKill?: boolean;
+  /** Mercy spirit — pull a lethal hit, leave the foe at 10 HP (consumed) */
+  mercyArmed?: boolean;
   /** overkill damage this unit took on its deathblow — feeds salvage bonus */
   overkillDealt?: number;
 }
@@ -283,6 +287,8 @@ export interface AttackResult {
   pincer?: boolean;
   /** Miracle spirit — the defender refused a fatal hit (10 HP left) */
   miracle?: boolean;
+  /** Mercy spirit — attacker pulled the killing blow (defender at 10 HP) */
+  mercy?: boolean;
   /** this blow crippled the defender's frame (move -2) */
   crippled?: boolean;
   /** damage beyond what the finishing blow needed */
