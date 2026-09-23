@@ -41,6 +41,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   deadshot: { id: 'deadshot', name: 'Deadshot', cost: 45, desc: 'Paint the kill-shot — your next attack is a guaranteed critical' },
   frenzy: { id: 'frenzy', name: 'Frenzy', cost: 40, desc: 'Push the reactor — your weapons cost no EN for the rest of this turn' },
   breach: { id: 'breach', name: 'Breach', cost: 45, desc: 'Overload the cutter — your next attack ignores all enemy armor' },
+  relentless: { id: 'relentless', name: 'Relentless', cost: 35, desc: 'Blood in the water — +25% damage to enemies below half HP until the enemy phase ends' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
@@ -94,6 +95,7 @@ export const WEAPONS = {
   thermoCharge: W({ id: 'thermo_charge', name: 'Thermobaric Charge', kind: 'missile', power: 3600, rangeMin: 1, rangeMax: 3, enCost: 0, ammo: 4, hitMod: 0, postMove: false, animSeed: 18, willReq: 110, knockback: true }),
   railVolley: W({ id: 'rail_volley', name: 'Railgun Volley', kind: 'gun', power: 2000, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 12, hitMod: 15, postMove: true, animSeed: 19, status: 'break', sniper: true }),
   flareField: W({ id: 'flare_field', name: 'Flare Field', kind: 'funnel', power: 2400, rangeMin: 1, rangeMax: 4, enCost: 20, ammo: null, hitMod: 15, postMove: true, animSeed: 20, status: 'burn' }),
+  flareDart: W({ id: 'flare_dart', name: 'Flare Dart', kind: 'beam', power: 1600, rangeMin: 2, rangeMax: 5, enCost: 12, ammo: null, hitMod: 10, postMove: true, animSeed: 21, status: 'mark' }),
   mapFlare: W({ id: 'map_flare', name: 'MAP: Flare Burst', kind: 'funnel', power: 1900, rangeMin: 2, rangeMax: 5, enCost: 45, ammo: null, hitMod: -5, postMove: false, animSeed: 20, willReq: 105, mapRange: 1 }),
   mapShelling: W({ id: 'map_shelling', name: 'MAP: Siege Howitzer', kind: 'missile', power: 2400, rangeMin: 2, rangeMax: 6, enCost: 40, ammo: null, hitMod: -10, postMove: false, animSeed: 25, mapRange: 1 }),
   mapCataclysm: W({ id: 'map_cataclysm', name: 'MAP: Void Cataclysm', kind: 'funnel', power: 2800, rangeMin: 2, rangeMax: 6, enCost: 60, ammo: null, hitMod: -5, postMove: false, animSeed: 26, mapRange: 2 }),
@@ -136,9 +138,9 @@ export const UNITS: Record<string, UnitDef> = {
   valstray_s: U({ id: 'valstray_s', name: 'Valstray Strider', title: 'X-Face Skyframe', color: '#3a8de0', accent: '#bfe4ff', maxHp: 5400, maxEn: 140, armor: 880, mobility: 148, moveRange: 8, moveType: 'air', weapons: [WEAPONS.beamSaber, WEAPONS.photonRifle, WEAPONS.vulcan, WEAPONS.arcCannon, WEAPONS.dawnCutter], pilot: PILOTS.ray }),
   arielis: U({ id: 'arielis', name: 'Arielis', title: 'X-Face Sniper', color: '#38b6c9', accent: '#c8f6ff', maxHp: 4600, maxEn: 160, armor: 900, mobility: 132, moveRange: 7, moveType: 'air', weapons: [WEAPONS.eclipseLance, WEAPONS.megaBeam, WEAPONS.photonRifle, WEAPONS.vulcan, WEAPONS.twinBarrage, WEAPONS.railVolley, WEAPONS.starfallStrike], pilot: PILOTS.mira }),
   gruntborg: U({ id: 'gruntborg', name: 'Grunborg', title: 'Y-Face Heavy', color: '#c94f4f', accent: '#ffd0c0', maxHp: 7200, maxEn: 110, armor: 1400, mobility: 92, moveRange: 5, moveType: 'land', weapons: [WEAPONS.novaMortar, WEAPONS.drillLancer, WEAPONS.railgun, WEAPONS.gatling, WEAPONS.mapBuster, WEAPONS.thermoCharge, WEAPONS.omniBarrage, WEAPONS.ironChord], pilot: PILOTS.gara }),
-  zephyra: U({ id: 'zephyra', name: 'Zephyra', title: 'Z-Face Duelist', color: '#5fbf62', accent: '#d8ffd8', maxHp: 5400, maxEn: 150, armor: 1000, mobility: 126, moveRange: 6, moveType: 'air', weapons: [WEAPONS.wraithBloom, WEAPONS.plasmaEdge, WEAPONS.chestBlaster, WEAPONS.vulcan, WEAPONS.flareField, WEAPONS.mapFlare, WEAPONS.mirageWaltz], pilot: PILOTS.orin, repairer: true, supplier: true, transformInto: 'zephyra_w' }),
+  zephyra: U({ id: 'zephyra', name: 'Zephyra', title: 'Z-Face Duelist', color: '#5fbf62', accent: '#d8ffd8', maxHp: 5400, maxEn: 150, armor: 1000, mobility: 126, moveRange: 6, moveType: 'air', weapons: [WEAPONS.wraithBloom, WEAPONS.plasmaEdge, WEAPONS.chestBlaster, WEAPONS.vulcan, WEAPONS.flareField, WEAPONS.flareDart, WEAPONS.mapFlare, WEAPONS.mirageWaltz], pilot: PILOTS.orin, repairer: true, supplier: true, transformInto: 'zephyra_w' }),
   // Zephyra's skirmisher frame — a ghost on the field: faster, harder to pin, paper-thin
-  zephyra_w: U({ id: 'zephyra_w', name: 'Zephyra Wisp', title: 'Z-Face Ghost', color: '#8fe08f', accent: '#eaffea', maxHp: 5200, maxEn: 150, armor: 750, mobility: 158, moveRange: 8, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.chestBlaster, WEAPONS.flareField, WEAPONS.mirageWaltz], pilot: PILOTS.orin }),
+  zephyra_w: U({ id: 'zephyra_w', name: 'Zephyra Wisp', title: 'Z-Face Ghost', color: '#8fe08f', accent: '#eaffea', maxHp: 5200, maxEn: 150, armor: 750, mobility: 158, moveRange: 8, moveType: 'air', weapons: [WEAPONS.plasmaEdge, WEAPONS.chestBlaster, WEAPONS.flareField, WEAPONS.flareDart, WEAPONS.mirageWaltz], pilot: PILOTS.orin }),
   // --- enemy ---
   zolda: U({ id: 'zolda', name: 'Zolda', title: 'Imperial Mass Unit', color: '#6b6f7a', accent: '#c9ccd6', maxHp: 3800, maxEn: 100, armor: 850, mobility: 88, moveRange: 5, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod], pilot: PILOTS.grunt }),
   zoldaAir: U({ id: 'zolda_air', name: 'Zolda Flyer', title: 'Imperial Air Unit', color: '#7a6b6f', accent: '#d6c9cc', maxHp: 3400, maxEn: 110, armor: 700, mobility: 104, moveRange: 7, moveType: 'air', weapons: [WEAPONS.missilePods, WEAPONS.vulcan], pilot: PILOTS.grunt }),

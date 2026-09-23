@@ -159,7 +159,7 @@ function armorOf(u: UnitState, map: MapDef): number {
 }
 
 /** status applied on a landed hit — refreshes the same debuff instead of stacking */
-function applyStatus(u: UnitState, id: 'burn' | 'stun' | 'break' | 'slow'): void {
+function applyStatus(u: UnitState, id: 'burn' | 'stun' | 'break' | 'slow' | 'mark'): void {
   u.statuses = [...(u.statuses ?? []).filter((s) => s.id !== id), { id, turns: 2 }];
 }
 
@@ -178,7 +178,7 @@ export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: Map
   if (att.strikeForNextAttack) return 100;
   const trait = att.def.pilot.trait;
   const traitHit = (trait === 'deadeye' ? 8 : 0) + (trait === 'falcon_wing' && def.def.moveType === 'air' ? 10 : 0) + (trait === 'crimson_fury' && att.hp < att.def.maxHp / 2 ? 8 : 0);
-  const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus + traitHit + willHitBonus(att) + partBonus(att, 'hit') + (att.skills?.hit ?? 0) + (att.aceMastery ? 5 : 0) + (att.hymnUntilEndOfEnemyPhase ? 15 : 0) + (def.exposed ? 20 : 0) - evadeOf(def, map) * 0.55;
+  const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus + traitHit + willHitBonus(att) + partBonus(att, 'hit') + (att.skills?.hit ?? 0) + (att.aceMastery ? 5 : 0) + (att.hymnUntilEndOfEnemyPhase ? 15 : 0) + (def.exposed ? 20 : 0) + (def.statuses?.some((fx) => fx.id === 'mark') ? 25 : 0) - evadeOf(def, map) * 0.55;
   return Math.max(10, Math.min(100, Math.round(raw * (att.wounded ? 0.85 : 1))));
 }
 
@@ -191,6 +191,8 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (att.soulForNextAttack) dmg = Math.round(dmg * 2);
   if (att.gutsForNextAttack && att.hp < att.def.maxHp / 2) dmg = Math.round(dmg * 1.75);
   if (def.exposed) dmg = Math.round(dmg * 1.25);
+  if (def.statuses?.some((fx) => fx.id === 'mark')) dmg = Math.round(dmg * 1.15);
+  if (att.relentlessUntilEndOfEnemyPhase && def.hp < def.def.maxHp / 2) dmg = Math.round(dmg * 1.25);
   if (def.guardUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.5);
   dmg = Math.round(dmg * (1 + partBonus(att, 'dmg') * 0.01 + (att.skills?.dmg ?? 0) * 0.015));
   dmg = Math.round(dmg * (1 - Math.min(0.5, (def.skills?.def ?? 0) * 0.015)));
@@ -430,6 +432,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
     }
   }
   if (result.hit && w.drain) att.hp = Math.min(att.def.maxHp, att.hp + Math.round(result.damage * 0.25));
+  if (result.hit && def.alive) def.statuses = (def.statuses ?? []).filter((fx) => fx.id !== 'mark'); // paint spent by the strike
   if (result.hit && def.alive && w.status && !result.graze) applyStatus(def, w.status);
   if (result.hit && def.alive && w.breaker && !result.graze) def.sundered = true;
   // bash knockback — a landed hit hurls the survivor one tile away from the strike
@@ -512,6 +515,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
       }
     }
     if (result.counter.hit && cw.drain) def.hp = Math.min(def.def.maxHp, def.hp + Math.round(result.counter.damage * 0.25));
+    if (result.counter.hit && att.alive) att.statuses = (att.statuses ?? []).filter((fx) => fx.id !== 'mark');
     if (result.counter.hit && att.alive && cw.status && !result.counter.graze) applyStatus(att, cw.status);
     if (result.counter.hit && att.alive && cw.breaker && !result.counter.graze) att.sundered = true;
     if (result.counter.hit) att.exposed = false;
@@ -731,6 +735,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'breach':
       u.breachNextAttack = true;
       break;
+    case 'relentless':
+      u.relentlessUntilEndOfEnemyPhase = true;
+      break;
     case 'expose':
       break; // enemies in radius are marked by the store pass
     case 'overdrive':
@@ -790,6 +797,7 @@ export function clearTransientForOwnPhase(u: UnitState): void {
   u.overwatch = false;
   u.hymnUntilEndOfEnemyPhase = false;
   u.frenzyThisTurn = false;
+  u.relentlessUntilEndOfEnemyPhase = false;
   u.dodges = 0;
 }
 

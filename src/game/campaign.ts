@@ -118,7 +118,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1040,6 +1040,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_chain', name: 'CHAIN GANG', desc: 'Score four or more kills in a single turn', rewardCr: 700 },
   { id: 'h_surv', name: 'SURVIVOR', desc: 'Win with a squad frame at 10% HP or less still standing', rewardCr: 600 },
   { id: 'h_solo', name: 'SOLO WING', desc: 'A single squad frame scores every player kill (3 or more)', rewardCr: 900 },
+  { id: 'h_arty', name: 'ARTILLERY HUNTER', desc: 'Destroy two Valkyr Ballista siege frames', rewardCr: 700 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
@@ -1131,6 +1132,8 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       const ks = (s.units ?? []).filter((u) => u.side === 'player' && u.kills > 0);
       return ks.length === 1 && (ks[0]?.kills ?? 0) >= 3;
     }
+    case 'h_arty':
+      return (s.killsByDef?.ballista ?? 0) >= 2;
     case 'h_ghostd':
       return s.altKill === true;
     default:

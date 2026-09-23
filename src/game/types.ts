@@ -45,17 +45,17 @@ export interface WeaponDef {
   /** combination attack: requires this partner unit adjacent & unacted; both consume their turn */
   comboPartner?: string;
   /** status inflicted on a hit: burn (HP loss/turn), stun (skip next action), break (armor -30%) */
-  status?: 'burn' | 'stun' | 'break' | 'slow';
+  status?: 'burn' | 'stun' | 'break' | 'slow' | 'mark';
   /** ALL weapon: fires on every enemy inside range at once — no counters (SRW ALL attack) */
   all?: boolean;
 }
 
 export interface StatusFx {
-  id: 'burn' | 'stun' | 'break' | 'slow';
+  id: 'burn' | 'stun' | 'break' | 'slow' | 'mark';
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy' | 'hymn' | 'emp' | 'phalanx' | 'deadshot' | 'frenzy' | 'breach';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy' | 'hymn' | 'emp' | 'phalanx' | 'deadshot' | 'frenzy' | 'breach' | 'relentless';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -146,6 +146,8 @@ export interface UnitState {
   frenzyThisTurn?: boolean;
   /** Breach — next attack ignores enemy armor */
   breachNextAttack?: boolean;
+  /** Relentless — +25% damage to enemies below half HP until the enemy phase ends */
+  relentlessUntilEndOfEnemyPhase?: boolean;
   gritUntilEndOfEnemyPhase?: boolean;
   guardUntilEndOfEnemyPhase?: boolean;
   strikeForNextAttack?: boolean;

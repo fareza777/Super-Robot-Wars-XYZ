@@ -23,6 +23,7 @@ function buffNames(u: UnitState): string[] {
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');
   if (u.breachNextAttack) names.push('\u26CFBREACH');
+  if (u.relentlessUntilEndOfEnemyPhase) names.push('\U0001FA78RELENT');
   if (u.fortuneForNextAttack) names.push('FORTUNE');
   if (u.accelThisTurn) names.push('ACCEL');
   if (u.miracleArmed) names.push('MIRACLE');
