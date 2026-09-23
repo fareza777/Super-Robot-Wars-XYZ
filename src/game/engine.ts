@@ -28,16 +28,19 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField'): number {
   let n = 0;
-  for (const p of u.parts) n += PARTS[p]?.[stat] ?? 0;
+  for (const p of u.parts) {
+    const v = PARTS[p]?.[stat];
+    n += typeof v === 'number' ? v : v ? 1 : 0;
+  }
   return n;
 }
 
@@ -198,6 +201,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if ((att.skills?.assassin ?? 0) > 0 && def.hp < def.def.maxHp * 0.4) dmg = Math.round(dmg * (1 + 0.06 * att.skills.assassin));
   if ((att.skills?.brawler ?? 0) > 0 && w.kind === 'melee') dmg = Math.round(dmg * (1 + 0.05 * att.skills.brawler));
   if (att.enraged) dmg = Math.round(dmg * 1.15);
+  if (!att.hasAttacked && (att.skills?.initiative ?? 0) > 0) dmg = Math.round(dmg * (1 + 0.1 * att.skills.initiative));
   if (def.guardUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.5);
   dmg = Math.round(dmg * (1 + partBonus(att, 'dmg') * 0.01 + (att.skills?.dmg ?? 0) * 0.015));
   dmg = Math.round(dmg * (1 - Math.min(0.5, (def.skills?.def ?? 0) * 0.015)));
@@ -546,6 +550,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   att.strikeForNextAttack = false;
   att.deadshotForNextAttack = false;
   att.charged = false;
+  att.hasAttacked = true;
   att.breachNextAttack = false;
   att.valorForNextAttack = false;
   att.gutsForNextAttack = false;
@@ -590,6 +595,7 @@ export function applyMapAttack(state: GameState, attackerUid: string, targetTile
   att.strikeForNextAttack = false;
   att.deadshotForNextAttack = false;
   att.charged = false;
+  att.hasAttacked = true;
   att.breachNextAttack = false;
   att.valorForNextAttack = false;
   att.gutsForNextAttack = false;
@@ -639,6 +645,7 @@ export function applyAllAttack(state: GameState, attackerUid: string, weaponId: 
   att.strikeForNextAttack = false;
   att.deadshotForNextAttack = false;
   att.charged = false;
+  att.hasAttacked = true;
   att.breachNextAttack = false;
   att.valorForNextAttack = false;
   att.gutsForNextAttack = false;
@@ -883,6 +890,7 @@ export function planEnemyActions(state: GameState): AiPlan[] {
     for (const tile of tiles) {
       for (const p of players) {
         if (e.provokedTo && p.uid !== e.provokedTo) continue; // Provoke: locked onto the war horn
+        if (partBonus(p, 'stealthField') > 0 && dist(tile, p.pos) > 3) continue; // Stealth Field: invisible past 3 tiles
         for (const w of weaponsAgainst(e, tile, p, willMove(tile))) {
           const hc = hitChance(e, p, w, map, rallyBonus(units, e) + formationBonus(units, e) - jammerPenalty(units, e));
           const dmg = damageOf(e, p, w, map, false);

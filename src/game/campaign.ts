@@ -53,6 +53,7 @@ export const PARTS: Record<string, PartDef> = {
   salvageArm: { id: 'salvageArm', name: 'Salvage Arm', desc: '+25% salvage drop chance while any equipped frame stands (squad-wide)', price: 1200 },
   iField: { id: 'iField', name: 'I-Field Emitter', desc: 'Cuts incoming damage below 1400 to 20%', price: 3000, barrier: 1400 },
   commandRelay: { id: 'commandRelay', name: 'Command Relay', desc: 'Allies within 2 tiles gain +8% hit (squad aura)', price: 1400, auraHit: 8 },
+  stealthField: { id: 'stealthField', name: 'Stealth Field', desc: 'Enemies cannot target this unit beyond 3 tiles', price: 2400, stealthField: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -85,6 +86,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'lastStand', name: 'Last Stand', desc: '+5% damage per point while under 30% HP' },
   { id: 'assassin', name: 'Assassin', desc: '+6% damage per point vs targets under 40% HP' },
   { id: 'brawler', name: 'Brawler', desc: '+5% damage per point with melee weapons' },
+  { id: 'initiative', name: 'Initiative', desc: '+10% damage per point on the first strike each battle' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -152,7 +154,7 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   // unarmed civilian convoy — escort objective on protect chapters
   arklander: U({ id: 'arklander', name: 'Arklander Convoy', title: 'Civilian Transport', color: '#5a5148', accent: '#e0d0a8', maxHp: 3400, maxEn: 0, armor: 350, mobility: 40, moveRange: 0, moveType: 'land', weapons: [], pilot: PILOTS.civ }),
   // --- player reinforcements (join at arc boundaries) ---
-  raxdenR: U({ id: 'raxdenR', name: 'Raxden Crimson', title: 'Defected Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.fangRipper, WEAPONS.plasmaEdge, WEAPONS.railgun, WEAPONS.vulcan, WEAPONS.crimsonDuet], pilot: CAMPAIGN_PILOTS.raxp, level: 5 }),
+  raxdenR: U({ id: 'raxdenR', name: 'Raxden Crimson', title: 'Defected Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.fangRipper, WEAPONS.plasmaEdge, WEAPONS.pileBunker, WEAPONS.railgun, WEAPONS.vulcan, WEAPONS.crimsonDuet], pilot: CAMPAIGN_PILOTS.raxp, level: 5 }),
   vexiaX: U({ id: 'vexiaX', name: 'Vexia Custom', title: 'Ark Interceptor', color: '#2a8a9a', accent: '#a0f0ff', maxHp: 5200, maxEn: 150, armor: 880, mobility: 142, moveRange: 7, moveType: 'air', weapons: [WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.vulcan, WEAPONS.voidLance, WEAPONS.arcCascade], pilot: CAMPAIGN_PILOTS.veep, level: 7 }),
   // act-3 fast striker — drains HP on hit, high evade, hunts stragglers
   cataphract: U({ id: 'cataphract', name: 'Karn Cataphract', title: 'Shadow Striker', color: '#2e2e3a', accent: '#a0a0ff', maxHp: 4200, maxEn: 120, armor: 650, mobility: 158, moveRange: 8, moveType: 'air', weapons: [WEAPONS.vampEdge, WEAPONS.plasmaEdge], pilot: PILOTS.grunt, resists: { beam: 0.4 }, jammer: true }),
@@ -1056,6 +1058,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_last', name: 'LAST MAN', desc: 'Win with a single squad frame left standing', rewardCr: 800 },
   { id: 'h_dark', name: 'DARK PASSAGE', desc: 'Win a mission under sensor fog', rewardCr: 700 },
   { id: 'h_glory', name: 'SHARED GLORY', desc: 'Win with every deployed squad frame landing a kill', rewardCr: 900 },
+  { id: 'h_light', name: 'LIGHTNING', desc: 'Win a battle in three turns or fewer', rewardCr: 700 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
@@ -1169,6 +1172,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       const ps = (s.units ?? []).filter((u) => u.side === 'player' && u.alive && !u.npc);
       return ps.length >= 3 && ps.every((u) => u.kills > 0);
     }
+    case 'h_light':
+      return (s.turn ?? 99) <= 3;
     case 'h_ghostd':
       return s.altKill === true;
     default:

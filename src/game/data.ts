@@ -110,6 +110,7 @@ export const WEAPONS = {
   // ALL weapon — saturates every hostile inside range in one volley, no counters
   omniBarrage: W({ id: 'omni_barrage', name: 'ALL: Omni Barrage', kind: 'missile', power: 2100, rangeMin: 1, rangeMax: 4, enCost: 0, ammo: 4, hitMod: 0, postMove: false, animSeed: 27, willReq: 110, all: true }),
   fangRipper: W({ id: 'fang_ripper', name: 'Fang Ripper', kind: 'melee', power: 3300, rangeMin: 1, rangeMax: 2, enCost: 30, ammo: null, hitMod: 12, postMove: true, animSeed: 54, breaker: true }),
+  pileBunker: W({ id: 'pile_bunker', name: 'Pile Bunker', kind: 'melee', power: 3400, rangeMin: 1, rangeMax: 1, enCost: 16, ammo: 3, hitMod: -10, critMod: 40, postMove: true, animSeed: 24 }),
   siegeCrusher: W({ id: 'siege_crusher', name: 'Siege Crusher', kind: 'melee', power: 3600, rangeMin: 1, rangeMax: 1, enCost: 20, ammo: null, hitMod: -5, postMove: true, animSeed: 55, breaker: true, knockback: true }),
   arkZenith: W({ id: 'ark_zenith', name: 'Ark Zenith Saber', kind: 'melee', power: 5200, rangeMin: 1, rangeMax: 2, enCost: 45, ammo: null, hitMod: 20, critMod: 20, postMove: true, animSeed: 56, aceReq: 5 }),
   novaMortar: W({ id: 'nova_mortar', name: 'MAP: Nova Mortar', kind: 'missile', power: 3100, rangeMin: 2, rangeMax: 5, enCost: 0, ammo: 3, hitMod: -5, postMove: false, animSeed: 57, mapRange: 1, aceReq: 5 }),

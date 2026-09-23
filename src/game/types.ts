@@ -207,6 +207,8 @@ export interface UnitState {
   charged?: boolean;
   /** desperation fury — a cornered boss at <20% HP gains +15% damage and +10 crit */
   enraged?: boolean;
+  /** has launched an attack this battle — gates the Initiative opening strike */
+  hasAttacked?: boolean;
   /** Guts — next attack deals +75% damage while under half HP */
   gutsForNextAttack?: boolean;
   /** Exposed — painted by targeting data: next hit lands +20 hit and +25% damage */
@@ -237,7 +239,7 @@ export interface UnitState {
   overkillDealt?: number;
 }
 
-export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler';
+export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative';
 export type PilotSkills = Record<PilotSkillId, number>;
 
 /** SRW-style enhancement parts equippable on a mecha. */
@@ -264,6 +266,8 @@ export interface PartDef {
   ammoPct?: number;
   /** command aura: allies within 2 tiles gain this much hit */
   auraHit?: number;
+  /** cloaking field — enemies cannot target this unit beyond 3 tiles */
+  stealthField?: boolean;
   unique?: boolean; // not sold — awarded by story
   /** afterburner: unit may attack again after a kill, once per turn */
   again?: boolean;
