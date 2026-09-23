@@ -154,7 +154,9 @@ export const NO_MODS: CombatMods = { hitBonus: 0, dmgMult: 1 };
 export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, hitBonus = 0): number {
   if (def.flashUntilEndOfEnemyPhase) return 0; // Flash: guaranteed dodge
   if (att.strikeForNextAttack) return 100;
-  const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus + willHitBonus(att) + partBonus(att, 'hit') + (att.skills?.hit ?? 0) + (att.aceMastery ? 5 : 0) - evadeOf(def, map) * 0.55;
+  const trait = att.def.pilot.trait;
+  const traitHit = (trait === 'deadeye' ? 8 : 0) + (trait === 'falcon_wing' && def.def.moveType === 'air' ? 10 : 0) + (trait === 'crimson_fury' && att.hp < att.def.maxHp / 2 ? 8 : 0);
+  const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus + traitHit + willHitBonus(att) + partBonus(att, 'hit') + (att.skills?.hit ?? 0) + (att.aceMastery ? 5 : 0) - evadeOf(def, map) * 0.55;
   return Math.max(10, Math.min(100, Math.round(raw)));
 }
 
@@ -169,6 +171,11 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   dmg = Math.round(dmg * (1 - Math.min(0.5, (def.skills?.def ?? 0) * 0.015)));
   if (att.aceMastery) dmg = Math.round(dmg * 1.05);
   if (att.phase2) dmg = Math.round(dmg * 1.15);
+  const trait = att.def.pilot.trait;
+  if (trait === 'ace_instinct' && att.will >= 130) dmg = Math.round(dmg * 1.12);
+  if (trait === 'siege_breaker' && (def.def.boss || def.elite)) dmg = Math.round(dmg * 1.15);
+  if (trait === 'crimson_fury' && att.hp < att.def.maxHp / 2) dmg = Math.round(dmg * 1.1);
+  if (trait === 'sovereign') dmg = Math.round(dmg * 1.08);
   return Math.round(dmg * dmgMult * willDmgMult(att));
 }
 
@@ -464,7 +471,8 @@ export function planEnemyActions(state: GameState): AiPlan[] {
         for (const w of weaponsAgainst(e, tile, p, willMove(tile))) {
           const hc = hitChance(e, p, w, map);
           const dmg = damageOf(e, p, w, map, false);
-          const score = dmg * (hc / 100) + (p.hp - dmg <= 0 ? 5000 : 0) + w.power * 0.01;
+          // convoy priority: protect-mission NPCs are the AI's preferred prey
+          const score = dmg * (hc / 100) + (p.hp - dmg <= 0 ? 5000 : 0) + (p.npc ? 1500 : 0) + w.power * 0.01;
           if (!best || score > best.score) best = { pos: tile, target: p, weapon: w, score };
         }
       }
@@ -473,8 +481,8 @@ export function planEnemyActions(state: GameState): AiPlan[] {
       claimed.add(key(best.pos));
       plans.push({ unit: e, moveTo: best.pos, target: best.target, weapon: best.weapon });
     } else {
-      // advance toward nearest player
-      const nearest = players.slice().sort((a, b) => dist(e.pos, a.pos) - dist(e.pos, b.pos))[0];
+      // advance toward nearest player — NPC convoy draws attackers like a magnet
+      const nearest = players.slice().sort((a, b) => dist(e.pos, a.pos) - (a.npc ? 3 : 0) - (dist(e.pos, b.pos) - (b.npc ? 3 : 0)))[0];
       if (!nearest) continue;
       const target = moveTiles.slice().sort((a, b) => dist(a, nearest.pos) - dist(b, nearest.pos))[0] ?? e.pos;
       claimed.add(key(target));
@@ -485,9 +493,10 @@ export function planEnemyActions(state: GameState): AiPlan[] {
 }
 
 export interface EndObjective {
-  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect';
+  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect' | 'seize';
   surviveTurns?: number;
   protectTurns?: number;
+  seizePos?: Pos;
 }
 
 /** SRW support attack: an ally adjacent to the attacker and in range of the defender chips in (55% dmg, no counter, doesn't consume its turn). */
@@ -549,6 +558,13 @@ export function checkEnd(units: UnitState[], obj?: EndObjective | null, turn?: n
     if (!units.some((u) => u.alive && u.npc)) return 'defeat';
     if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
     return (turn ?? 0) > (obj?.protectTurns ?? 8) ? 'victory' : null;
+  }
+  if (type === 'seize') {
+    // a player unit standing on the beacon wins; routing the defenders also wins
+    const bp = obj?.seizePos;
+    if (bp && units.some((u) => u.alive && u.side === 'player' && u.pos.x === bp.x && u.pos.y === bp.y)) return 'victory';
+    if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
+    return null;
   }
   if (!units.some((u) => u.alive && u.side === 'enemy')) return 'victory';
   return null;

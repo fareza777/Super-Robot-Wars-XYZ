@@ -6,7 +6,7 @@ import { ART, AudioKey, MECH_ART, NPC_ART, PILOT_ART } from '../assets';
 import { play } from '../audio';
 import { ALL_UNITS, CHAPTERS, CHAPTERS_COUNT, ITEMS, MAX_PART_SLOTS, MAX_PILOT_SKILL, MAX_WEAPON_UPG, PARTS, PILOT_STATS, PLAYER_DEF_IDS, SIDE_MISSIONS, UPGRADE_STATS, WEAPON_UPG_POWER, chapterOf, rosterFor, weaponUpgCost } from '../game/campaign';
 import { BOND_EVENTS, MAX_BOND, bondLevel } from '../game/bonds';
-import { SPIRITS } from '../game/data';
+import { SPIRITS, TRAITS } from '../game/data';
 import { useGame } from '../game/store';
 
 type Tab = 'main' | 'merchant' | 'workshop' | 'chat' | 'mess' | 'codex';
@@ -220,6 +220,11 @@ export function HQScreen() {
                     Career kills {s.pilotProg[selUnit]?.kills ?? 0}
                     {(s.pilotProg[selUnit]?.kills ?? 0) >= 50 ? ' · ★ACE' : (s.pilotProg[selUnit]?.kills ?? 0) >= 25 ? ' · ACE' : ''} · PP {s.pilotProg[selUnit]?.pp ?? 0}
                   </Text>
+                  {ALL_UNITS[selUnit].pilot.trait && (
+                    <Text style={[styles.pilotCardSub, { color: '#b8a0ff' }]} numberOfLines={1}>
+                      ◆ {TRAITS[ALL_UNITS[selUnit].pilot.trait!].name} — {TRAITS[ALL_UNITS[selUnit].pilot.trait!].desc}
+                    </Text>
+                  )}
                   <Text style={styles.pilotCardSub} numberOfLines={1}>
                     Spirits: {ALL_UNITS[selUnit].pilot.spirits.map((id) => SPIRITS[id].name).join(' · ')}
                   </Text>
@@ -436,6 +441,11 @@ function CodexRow({ id, ally }: { id: string; ally: boolean }) {
         {ally && d.pilot.spirits.length > 0 && (
           <Text style={styles.codexSpirit} numberOfLines={1}>
             Spirits: {d.pilot.spirits.map((sp) => SPIRITS[sp].name).join(' · ')}
+          </Text>
+        )}
+        {ally && d.pilot.trait && (
+          <Text style={[styles.codexSpirit, { color: '#b8a0ff' }]} numberOfLines={1}>
+            ◆ {TRAITS[d.pilot.trait].name} — {TRAITS[d.pilot.trait].desc}
           </Text>
         )}
       </View>

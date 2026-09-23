@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { Image } from 'expo-image';
 import { PILOT_ART } from '../assets';
 import { ITEMS, PARTS } from '../game/campaign';
-import { SPIRITS, TERRAIN_INFO } from '../game/data';
+import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { bondMods } from '../game/bonds';
 import { bestCounterWeapon, critChance, damageOf, dist, hitChance, key, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, useGame } from '../game/store';
@@ -40,6 +40,7 @@ export function SidePanel() {
   const allActed = s.units.length > 0 && s.units.every((u) => u.side !== 'player' || !u.alive || u.acted || u.npc);
   const [showRoster, setShowRoster] = React.useState(false);
   const objType = s.missionCh.objectiveType ?? 'rout';
+  const unitOnBeacon = !!s.missionCh.seizePos && s.units.some((u) => u.side === 'player' && u.alive && u.pos.x === s.missionCh.seizePos!.x && u.pos.y === s.missionCh.seizePos!.y);
   const npcU = s.units.find((u) => u.npc && u.alive);
   const bossU = s.units.find((u) => u.side === 'enemy' && u.def.boss && u.alive);
 
@@ -71,6 +72,11 @@ export function SidePanel() {
           <Bar label="BOSS" val={bossU.hp} max={bossU.def.maxHp} color="#ff5a5a" />
         </View>
       )}
+      {objType === 'seize' && (
+        <View style={styles.objCard}>
+          <Text style={styles.objTxt}>⌖ SEIZE THE BEACON{unitOnBeacon ? ' — SECURED!' : ` · (${s.missionCh.seizePos?.x},${s.missionCh.seizePos?.y})`}</Text>
+        </View>
+      )}
 
       <ScrollView style={styles.body} contentContainerStyle={{ paddingBottom: 6 }}>
         {unit && (
@@ -95,6 +101,11 @@ export function SidePanel() {
             {!!unit.parts?.length && (
               <Text style={styles.killsLine} numberOfLines={1}>
                 PARTS {unit.parts.map((p) => PARTS[p]?.name ?? p).join(' + ')}
+              </Text>
+            )}
+            {unit.def.pilot.trait && (
+              <Text style={styles.traitLine} numberOfLines={1}>
+                ◆ {TRAITS[unit.def.pilot.trait].name} — {TRAITS[unit.def.pilot.trait].desc}
               </Text>
             )}
             <Text style={styles.terrainLine}>{terrainDesc(s.map, unit.pos)}</Text>
@@ -310,6 +321,11 @@ export function SidePanel() {
               <Text style={styles.statTxt}>MOB {inspect.def.mobility}</Text>
               <Text style={styles.statTxt}>MOV {inspect.def.moveRange}</Text>
             </View>
+            {inspect.def.pilot.trait && (
+              <Text style={styles.traitLine} numberOfLines={1}>
+                ◆ {TRAITS[inspect.def.pilot.trait].name} — {TRAITS[inspect.def.pilot.trait].desc}
+              </Text>
+            )}
             {inspect.def.weapons.map((w) => (
               <Text key={w.id} style={styles.weapLine} numberOfLines={1}>
                 ⚔ {w.name} · POW {w.power} · R{w.rangeMin}-{w.rangeMax}
@@ -395,6 +411,7 @@ const styles = StyleSheet.create({
   tileCoords: { color: '#6b7694', fontSize: 8.5, marginTop: 1 },
   crateHint: { color: '#ffd34d', fontSize: 8.5, marginTop: 4, fontWeight: '700' },
   rosterBox: { marginTop: 7, backgroundColor: '#0c0e16', borderRadius: 6, padding: 6 },
+  traitLine: { color: '#b8a0ff', fontSize: 9, marginTop: 3 },
   rosterRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
   rosterName: { color: '#cfd8f0', fontSize: 9, fontWeight: '700', width: 78 },
   rosterActed: { opacity: 0.4 },

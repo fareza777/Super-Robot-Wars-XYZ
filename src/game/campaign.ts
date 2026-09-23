@@ -92,12 +92,12 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike'], faceColor: '#ff7a7a' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike'], faceColor: '#ff7a7a', trait: 'crimson_fury' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel'], faceColor: '#8ef0e8' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878' }),
-  vaelp: P({ name: 'Emperor Vael', callsign: 'THRONE', melee: 82, ranged: 84, defense: 76, evade: 72, maxSp: 90, spirits: ['strike', 'valor', 'focus', 'guard'], faceColor: '#ffe08a' }),
+  vaelp: P({ name: 'Emperor Vael', callsign: 'THRONE', melee: 82, ranged: 84, defense: 76, evade: 72, maxSp: 90, spirits: ['strike', 'valor', 'focus', 'guard'], faceColor: '#ffe08a', trait: 'sovereign' }),
 };
 
 // merged pilot lookup (unit.def.pilot stays typed as PilotDef)
@@ -117,7 +117,7 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   // unarmed civilian convoy — escort objective on protect chapters
   arklander: U({ id: 'arklander', name: 'Arklander Convoy', title: 'Civilian Transport', color: '#5a5148', accent: '#e0d0a8', maxHp: 3400, maxEn: 0, armor: 350, mobility: 40, moveRange: 0, moveType: 'land', weapons: [], pilot: PILOTS.civ }),
   // --- player reinforcements (join at arc boundaries) ---
-  raxdenR: U({ id: 'raxdenR', name: 'Raxden Crimson', title: 'Defected Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.plasmaEdge, WEAPONS.railgun, WEAPONS.vulcan], pilot: CAMPAIGN_PILOTS.raxp, level: 5 }),
+  raxdenR: U({ id: 'raxdenR', name: 'Raxden Crimson', title: 'Defected Ace', color: '#a02828', accent: '#ffb080', maxHp: 7800, maxEn: 150, armor: 1100, mobility: 116, moveRange: 6, moveType: 'land', weapons: [WEAPONS.plasmaEdge, WEAPONS.railgun, WEAPONS.vulcan, WEAPONS.crimsonDuet], pilot: CAMPAIGN_PILOTS.raxp, level: 5 }),
   vexiaX: U({ id: 'vexiaX', name: 'Vexia Custom', title: 'Ark Interceptor', color: '#2a8a9a', accent: '#a0f0ff', maxHp: 5200, maxEn: 150, armor: 880, mobility: 142, moveRange: 7, moveType: 'air', weapons: [WEAPONS.photonRifle, WEAPONS.missilePods, WEAPONS.vulcan], pilot: CAMPAIGN_PILOTS.veep, level: 7 }),
 };
 
@@ -155,10 +155,12 @@ export interface ChapterDef {
   count: number;
   boss?: string;
   bossLevel?: number;
-  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect';
+  objectiveType?: 'rout' | 'survive' | 'boss' | 'protect' | 'seize';
   surviveTurns?: number;
   /** protect missions: turns the NPC convoy must stay alive */
   protectTurns?: number;
+  /** seize missions: beacon tile a player unit must occupy to win (filled by genMap) */
+  seizePos?: Pos;
   objective: string;
   /** SRW-point style bonus challenge — award credits when the mission ends meeting it */
   mastery?: { desc: string; maxTurns?: number; keepAll?: boolean; rewardCr: number };
@@ -414,6 +416,18 @@ export function genMap(ch: ChapterDef): MapDef {
       }
   }
   const crates = genCrates(terrain2, used, rSpawn);
+  // seize chapters place the beacon deep in enemy territory — the squad must break through
+  let beaconPos: Pos | undefined;
+  if (ch.objectiveType === 'seize') {
+    outer: for (let x = 11; x <= 13; x++)
+      for (let y = 3; y <= 6; y++) {
+        const ti = TERRAIN_INFO[terrain2[y][x]];
+        if (ti.passable.land && !ti.hpDmg) {
+          beaconPos = { x, y };
+          break outer;
+        }
+      }
+  }
   // protect chapters station the convoy near the deployment zone
   let allySpawns: { defId: string; pos: Pos }[] | undefined;
   if (ch.objectiveType === 'protect') {
@@ -440,6 +454,7 @@ export function genMap(ch: ChapterDef): MapDef {
     enemySpawns,
     allySpawns,
     crates,
+    beaconPos,
     bossHoldUntil: ch.boss ? 3 : undefined,
     reinforce: REINFORCE[ch.id],
     events: MID_EVENTS[ch.id],

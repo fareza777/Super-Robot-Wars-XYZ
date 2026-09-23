@@ -1,4 +1,4 @@
-import { MapDef, PilotDef, SpiritDef, SpiritId, Terrain, UnitDef, WeaponDef } from './types';
+import { MapDef, PilotDef, SpiritDef, SpiritId, Terrain, TraitId, UnitDef, WeaponDef } from './types';
 
 // ---------- Spirits (SRW "seishin") ----------
 
@@ -20,6 +20,18 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   fortune: { id: 'fortune', name: 'Fortune', cost: 30, desc: 'Next attack grants double EXP' },
   soul: { id: 'soul', name: 'Soul', cost: 60, desc: 'Next attack damage x2' },
   trust: { id: 'trust', name: 'Trust', cost: 25, desc: 'Heal the most wounded ally within 2 tiles for 30% HP' },
+};
+
+// ---------- Pilot traits (passives, resolved in the combat engine) ----------
+
+export const TRAITS: Record<TraitId, { name: string; desc: string }> = {
+  ace_instinct: { name: 'Ace Instinct', desc: '+12% damage when Will is 130 or higher' },
+  deadeye: { name: 'Deadeye', desc: '+8% hit chance on all attacks' },
+  siege_breaker: { name: 'Siege Breaker', desc: '+15% damage against bosses and elite units' },
+  field_medic: { name: 'Field Medic', desc: 'REPAIR restores +50% more HP' },
+  crimson_fury: { name: 'Crimson Fury', desc: '+10% damage and +8% hit while under 50% HP' },
+  falcon_wing: { name: 'Falcon Wing', desc: '+10% hit chance against air units' },
+  sovereign: { name: 'Sovereign', desc: '+8% damage at all times' },
 };
 
 // ---------- Weapons ----------
@@ -44,6 +56,7 @@ export const WEAPONS = {
   // combination attacks — need the partner unit standing adjacent & unacted
   twinBreaker: W({ id: 'twin_breaker', name: 'Twin Breaker', kind: 'melee', power: 4300, rangeMin: 1, rangeMax: 2, enCost: 25, ammo: null, hitMod: 30, postMove: true, animSeed: 15, willReq: 110, comboPartner: 'gruntborg' }),
   twinBarrage: W({ id: 'twin_barrage', name: 'Twin Barrage', kind: 'beam', power: 4500, rangeMin: 2, rangeMax: 6, enCost: 30, ammo: null, hitMod: 25, postMove: false, animSeed: 16, willReq: 115, comboPartner: 'zephyra' }),
+  crimsonDuet: W({ id: 'crimson_duet', name: 'Crimson Duet', kind: 'melee', power: 4600, rangeMin: 1, rangeMax: 3, enCost: 30, ammo: null, hitMod: 28, postMove: true, animSeed: 17, willReq: 110, comboPartner: 'vexiaX' }),
   // v1.8 hero weapons — one extra trick per mech
   arcCannon: W({ id: 'arc_cannon', name: 'Arc Cannon', kind: 'beam', power: 3200, rangeMin: 2, rangeMax: 5, enCost: 28, ammo: null, hitMod: 5, postMove: false, animSeed: 17, willReq: 105 }),
   thermoCharge: W({ id: 'thermo_charge', name: 'Thermobaric Charge', kind: 'missile', power: 3600, rangeMin: 1, rangeMax: 3, enCost: 0, ammo: 4, hitMod: 0, postMove: false, animSeed: 18, willReq: 110 }),
@@ -56,10 +69,10 @@ export const WEAPONS = {
 const P = (p: PilotDef) => p;
 
 export const PILOTS = {
-  ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul'], faceColor: '#ffb347' }),
-  mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse', 'fortune', 'trust'], faceColor: '#7ee7ff' }),
-  gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor'], faceColor: '#ff9d9d' }),
-  orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless'], faceColor: '#b6ff9d' }),
+  ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul'], faceColor: '#ffb347', trait: 'ace_instinct' }),
+  mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse', 'fortune', 'trust'], faceColor: '#7ee7ff', trait: 'deadeye' }),
+  gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor'], faceColor: '#ff9d9d', trait: 'siege_breaker' }),
+  orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless'], faceColor: '#b6ff9d', trait: 'field_medic' }),
   karg: P({ name: 'Col. Karg Draven', callsign: 'BOSS', melee: 75, ranged: 75, defense: 70, evade: 65, maxSp: 70, spirits: ['valor', 'strike'], faceColor: '#d0a0ff' }),
   grunt: P({ name: 'Soldier', callsign: 'GR', melee: 56, ranged: 56, defense: 52, evade: 52, maxSp: 30, spirits: [], faceColor: '#bbbbbb' }),
   civ: P({ name: 'Convoy Crew', callsign: 'CVY', melee: 40, ranged: 40, defense: 40, evade: 40, maxSp: 0, spirits: [], faceColor: '#c8b090' }),

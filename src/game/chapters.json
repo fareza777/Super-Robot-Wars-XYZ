@@ -1,1180 +1,1182 @@
 [
- {
-  "id": 1,
-  "name": "Steel Sky Siege",
-  "subtitle": "Port Nara, Earth",
-  "act": 1,
-  "theme": "custom",
-  "lvl": 1,
-  "count": 6,
-  "boss": "kargan",
-  "bossLevel": 5,
-  "objective": "Defeat all Imperial units. Ace pilot Col. Karg Draven commands the Kargan Rex — bring him down.",
-  "lines": [
-   {
-    "speaker": "valstray",
-    "text": "All units, check in. Valstray — green and ready."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Arielis, all systems nominal. I'm picking up six Imperial signatures dead ahead."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "Six of them? Ha! Just enough to make it interesting."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Zephyra standing by! Let's send them home in pieces!"
-   },
-   {
-    "speaker": "kargan",
-    "text": "So. The Federation sends its little toys to die in my sky."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Squadron XYZ — weapons free! Mission start!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear without losing a unit",
-   "keepAll": true,
-   "rewardCr": 900
-  }
- },
- {
-  "id": 2,
-  "name": "Forest of Rhea",
-  "subtitle": "Rhea Wilds, Earth",
-  "act": 1,
-  "theme": "forest",
-  "lvl": 2,
-  "count": 6,
-  "objective": "Pursue the retreating Imperial column through the forest and destroy all units.",
-  "lines": [
-   {
-    "speaker": "valstray",
-    "text": "They're falling back through the Rhea forest. Don't let them regroup."
-   },
-   {
-    "speaker": "arielis",
-    "text": "The canopy is thick — my sensors are half blind down there."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "Trees, metal, whatever — Grunborg punches through all of it."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Watch the treeline. These Imperial grunts love an ambush."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Move out. Sector Triple-S isn't won yet — this is just the beginning."
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 8 turns",
-   "maxTurns": 8,
-   "rewardCr": 640
-  }
- },
- {
-  "id": 3,
-  "name": "The Coastal Line",
-  "subtitle": "Meridian Coast, Earth",
-  "act": 1,
-  "theme": "sea",
-  "lvl": 3,
-  "count": 6,
-  "objective": "Stop the Imperial landing force before it secures the coastal batteries.",
-  "lines": [
-   {
-    "speaker": "arielis",
-    "text": "Imperial dropships on the horizon — they're making a beachhead."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "They picked the wrong stretch of sand."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Coastal batteries are still ours. Hold them and the fleet can't land."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Form up on me. We push them back into the sea."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Contacts closing fast. Squadron XYZ — engage!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 8 turns",
-   "maxTurns": 8,
-   "rewardCr": 660
-  }
- },
- {
-  "id": 4,
-  "name": "Evacuation at Nara City",
-  "subtitle": "Nara City, Earth",
-  "act": 1,
-  "theme": "city",
-  "lvl": 4,
-  "count": 7,
-  "objective": "Protect the evacuation convoy — destroy the Imperial raiders in the city.",
-  "lines": [
-   {
-    "speaker": "zephyra",
-    "text": "Civilians are still loading onto the transports. We have to buy them time."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Then we don't retreat a single step. XYZ forms a wall."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "A wall? Buddy, I'm a whole fortress."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Imperial raiders entering the city grid from the east!"
-   },
-   {
-    "speaker": "valstray",
-    "text": "For every home they burn, we answer. Go!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 8 turns",
-   "maxTurns": 8,
-   "rewardCr": 680
-  }
- },
- {
-  "id": 5,
-  "name": "The Red Lieutenant",
-  "subtitle": "Kharon Pass, Earth",
-  "act": 1,
-  "theme": "mountain",
-  "lvl": 5,
-  "count": 6,
-  "boss": "raxden",
-  "bossLevel": 7,
-  "objective": "Defeat Captain Rax Daver to break the Imperial line.",
-  "lines": [
-   {
-    "speaker": "gruntborg",
-    "text": "A pass this narrow... someone wants us to come through here."
-   },
-   {
-    "speaker": "raxden",
-    "text": "The XYZ Squadron. The Emperor himself wants your heads — lucky me."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Rax Daver. The Red Lieutenant. You picked a bad hill to die on."
-   },
-   {
-    "speaker": "raxden",
-    "text": "Big talk from Federation scrap. Come climb, if you dare."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Energy readings spiking — his machine is no ordinary Zolda. Careful!"
-   }
-  ],
-  "objectiveType": "boss",
-  "mastery": {
-   "desc": "Clear without losing a unit",
-   "keepAll": true,
-   "rewardCr": 900
-  }
- },
- {
-  "id": 6,
-  "name": "Night Raid on Camp Veks",
-  "subtitle": "Veks Supply Depot, Earth",
-  "act": 1,
-  "theme": "base",
-  "lvl": 6,
-  "count": 7,
-  "objective": "Destroy the Imperial supply depot and every unit guarding it.",
-  "lines": [
-   {
-    "speaker": "zephyra",
-    "text": "Fuel, ammo, spare cores — this depot feeds their whole southern front."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Night raid means short sensor range for both sides. Stay close."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "I'll kick their pantry door down myself."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Hit them before they wake up. Burn the depot, break their line."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Contact! They've scrambled the guards — here they come!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 8 turns",
-   "maxTurns": 8,
-   "rewardCr": 720
-  }
- },
- {
-  "id": 7,
-  "name": "Hold the Grand Bridge",
-  "subtitle": "Taranis River, Earth",
-  "act": 1,
-  "theme": "road",
-  "lvl": 7,
-  "count": 7,
-  "objective": "Defend the Grand Bridge for 8 turns — reinforcements are en route.",
-  "lines": [
-   {
-    "speaker": "arielis",
-    "text": "Last bridge standing over the Taranis. The whole eastern front is watching us."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "Let them come. They'll feed the river one machine at a time."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Charge pattern on their lead unit — it has heavier plating than the rest."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Nobody crosses. Not today, not ever. XYZ — hold the line!"
-   },
-   {
-    "speaker": "arielis",
-    "text": "Wave inbound! Battle stations!"
-   }
-  ],
-  "objectiveType": "survive",
-  "surviveTurns": 8,
-  "mastery": {
-   "desc": "Keep all units alive",
-   "keepAll": true,
-   "rewardCr": 700
-  }
- },
- {
-  "id": 8,
-  "name": "Airship Docks at Kestrel Bay",
-  "subtitle": "Kestrel Bay, Earth",
-  "act": 1,
-  "theme": "sea",
-  "lvl": 8,
-  "count": 8,
-  "objective": "Raid Kestrel Bay and destroy the Imperial airship escorts before they lift off.",
-  "lines": [
-   {
-    "speaker": "zephyra",
-    "text": "Those airships are loading siege shells. If they lift off, Nara City is dust."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Then they never leave the water. We hit the escorts first."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "Eight contacts. Good — I was getting bored."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Dock guns are offline. It's just us and them."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Squadron XYZ — make this bay a graveyard for the Empire!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 8 turns",
-   "maxTurns": 8,
-   "rewardCr": 760
-  }
- },
- {
-  "id": 9,
-  "name": "The Counterattack Begins",
-  "subtitle": "Ash Plains, Earth",
-  "act": 1,
-  "theme": "earth",
-  "lvl": 9,
-  "count": 8,
-  "objective": "Smash the Imperial field army on the Ash Plains — Earth's counterattack starts here.",
-  "lines": [
-   {
-    "speaker": "valstray",
-    "text": "Today the whole Federation attacks. The Empire learns what Earth remembers."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Their line is stretched thin — we break the center and it all folds."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "I've waited ten chapters for a fight like this!"
-   },
-   {
-    "speaker": "zephyra",
-    "text": "All wings, forward! This is the turn of the tide!"
-   },
-   {
-    "speaker": "valstray",
-    "text": "Squadron XYZ — tip of the spear. Advance!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 8 turns",
-   "maxTurns": 8,
-   "rewardCr": 780
-  }
- },
- {
-  "id": 10,
-  "name": "General Moorin's Last Line",
-  "subtitle": "Imperial Line, Earth",
-  "act": 1,
-  "theme": "mountain",
-  "lvl": 10,
-  "count": 8,
-  "boss": "moorin",
-  "bossLevel": 12,
-  "objective": "Defeat General Moorin.",
-  "lines": [
-   {
-    "speaker": "moorin",
-    "text": "Beyond this ridge lies my Emperor's sky. You will not pass."
-   },
-   {
-    "speaker": "valstray",
-    "text": "General Moorin — the last real soldier they have left down here."
-   },
-   {
-    "speaker": "moorin",
-    "text": "Forty years I have served the throne. Come, children — earn your legend."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "An old lion guarding a dying empire. Respect. Now move aside."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Break his line and the path to orbit is open. This is it!"
-   }
-  ],
-  "objectiveType": "boss",
-  "mastery": {
-   "desc": "Clear without losing a unit",
-   "keepAll": true,
-   "rewardCr": 900
-  }
- },
- {
-  "id": 11,
-  "name": "Elevator Ascent",
-  "subtitle": "Orbital Elevator, Earth",
-  "act": 2,
-  "theme": "base",
-  "lvl": 11,
-  "count": 7,
-  "objective": "Seize the orbital elevator platform and clear Imperial resistance.",
-  "lines": [
-   {
-    "speaker": "valstray",
-    "text": "Commander — a Crimson frame just broke formation. It's Rax Daver. He's requesting a berth.",
-    "voice": "c11_j0"
-   },
-   {
-    "speaker": "raxdenR",
-    "text": "I fought you at Kharon Pass and saw what you protect. My blade serves the Ark now — Crimson Fang, reporting for duty.",
-    "voice": "c11_j1"
-   },
-   {
-    "speaker": "arielis",
-    "text": "The elevator cable reaches all the way to the ring station. Our road to space.",
-    "voice": "c11_l0"
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "A fifty-thousand-kilometer elevator. And I thought the bridge was big.",
-    "voice": "c11_l1"
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Platform defenders on approach vector — they're not giving it up cheap.",
-    "voice": "c11_l2"
-   },
-   {
-    "speaker": "valstray",
-    "text": "Take the platform. From here on, we bring the fight to the Emperor.",
-    "voice": "c11_l3"
-   },
-   {
-    "speaker": "arielis",
-    "text": "Hold on to your stomachs, everyone. Next stop — the heavens.",
-    "voice": "c11_l4"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 10 turns",
-   "maxTurns": 10,
-   "rewardCr": 820
-  }
- },
- {
-  "id": 12,
-  "name": "Debris Field Sigma",
-  "subtitle": "Earth Orbit",
-  "act": 2,
-  "theme": "void",
-  "lvl": 12,
-  "count": 7,
-  "objective": "Navigate the wreckage field and destroy the Imperial picket line.",
-  "lines": [
-   {
-    "speaker": "zephyra",
-    "text": "This debris field is a graveyard of ships from the first invasion."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Wreckage everywhere — perfect ambush cover. Eyes open."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "No ground, no sky, just void. Weird place to die."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Then nobody dies. XYZ, spread formation — clear the picket."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "They're here! Between the wrecks!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 10 turns",
-   "maxTurns": 10,
-   "rewardCr": 840
-  }
- },
- {
-  "id": 13,
-  "name": "Colony Ring Seven",
-  "subtitle": "Ring Station, Orbit",
-  "act": 2,
-  "theme": "colony",
-  "lvl": 13,
-  "count": 8,
-  "objective": "Liberate Colony Ring Seven — the Empire's slave-labor station in orbit.",
-  "lines": [
-   {
-    "speaker": "arielis",
-    "text": "Fifty thousand workers on that ring, all under Imperial guns."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "Not for long. They'll be free by nightfall."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Careful with your fire — hull breaches mean civilian casualties."
-   },
-   {
-    "speaker": "valstray",
-    "text": "We came all this way to free them. Precision over power. Go!"
-   },
-   {
-    "speaker": "arielis",
-    "text": "Imperial garrison mobilizing on the ring's surface!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 10 turns",
-   "maxTurns": 10,
-   "rewardCr": 860
-  }
- },
- {
-  "id": 14,
-  "name": "Silent Vacuum",
-  "subtitle": "Deep Orbit",
-  "act": 2,
-  "theme": "void",
-  "lvl": 14,
-  "count": 8,
-  "objective": "Hold the ambush for 9 turns while the convoy is diverted.",
-  "lines": [
-   {
-    "speaker": "gruntborg",
-    "text": "No sound out here. Even the explosions are silent. Creepy."
-   },
-   {
-    "speaker": "arielis",
-    "text": "That convoy feeds the throne fortress. Cut it and they starve."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Escorts turning to intercept — they know we're here."
-   },
-   {
-    "speaker": "valstray",
-    "text": "In the silent dark, we are the loudest thing alive. Engage!"
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "Heh. Poetic. I like it. Grunborg, moving in!"
-   }
-  ],
-  "objectiveType": "survive",
-  "surviveTurns": 9,
-  "mastery": {
-   "desc": "Keep all units alive",
-   "keepAll": true,
-   "rewardCr": 700
-  }
- },
- {
-  "id": 15,
-  "name": "The Void Empress",
-  "subtitle": "Serka's Domain, Deep Orbit",
-  "act": 2,
-  "theme": "colony",
-  "lvl": 15,
-  "count": 8,
-  "boss": "serka",
-  "bossLevel": 16,
-  "objective": "Defeat Serka, the Void Empress.",
-  "lines": [
-   {
-    "speaker": "serka",
-    "text": "Little sparks of Earth. You burn so bravely in my darkness."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Serka. The Void Empress. Half the pilots we've lost fell to her."
-   },
-   {
-    "speaker": "serka",
-    "text": "Kneel, and I will make your machines into ornaments for my void."
-   },
-   {
-    "speaker": "valstray",
-    "text": "We've crossed a hundred thousand kilometers, Serka. We don't kneel."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Her frame is radiating power like a small star. XYZ — full power!"
-   }
-  ],
-  "objectiveType": "boss",
-  "mastery": {
-   "desc": "Clear without losing a unit",
-   "keepAll": true,
-   "rewardCr": 900
-  }
- },
- {
-  "id": 16,
-  "name": "Moonfall Base",
-  "subtitle": "Lunar Surface",
-  "act": 2,
-  "theme": "moon",
-  "lvl": 16,
-  "count": 8,
-  "objective": "Destroy Moonfall Base — the Empire's lunar foundry feeding the throne.",
-  "lines": [
-   {
-    "speaker": "gruntborg",
-    "text": "One small step for me, one giant kick in the Empire's face."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Moonfall forges a new Imperial cruiser every month. Burn it."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Low gravity — good for jumps, bad for footing. Adjust your gyros."
-   },
-   {
-    "speaker": "valstray",
-    "text": "The Emperor's supply chain ends on this rock. Take it apart!"
-   },
-   {
-    "speaker": "arielis",
-    "text": "Foundry garrison deploying! Contact, multiple signatures!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 10 turns",
-   "maxTurns": 10,
-   "rewardCr": 920
-  }
- },
- {
-  "id": 17,
-  "name": "The Broken Lattice",
-  "subtitle": "Ring Ruins, Deep Orbit",
-  "act": 2,
-  "theme": "void",
-  "lvl": 17,
-  "count": 9,
-  "objective": "An Arklander convoy is stranded in the ring ruins — keep it alive for 6 turns while the ambush burns out.",
-  "lines": [
-   {
-    "speaker": "zephyra",
-    "text": "This was a colony once. Now it's just bones drifting in the dark."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "They're hiding between the ribs of this thing. Clever vermin."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Nine signatures. They want this corridor back badly."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Then we take it from them twice. XYZ — through the lattice!"
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Ambush pattern confirmed. They come from every angle — hold formation!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 10 turns",
-   "maxTurns": 10,
-   "rewardCr": 940
+  {
+    "id": 1,
+    "name": "Steel Sky Siege",
+    "subtitle": "Port Nara, Earth",
+    "act": 1,
+    "theme": "custom",
+    "lvl": 1,
+    "count": 6,
+    "boss": "kargan",
+    "bossLevel": 5,
+    "objective": "Defeat all Imperial units. Ace pilot Col. Karg Draven commands the Kargan Rex \u2014 bring him down.",
+    "lines": [
+      {
+        "speaker": "valstray",
+        "text": "All units, check in. Valstray \u2014 green and ready."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Arielis, all systems nominal. I'm picking up six Imperial signatures dead ahead."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "Six of them? Ha! Just enough to make it interesting."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Zephyra standing by! Let's send them home in pieces!"
+      },
+      {
+        "speaker": "kargan",
+        "text": "So. The Federation sends its little toys to die in my sky."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Squadron XYZ \u2014 weapons free! Mission start!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear without losing a unit",
+      "keepAll": true,
+      "rewardCr": 900
+    }
   },
-  "objectiveType": "protect",
-  "protectTurns": 6
- },
- {
-  "id": 18,
-  "name": "Voices in the Dark",
-  "subtitle": "Void Corridor",
-  "act": 2,
-  "theme": "void",
-  "lvl": 18,
-  "count": 9,
-  "objective": "Push through the Imperial screen guarding the throne approach.",
-  "lines": [
-   {
-    "speaker": "arielis",
-    "text": "Their pilots are singing war hymns over open comms. They're scared too."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "Good. Fear is the first sound of an empire dying."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Final screen before the fortress. Every push matters now."
-   },
-   {
-    "speaker": "valstray",
-    "text": "We've buried too many friends to stop here. Weapons free!"
-   },
-   {
-    "speaker": "arielis",
-    "text": "For Earth! For everyone they've taken!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 10 turns",
-   "maxTurns": 10,
-   "rewardCr": 960
-  }
- },
- {
-  "id": 19,
-  "name": "Throne Approach",
-  "subtitle": "Fortress Outskirts",
-  "act": 2,
-  "theme": "mountain",
-  "lvl": 19,
-  "count": 9,
-  "objective": "Reach the throne fortress perimeter and destroy its outer guard.",
-  "lines": [
-   {
-    "speaker": "zephyra",
-    "text": "There it is. The Steel Throne. A fortress the size of a moon."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "All this way, and I finally get to knock on the Emperor's door."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Outer guard is elite — every one of them is a decorated ace."
-   },
-   {
-    "speaker": "valstray",
-    "text": "So are we. Squadron XYZ — knock that door down!"
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "With pleasure!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 10 turns",
-   "maxTurns": 10,
-   "rewardCr": 980
-  }
- },
- {
-  "id": 20,
-  "name": "Serka's True Form",
-  "subtitle": "Fortress Gate, Deep Orbit",
-  "act": 2,
-  "theme": "fortress",
-  "lvl": 20,
-  "count": 8,
-  "boss": "empress",
-  "bossLevel": 21,
-  "objective": "Destroy the Empress Ascendant.",
-  "lines": [
-   {
-    "speaker": "empress",
-    "text": "You wounded my pride, little sparks. I have shed my old shell for this moment."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Serka's back — and her frame is twice the machine it was."
-   },
-   {
-    "speaker": "empress",
-    "text": "Behold the Empress Ascendant! The void itself bows to me."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Gate's behind her — no way through but through her."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Then we go through her. Squadron XYZ, all power forward!"
-   }
-  ],
-  "objectiveType": "boss",
-  "mastery": {
-   "desc": "Clear without losing a unit",
-   "keepAll": true,
-   "rewardCr": 900
-  }
- },
- {
-  "id": 21,
-  "name": "Landing at Sol Strait",
-  "subtitle": "Fortress Dock Ring",
-  "act": 3,
-  "theme": "sea",
-  "lvl": 21,
-  "count": 9,
-  "objective": "Storm the fortress dock ring and secure a landing zone for the fleet.",
-  "lines": [
-   {
-    "speaker": "zephyra",
-    "text": "New contact on our six — wait, it's broadcasting Ark codes! The Vexia Custom is ours?!",
-    "voice": "c21_j0"
-   },
-   {
-    "speaker": "vexiaX",
-    "text": "Lt. Vee Corrin, Ark interceptor wing. I stole this frame back from the dock ring. Let me cover your approach.",
-    "voice": "c21_j1"
-   },
-   {
-    "speaker": "arielis",
-    "text": "The dock ring's flood barriers work like a strait — one choke point in.",
-    "voice": "c21_l0"
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "Then it's a storming-the-beach mission. My favorite.",
-    "voice": "c21_l1"
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Fleet's holding back until we clear the guns. It's all on us.",
-    "voice": "c21_l2"
-   },
-   {
-    "speaker": "valstray",
-    "text": "Take the strait, raise the banner. XYZ — landfall!",
-    "voice": "c21_l3"
-   },
-   {
-    "speaker": "arielis",
-    "text": "Defense force inbound — they know exactly where we must land!",
-    "voice": "c21_l4"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 12 turns",
-   "maxTurns": 12,
-   "rewardCr": 1020
-  }
- },
- {
-  "id": 22,
-  "name": "Outer Wall",
-  "subtitle": "Steel Throne, Wall Level",
-  "act": 3,
-  "theme": "fortress",
-  "lvl": 22,
-  "count": 9,
-  "objective": "Hold the breachhead for 9 turns — the fleet needs the wall open.",
-  "lines": [
-   {
-    "speaker": "gruntborg",
-    "text": "A wall of steel a kilometer thick. I've waited my whole life for this crack."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Breach charges are set. When it falls, we're through."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Elite defenders on the parapet — this is the throne's best."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Wall, throne, emperor — one by one they fall. Charge!"
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "Breach is open! Let's get in there!"
-   }
-  ],
-  "objectiveType": "survive",
-  "surviveTurns": 9,
-  "mastery": {
-   "desc": "Keep all units alive",
-   "keepAll": true,
-   "rewardCr": 700
-  }
- },
- {
-  "id": 23,
-  "name": "The Furnace Level",
-  "subtitle": "Steel Throne, Interior",
-  "act": 3,
-  "theme": "volcano",
-  "lvl": 23,
-  "count": 9,
-  "objective": "Fight through the fortress furnace level — the heart of its war machine.",
-  "lines": [
-   {
-    "speaker": "arielis",
-    "text": "We're inside it now. This furnace powers every gun on the fortress."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Heat readings are brutal. Don't linger near the vents."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "They built a furnace big enough to fight a war inside it."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Then we shut it off. XYZ — into the fire!"
-   },
-   {
-    "speaker": "arielis",
-    "text": "Internal guard mobilizing! Here they come!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 12 turns",
-   "maxTurns": 12,
-   "rewardCr": 1060
-  }
- },
- {
-  "id": 24,
-  "name": "Old Friends",
-  "subtitle": "Steel Throne, Grand Hall",
-  "act": 3,
-  "theme": "base",
-  "lvl": 24,
-  "count": 9,
-  "boss": "kargan",
-  "bossLevel": 25,
-  "objective": "Karg Draven rebuilt stands between the convoy and the grand hall — keep the Arklander alive for 7 turns.",
-  "lines": [
-   {
-    "speaker": "kargan",
-    "text": "The toys of Port Nara, all grown up. I've waited in this hall for you."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Draven. You crawled out of the wreckage just to lose again."
-   },
-   {
-    "speaker": "kargan",
-    "text": "Lose? I studied you, boy. I rebuilt Kargan around your weakness."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "His frame reads completely different — armor, output, everything upgraded."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Then we give him a new lesson. Squadron — engage!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear without losing a unit",
-   "keepAll": true,
-   "rewardCr": 900
+  {
+    "id": 2,
+    "name": "Forest of Rhea",
+    "subtitle": "Rhea Wilds, Earth",
+    "act": 1,
+    "theme": "forest",
+    "lvl": 2,
+    "count": 6,
+    "objective": "Pursue the retreating Imperial column through the forest and destroy all units.",
+    "lines": [
+      {
+        "speaker": "valstray",
+        "text": "They're falling back through the Rhea forest. Don't let them regroup."
+      },
+      {
+        "speaker": "arielis",
+        "text": "The canopy is thick \u2014 my sensors are half blind down there."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "Trees, metal, whatever \u2014 Grunborg punches through all of it."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Watch the treeline. These Imperial grunts love an ambush."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Move out. Sector Triple-S isn't won yet \u2014 this is just the beginning."
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 8 turns",
+      "maxTurns": 8,
+      "rewardCr": 640
+    }
   },
-  "objectiveType": "protect",
-  "protectTurns": 7
- },
- {
-  "id": 25,
-  "name": "Gate Warden Bram",
-  "subtitle": "Steel Throne, Inner Gate",
-  "act": 3,
-  "theme": "fortress",
-  "lvl": 25,
-  "count": 8,
-  "boss": "warden",
-  "bossLevel": 26,
-  "objective": "Defeat Gate Warden Bram.",
-  "lines": [
-   {
-    "speaker": "warden",
-    "text": "Three hundred years the gate has stood. I am its last warden."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "Three hundred years is a long shift. Time to clock out, old man."
-   },
-   {
-    "speaker": "warden",
-    "text": "The Emperor sits beyond. You will go no further."
-   },
-   {
-    "speaker": "arielis",
-    "text": "That gate is the last lock on the throne room. One more wall."
-   },
-   {
-    "speaker": "valstray",
-    "text": "One more wall, Bram. And we are already through it."
-   }
-  ],
-  "objectiveType": "boss",
-  "mastery": {
-   "desc": "Clear without losing a unit",
-   "keepAll": true,
-   "rewardCr": 900
+  {
+    "id": 3,
+    "name": "The Coastal Line",
+    "subtitle": "Meridian Coast, Earth",
+    "act": 1,
+    "theme": "sea",
+    "lvl": 3,
+    "count": 6,
+    "objective": "Stop the Imperial landing force before it secures the coastal batteries.",
+    "lines": [
+      {
+        "speaker": "arielis",
+        "text": "Imperial dropships on the horizon \u2014 they're making a beachhead."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "They picked the wrong stretch of sand."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Coastal batteries are still ours. Hold them and the fleet can't land."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Form up on me. We push them back into the sea."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Contacts closing fast. Squadron XYZ \u2014 engage!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 8 turns",
+      "maxTurns": 8,
+      "rewardCr": 660
+    }
+  },
+  {
+    "id": 4,
+    "name": "Evacuation at Nara City",
+    "subtitle": "Nara City, Earth",
+    "act": 1,
+    "theme": "city",
+    "lvl": 4,
+    "count": 7,
+    "objective": "Protect the evacuation convoy \u2014 destroy the Imperial raiders in the city.",
+    "lines": [
+      {
+        "speaker": "zephyra",
+        "text": "Civilians are still loading onto the transports. We have to buy them time."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Then we don't retreat a single step. XYZ forms a wall."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "A wall? Buddy, I'm a whole fortress."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Imperial raiders entering the city grid from the east!"
+      },
+      {
+        "speaker": "valstray",
+        "text": "For every home they burn, we answer. Go!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 8 turns",
+      "maxTurns": 8,
+      "rewardCr": 680
+    }
+  },
+  {
+    "id": 5,
+    "name": "The Red Lieutenant",
+    "subtitle": "Kharon Pass, Earth",
+    "act": 1,
+    "theme": "mountain",
+    "lvl": 5,
+    "count": 6,
+    "boss": "raxden",
+    "bossLevel": 7,
+    "objective": "Defeat Captain Rax Daver to break the Imperial line.",
+    "lines": [
+      {
+        "speaker": "gruntborg",
+        "text": "A pass this narrow... someone wants us to come through here."
+      },
+      {
+        "speaker": "raxden",
+        "text": "The XYZ Squadron. The Emperor himself wants your heads \u2014 lucky me."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Rax Daver. The Red Lieutenant. You picked a bad hill to die on."
+      },
+      {
+        "speaker": "raxden",
+        "text": "Big talk from Federation scrap. Come climb, if you dare."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Energy readings spiking \u2014 his machine is no ordinary Zolda. Careful!"
+      }
+    ],
+    "objectiveType": "boss",
+    "mastery": {
+      "desc": "Clear without losing a unit",
+      "keepAll": true,
+      "rewardCr": 900
+    }
+  },
+  {
+    "id": 6,
+    "name": "Night Raid on Camp Veks",
+    "subtitle": "Veks Supply Depot, Earth",
+    "act": 1,
+    "theme": "base",
+    "lvl": 6,
+    "count": 7,
+    "objective": "Destroy the Imperial supply depot and every unit guarding it.",
+    "lines": [
+      {
+        "speaker": "zephyra",
+        "text": "Fuel, ammo, spare cores \u2014 this depot feeds their whole southern front."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Night raid means short sensor range for both sides. Stay close."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "I'll kick their pantry door down myself."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Hit them before they wake up. Burn the depot, break their line."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Contact! They've scrambled the guards \u2014 here they come!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 8 turns",
+      "maxTurns": 8,
+      "rewardCr": 720
+    }
+  },
+  {
+    "id": 7,
+    "name": "Hold the Grand Bridge",
+    "subtitle": "Taranis River, Earth",
+    "act": 1,
+    "theme": "road",
+    "lvl": 7,
+    "count": 7,
+    "objective": "Defend the Grand Bridge for 8 turns \u2014 reinforcements are en route.",
+    "lines": [
+      {
+        "speaker": "arielis",
+        "text": "Last bridge standing over the Taranis. The whole eastern front is watching us."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "Let them come. They'll feed the river one machine at a time."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Charge pattern on their lead unit \u2014 it has heavier plating than the rest."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Nobody crosses. Not today, not ever. XYZ \u2014 hold the line!"
+      },
+      {
+        "speaker": "arielis",
+        "text": "Wave inbound! Battle stations!"
+      }
+    ],
+    "objectiveType": "survive",
+    "surviveTurns": 8,
+    "mastery": {
+      "desc": "Keep all units alive",
+      "keepAll": true,
+      "rewardCr": 700
+    }
+  },
+  {
+    "id": 8,
+    "name": "Airship Docks at Kestrel Bay",
+    "subtitle": "Kestrel Bay, Earth",
+    "act": 1,
+    "theme": "sea",
+    "lvl": 8,
+    "count": 8,
+    "objective": "Raid Kestrel Bay and destroy the Imperial airship escorts before they lift off.",
+    "lines": [
+      {
+        "speaker": "zephyra",
+        "text": "Those airships are loading siege shells. If they lift off, Nara City is dust."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Then they never leave the water. We hit the escorts first."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "Eight contacts. Good \u2014 I was getting bored."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Dock guns are offline. It's just us and them."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Squadron XYZ \u2014 make this bay a graveyard for the Empire!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 8 turns",
+      "maxTurns": 8,
+      "rewardCr": 760
+    }
+  },
+  {
+    "id": 9,
+    "name": "The Counterattack Begins",
+    "subtitle": "Ash Plains, Earth",
+    "act": 1,
+    "theme": "earth",
+    "lvl": 9,
+    "count": 8,
+    "objective": "Smash the Imperial field army on the Ash Plains \u2014 Earth's counterattack starts here.",
+    "lines": [
+      {
+        "speaker": "valstray",
+        "text": "Today the whole Federation attacks. The Empire learns what Earth remembers."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Their line is stretched thin \u2014 we break the center and it all folds."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "I've waited ten chapters for a fight like this!"
+      },
+      {
+        "speaker": "zephyra",
+        "text": "All wings, forward! This is the turn of the tide!"
+      },
+      {
+        "speaker": "valstray",
+        "text": "Squadron XYZ \u2014 tip of the spear. Advance!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 8 turns",
+      "maxTurns": 8,
+      "rewardCr": 780
+    }
+  },
+  {
+    "id": 10,
+    "name": "General Moorin's Last Line",
+    "subtitle": "Imperial Line, Earth",
+    "act": 1,
+    "theme": "mountain",
+    "lvl": 10,
+    "count": 8,
+    "boss": "moorin",
+    "bossLevel": 12,
+    "objective": "Defeat General Moorin.",
+    "lines": [
+      {
+        "speaker": "moorin",
+        "text": "Beyond this ridge lies my Emperor's sky. You will not pass."
+      },
+      {
+        "speaker": "valstray",
+        "text": "General Moorin \u2014 the last real soldier they have left down here."
+      },
+      {
+        "speaker": "moorin",
+        "text": "Forty years I have served the throne. Come, children \u2014 earn your legend."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "An old lion guarding a dying empire. Respect. Now move aside."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Break his line and the path to orbit is open. This is it!"
+      }
+    ],
+    "objectiveType": "boss",
+    "mastery": {
+      "desc": "Clear without losing a unit",
+      "keepAll": true,
+      "rewardCr": 900
+    }
+  },
+  {
+    "id": 11,
+    "name": "Elevator Ascent",
+    "subtitle": "Orbital Elevator, Earth",
+    "act": 2,
+    "theme": "base",
+    "lvl": 11,
+    "count": 7,
+    "objective": "Seize the orbital elevator platform and clear Imperial resistance.",
+    "lines": [
+      {
+        "speaker": "valstray",
+        "text": "Commander \u2014 a Crimson frame just broke formation. It's Rax Daver. He's requesting a berth.",
+        "voice": "c11_j0"
+      },
+      {
+        "speaker": "raxdenR",
+        "text": "I fought you at Kharon Pass and saw what you protect. My blade serves the Ark now \u2014 Crimson Fang, reporting for duty.",
+        "voice": "c11_j1"
+      },
+      {
+        "speaker": "arielis",
+        "text": "The elevator cable reaches all the way to the ring station. Our road to space.",
+        "voice": "c11_l0"
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "A fifty-thousand-kilometer elevator. And I thought the bridge was big.",
+        "voice": "c11_l1"
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Platform defenders on approach vector \u2014 they're not giving it up cheap.",
+        "voice": "c11_l2"
+      },
+      {
+        "speaker": "valstray",
+        "text": "Take the platform. From here on, we bring the fight to the Emperor.",
+        "voice": "c11_l3"
+      },
+      {
+        "speaker": "arielis",
+        "text": "Hold on to your stomachs, everyone. Next stop \u2014 the heavens.",
+        "voice": "c11_l4"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 10 turns",
+      "maxTurns": 10,
+      "rewardCr": 820
+    }
+  },
+  {
+    "id": 12,
+    "name": "Debris Field Sigma",
+    "subtitle": "Earth Orbit",
+    "act": 2,
+    "theme": "void",
+    "lvl": 12,
+    "count": 7,
+    "objective": "Navigate the wreckage field and destroy the Imperial picket line.",
+    "lines": [
+      {
+        "speaker": "zephyra",
+        "text": "This debris field is a graveyard of ships from the first invasion."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Wreckage everywhere \u2014 perfect ambush cover. Eyes open."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "No ground, no sky, just void. Weird place to die."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Then nobody dies. XYZ, spread formation \u2014 clear the picket."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "They're here! Between the wrecks!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 10 turns",
+      "maxTurns": 10,
+      "rewardCr": 840
+    }
+  },
+  {
+    "id": 13,
+    "name": "Colony Ring Seven",
+    "subtitle": "Ring Station, Orbit",
+    "act": 2,
+    "theme": "colony",
+    "lvl": 13,
+    "count": 8,
+    "objective": "Liberate Colony Ring Seven \u2014 seize the control beacon behind Imperial lines.",
+    "lines": [
+      {
+        "speaker": "arielis",
+        "text": "Fifty thousand workers on that ring, all under Imperial guns."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "Not for long. They'll be free by nightfall."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Careful with your fire \u2014 hull breaches mean civilian casualties."
+      },
+      {
+        "speaker": "valstray",
+        "text": "We came all this way to free them. Precision over power. Go!"
+      },
+      {
+        "speaker": "arielis",
+        "text": "Imperial garrison mobilizing on the ring's surface!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 10 turns",
+      "maxTurns": 10,
+      "rewardCr": 860
+    },
+    "objectiveType": "seize"
+  },
+  {
+    "id": 14,
+    "name": "Silent Vacuum",
+    "subtitle": "Deep Orbit",
+    "act": 2,
+    "theme": "void",
+    "lvl": 14,
+    "count": 8,
+    "objective": "Hold the ambush for 9 turns while the convoy is diverted.",
+    "lines": [
+      {
+        "speaker": "gruntborg",
+        "text": "No sound out here. Even the explosions are silent. Creepy."
+      },
+      {
+        "speaker": "arielis",
+        "text": "That convoy feeds the throne fortress. Cut it and they starve."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Escorts turning to intercept \u2014 they know we're here."
+      },
+      {
+        "speaker": "valstray",
+        "text": "In the silent dark, we are the loudest thing alive. Engage!"
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "Heh. Poetic. I like it. Grunborg, moving in!"
+      }
+    ],
+    "objectiveType": "survive",
+    "surviveTurns": 9,
+    "mastery": {
+      "desc": "Keep all units alive",
+      "keepAll": true,
+      "rewardCr": 700
+    }
+  },
+  {
+    "id": 15,
+    "name": "The Void Empress",
+    "subtitle": "Serka's Domain, Deep Orbit",
+    "act": 2,
+    "theme": "colony",
+    "lvl": 15,
+    "count": 8,
+    "boss": "serka",
+    "bossLevel": 16,
+    "objective": "Defeat Serka, the Void Empress.",
+    "lines": [
+      {
+        "speaker": "serka",
+        "text": "Little sparks of Earth. You burn so bravely in my darkness."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Serka. The Void Empress. Half the pilots we've lost fell to her."
+      },
+      {
+        "speaker": "serka",
+        "text": "Kneel, and I will make your machines into ornaments for my void."
+      },
+      {
+        "speaker": "valstray",
+        "text": "We've crossed a hundred thousand kilometers, Serka. We don't kneel."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Her frame is radiating power like a small star. XYZ \u2014 full power!"
+      }
+    ],
+    "objectiveType": "boss",
+    "mastery": {
+      "desc": "Clear without losing a unit",
+      "keepAll": true,
+      "rewardCr": 900
+    }
+  },
+  {
+    "id": 16,
+    "name": "Moonfall Base",
+    "subtitle": "Lunar Surface",
+    "act": 2,
+    "theme": "moon",
+    "lvl": 16,
+    "count": 8,
+    "objective": "Destroy Moonfall Base \u2014 the Empire's lunar foundry feeding the throne.",
+    "lines": [
+      {
+        "speaker": "gruntborg",
+        "text": "One small step for me, one giant kick in the Empire's face."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Moonfall forges a new Imperial cruiser every month. Burn it."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Low gravity \u2014 good for jumps, bad for footing. Adjust your gyros."
+      },
+      {
+        "speaker": "valstray",
+        "text": "The Emperor's supply chain ends on this rock. Take it apart!"
+      },
+      {
+        "speaker": "arielis",
+        "text": "Foundry garrison deploying! Contact, multiple signatures!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 10 turns",
+      "maxTurns": 10,
+      "rewardCr": 920
+    }
+  },
+  {
+    "id": 17,
+    "name": "The Broken Lattice",
+    "subtitle": "Ring Ruins, Deep Orbit",
+    "act": 2,
+    "theme": "void",
+    "lvl": 17,
+    "count": 9,
+    "objective": "An Arklander convoy is stranded in the ring ruins \u2014 keep it alive for 6 turns while the ambush burns out.",
+    "lines": [
+      {
+        "speaker": "zephyra",
+        "text": "This was a colony once. Now it's just bones drifting in the dark."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "They're hiding between the ribs of this thing. Clever vermin."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Nine signatures. They want this corridor back badly."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Then we take it from them twice. XYZ \u2014 through the lattice!"
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Ambush pattern confirmed. They come from every angle \u2014 hold formation!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 10 turns",
+      "maxTurns": 10,
+      "rewardCr": 940
+    },
+    "objectiveType": "protect",
+    "protectTurns": 6
+  },
+  {
+    "id": 18,
+    "name": "Voices in the Dark",
+    "subtitle": "Void Corridor",
+    "act": 2,
+    "theme": "void",
+    "lvl": 18,
+    "count": 9,
+    "objective": "Push through the Imperial screen guarding the throne approach.",
+    "lines": [
+      {
+        "speaker": "arielis",
+        "text": "Their pilots are singing war hymns over open comms. They're scared too."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "Good. Fear is the first sound of an empire dying."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Final screen before the fortress. Every push matters now."
+      },
+      {
+        "speaker": "valstray",
+        "text": "We've buried too many friends to stop here. Weapons free!"
+      },
+      {
+        "speaker": "arielis",
+        "text": "For Earth! For everyone they've taken!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 10 turns",
+      "maxTurns": 10,
+      "rewardCr": 960
+    }
+  },
+  {
+    "id": 19,
+    "name": "Throne Approach",
+    "subtitle": "Fortress Outskirts",
+    "act": 2,
+    "theme": "mountain",
+    "lvl": 19,
+    "count": 9,
+    "objective": "Reach the throne fortress perimeter and destroy its outer guard.",
+    "lines": [
+      {
+        "speaker": "zephyra",
+        "text": "There it is. The Steel Throne. A fortress the size of a moon."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "All this way, and I finally get to knock on the Emperor's door."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Outer guard is elite \u2014 every one of them is a decorated ace."
+      },
+      {
+        "speaker": "valstray",
+        "text": "So are we. Squadron XYZ \u2014 knock that door down!"
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "With pleasure!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 10 turns",
+      "maxTurns": 10,
+      "rewardCr": 980
+    }
+  },
+  {
+    "id": 20,
+    "name": "Serka's True Form",
+    "subtitle": "Fortress Gate, Deep Orbit",
+    "act": 2,
+    "theme": "fortress",
+    "lvl": 20,
+    "count": 8,
+    "boss": "empress",
+    "bossLevel": 21,
+    "objective": "Destroy the Empress Ascendant.",
+    "lines": [
+      {
+        "speaker": "empress",
+        "text": "You wounded my pride, little sparks. I have shed my old shell for this moment."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Serka's back \u2014 and her frame is twice the machine it was."
+      },
+      {
+        "speaker": "empress",
+        "text": "Behold the Empress Ascendant! The void itself bows to me."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Gate's behind her \u2014 no way through but through her."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Then we go through her. Squadron XYZ, all power forward!"
+      }
+    ],
+    "objectiveType": "boss",
+    "mastery": {
+      "desc": "Clear without losing a unit",
+      "keepAll": true,
+      "rewardCr": 900
+    }
+  },
+  {
+    "id": 21,
+    "name": "Landing at Sol Strait",
+    "subtitle": "Fortress Dock Ring",
+    "act": 3,
+    "theme": "sea",
+    "lvl": 21,
+    "count": 9,
+    "objective": "Storm the fortress dock ring \u2014 seize the landing beacon for the fleet.",
+    "lines": [
+      {
+        "speaker": "zephyra",
+        "text": "New contact on our six \u2014 wait, it's broadcasting Ark codes! The Vexia Custom is ours?!",
+        "voice": "c21_j0"
+      },
+      {
+        "speaker": "vexiaX",
+        "text": "Lt. Vee Corrin, Ark interceptor wing. I stole this frame back from the dock ring. Let me cover your approach.",
+        "voice": "c21_j1"
+      },
+      {
+        "speaker": "arielis",
+        "text": "The dock ring's flood barriers work like a strait \u2014 one choke point in.",
+        "voice": "c21_l0"
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "Then it's a storming-the-beach mission. My favorite.",
+        "voice": "c21_l1"
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Fleet's holding back until we clear the guns. It's all on us.",
+        "voice": "c21_l2"
+      },
+      {
+        "speaker": "valstray",
+        "text": "Take the strait, raise the banner. XYZ \u2014 landfall!",
+        "voice": "c21_l3"
+      },
+      {
+        "speaker": "arielis",
+        "text": "Defense force inbound \u2014 they know exactly where we must land!",
+        "voice": "c21_l4"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 12 turns",
+      "maxTurns": 12,
+      "rewardCr": 1020
+    },
+    "objectiveType": "seize"
+  },
+  {
+    "id": 22,
+    "name": "Outer Wall",
+    "subtitle": "Steel Throne, Wall Level",
+    "act": 3,
+    "theme": "fortress",
+    "lvl": 22,
+    "count": 9,
+    "objective": "Hold the breachhead for 9 turns \u2014 the fleet needs the wall open.",
+    "lines": [
+      {
+        "speaker": "gruntborg",
+        "text": "A wall of steel a kilometer thick. I've waited my whole life for this crack."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Breach charges are set. When it falls, we're through."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Elite defenders on the parapet \u2014 this is the throne's best."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Wall, throne, emperor \u2014 one by one they fall. Charge!"
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "Breach is open! Let's get in there!"
+      }
+    ],
+    "objectiveType": "survive",
+    "surviveTurns": 9,
+    "mastery": {
+      "desc": "Keep all units alive",
+      "keepAll": true,
+      "rewardCr": 700
+    }
+  },
+  {
+    "id": 23,
+    "name": "The Furnace Level",
+    "subtitle": "Steel Throne, Interior",
+    "act": 3,
+    "theme": "volcano",
+    "lvl": 23,
+    "count": 9,
+    "objective": "Fight through the fortress furnace level \u2014 the heart of its war machine.",
+    "lines": [
+      {
+        "speaker": "arielis",
+        "text": "We're inside it now. This furnace powers every gun on the fortress."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Heat readings are brutal. Don't linger near the vents."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "They built a furnace big enough to fight a war inside it."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Then we shut it off. XYZ \u2014 into the fire!"
+      },
+      {
+        "speaker": "arielis",
+        "text": "Internal guard mobilizing! Here they come!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 12 turns",
+      "maxTurns": 12,
+      "rewardCr": 1060
+    }
+  },
+  {
+    "id": 24,
+    "name": "Old Friends",
+    "subtitle": "Steel Throne, Grand Hall",
+    "act": 3,
+    "theme": "base",
+    "lvl": 24,
+    "count": 9,
+    "boss": "kargan",
+    "bossLevel": 25,
+    "objective": "Karg Draven rebuilt stands between the convoy and the grand hall \u2014 keep the Arklander alive for 7 turns.",
+    "lines": [
+      {
+        "speaker": "kargan",
+        "text": "The toys of Port Nara, all grown up. I've waited in this hall for you."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Draven. You crawled out of the wreckage just to lose again."
+      },
+      {
+        "speaker": "kargan",
+        "text": "Lose? I studied you, boy. I rebuilt Kargan around your weakness."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "His frame reads completely different \u2014 armor, output, everything upgraded."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Then we give him a new lesson. Squadron \u2014 engage!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear without losing a unit",
+      "keepAll": true,
+      "rewardCr": 900
+    },
+    "objectiveType": "protect",
+    "protectTurns": 7
+  },
+  {
+    "id": 25,
+    "name": "Gate Warden Bram",
+    "subtitle": "Steel Throne, Inner Gate",
+    "act": 3,
+    "theme": "fortress",
+    "lvl": 25,
+    "count": 8,
+    "boss": "warden",
+    "bossLevel": 26,
+    "objective": "Defeat Gate Warden Bram.",
+    "lines": [
+      {
+        "speaker": "warden",
+        "text": "Three hundred years the gate has stood. I am its last warden."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "Three hundred years is a long shift. Time to clock out, old man."
+      },
+      {
+        "speaker": "warden",
+        "text": "The Emperor sits beyond. You will go no further."
+      },
+      {
+        "speaker": "arielis",
+        "text": "That gate is the last lock on the throne room. One more wall."
+      },
+      {
+        "speaker": "valstray",
+        "text": "One more wall, Bram. And we are already through it."
+      }
+    ],
+    "objectiveType": "boss",
+    "mastery": {
+      "desc": "Clear without losing a unit",
+      "keepAll": true,
+      "rewardCr": 900
+    }
+  },
+  {
+    "id": 26,
+    "name": "Inner Sanctum I",
+    "subtitle": "Steel Throne, Sanctum",
+    "act": 3,
+    "theme": "fortress",
+    "lvl": 26,
+    "count": 10,
+    "objective": "Fight through the first wave of the Imperial royal guard.",
+    "lines": [
+      {
+        "speaker": "zephyra",
+        "text": "The royal guard \u2014 ten of the finest pilots the Empire ever made."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "Ten of them, four of us. About fair, I'd say."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Their formation is flawless. Break the pattern, break the guard."
+      },
+      {
+        "speaker": "valstray",
+        "text": "We've fought for every meter of this war. Take the sanctum!"
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Here they come \u2014 for the Emperor!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 12 turns",
+      "maxTurns": 12,
+      "rewardCr": 1120
+    }
+  },
+  {
+    "id": 27,
+    "name": "Inner Sanctum II",
+    "subtitle": "Steel Throne, Sanctum",
+    "act": 3,
+    "theme": "fortress",
+    "lvl": 27,
+    "count": 10,
+    "objective": "Destroy the second royal guard wave holding the sanctum floor.",
+    "lines": [
+      {
+        "speaker": "arielis",
+        "text": "Second wave inbound \u2014 they're fighting like there's no tomorrow."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "There isn't. Not for them."
+      },
+      {
+        "speaker": "zephyra",
+        "text": "Every step closer to the throne, the resistance gets more desperate."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Then desperation is what we give them back. XYZ \u2014 forward!"
+      },
+      {
+        "speaker": "arielis",
+        "text": "For everyone we've lost \u2014 finish this wave!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 12 turns",
+      "maxTurns": 12,
+      "rewardCr": 1140
+    }
+  },
+  {
+    "id": 28,
+    "name": "Draven's Final Duel",
+    "subtitle": "Steel Throne, Sanctum Edge",
+    "act": 3,
+    "theme": "desert",
+    "lvl": 28,
+    "count": 9,
+    "boss": "kargan",
+    "bossLevel": 28,
+    "objective": "Karg Draven fights his last duel \u2014 end it, once and for all.",
+    "lines": [
+      {
+        "speaker": "kargan",
+        "text": "One more time, Ardent. Before the Emperor's door \u2014 just you and me."
+      },
+      {
+        "speaker": "valstray",
+        "text": "You keep coming back, Draven. This time, stay down."
+      },
+      {
+        "speaker": "kargan",
+        "text": "A soldier does not stay down while his Emperor still stands."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "He's buying the Emperor time with his own life. Damn him."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Then we honor him the only way warriors do. All units \u2014 attack!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear without losing a unit",
+      "keepAll": true,
+      "rewardCr": 900
+    }
+  },
+  {
+    "id": 29,
+    "name": "The Throne of Steel",
+    "subtitle": "Steel Throne, Throne Approach",
+    "act": 3,
+    "theme": "fortress",
+    "lvl": 29,
+    "count": 10,
+    "objective": "Clear the throne approach \u2014 the final defenders before Emperor Vael himself.",
+    "lines": [
+      {
+        "speaker": "zephyra",
+        "text": "The throne doors are in sight. Everything we've bled for is beyond them."
+      },
+      {
+        "speaker": "arielis",
+        "text": "Final defenders \u2014 the Empire's last blade between us and Vael."
+      },
+      {
+        "speaker": "gruntborg",
+        "text": "Then we break the blade and knock on the door."
+      },
+      {
+        "speaker": "valstray",
+        "text": "For Earth, for the colonies, for every friend we lost \u2014 clear the approach!"
+      },
+      {
+        "speaker": "zephyra",
+        "text": "All units \u2014 final charge! The throne is ours!"
+      }
+    ],
+    "mastery": {
+      "desc": "Clear within 12 turns",
+      "maxTurns": 12,
+      "rewardCr": 1180
+    }
+  },
+  {
+    "id": 30,
+    "name": "Emperor Vael \u2014 Final Battle",
+    "subtitle": "Steel Throne, Throne Room",
+    "act": 3,
+    "theme": "fortress",
+    "lvl": 30,
+    "count": 8,
+    "boss": "emperor",
+    "bossLevel": 30,
+    "objective": "Defeat Emperor Vael and end the war.",
+    "lines": [
+      {
+        "speaker": "emperor",
+        "text": "So the sparks of Earth reach my throne at last. Burn, then. Show me your fire."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Emperor Vael. The war ends in this room."
+      },
+      {
+        "speaker": "emperor",
+        "text": "I have burned a hundred worlds, boy. Yours is simply next."
+      },
+      {
+        "speaker": "arielis",
+        "text": "His frame draws power from the whole fortress. This is the last fight."
+      },
+      {
+        "speaker": "valstray",
+        "text": "Squadron XYZ \u2014 for every world he burned, strike him down! FINAL MISSION \u2014 GO!"
+      }
+    ],
+    "objectiveType": "boss",
+    "mastery": {
+      "desc": "Clear without losing a unit",
+      "keepAll": true,
+      "rewardCr": 900
+    }
   }
- },
- {
-  "id": 26,
-  "name": "Inner Sanctum I",
-  "subtitle": "Steel Throne, Sanctum",
-  "act": 3,
-  "theme": "fortress",
-  "lvl": 26,
-  "count": 10,
-  "objective": "Fight through the first wave of the Imperial royal guard.",
-  "lines": [
-   {
-    "speaker": "zephyra",
-    "text": "The royal guard — ten of the finest pilots the Empire ever made."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "Ten of them, four of us. About fair, I'd say."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Their formation is flawless. Break the pattern, break the guard."
-   },
-   {
-    "speaker": "valstray",
-    "text": "We've fought for every meter of this war. Take the sanctum!"
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Here they come — for the Emperor!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 12 turns",
-   "maxTurns": 12,
-   "rewardCr": 1120
-  }
- },
- {
-  "id": 27,
-  "name": "Inner Sanctum II",
-  "subtitle": "Steel Throne, Sanctum",
-  "act": 3,
-  "theme": "fortress",
-  "lvl": 27,
-  "count": 10,
-  "objective": "Destroy the second royal guard wave holding the sanctum floor.",
-  "lines": [
-   {
-    "speaker": "arielis",
-    "text": "Second wave inbound — they're fighting like there's no tomorrow."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "There isn't. Not for them."
-   },
-   {
-    "speaker": "zephyra",
-    "text": "Every step closer to the throne, the resistance gets more desperate."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Then desperation is what we give them back. XYZ — forward!"
-   },
-   {
-    "speaker": "arielis",
-    "text": "For everyone we've lost — finish this wave!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 12 turns",
-   "maxTurns": 12,
-   "rewardCr": 1140
-  }
- },
- {
-  "id": 28,
-  "name": "Draven's Final Duel",
-  "subtitle": "Steel Throne, Sanctum Edge",
-  "act": 3,
-  "theme": "desert",
-  "lvl": 28,
-  "count": 9,
-  "boss": "kargan",
-  "bossLevel": 28,
-  "objective": "Karg Draven fights his last duel — end it, once and for all.",
-  "lines": [
-   {
-    "speaker": "kargan",
-    "text": "One more time, Ardent. Before the Emperor's door — just you and me."
-   },
-   {
-    "speaker": "valstray",
-    "text": "You keep coming back, Draven. This time, stay down."
-   },
-   {
-    "speaker": "kargan",
-    "text": "A soldier does not stay down while his Emperor still stands."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "He's buying the Emperor time with his own life. Damn him."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Then we honor him the only way warriors do. All units — attack!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear without losing a unit",
-   "keepAll": true,
-   "rewardCr": 900
-  }
- },
- {
-  "id": 29,
-  "name": "The Throne of Steel",
-  "subtitle": "Steel Throne, Throne Approach",
-  "act": 3,
-  "theme": "fortress",
-  "lvl": 29,
-  "count": 10,
-  "objective": "Clear the throne approach — the final defenders before Emperor Vael himself.",
-  "lines": [
-   {
-    "speaker": "zephyra",
-    "text": "The throne doors are in sight. Everything we've bled for is beyond them."
-   },
-   {
-    "speaker": "arielis",
-    "text": "Final defenders — the Empire's last blade between us and Vael."
-   },
-   {
-    "speaker": "gruntborg",
-    "text": "Then we break the blade and knock on the door."
-   },
-   {
-    "speaker": "valstray",
-    "text": "For Earth, for the colonies, for every friend we lost — clear the approach!"
-   },
-   {
-    "speaker": "zephyra",
-    "text": "All units — final charge! The throne is ours!"
-   }
-  ],
-  "mastery": {
-   "desc": "Clear within 12 turns",
-   "maxTurns": 12,
-   "rewardCr": 1180
-  }
- },
- {
-  "id": 30,
-  "name": "Emperor Vael — Final Battle",
-  "subtitle": "Steel Throne, Throne Room",
-  "act": 3,
-  "theme": "fortress",
-  "lvl": 30,
-  "count": 8,
-  "boss": "emperor",
-  "bossLevel": 30,
-  "objective": "Defeat Emperor Vael and end the war.",
-  "lines": [
-   {
-    "speaker": "emperor",
-    "text": "So the sparks of Earth reach my throne at last. Burn, then. Show me your fire."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Emperor Vael. The war ends in this room."
-   },
-   {
-    "speaker": "emperor",
-    "text": "I have burned a hundred worlds, boy. Yours is simply next."
-   },
-   {
-    "speaker": "arielis",
-    "text": "His frame draws power from the whole fortress. This is the last fight."
-   },
-   {
-    "speaker": "valstray",
-    "text": "Squadron XYZ — for every world he burned, strike him down! FINAL MISSION — GO!"
-   }
-  ],
-  "objectiveType": "boss",
-  "mastery": {
-   "desc": "Clear without losing a unit",
-   "keepAll": true,
-   "rewardCr": 900
-  }
- }
 ]

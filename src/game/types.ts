@@ -35,6 +35,9 @@ export interface SpiritDef {
   desc: string;
 }
 
+/** Unique pilot passive — see TRAITS in data.ts for name/description. */
+export type TraitId = 'ace_instinct' | 'deadeye' | 'siege_breaker' | 'field_medic' | 'crimson_fury' | 'falcon_wing' | 'sovereign';
+
 export interface PilotDef {
   name: string;
   callsign: string;
@@ -45,6 +48,8 @@ export interface PilotDef {
   maxSp: number;
   spirits: SpiritId[];
   faceColor: string;
+  /** pilot trait (passive) — resolved inside the combat engine */
+  trait?: TraitId;
 }
 
 export interface UnitDef {
@@ -156,6 +161,8 @@ export interface MapDef {
   reinforce?: { turn: number; comp: string[] };
   /** mid-battle story beats: dialog plays at the start of player turn `turn` */
   events?: { turn: number; lines: { speaker: string; text: string; voice?: string }[] }[];
+  /** seize missions: the beacon tile a player unit must reach to win */
+  beaconPos?: Pos;
 }
 
 export type Phase =
@@ -187,7 +194,7 @@ export interface GameSettings {
   difficulty?: 'normal' | 'hard';
 }
 
-export type ObjectiveType = 'rout' | 'survive' | 'boss';
+export type ObjectiveType = 'rout' | 'survive' | 'boss' | 'protect' | 'seize';
 
 export type Reaction = 'counter' | 'defend' | 'evade' | 'cover';
 
