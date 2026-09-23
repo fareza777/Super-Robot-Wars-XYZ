@@ -126,6 +126,7 @@ export interface BattleSave {
   iFieldKill?: boolean;
   arcKill?: boolean;
   blastKill?: boolean;
+  lostAlly?: boolean;
   bossWarned: boolean;
   eventsFired: string[];
   inventory: Record<string, number>;
@@ -233,6 +234,7 @@ interface Store {
   mirrorWon: boolean;
   arcKill: boolean;
   blastKill: boolean;
+  lostAlly: boolean;
   extremeWon: boolean;
   shepHon: boolean;
   /** a frame transformed at least once this battle (FORMA SHIFT honor) */
@@ -289,6 +291,7 @@ interface Store {
   setReaction: (r: Reaction) => void;
   waitUnit: () => void;
   overwatchUnit: () => void;
+  swapUnit: () => void;
   transformUnit: (uid: string) => void;
   openSpirits: (uid: string) => void;
   beginMission: () => void; // deploy phase -> chapter dialog
@@ -485,7 +488,7 @@ async function persistBattle(s: Store) {
     map: s.map,
     units: s.units,
     turn: s.turn,
-    kills: s.kills, altKill: s.altKill, arcKill: s.arcKill, blastKill: s.blastKill,
+    kills: s.kills, altKill: s.altKill, arcKill: s.arcKill, blastKill: s.blastKill, lostAlly: s.lostAlly,
     decoyHit: s.decoyHit,
     iFieldKill: s.iFieldKill,
     bossWarned: s.bossWarned,
@@ -671,6 +674,7 @@ export const useGame = create<Store>((set, get) => ({
   mirrorWon: false,
   arcKill: false,
   blastKill: false,
+  lostAlly: false,
     extremeWon: false,
     shepHon: false,
     transformed: false,
@@ -740,7 +744,7 @@ export const useGame = create<Store>((set, get) => ({
     const cellGranted = allied && grantDrakeCell(set, get);
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal', allied);
     void clearBattleSave();
-    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, simWave: 0, log: [`${m.repeatable ? 'PATROL OP' : 'SIDE QUEST'}: ${m.name}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : []), ...(cellGranted ? [`▣ Drake's Cell integrated — unique part acquired`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1', usedSupport: false, altKill: false, decoyHit: false, iFieldKill: false, arcKill: false, blastKill: false });
+    set({ phase: 'player', sideId: id, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, simWave: 0, log: [`${m.repeatable ? 'PATROL OP' : 'SIDE QUEST'}: ${m.name}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : []), ...(cellGranted ? [`▣ Drake's Cell integrated — unique part acquired`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], notice: 'PLAYER PHASE — TURN 1', usedSupport: false, altKill: false, decoyHit: false, iFieldKill: false, arcKill: false, blastKill: false, lostAlly: false });
     setTimeout(() => set({ notice: null }), 2400);
     void persistBattle(get());
   },
@@ -768,7 +772,7 @@ export const useGame = create<Store>((set, get) => ({
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts, s.settings.difficulty ?? 'normal', false, s.wounded);
     // VR runs are ephemeral and never autosave — keep any prior mission snapshot
     // so the ops board still offers RESUME for it after the run ends.
-    set({ phase: 'player', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: s.savedBattle, simWave: 1, simSettled: false, log: ['▲ VR SIMULATION — WAVE 1', `Objective: ${ch.objective}`, 'Waves escalate. The run ends when the squad falls.'], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], notice: '▲ VR SIMULATION — WAVE 1', usedSupport: false, altKill: false, decoyHit: false, iFieldKill: false, arcKill: false, blastKill: false });
+    set({ phase: 'player', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: s.savedBattle, simWave: 1, simSettled: false, log: ['▲ VR SIMULATION — WAVE 1', `Objective: ${ch.objective}`, 'Waves escalate. The run ends when the squad falls.'], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], notice: '▲ VR SIMULATION — WAVE 1', usedSupport: false, altKill: false, decoyHit: false, iFieldKill: false, arcKill: false, blastKill: false, lostAlly: false });
     setTimeout(() => set({ notice: null }), 2600);
   },
 
@@ -1071,7 +1075,7 @@ export const useGame = create<Store>((set, get) => ({
       zoneTiles.set(k, { pos: { x, y }, cost: 0 });
     }
     void clearBattleSave();
-    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : []), ...(cellGranted ? [`▣ Drake's Cell integrated — unique part acquired`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles, transformed: false, usedSupport: false, altKill: false, decoyHit: false, iFieldKill: false, arcKill: false, blastKill: false });
+    set({ phase: 'deploy', sideId: null, missionCh: { ...ch, seizePos: map.beaconPos, reachPos: map.reachPos }, map, units, crates: map.crates ?? [], kills: 0, salvageCr: 0, turn: 1, bossWarned: false, savedBattle: null, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`, ...(allied ? [`🤝 Cpt. Vossen: "I've seen enough. Ark — the Drake flies on your wing now."`] : []), ...(cellGranted ? [`▣ Drake's Cell integrated — unique part acquired`] : [])], inspectUid: null, tileInfo: null, dangerZone: false, dangerTiles: new Set(), threatTiles: new Set(), hazardWarn: [], blizzard: false, midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles, transformed: false, usedSupport: false, altKill: false, decoyHit: false, iFieldKill: false, arcKill: false, blastKill: false, lostAlly: false });
   },
   finishDialog: () => {
     set({ phase: 'player', notice: 'PLAYER PHASE — TURN 1' });
@@ -1485,7 +1489,7 @@ export const useGame = create<Store>((set, get) => ({
         inventory,
         partsOwned,
         salvageQueue,
-        kills: s.kills + killCount, altKill: altFlag, iFieldKill: iFieldF, arcKill: arcF, blastKill: blastF,
+        kills: s.kills + killCount, altKill: altFlag, iFieldKill: iFieldF, arcKill: arcF, blastKill: blastF, lostAlly: s.lostAlly || deadPlayers(s.units, state.units).length > 0,
         chainTurn: killCount > 0 ? s.turn : s.chainTurn,
         chainCount: chain,
         salvageCr: s.salvageCr + chainBonus + overkillCr + lucky.cr,
@@ -1628,7 +1632,7 @@ export const useGame = create<Store>((set, get) => ({
       inventory,
       partsOwned,
       salvageQueue,
-      kills: s.kills + killCount, altKill: altFlag, iFieldKill: iFieldF, arcKill: arcF, blastKill: blastF,
+      kills: s.kills + killCount, altKill: altFlag, iFieldKill: iFieldF, arcKill: arcF, blastKill: blastF, lostAlly: s.lostAlly || deadPlayers(s.units, state.units).length > 0,
       chainTurn: killCount > 0 ? s.turn : s.chainTurn,
       chainCount: chain,
       salvageCr: s.salvageCr + chainBonus + carrierCr + overkillCr + lucky.cr,
@@ -1740,7 +1744,7 @@ export const useGame = create<Store>((set, get) => ({
       salvageQueue,
       vossenDefeated: s.vossenDefeated || vossenDowned(s.units, state.units),
       killsByDef: tallyKills(s.killsByDef, deadEnemies(s.units, state.units)),
-      kills: s.kills + deadEnemies(s.units, state.units).length, altKill: altFlag, iFieldKill: iFieldF, arcKill: arcF, blastKill: blastF,
+      kills: s.kills + deadEnemies(s.units, state.units).length, altKill: altFlag, iFieldKill: iFieldF, arcKill: arcF, blastKill: blastF, lostAlly: s.lostAlly || deadPlayers(s.units, state.units).length > 0,
       chainTurn: mapKills > 0 ? s.turn : s.chainTurn,
       chainCount: mapChain,
       salvageCr: s.salvageCr + mapChainBonus + overkillCr + lucky.cr,
@@ -1812,6 +1816,20 @@ export const useGame = create<Store>((set, get) => ({
     const name = s.units.find((u) => u.uid === uid)?.def.name;
     const units = s.units.map((u) => (u.uid === uid ? { ...u, acted: true, moved: true, overwatch: true } : u));
     set({ units, menuForUid: null, pendingMove: null, selectedUid: null, moveTiles: new Map(), inspectUid: null, threatTiles: new Set(), log: push(s.log, `\u25CF ${name} holds fire — overwatch arc armed`) });
+  },
+
+  swapUnit: () => {
+    const s = get();
+    const uid = s.menuForUid;
+    const u = uid ? s.units.find((x) => x.uid === uid) : undefined;
+    const mate = u ? s.units.find((x) => x.alive && x.side === 'player' && !x.npc && x.uid !== u.uid && !x.acted && dist(x.pos, u.pos) === 1) : undefined;
+    if (!u || !mate) return;
+    const units = s.units.map((x) => {
+      if (x.uid === u.uid) return { ...x, pos: mate.pos, acted: true, moved: true };
+      if (x.uid === mate.uid) return { ...x, pos: u.pos };
+      return x;
+    });
+    set({ units, menuForUid: null, pendingMove: null, selectedUid: null, moveTiles: new Map(), inspectUid: null, threatTiles: new Set(), log: push(s.log, `\u21C4 ${u.def.name} ⇄ ${mate.def.name} — position swap`) });
   },
 
   openSpirits: (uid) => set({ spiritForUid: uid }),
@@ -2070,6 +2088,10 @@ function deadEnemies(before: UnitState[], after: UnitState[]): UnitState[] {
   const afterAlive = new Set(after.filter((u) => u.alive).map((u) => u.uid));
   return before.filter((u) => u.side === 'enemy' && u.alive && !afterAlive.has(u.uid));
 }
+function deadPlayers(before: UnitState[], after: UnitState[]): UnitState[] {
+  const afterAlive = new Set(after.filter((u) => u.alive).map((u) => u.uid));
+  return before.filter((u) => u.side === 'player' && !u.npc && u.alive && !afterAlive.has(u.uid));
+}
 function tallyKills(acc: Record<string, number>, dead: UnitState[]): Record<string, number> {
   if (!dead.length) return acc;
   const next = { ...acc };
@@ -2200,6 +2222,8 @@ function applyVictory(set: SetFn, get: Get) {
   const flawlessHon = s.flawlessHon || (!s.sideId && s.simWave === 0 && s.missionCh.id >= 10 && !s.units.some((u) => u.side === 'player' && !u.npc && !u.alive));
   // wrecked squad frames must be rebuilt — repair bill comes out of the reward
   const repairBill = s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive).reduce((n, u) => n + u.level * 15, 0);
+  // stragglers — surviving foes abandon their salvage when the field breaks (+15cr each)
+  const stragglerCr = s.units.filter((u) => u.side === 'enemy' && u.alive).length * 15;
   const woundedIds = s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive && !(u.parts ?? []).includes('escapePod')).map((u) => u.def.id);
   const aceLines: string[] = [];
   for (const u of s.units) {
@@ -2217,7 +2241,7 @@ function applyVictory(set: SetFn, get: Get) {
   const eliteCr = s.units.filter((u) => u.side === 'enemy' && !u.alive && u.elite).length * 50;
   const side = s.sideId ? ALL_SIDE_MISSIONS.find((m) => m.id === s.sideId) : undefined;
   if (side) {
-    const reward = Math.round((side.rewardCr + s.kills * 150 + eliteCr) * (s.settings.difficulty === 'hard' ? 1.25 : s.settings.difficulty === 'extreme' ? 1.5 : 1)) + s.salvageCr - repairBill;
+    const reward = Math.round((side.rewardCr + s.kills * 150 + eliteCr) * (s.settings.difficulty === 'hard' ? 1.25 : s.settings.difficulty === 'extreme' ? 1.5 : 1)) + (s.salvageCr + stragglerCr) - repairBill;
     const credits = s.credits + reward;
     const inventory = side.rewardItem ? { ...s.inventory, [side.rewardItem]: (s.inventory[side.rewardItem] ?? 0) + 1 } : s.inventory;
     const sideCleared = side.repeatable ? s.sideCleared : [...s.sideCleared, side.id];
@@ -2237,7 +2261,7 @@ function applyVictory(set: SetFn, get: Get) {
       pilotProg,
       sideId: null,
       lastReward: reward,
-      lastSalvage: s.salvageCr,
+      lastSalvage: s.salvageCr + stragglerCr,
       lastRank: rankS,
       missionRank,
       partsOwned,
@@ -2249,7 +2273,7 @@ function applyVictory(set: SetFn, get: Get) {
       wounded: woundedIds,
       debrief: null,
       salvageQueue: [],
-      log: aceLines.reduce((l, line) => push(l, line), push(push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''} · RANK ${rankS}${sRankNote ? ' · awarded 🛡 VETERAN PLATE' : ''}${repairBill > 0 ? ` · 🔧 repair bill -${repairBill}cr` : ''}`), `${woundedIds.length ? `🩹 ${woundedIds.length} pilot(s) wounded — reduced effectiveness next sortie` : ''}`).filter(Boolean)),
+      log: aceLines.reduce((l, line) => push(l, line), push(push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''} · RANK ${rankS}${sRankNote ? ' · awarded 🛡 VETERAN PLATE' : ''}${repairBill > 0 ? ` · 🔧 repair bill -${repairBill}cr` : ''}${stragglerCr > 0 ? ` · 🏃 stragglers +${stragglerCr}cr` : ''}`), `${woundedIds.length ? `🩹 ${woundedIds.length} pilot(s) wounded — reduced effectiveness next sortie` : ''}`).filter(Boolean)),
     });
     void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank, snowFox, extremeWon, shepHon, flawlessHon, maxHitEver });
     return;
@@ -2282,8 +2306,9 @@ function applyVictory(set: SetFn, get: Get) {
       log = push(log, `☆ Mastery missed — ${m.desc}`);
     }
   }
-  const credits = s.credits + reward + masteryCr + s.salvageCr + (clearedFinal ? 5000 : 0) - repairBill;
+  const credits = s.credits + reward + masteryCr + (s.salvageCr + stragglerCr) + (clearedFinal ? 5000 : 0) - repairBill;
   if (repairBill > 0) log = push(log, `🔧 ${s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive).length} frame(s) rebuilt — repair bill -${repairBill}cr`);
+  if (stragglerCr > 0) log = push(log, `🏃 Stragglers abandon their salvage — +${stragglerCr}cr`);
   const par = ch.surviveTurns ?? Math.max(6, Math.ceil((ch.count + (ch.boss ? 1 : 0)) * 1.1));
   const rank = battleRank(unitsLost, s.turn, par, lastMastery != null);
   const missionRank = { ...s.missionRank, [ch.id]: betterRank(s.missionRank[ch.id], rank) };
@@ -2306,7 +2331,7 @@ function applyVictory(set: SetFn, get: Get) {
     savedBattle: null,
     lastMastery,
     lastRank: rank,
-    lastSalvage: s.salvageCr,
+    lastSalvage: s.salvageCr + stragglerCr,
     missionRank,
     partsOwned,
     snowFox,
@@ -2579,7 +2604,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
           let l = mkLog(st.log);
           for (const x of d.lines) l = push(l, x);
           for (const q of defeatQuotes(cur.units, state.units, att)) l = push(l, q);
-          return { units: state.units, kills: st.kills + kc, decoyHit: st.decoyHit || def.decoyUntil != null, killsByDef: tallyKills(st.killsByDef, deadEnemies(cur.units, state.units)), inventory: d.inventory, salvageQueue: [...st.salvageQueue, ...d.names], log: rxnLog(l) };
+          return { units: state.units, kills: st.kills + kc, decoyHit: st.decoyHit || def.decoyUntil != null, killsByDef: tallyKills(st.killsByDef, deadEnemies(cur.units, state.units)), inventory: d.inventory, salvageQueue: [...st.salvageQueue, ...d.names], lostAlly: st.lostAlly || deadPlayers(cur.units, state.units).length > 0, log: rxnLog(l) };
         });
         const end = checkEnd(get().units, get().missionCh, get().turn);
         if (end) {
@@ -2606,6 +2631,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
           killsByDef: tallyKills(st.killsByDef, deadEnemies(cur.units, state.units)),
           inventory: d.inventory,
           salvageQueue: [...st.salvageQueue, ...d.names],
+          lostAlly: st.lostAlly || deadPlayers(cur.units, state.units).length > 0,
           log: rxnLog(l),
           battle: { attacker: { ...att }, defender: { ...defForScene }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: plan.weapon!, result, warning },
         };
@@ -2892,7 +2918,7 @@ useGame.subscribe((s, prev) => {
     map: s.map,
     units: s.units,
     turn: s.turn,
-    kills: s.kills, altKill: s.altKill, arcKill: s.arcKill, blastKill: s.blastKill,
+    kills: s.kills, altKill: s.altKill, arcKill: s.arcKill, blastKill: s.blastKill, lostAlly: s.lostAlly,
     decoyHit: s.decoyHit,
     iFieldKill: s.iFieldKill,
     bossWarned: s.bossWarned,

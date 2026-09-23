@@ -1028,11 +1028,12 @@ export const HONORS: HonorDef[] = [
   { id: 'h_sig', name: 'MIRROR BREAKER', desc: 'Clear a Σ mirror wave in the VR simulator', rewardCr: 800 },
   { id: 'h_arc', name: 'CHAIN REACTION', desc: 'Kill two foes with a single chain-arc strike', rewardCr: 700 },
   { id: 'h_blast', name: 'SATURATION', desc: 'Destroy four or more foes with a single strike', rewardCr: 900 },
+  { id: 'h_brink', name: 'FROM THE BRINK', desc: 'Win a mission after losing a squad frame', rewardCr: 1000 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean; decoyHit?: boolean; iFieldKill?: boolean; mirrorWon?: boolean; arcKill?: boolean; blastKill?: boolean }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean; decoyHit?: boolean; iFieldKill?: boolean; mirrorWon?: boolean; arcKill?: boolean; blastKill?: boolean; lostAlly?: boolean }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -1103,6 +1104,8 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return s.arcKill === true;
     case 'h_blast':
       return s.blastKill === true;
+    case 'h_brink':
+      return s.lostAlly === true;
     case 'h_ghostd':
       return s.altKill === true;
     default:

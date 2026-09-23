@@ -314,6 +314,9 @@ export function SidePanel() {
               />
             )}
             <Btn label="\u25CF OVRWATCH" sub="hold — auto-fire on first foe in range" onPress={s.overwatchUnit} accent="#7ec8ff" />
+            {s.units.some((a2) => a2.alive && a2.side === 'player' && !a2.npc && a2.uid !== unit.uid && !a2.acted && dist(a2.pos, unit.pos) === 1) && (
+              <Btn label="⇄ SWAP" sub="trade positions with an adjacent ally" onPress={s.swapUnit} accent="#9fd0ff" />
+            )}
             <Btn label="WAIT" onPress={s.waitUnit} />
             <Btn label="CANCEL" onPress={s.cancel} accent="#666" />
           </View>
