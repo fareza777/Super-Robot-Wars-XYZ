@@ -33,7 +33,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen'): number {
   let n = 0;
   for (const p of u.parts) n += PARTS[p]?.[stat] ?? 0;
   return n;
@@ -190,7 +190,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
 }
 
 const rnd = () => Math.random() * 100;
-export const critChance = (att: UnitState, def: UnitState, w?: WeaponDef) => Math.max(5, Math.round(8 + (att.def.mobility - def.def.mobility) * 0.2 + (w?.critMod ?? 0)));
+export const critChance = (att: UnitState, def: UnitState, w?: WeaponDef) => Math.max(5, Math.round(8 + (att.def.mobility - def.def.mobility) * 0.2 + (w?.critMod ?? 0) + partBonus(att, 'crit')));
 const critRoll = (att: UnitState, def: UnitState, w?: WeaponDef) => rnd() < critChance(att, def, w);
 
 interface SimAttack {
@@ -330,6 +330,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   att.en = Math.max(0, att.en - w.enCost);
   if (w.ammo != null) att.ammo[w.id] = (att.ammo[w.id] ?? 0) - 1;
   if (result.hit) {
+    const hpBefore = def.hp;
     def.hp = Math.max(0, def.hp - result.damage);
     att.dmgDealt = (att.dmgDealt ?? 0) + result.damage;
     // Miracle spirit — refuse a fatal hit, stand at 10 HP (consumed)
@@ -338,6 +339,10 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
       result.miracle = true;
       def.miracleArmed = false;
       def.hp = 10;
+    }
+    if (result.destroyed) {
+      def.overkillDealt = Math.max(0, result.damage - hpBefore);
+      result.overkill = def.overkillDealt;
     }
   }
   if (result.hit && w.drain) att.hp = Math.min(att.def.maxHp, att.hp + Math.round(result.damage * 0.25));
@@ -358,6 +363,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
     def.en = Math.max(0, def.en - cw.enCost);
     if (cw.ammo != null) def.ammo[cw.id] = (def.ammo[cw.id] ?? 0) - 1;
     if (result.counter.hit) {
+      const hpBefore = att.hp;
       att.hp = Math.max(0, att.hp - result.counter.damage);
       def.dmgDealt = (def.dmgDealt ?? 0) + result.counter.damage;
       if (result.counter.destroyed && att.miracleArmed) {
@@ -369,6 +375,10 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
       if (att.alive && !att.crippled && result.counter.damage >= att.def.maxHp * 0.4) {
         att.crippled = true;
         result.counter.crippled = true;
+      }
+      if (result.counter.destroyed) {
+        att.overkillDealt = Math.max(0, result.counter.damage - hpBefore);
+        result.counter.overkill = att.overkillDealt;
       }
     }
     if (result.counter.hit && cw.drain) def.hp = Math.min(def.def.maxHp, def.hp + Math.round(result.counter.damage * 0.25));
@@ -429,7 +439,9 @@ export function applyMapAttack(state: GameState, attackerUid: string, targetTile
   inBlast.forEach((t, i) => {
     const r = i === 0 ? { hit: result.hit, damage: result.damage, destroyed: result.destroyed } : result.splash![i - 1];
     if (r.hit) {
+      const hpB = t.hp;
       t.hp = Math.max(0, t.hp - r.damage);
+      if (r.destroyed) t.overkillDealt = Math.max(0, r.damage - hpB);
       if (t.side !== att.side) att.dmgDealt = (att.dmgDealt ?? 0) + r.damage;
       willGain(t, 1);
       hits++;
@@ -537,6 +549,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'flash':
       u.flashUntilEndOfEnemyPhase = true;
       break;
+    case 'vanish':
+      u.vanishUntilEndOfEnemyPhase = true;
+      break;
     case 'miracle':
       u.miracleArmed = true;
       break;
@@ -570,6 +585,7 @@ export function clearTransientForOwnPhase(u: UnitState): void {
   u.gritUntilEndOfEnemyPhase = false;
   u.guardUntilEndOfEnemyPhase = false;
   u.accelThisTurn = 0;
+  u.vanishUntilEndOfEnemyPhase = false;
   u.moved = false;
   u.acted = false;
   u.followUpReady = false;
@@ -590,7 +606,7 @@ interface AiPlan {
 /** For each enemy unit pick: best tile in range that can attack the weakest-hit player unit; else move toward nearest player. */
 export function planEnemyActions(state: GameState): AiPlan[] {
   const { map, units } = state;
-  const players = units.filter((u) => u.alive && u.side === 'player');
+  const players = units.filter((u) => u.alive && u.side === 'player' && !u.vanishUntilEndOfEnemyPhase); // Vanish: untargetable
   const enemies = units.filter((u) => u.alive && u.side === 'enemy' && !u.acted);
   const plans: AiPlan[] = [];
   const claimed = new Set<string>(); // tiles other AI units plan to occupy
@@ -812,7 +828,7 @@ function timedOut(obj: EndObjective | null | undefined, turn?: number): boolean 
 /** Start-of-own-phase recovery: base EN regen + terrain effects (heal on base/city, burn on lava). */
 export function phaseRecovery(u: UnitState, map: MapDef): { hpGain: number; enGain: number; hpLoss: number } {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
-  const enGain = Math.min(u.def.maxEn - u.en, 5 + (t.enRegen ?? 0));
+  const enGain = Math.min(u.def.maxEn - u.en, 5 + (t.enRegen ?? 0) + partBonus(u, 'enRegen'));
   const hpGain = Math.min(u.def.maxHp - u.hp, Math.round(u.def.maxHp * (t.hpRegen ?? 0)));
   const hpLoss = Math.min(u.hp - 1, Math.round(u.def.maxHp * (t.hpDmg ?? 0))); // terrain can't kill — leaves 1 HP
   u.en += enGain;

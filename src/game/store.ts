@@ -97,6 +97,7 @@ export interface SaveData {
   vossenDefeated?: boolean; // NEMESIS honor — Drake Eclipse shot down at least once
   killsByDef?: Record<string, number>; // enemies destroyed per frame id — codex tally
   snowFox?: boolean; // WHITEOUT honor — won during a blizzard turn
+  extremeWon?: boolean; // OVERLORD honor — won a mission on EXTREME
 }
 
 /** Serialized mid-battle snapshot — lets the player leave a mission and resume it later. */
@@ -210,6 +211,7 @@ interface Store {
   vossenDefeated: boolean; // Cpt. Vossen shot down at least once (persisted — NEMESIS honor)
   killsByDef: Record<string, number>; // enemy frames destroyed per def id — codex tally (persisted)
   snowFox: boolean;
+  extremeWon: boolean;
   log: string[];
   enemyBusy: boolean;
   screenShake: number;
@@ -428,8 +430,8 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
 
 const BATTLE_SAVE_KEY = 'srwxyz_battle_v1';
 
-async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank' | 'snowFox'>>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated, killsByDef: useGame.getState().killsByDef, snowFox: useGame.getState().snowFox };
+async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen' | 'route' | 'honorsClaimed' | 'missionRank' | 'snowFox' | 'extremeWon'>>) {
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen, route: s.route, honorsClaimed: s.honorsClaimed, missionRank: s.missionRank, simBest: useGame.getState().simBest, vossenDefeated: useGame.getState().vossenDefeated, killsByDef: useGame.getState().killsByDef, snowFox: useGame.getState().snowFox, extremeWon: useGame.getState().extremeWon };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -596,6 +598,7 @@ export const useGame = create<Store>((set, get) => ({
   vossenDefeated: false,
   killsByDef: {} as Record<string, number>,
   snowFox: false,
+    extremeWon: false,
   hint: null,
   hintsSeen: [],
 
@@ -714,7 +717,7 @@ export const useGame = create<Store>((set, get) => ({
       await AsyncStorage.removeItem(SAVE_KEY);
       await AsyncStorage.removeItem(BATTLE_SAVE_KEY);
     } catch {}
-    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false, killsByDef: {}, snowFox: false });
+    set({ hasSave: false, chapter: 0, credits: 0, inventory: {}, upgrades: {}, weaponUpg: {}, pilotProg: {}, ngPlus: 0, parts: {}, partsOwned: [], masteryDone: [], savedBattle: null, simBest: 0, vossenDefeated: false, killsByDef: {}, snowFox: false, extremeWon: false });
   },
 
   toggleDeploy: (defId) => {
@@ -794,7 +797,8 @@ export const useGame = create<Store>((set, get) => ({
       const raw = await AsyncStorage.getItem(SAVE_KEY);
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
-      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {}, simBest: d.simBest ?? 0, vossenDefeated: d.vossenDefeated ?? false, snowFox: d.snowFox ?? false, killsByDef: d.killsByDef ?? {} });
+      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [], route: d.route ?? null, honorsClaimed: d.honorsClaimed ?? [], missionRank: (d.missionRank as Record<number, 'S' | 'A' | 'B' | 'C'>) ?? {}, simBest: d.simBest ?? 0, vossenDefeated: d.vossenDefeated ?? false, snowFox: d.snowFox ?? false,
+    extremeWon: d.extremeWon ?? false, killsByDef: d.killsByDef ?? {} });
     } catch {}
     try {
       const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
@@ -1323,13 +1327,15 @@ export const useGame = create<Store>((set, get) => ({
       const attAfter = state.units.find((u) => u.uid === att.uid)!;
       const defAfter = state.units.find((u) => u.uid === uid)!;
       const dead = deadEnemies(s.units, state.units);
+      const overkillCr = Math.floor(dead.reduce((n, d) => n + (d.overkillDealt ?? 0), 0) / 50);
+      if (overkillCr) log = push(log, `⚡ OVERKILL — +${overkillCr}cr salvage`);
       const common = {
         units: state.units,
         log,
         kills: s.kills + killCount,
         chainTurn: killCount > 0 ? s.turn : s.chainTurn,
         chainCount: chain,
-        salvageCr: s.salvageCr + chainBonus,
+        salvageCr: s.salvageCr + chainBonus + overkillCr,
         killsByDef: tallyKills(s.killsByDef, dead),
         pendingWeapon: null,
         mapAim: null,
@@ -1411,6 +1417,8 @@ export const useGame = create<Store>((set, get) => ({
     const chain = killCount > 0 ? (s.turn === s.chainTurn ? s.chainCount + killCount : killCount) : s.chainCount;
     const chainBonus = chain > 1 && killCount > 0 ? 30 * chain : 0;
     if (chainBonus) log2 = push(log2, `⛓ CHAIN ×${chain} — +${chainBonus}cr bonus salvage`);
+    const overkillCr = Math.floor(dead.reduce((n, d) => n + (d.overkillDealt ?? 0), 0) / 50);
+    if (overkillCr) log2 = push(log2, `⚡ OVERKILL — the wrecks spill extra salvage: +${overkillCr}cr`);
     const quip = bondQuip(s, att, dead);
     if (quip) log2 = push(log2, `♥ ${quip}`);
     let inventory = s.inventory;
@@ -1446,7 +1454,7 @@ export const useGame = create<Store>((set, get) => ({
       kills: s.kills + killCount,
       chainTurn: killCount > 0 ? s.turn : s.chainTurn,
       chainCount: chain,
-      salvageCr: s.salvageCr + chainBonus + carrierCr,
+      salvageCr: s.salvageCr + chainBonus + carrierCr + overkillCr,
       pendingWeapon: null,
       mapAim: null,
       attackTiles: new Set<string>(),
@@ -1501,6 +1509,8 @@ export const useGame = create<Store>((set, get) => ({
       salvageQueue = [...salvageQueue, ITEMS.megaKit.name];
     }
     const mapKills = deadEnemies(s.units, state.units).length;
+    const overkillCr = Math.floor(deadEnemies(s.units, state.units).reduce((n, d) => n + (d.overkillDealt ?? 0), 0) / 50);
+    if (overkillCr) log2 = push(log2, `⚡ OVERKILL — +${overkillCr}cr salvage`);
     const mapChain = mapKills > 0 ? (s.turn === s.chainTurn ? s.chainCount + mapKills : mapKills) : s.chainCount;
     const mapChainBonus = mapChain > 1 && mapKills > 0 ? 30 * mapChain : 0;
     if (mapChainBonus) log2 = push(log2, `⛓ CHAIN ×${mapChain} — +${mapChainBonus}cr bonus salvage`);
@@ -1514,7 +1524,7 @@ export const useGame = create<Store>((set, get) => ({
       kills: s.kills + deadEnemies(s.units, state.units).length,
       chainTurn: mapKills > 0 ? s.turn : s.chainTurn,
       chainCount: mapChain,
-      salvageCr: s.salvageCr + mapChainBonus,
+      salvageCr: s.salvageCr + mapChainBonus + overkillCr,
       pendingWeapon: null,
       mapAim: null,
       attackTiles: new Set<string>(),
@@ -1811,6 +1821,7 @@ function applyVictory(set: SetFn, get: Get) {
   const pilotProg = { ...s.pilotProg };
   const unitsLost = s.units.filter((u) => u.side === 'player' && !u.alive).length;
   const snowFox = s.snowFox || (s.missionCh.theme === 'snow' && s.blizzard);
+  const extremeWon = s.extremeWon || s.settings.difficulty === 'extreme';
   // wrecked squad frames must be rebuilt — repair bill comes out of the reward
   const repairBill = s.units.filter((u) => u.side === 'player' && !u.npc && !u.alive).reduce((n, u) => n + u.level * 15, 0);
   const aceLines: string[] = [];
@@ -1854,11 +1865,12 @@ function applyVictory(set: SetFn, get: Get) {
       missionRank,
       partsOwned,
       snowFox,
+      extremeWon,
       debrief: null,
       salvageQueue: [],
       log: aceLines.reduce((l, line) => push(l, line), push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''} · RANK ${rankS}${sRankNote ? ' · awarded 🛡 VETERAN PLATE' : ''}${repairBill > 0 ? ` · 🔧 repair bill -${repairBill}cr` : ''}`)),
     });
-    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank, snowFox });
+    void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus, route: s.route, missionRank, snowFox, extremeWon });
     return;
   }
   const ch = s.missionCh;
@@ -1917,13 +1929,14 @@ function applyVictory(set: SetFn, get: Get) {
     missionRank,
     partsOwned,
     snowFox,
+    extremeWon,
     lastReward: reward + masteryCr + (clearedFinal ? 5000 : 0),
     debrief: DEBRIEFS[ch.id] ?? null,
     salvageQueue: [],
     log: push(log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + masteryCr + 5000} credits` : `Mission complete! +${reward + masteryCr} credits · RANK ${rank}`),
   });
   void clearBattleSave();
-  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route, missionRank, snowFox });
+  void persist({ chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus, masteryDone, route: s.route, missionRank, snowFox, extremeWon });
 }
 
 async function runEnemyPhase(set: SetFn, get: Get) {
@@ -2246,10 +2259,11 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       }
     }
     // blizzard turns on snow fields — ground units lose 15% hit for the whole phase
-    const blizzard = st.missionCh.theme === 'snow' && nextTurn % 3 === 0;
+    const stormTheme = st.missionCh.theme === 'snow' ? 'snow' : st.missionCh.theme === 'desert' ? 'desert' : null;
+    const blizzard = stormTheme != null && nextTurn % 3 === 0;
     if (blizzard) {
-      if (!notice) { notice = '❄ BLIZZARD — ground units -15% hit'; setTimeout(() => set({ notice: null }), 2800); }
-      recovered.push('❄ Blizzard sweeps the field — ground units have -15% hit this turn.');
+      if (!notice) { notice = stormTheme === 'desert' ? '🏜 SANDSTORM — ground units -15% hit' : '❄ BLIZZARD — ground units -15% hit'; setTimeout(() => set({ notice: null }), 2800); }
+      recovered.push(stormTheme === 'desert' ? '🏜 Sandstorm sweeps the field — ground units have -15% hit this turn.' : '❄ Blizzard sweeps the field — ground units have -15% hit this turn.');
     }
     // bond resonance — bonded partners standing together feed each other's Will
     let resonated = false;

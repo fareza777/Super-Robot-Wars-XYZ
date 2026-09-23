@@ -21,6 +21,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   soul: { id: 'soul', name: 'Soul', cost: 60, desc: 'Next attack damage x2' },
   trust: { id: 'trust', name: 'Trust', cost: 25, desc: 'Heal the most wounded ally within 2 tiles for 30% HP' },
   miracle: { id: 'miracle', name: 'Miracle', cost: 60, desc: 'Survive the next fatal hit with 10 HP — once' },
+  vanish: { id: 'vanish', name: 'Vanish', cost: 40, desc: 'Enemies cannot target this unit until end of enemy phase' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

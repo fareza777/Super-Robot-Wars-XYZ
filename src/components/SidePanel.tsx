@@ -69,7 +69,7 @@ export function SidePanel() {
         <Text style={styles.phaseTxt}>{s.phase === 'enemy' ? 'ENEMY PHASE' : 'PLAYER PHASE'}</Text>
         <Text style={styles.turnTxt}>T{s.turn}</Text>
       </View>
-      {s.blizzard ? <Text style={styles.blizzChip}>❄ BLIZZARD — ground units -15% hit</Text> : null}
+      {s.blizzard ? <Text style={styles.blizzChip}>{s.missionCh.theme === 'desert' ? '🏜 SANDSTORM — ground units -15% hit' : '❄ BLIZZARD — ground units -15% hit'}</Text> : null}
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity onPress={() => setShowRoster((v) => !v)} style={{ flex: 1 }}>
           <Text style={styles.counts}>

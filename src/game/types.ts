@@ -41,7 +41,7 @@ export interface StatusFx {
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'vanish';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -162,6 +162,10 @@ export interface UnitState {
   crippled?: boolean;
   /** Miracle spirit armed — survive the next fatal hit with 10 HP */
   miracleArmed?: boolean;
+  /** Vanish spirit — enemies cannot target this unit until the flag clears */
+  vanishUntilEndOfEnemyPhase?: boolean;
+  /** overkill damage this unit took on its deathblow — feeds salvage bonus */
+  overkillDealt?: number;
 }
 
 export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def';
@@ -181,6 +185,8 @@ export interface PartDef {
   hp?: number; // +max HP
   en?: number; // +max EN
   evade?: number; // +% evade
+  crit?: number; // +% critical chance
+  enRegen?: number; // +EN regenerated at the start of own phase
   unique?: boolean; // not sold — awarded by story
   /** afterburner: unit may attack again after a kill, once per turn */
   again?: boolean;
@@ -273,6 +279,8 @@ export interface AttackResult {
   miracle?: boolean;
   /** this blow crippled the defender's frame (move -2) */
   crippled?: boolean;
+  /** damage beyond what the finishing blow needed */
+  overkill?: number;
   // human-readable EXP/level-up events for the log
   expEvents: string[];
 }
@@ -289,6 +297,8 @@ export interface CounterResult {
   miracle?: boolean;
   /** this blow crippled the attacker's frame (move -2) */
   crippled?: boolean;
+  /** damage beyond what the finishing blow needed */
+  overkill?: number;
 }
 
 export interface BattleData {
