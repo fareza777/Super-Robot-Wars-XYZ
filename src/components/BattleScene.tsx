@@ -42,6 +42,9 @@ export function BattleScene() {
   const defEnter = useRef(new Animated.Value(0)).current;
   const attLunge = useRef(new Animated.Value(0)).current;
   const defLunge = useRef(new Animated.Value(0)).current;
+  const attDodge = useRef(new Animated.Value(0)).current;
+  const defDodge = useRef(new Animated.Value(0)).current;
+  const shieldAnim = useRef(new Animated.Value(0)).current;
 
   const atk = battle?.attacker;
   const def = battle?.defender;
@@ -57,6 +60,9 @@ export function BattleScene() {
     defEnter.setValue(0);
     attLunge.setValue(0);
     defLunge.setValue(0);
+    attDodge.setValue(0);
+    defDodge.setValue(0);
+    shieldAnim.setValue(0);
     Animated.timing(fade, { toValue: 1, duration: 400, useNativeDriver: true }).start();
     bgZoom.setValue(0);
     Animated.timing(bgZoom, { toValue: 1, duration: 24000, easing: Easing.linear, useNativeDriver: true }).start();
@@ -119,11 +125,23 @@ export function BattleScene() {
       if (r.hit) {
         play(r.destroyed ? 'sfx_explosion' : 'sfx_hit');
         pulse(defFlash, shakeX);
+        if (r.reaction === 'defend') {
+          Animated.sequence([
+            Animated.timing(shieldAnim, { toValue: 1, duration: 280, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+            Animated.timing(shieldAnim, { toValue: 0, duration: 480, delay: 240, useNativeDriver: true }),
+          ]).start();
+        }
         if (r.destroyed) {
           Animated.timing(defFall, { toValue: 1, duration: 1100, delay: 420, easing: Easing.in(Easing.cubic), useNativeDriver: true }).start();
           const dv = UNIT_DEFEAT_VOICE[battle.defender.def.id];
           if (dv) timers.push(setTimeout(() => play(dv), 650));
         }
+      } else if (r.reaction === 'evade') {
+        // evade pick — defender dashes aside as the shot whiffs
+        Animated.sequence([
+          Animated.timing(defDodge, { toValue: 1, duration: 150, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+          Animated.timing(defDodge, { toValue: 0, duration: 340, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        ]).start();
       }
     }
     if (stage === 5 && battle.result.counter) {
@@ -136,6 +154,12 @@ export function BattleScene() {
           const dv = UNIT_DEFEAT_VOICE[battle.attacker.def.id];
           if (dv) timers.push(setTimeout(() => play(dv), 650));
         }
+      } else {
+        // counter whiffed — attacker slips aside
+        Animated.sequence([
+          Animated.timing(attDodge, { toValue: 1, duration: 150, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+          Animated.timing(attDodge, { toValue: 0, duration: 340, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        ]).start();
       }
     }
     return () => timers.forEach(clearTimeout);
@@ -169,7 +193,12 @@ export function BattleScene() {
               borderColor: atk.def.accent,
               opacity: attFall.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }),
               transform: [
-                { translateX: Animated.add(attEnter.interpolate({ inputRange: [0, 1], outputRange: [-PW * 1.2, 0] }), attLunge.interpolate({ inputRange: [0, 1], outputRange: [0, width * 0.07] })) },
+                {
+                  translateX: Animated.add(
+                    Animated.add(attEnter.interpolate({ inputRange: [0, 1], outputRange: [-PW * 1.2, 0] }), attLunge.interpolate({ inputRange: [0, 1], outputRange: [0, width * 0.07] })),
+                    attDodge.interpolate({ inputRange: [0, 1], outputRange: [0, -width * 0.05] }),
+                  ),
+                },
                 { translateY: attFall.interpolate({ inputRange: [0, 1], outputRange: [0, 160] }) },
                 { rotate: attFall.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '12deg'] }) },
               ],
@@ -193,7 +222,12 @@ export function BattleScene() {
               borderColor: def.def.accent,
               opacity: defFall.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }),
               transform: [
-                { translateX: Animated.add(defEnter.interpolate({ inputRange: [0, 1], outputRange: [PW * 1.2, 0] }), defLunge.interpolate({ inputRange: [0, 1], outputRange: [0, -width * 0.07] })) },
+                {
+                  translateX: Animated.add(
+                    Animated.add(defEnter.interpolate({ inputRange: [0, 1], outputRange: [PW * 1.2, 0] }), defLunge.interpolate({ inputRange: [0, 1], outputRange: [0, -width * 0.07] })),
+                    defDodge.interpolate({ inputRange: [0, 1], outputRange: [0, width * 0.05] }),
+                  ),
+                },
                 { translateY: defFall.interpolate({ inputRange: [0, 1], outputRange: [0, 160] }) },
                 { rotate: defFall.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '-12deg'] }) },
               ],
@@ -203,6 +237,23 @@ export function BattleScene() {
           <Image cachePolicy="memory" source={MECH_ART[def.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" contentPosition="top" />
           <LinearGradient colors={['transparent', 'rgba(0,0,0,0.55)']} style={StyleSheet.absoluteFill} />
           <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#fff', opacity: defFlash }]} />
+          {/* DEFEND pick — energy shield flashes over the defender's hull on impact */}
+          {battle.result.reaction === 'defend' && (
+            <View pointerEvents="none" style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
+              <Animated.View
+                style={{
+                  width: '58%',
+                  aspectRatio: 1,
+                  borderRadius: 18,
+                  borderWidth: 4,
+                  borderColor: '#7ee7ff',
+                  backgroundColor: 'rgba(126,231,255,0.12)',
+                  opacity: shieldAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 0.95] }),
+                  transform: [{ scale: shieldAnim.interpolate({ inputRange: [0, 1], outputRange: [0.45, 1.14] }) }, { rotate: '45deg' }],
+                }}
+              />
+            </View>
+          )}
         </Animated.View>
 
         {/* attack VFX overlays */}
@@ -226,6 +277,9 @@ export function BattleScene() {
       {!battle.needsReaction && stage <= 2 && battle.result.reaction === 'defend' && <Banner text="DEFEND" color="#7ee7ff" />}
       {!battle.needsReaction && stage <= 2 && battle.result.reaction === 'evade' && <Banner text="EVADE" color="#b6ff9d" />}
       {!battle.needsReaction && stage <= 2 && battle.result.reaction === 'cover' && <Banner text="COVER" color="#ffd34d" />}
+      {/* critical hits get their own splash — up high so it never collides with FINISH */}
+      {!battle.needsReaction && stage === 3 && battle.result.hit && battle.result.crit && !battle.result.destroyed && <Banner text="⚡ CRITICAL ⚡" color="#ffd34d" pos="high" />}
+      {!battle.needsReaction && stage === 5 && !!battle.result.counter?.hit && battle.result.counter.crit && !battle.result.counter.destroyed && <Banner text="⚡ CRITICAL ⚡" color="#ff8a5c" pos="high" />}
       {/* killing blow on a boss — the dramatic finish */}
       {!battle.needsReaction && stage >= 3 && battle.result.destroyed && def.def.boss && <Banner text="★ FINISH ★" color="#ffd34d" />}
 
@@ -460,13 +514,13 @@ function NamePlate({ unit, hp, side }: { unit: UnitState; hp?: number; side: 'le
   );
 }
 
-function Banner({ text, color }: { text: string; color: string }) {
+function Banner({ text, color, pos }: { text: string; color: string; pos?: 'mid' | 'high' }) {
   const slide = useRef(new Animated.Value(-1)).current;
   useEffect(() => {
     Animated.spring(slide, { toValue: 0, useNativeDriver: true, friction: 7 }).start();
   }, []);
   return (
-    <Animated.View style={[styles.banner, { borderColor: color, transform: [{ translateX: slide.interpolate({ inputRange: [-1, 0], outputRange: [-520, 0] }) }] }]}>
+    <Animated.View style={[styles.banner, pos === 'high' && { top: '24%' }, { borderColor: color, transform: [{ translateX: slide.interpolate({ inputRange: [-1, 0], outputRange: [-520, 0] }) }] }]}>
       <Text style={[styles.bannerTxt, { color }]}>{text}</Text>
     </Animated.View>
   );

@@ -51,6 +51,7 @@ export function BriefingScreen() {
   const pilotProg = useGame((s) => s.pilotProg);
   const deploySel = useGame((s) => s.deploySel);
   const toggleDeploy = useGame((s) => s.toggleDeploy);
+  const hard = useGame((s) => (s.settings.difficulty ?? 'normal') === 'hard');
   const ch = chapterOf(chapter);
   const roster = rosterFor(ch);
   return (
@@ -68,6 +69,7 @@ export function BriefingScreen() {
             ★ MASTERY: {ch.mastery.desc} — +{ch.mastery.rewardCr}cr
           </Text>
         )}
+        {hard && <Text style={{ color: '#ff8a5c', fontSize: 11, fontWeight: '800', letterSpacing: 1.5, marginTop: 4 }}>▲ HARD MODE — enemies +15% · mission rewards +25%</Text>}
         <Text style={styles.deployLbl}>DEPLOY SQUAD — tap to toggle ({deploySel.length}/{roster.length})</Text>
         <View style={styles.squadRow}>
           {roster.map((id) => {

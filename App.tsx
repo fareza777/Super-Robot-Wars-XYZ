@@ -66,6 +66,15 @@ function MidDialog() {
   return <DialogScene lines={lines.map((l) => ({ speaker: l.speaker, text: l.text, voice: l.voice as never }))} tag={`${missionCh.name.toUpperCase()} · ONGOING BATTLE`} bg={ART.story[4]} onDone={finish} />;
 }
 
+/** Post-mission debrief — plays over HQ right after a story chapter is cleared. */
+function Debrief() {
+  const lines = useGame((s) => s.debrief);
+  const clear = useGame((s) => s.clearDebrief);
+  const phase = useGame((s) => s.phase);
+  if (!lines?.length || phase !== 'hq') return null;
+  return <DialogScene lines={lines.map((l) => ({ speaker: l.speaker, text: l.text }))} tag="POST-MISSION DEBRIEF" bg={ART.hqBg} onDone={clear} />;
+}
+
 export default function App() {
   const phase = useGame((s) => s.phase);
   const battle = useGame((s) => s.battle);
@@ -108,13 +117,31 @@ export default function App() {
           {phase === 'deploy' ? <DeployBar /> : <SidePanel />}
           {phase === 'enemy' && <EnemyBanner />}
           {!!notice && <NoticeBanner text={notice} />}
+          <HintCard />
         </View>
       )}
       {phase === 'victory' && <EndScreen victory />}
       {phase === 'defeat' && <EndScreen victory={false} />}
       <MidDialog />
+      <Debrief />
       {battle && <BattleScene key={`${battle.attacker.uid}-${battle.defender.uid}-${battle.weapon.id}`} />}
       <StatusBar style="light" hidden />
+    </View>
+  );
+}
+
+/** One-time tutorial card — dismisses itself permanently once tapped. */
+function HintCard() {
+  const hint = useGame((s) => s.hint);
+  const dismissHint = useGame((s) => s.dismissHint);
+  if (!hint) return null;
+  return (
+    <View style={styles.hintCard} pointerEvents="box-none">
+      <Text style={styles.hintTitle}>GUIDE</Text>
+      <Text style={styles.hintTxt}>{hint.text}</Text>
+      <Pressable style={styles.hintBtn} onPress={dismissHint}>
+        <Text style={styles.hintBtnTxt}>GOT IT ▸</Text>
+      </Pressable>
     </View>
   );
 }
@@ -139,6 +166,11 @@ function NoticeBanner({ text }: { text: string }) {
 const styles = StyleSheet.create({
   noticeBanner: { position: 'absolute', top: '12%', left: 0, right: 240, alignItems: 'center', backgroundColor: 'rgba(150,50,10,0.72)', borderTopWidth: 1, borderBottomWidth: 1, borderColor: '#ff8a3a', paddingVertical: 10, zIndex: 45 },
   noticeTxt: { color: '#ffd8b0', fontSize: 20, fontWeight: '900', letterSpacing: 5, fontStyle: 'italic' },
+  hintCard: { position: 'absolute', bottom: '14%', left: 40, right: 280, maxWidth: 560, alignSelf: 'center', backgroundColor: 'rgba(8,14,30,0.94)', borderWidth: 1.5, borderColor: '#6db4ff', borderRadius: 12, padding: 16, zIndex: 46 },
+  hintTitle: { color: '#6db4ff', fontSize: 11, fontWeight: '900', letterSpacing: 3, marginBottom: 6 },
+  hintTxt: { color: '#dce8ff', fontSize: 13, lineHeight: 19, marginBottom: 10 },
+  hintBtn: { alignSelf: 'flex-end', borderWidth: 1, borderColor: '#6db4ff', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 6, backgroundColor: 'rgba(109,180,255,0.12)' },
+  hintBtnTxt: { color: '#9fd0ff', fontSize: 12, fontWeight: '800', letterSpacing: 1.5 },
   root: { flex: 1, backgroundColor: '#05070f' },
   gameRow: { flex: 1, flexDirection: 'row' },
   enemyBanner: {

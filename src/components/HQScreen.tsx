@@ -9,7 +9,7 @@ import { BOND_EVENTS, MAX_BOND, bondLevel } from '../game/bonds';
 import { SPIRITS } from '../game/data';
 import { useGame } from '../game/store';
 
-type Tab = 'main' | 'merchant' | 'workshop' | 'chat' | 'mess';
+type Tab = 'main' | 'merchant' | 'workshop' | 'chat' | 'mess' | 'codex';
 
 const NPCS = {
   merchant: { name: 'Mira Volkoff', role: 'MERCHANT', art: NPC_ART.merchant, accent: '#ffd34d', voices: ['hq_merch_1', 'hq_merch_2', 'hq_merch_3'] },
@@ -86,6 +86,7 @@ export function HQScreen() {
           <HqCard title="WORKSHOP" sub="Upgrade your mechs" art={NPC_ART.mechanic} accent="#6fe0ff" onPress={() => setTab('workshop')} />
           <HqCard title="BRIEF ROOM" sub="Talk with the crew" art={NPC_ART.captain} accent="#9fd0ff" onPress={goChat} />
           <HqCard title="MESS HALL" sub="Bonds & stories" art={PILOT_ART.valstray} accent="#ff9fd0" onPress={() => setTab('mess')} />
+          <HqCard title="CODEX" sub="Frame & pilot archive" art={MECH_ART.valstray} accent="#b8a0ff" onPress={() => setTab('codex')} />
           <Pressable style={styles.deployBtn} onPress={() => s.gotoMissions()}>
             <Text style={styles.deployTxt}>▶ MISSIONS</Text>
             <Text style={styles.deploySub}>CH.{ch.id} · {s.sideCleared.length} side cleared</Text>
@@ -339,6 +340,34 @@ export function HQScreen() {
         </View>
       )}
 
+      {/* CODEX — archive of every frame met in the campaign */}
+      {tab === 'codex' && (
+        <View style={styles.panelWrap}>
+          <View style={styles.panelLeft}>
+            <Animated.Image source={PILOT_ART.zephyra} style={{ width: '100%', height: npcImgH, transform: [{ translateY: npcBob.interpolate({ inputRange: [0, 1], outputRange: [0, -8] }) }] }} resizeMode="contain" />
+            <Text style={[styles.npcName, { color: '#b8a0ff' }]}>CODEX</Text>
+            <Text style={styles.npcRole}>FRAME ARCHIVE</Text>
+          </View>
+          <View style={styles.panelRight}>
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 12 }}>
+              <Text style={styles.panelTitle}>ARK SQUAD</Text>
+              {rosterFor(ch).map((id) => (
+                <CodexRow key={id} id={id} ally />
+              ))}
+              <Text style={[styles.panelTitle, { marginTop: 14 }]}>IMPERIAL REGISTRY</Text>
+              {Object.keys(ALL_UNITS)
+                .filter((id) => !CODEX_ALLY_IDS.includes(id))
+                .map((id) => (
+                  <CodexRow key={id} id={id} ally={false} />
+                ))}
+            </ScrollView>
+            <Pressable style={styles.backBtn} onPress={() => setTab('main')}>
+              <Text style={styles.backTxt}>◂ BACK TO HQ</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+
       {/* CHAT */}
       {tab === 'chat' && (
         <View style={styles.chatWrap}>
@@ -367,6 +396,41 @@ export function HQScreen() {
         </View>
       )}
     </Animated.View>
+  );
+}
+
+const CODEX_ALLY_IDS = [...PLAYER_DEF_IDS, 'raxdenR', 'vexiaX'];
+
+/** Codex entry — one frame: art, stats, armament, pilot. */
+function CodexRow({ id, ally }: { id: string; ally: boolean }) {
+  const d = ALL_UNITS[id];
+  return (
+    <View style={styles.codexRow}>
+      <ExpoImage cachePolicy="memory" source={MECH_ART[id]} style={styles.codexThumb} contentFit="cover" contentPosition="top center" />
+      <View style={{ flex: 1 }}>
+        <Text style={styles.shopName}>
+          {d.name} <Text style={{ color: d.accent }}>· {d.title}</Text>
+          {d.boss ? ' · ★ACE FRAME' : ''}
+        </Text>
+        <Text style={styles.shopDesc}>
+          Pilot: {d.pilot.name} “{d.pilot.callsign}” · {d.moveType === 'air' ? 'AIR' : 'LAND'} · MV {d.moveRange}
+        </Text>
+        <Text style={styles.shopDesc}>
+          HP {d.maxHp} · EN {d.maxEn} · ARM {d.armor} · MOB {d.mobility}
+        </Text>
+        <Text style={styles.codexWep} numberOfLines={1}>
+          {d.weapons.map((w) => w.name).join(' · ')}
+        </Text>
+        {ally && d.pilot.spirits.length > 0 && (
+          <Text style={styles.codexSpirit} numberOfLines={1}>
+            Spirits: {d.pilot.spirits.map((sp) => SPIRITS[sp].name).join(' · ')}
+          </Text>
+        )}
+      </View>
+      <View style={[styles.codexSide, { borderColor: ally ? '#6db4ff' : '#ff6b6b' }]}>
+        <Text style={{ color: ally ? '#6db4ff' : '#ff6b6b', fontSize: 9, fontWeight: '900', letterSpacing: 1 }}>{ally ? 'ARK' : 'FOE'}</Text>
+      </View>
+    </View>
   );
 }
 
@@ -469,4 +533,9 @@ const styles = StyleSheet.create({
   bondFaces: { flexDirection: 'row', alignItems: 'center' },
   bondFace: { width: 40, height: 40, borderRadius: 20, borderWidth: 1.5, borderColor: '#3a4160' },
   bondHeart: { color: '#ff9fd0', fontSize: 13, fontWeight: '900', marginHorizontal: 4 },
+  codexRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#1c2440' },
+  codexThumb: { width: 58, height: 58, borderRadius: 8, borderWidth: 1, borderColor: '#3a4160' },
+  codexWep: { color: '#c8b060', fontSize: 10, marginTop: 3 },
+  codexSpirit: { color: '#b09ae8', fontSize: 10, marginTop: 2 },
+  codexSide: { borderWidth: 1, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 },
 });

@@ -276,6 +276,40 @@ const MID_EVENTS: Record<number, MapDef['events']> = {
   }] as MapDef['events'],
 };
 
+/** Post-mission debrief scenes keyed by chapter id — play over the HQ screen after victory. */
+export const DEBRIEFS: Record<number, { speaker: string; text: string }[]> = {
+  1: [
+    { speaker: 'npc_captain', text: 'Good work, squad. The Kargan line is broken — the corridor to the colony road is ours.' },
+    { speaker: 'valstray', text: 'First sortie, first scars. The Ark is still standing — that is what counts.' },
+  ],
+  2: [{ speaker: 'npc_mechanic', text: 'Frames came back dented but whole. Get me two hours and they will fly like new.' }],
+  5: [
+    { speaker: 'raxden', text: '...Heh. So this is what it is like to lose to people who actually believe in something.' },
+    { speaker: 'npc_captain', text: 'Raxden Crimson stands down. Secure his frame — and treat the pilot with respect.' },
+  ],
+  10: [
+    { speaker: 'npc_captain', text: 'Moorin is down. The orbit gate is open — next stop, the sky itself.' },
+    { speaker: 'arielis', text: 'Whatever waits above us is worse than anything below. Rest while you can, Ray.' },
+  ],
+  11: [{ speaker: 'raxdenR', text: 'First sortie in an Ark frame. Strange — fighting for something feels heavier than fighting for a throne.' }],
+  15: [
+    { speaker: 'npc_captain', text: 'The Void Empress is down. One throne left — and the man sitting on it knows we are coming.' },
+    { speaker: 'gruntborg', text: 'Then let us not keep the Emperor waiting.' },
+  ],
+  20: [
+    { speaker: 'gruntborg', text: 'Still breathing. Still flying. Someone pour me something when we dock.' },
+    { speaker: 'zephyra', text: 'Doctor cleared you for engine coolant only, old man.' },
+  ],
+  21: [{ speaker: 'vexiaX', text: 'Falcon Squadron is aboard, Commander. We fly for the Ark now — prove it was worth the risk.' }],
+  25: [
+    { speaker: 'npc_captain', text: 'The Gate Warden has fallen. The Throne is ahead — whatever happens next, I am proud of every one of you.' },
+  ],
+  30: [
+    { speaker: 'npc_captain', text: 'It is over. The Steel Throne is empty — tonight, the empire releases its grip on the colonies.' },
+    { speaker: 'valstray', text: 'For everyone we carried this far... we made it. All units — stand down and come home.' },
+  ],
+};
+
 export function genMap(ch: ChapterDef): MapDef {
   if (ch.theme === 'custom') {
     const roster = rosterFor(ch);

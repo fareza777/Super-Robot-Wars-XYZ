@@ -14,6 +14,7 @@ import {
   WEAPON_UPG_POWER,
   WeaponUpgMap,
   ChapterDef,
+  DEBRIEFS,
   SIDE_MISSIONS,
   chapterOf,
   enemyLevelOf,
@@ -72,6 +73,7 @@ export interface SaveData {
   sideCleared?: string[];
   ngPlus?: number;
   masteryDone?: number[]; // chapter ids whose mastery challenge was achieved
+  hintsSeen?: string[]; // one-time tutorial cards already dismissed
 }
 
 /** Serialized mid-battle snapshot — lets the player leave a mission and resume it later. */
@@ -147,6 +149,8 @@ interface Store {
   battleReaction: Reaction | null; // defender's pick while a reaction prompt is open
   bossWarned: boolean; // WARNING card already shown this mission
   notice: string | null; // transient map banner (e.g. ENEMY REINFORCEMENTS)
+  hint: { id: string; text: string } | null; // one-time tutorial card currently showing
+  hintsSeen: string[]; // tutorial cards already dismissed (persisted)
   midDialog: { speaker: string; text: string; voice?: string }[] | null; // mid-battle story event playing
   eventsFired: string[]; // mid-battle event indexes already shown this mission
   deployTiles: Set<string>; // legal reposition tiles while in the deploy phase
@@ -154,11 +158,15 @@ interface Store {
   lastMastery: string | null; // mastery objective earned on the just-finished mission (description)
   masteryDone: number[]; // chapter ids whose mastery challenge was achieved
   savedBattle: BattleSave | null; // resumable in-progress mission
+  debrief: { speaker: string; text: string; voice?: string }[] | null; // post-mission scene queued over HQ
+  salvageQueue: string[]; // item names dropped on kills, toasted on the map
   log: string[];
   enemyBusy: boolean;
   screenShake: number;
 
   start: () => void;
+  showHint: (id: string, text: string) => void;
+  dismissHint: () => void;
   finishOnboarding: () => void;
   gotoBriefing: () => void;
   gotoMissions: () => void;
@@ -202,6 +210,7 @@ interface Store {
   retreatMission: () => void;
   endTurn: () => void;
   finishBattle: () => void;
+  clearDebrief: () => void;
   restart: () => void;
 }
 
@@ -299,8 +308,8 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
 
 const BATTLE_SAVE_KEY = 'srwxyz_battle_v1';
 
-async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone'>>) {
-  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone };
+async function persist(s: Pick<Store, 'chapter' | 'credits' | 'inventory' | 'upgrades' | 'pilotProg' | 'weaponUpg' | 'bonds' | 'bondSeen' | 'sideCleared' | 'ngPlus' | 'parts' | 'partsOwned'> & Partial<Pick<Store, 'masteryDone' | 'hintsSeen'>>) {
+  const data: SaveData = { chapter: s.chapter, credits: s.credits, inventory: s.inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg: s.pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared: s.sideCleared, ngPlus: s.ngPlus, masteryDone: s.masteryDone, hintsSeen: s.hintsSeen };
   try {
     await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(data));
   } catch {}
@@ -342,18 +351,34 @@ const DROP_POOL: (keyof typeof ITEMS)[] = ['repairKit', 'enCell', 'ammoBox', 'sp
 function rollDrop(): keyof typeof ITEMS | null {
   return Math.random() < 0.25 ? DROP_POOL[Math.floor(Math.random() * DROP_POOL.length)] : null;
 }
-/** Roll salvage drops for `n` kills — returns updated inventory + log lines. */
-function dropsForKills(n: number, inventory: Record<string, number>): { inventory: Record<string, number>; lines: string[] } {
+/** Roll salvage drops for `n` kills — returns updated inventory + log lines + item names for the map toast. */
+function dropsForKills(n: number, inventory: Record<string, number>): { inventory: Record<string, number>; lines: string[]; names: string[] } {
   const lines: string[] = [];
+  const names: string[] = [];
   let inv = inventory;
   for (let i = 0; i < n; i++) {
     const drop = rollDrop();
     if (drop) {
       inv = { ...inv, [drop]: (inv[drop] ?? 0) + 1 };
       lines.push(`Salvaged ${ITEMS[drop].name} from the wreck`);
+      names.push(ITEMS[drop].name);
     }
   }
-  return { inventory: inv, lines };
+  return { inventory: inv, lines, names };
+}
+
+/** Toast the queued salvage drops on the map once the current banner has cleared. */
+function drainSalvage(set: SetFn, get: Get, delayMs: number) {
+  const names = get().salvageQueue;
+  if (!names.length) return;
+  setTimeout(() => {
+    if (get().phase !== 'player') {
+      set({ salvageQueue: [] });
+      return;
+    }
+    set({ notice: `▣ SALVAGE — ${names.join(' · ')}`, salvageQueue: [] });
+    setTimeout(() => set((st) => (st.notice && st.notice.startsWith('▣ SALVAGE') ? { notice: null } : {})), 2800);
+  }, delayMs);
 }
 
 /** Tiles the unit threatens: move range + max weapon reach from each tile. */
@@ -424,8 +449,27 @@ export const useGame = create<Store>((set, get) => ({
   lastMastery: null,
   masteryDone: [],
   savedBattle: null,
+  debrief: null,
+  salvageQueue: [],
+  hint: null,
+  hintsSeen: [],
 
   start: () => set({ phase: 'onboarding', units: [], log: [] }),
+
+  // one-time tutorial card — first-run help on the early campaign chapters only
+  showHint: (id, text) => {
+    const s = get();
+    if (s.missionCh.id > 2 || s.sideId || s.hintsSeen.includes(id) || s.hint) return;
+    set({ hint: { id, text } });
+  },
+  dismissHint: () => {
+    const s = get();
+    if (!s.hint) return;
+    const hintsSeen = [...s.hintsSeen, s.hint.id];
+    set({ hint: null, hintsSeen });
+    void persist({ ...s, hintsSeen });
+  },
+  clearDebrief: () => set({ debrief: null }),
   finishOnboarding: () => set({ phase: 'home' }),
   gotoBriefing: () => {
     const s = get();
@@ -530,7 +574,7 @@ export const useGame = create<Store>((set, get) => ({
       const raw = await AsyncStorage.getItem(SAVE_KEY);
       if (!raw) return;
       const d = JSON.parse(raw) as SaveData;
-      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [] });
+      set({ chapter: d.chapter, credits: d.credits, inventory: d.inventory, upgrades: d.upgrades, weaponUpg: d.weaponUpg ?? {}, pilotProg: d.pilotProg, hasSave: true, bonds: d.bonds ?? {}, bondSeen: d.bondSeen ?? [], sideCleared: d.sideCleared ?? [], ngPlus: d.ngPlus ?? 0, parts: d.parts ?? {}, partsOwned: d.partsOwned ?? [], masteryDone: d.masteryDone ?? [], hintsSeen: d.hintsSeen ?? [] });
     } catch {}
     try {
       const sraw = await AsyncStorage.getItem(SETTINGS_KEY);
@@ -669,6 +713,7 @@ export const useGame = create<Store>((set, get) => ({
   finishDialog: () => {
     set({ phase: 'player', notice: 'PLAYER PHASE — TURN 1' });
     setTimeout(() => set({ notice: null }), 2400);
+    setTimeout(() => get().showHint('move', 'TAP a unit to select it — blue tiles are its move range, red its attack reach. Drag the map with a finger to look around.'), 2600);
     void persistBattle(get());
   },
 
@@ -814,6 +859,7 @@ export const useGame = create<Store>((set, get) => ({
       // tapped self tile -> open menu without moving
       if (sel && same(sel.pos, p)) {
         set({ menuForUid: sel.uid, pendingMove: sel.pos, preMovePos: sel.pos, pendingMovedFlag: false, moveTiles: new Map() });
+        get().showHint('menu', 'ACTION MENU — pick a weapon to strike targets in range (each row shows HIT % and damage), cast SPIRITS, use ITEMS, or WAIT. Greyed weapons need more WILL or EN.');
         return;
       }
       // tapped elsewhere -> select that unit or deselect
@@ -949,17 +995,20 @@ export const useGame = create<Store>((set, get) => ({
     for (const e of result.expEvents) log2 = push(log2, e);
     const killCount = (result.destroyed ? 1 : 0) + (result.counter?.destroyed ? 1 : 0) + (result.support?.destroyed ? 1 : 0);
     let inventory = s.inventory;
+    let salvageQueue = s.salvageQueue;
     for (let i = 0; i < killCount; i++) {
       const drop = rollDrop();
       if (drop) {
         inventory = { ...inventory, [drop]: (inventory[drop] ?? 0) + 1 };
         log2 = push(log2, `Salvaged ${ITEMS[drop].name} from the wreck`);
+        salvageQueue = [...salvageQueue, ITEMS[drop].name];
       }
     }
     const common = {
       units: state.units,
       log: log2,
       inventory,
+      salvageQueue,
       kills: s.kills + killCount,
       pendingWeapon: null,
       attackTiles: new Set<string>(),
@@ -1117,6 +1166,7 @@ export const useGame = create<Store>((set, get) => ({
       return;
     }
     set({ battle: null, battleReaction: null, phase: end === 'defeat' ? 'defeat' : s.enemyBusy ? 'enemy' : 'player' });
+    if (!end && !s.enemyBusy) drainSalvage(set, get, 400);
   },
 
   endTurn: () => {
@@ -1136,6 +1186,7 @@ export const useGame = create<Store>((set, get) => ({
     let log = push(s.log, `— Turn ${s.turn} enemy phase —`);
     for (const l of healed) log = push(log, l);
     set({ phase: 'enemy', enemyBusy: true, units, log, inspectUid: null, threatTiles: new Set() });
+    get().showHint('phase', 'ENEMY PHASE — hostiles move and strike. Units that kept COUNTER answer back automatically.');
     void runEnemyPhase(set, get);
   },
 }));
@@ -1176,7 +1227,7 @@ function applyVictory(set: SetFn, get: Get) {
   }
   const side = s.sideId ? SIDE_MISSIONS.find((m) => m.id === s.sideId) : undefined;
   if (side) {
-    const reward = side.rewardCr + s.kills * 150;
+    const reward = Math.round((side.rewardCr + s.kills * 150) * (s.settings.difficulty === 'hard' ? 1.25 : 1));
     const credits = s.credits + reward;
     const inventory = side.rewardItem ? { ...s.inventory, [side.rewardItem]: (s.inventory[side.rewardItem] ?? 0) + 1 } : s.inventory;
     const sideCleared = [...s.sideCleared, side.id];
@@ -1189,13 +1240,15 @@ function applyVictory(set: SetFn, get: Get) {
       pilotProg,
       sideId: null,
       lastReward: reward,
+      debrief: null,
+      salvageQueue: [],
       log: push(s.log, `Side quest cleared! +${reward} credits${side.rewardItem ? ` + ${ITEMS[side.rewardItem].name}` : ''}`),
     });
     void persist({ chapter: s.chapter, credits, inventory, upgrades: s.upgrades, weaponUpg: s.weaponUpg, pilotProg, parts: s.parts, partsOwned: s.partsOwned, bonds: s.bonds, bondSeen: s.bondSeen, sideCleared, ngPlus: s.ngPlus });
     return;
   }
   const ch = s.missionCh;
-  const reward = 800 + ch.id * 150 + s.kills * 150;
+  const reward = Math.round((800 + ch.id * 150 + s.kills * 150) * (s.settings.difficulty === 'hard' ? 1.25 : 1));
   const clearedFinal = s.chapter + 1 >= CHAPTERS_COUNT;
   // beating the final chapter rolls the campaign into New Game+: back to ch.1,
   // keeping levels/upgrades/bonds/items; enemy frames get +18% HP, +10% armor, +6 mobility, +2 lv per cycle
@@ -1232,6 +1285,8 @@ function applyVictory(set: SetFn, get: Get) {
     savedBattle: null,
     lastMastery,
     lastReward: reward + masteryCr + (clearedFinal ? 5000 : 0),
+    debrief: DEBRIEFS[ch.id] ?? null,
+    salvageQueue: [],
     log: push(log, clearedFinal ? `CAMPAIGN COMPLETE — NEW GAME+ ${ngPlus} unlocked! +${reward + masteryCr + 5000} credits` : `Mission complete! +${reward + masteryCr} credits`),
   });
   void clearBattleSave();
@@ -1302,6 +1357,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
           bossWarned: st.bossWarned || !!warning,
           battle: { attacker: { ...att }, defender: { ...def }, attackerAfter: att, defenderAfter: def, weapon: plan.weapon!, result: { hit: false, crit: false, damage: 0, destroyed: false, hitChance: 0, counter: null, expEvents: [] }, needsReaction: true, warning, coverUid },
         }));
+        get().showHint('react', 'INCOMING ATTACK — pick a reaction: COUNTER strikes back · DEFEND halves damage · EVADE improves dodge · COVER an ally beside you takes the hit.');
         await waitFor(() => get().battleReaction !== null, 5500);
         reaction = get().battleReaction ?? 'counter';
         if (reaction === 'cover' && !coverUid) reaction = 'counter';
@@ -1345,7 +1401,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
           const d = dropsForKills(kc, st.inventory);
           let l = mkLog(st.log);
           for (const x of d.lines) l = push(l, x);
-          return { units: state.units, kills: st.kills + kc, inventory: d.inventory, log: rxnLog(l) };
+          return { units: state.units, kills: st.kills + kc, inventory: d.inventory, salvageQueue: [...st.salvageQueue, ...d.names], log: rxnLog(l) };
         });
         const end = checkEnd(get().units, get().missionCh, get().turn);
         if (end) {
@@ -1368,6 +1424,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
           phase: 'battle',
           kills: st.kills + kc,
           inventory: d.inventory,
+          salvageQueue: [...st.salvageQueue, ...d.names],
           log: rxnLog(l),
           battle: { attacker: { ...att }, defender: { ...defForScene }, attackerAfter: attAfter, defenderAfter: defAfter, weapon: plan.weapon!, result, warning },
         };
@@ -1468,6 +1525,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
     };
   });
   if (pendingVictory) applyVictory(set, get);
+  else drainSalvage(set, get, 2700); // toast after the PLAYER PHASE banner clears
 }
 
 function waitFor(cond: () => boolean, timeoutMs = 20000): Promise<void> {
