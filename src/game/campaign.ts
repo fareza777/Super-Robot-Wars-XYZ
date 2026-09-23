@@ -1035,11 +1035,12 @@ export const HONORS: HonorDef[] = [
   { id: 'h_snipe', name: 'SHARPSHOOTER', desc: 'Destroy a hostile from 5 or more tiles away', rewardCr: 700 },
   { id: 'h_angel', name: 'GUARDIAN ANGEL', desc: 'Recover two escape pods in a single battle', rewardCr: 800 },
   { id: 'h_rush', name: 'RUSH DOWN', desc: 'Destroy a boss before it can phase-shift', rewardCr: 800 },
+  { id: 'h_chain', name: 'CHAIN GANG', desc: 'Score four or more kills in a single turn', rewardCr: 700 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean; decoyHit?: boolean; iFieldKill?: boolean; mirrorWon?: boolean; arcKill?: boolean; blastKill?: boolean; lostAlly?: boolean; snipeKill?: boolean; rescuedPods?: string[]; bossRush?: boolean }): boolean {
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; units?: { def: { id: string }; kills: number; alive: boolean; side: string; wounded?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean; decoyHit?: boolean; iFieldKill?: boolean; mirrorWon?: boolean; arcKill?: boolean; blastKill?: boolean; lostAlly?: boolean; snipeKill?: boolean; rescuedPods?: string[]; bossRush?: boolean; chainCount?: number }): boolean {
   const kills = Object.values(s.pilotProg);
   const totalKills = kills.reduce((n, p) => n + (p.kills ?? 0), 0);
   const maxKills = kills.reduce((n, p) => Math.max(n, p.kills ?? 0), 0);
@@ -1118,6 +1119,8 @@ export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: 
       return (s.rescuedPods?.length ?? 0) >= 2;
     case 'h_rush':
       return s.bossRush === true;
+    case 'h_chain':
+      return (s.chainCount ?? 0) >= 4;
     case 'h_ghostd':
       return s.altKill === true;
     default:

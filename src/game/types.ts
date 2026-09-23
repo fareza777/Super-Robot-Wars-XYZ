@@ -55,7 +55,7 @@ export interface StatusFx {
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy' | 'hymn' | 'emp' | 'phalanx';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy' | 'hymn' | 'emp' | 'phalanx' | 'deadshot';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -140,6 +140,8 @@ export interface UnitState {
   focusUntilEndOfEnemyPhase?: boolean;
   /** Hymn — squad anthem: +15 hit & +15 evade until end of enemy phase */
   hymnUntilEndOfEnemyPhase?: boolean;
+  /** Deadshot — the next attack is a guaranteed critical */
+  deadshotForNextAttack?: boolean;
   gritUntilEndOfEnemyPhase?: boolean;
   guardUntilEndOfEnemyPhase?: boolean;
   strikeForNextAttack?: boolean;

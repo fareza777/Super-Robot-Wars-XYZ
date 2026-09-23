@@ -216,7 +216,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
 
 const rnd = () => Math.random() * 100;
 export const critChance = (att: UnitState, def: UnitState, w?: WeaponDef) => Math.max(5, Math.round(8 + (att.def.mobility - def.def.mobility) * 0.2 + (w?.critMod ?? 0) + partBonus(att, 'crit') + (att.skills?.crit ?? 0) * 2));
-const critRoll = (att: UnitState, def: UnitState, w?: WeaponDef) => rnd() < critChance(att, def, w);
+const critRoll = (att: UnitState, def: UnitState, w?: WeaponDef) => att.deadshotForNextAttack === true || rnd() < critChance(att, def, w);
 
 interface SimAttack {
   hit: boolean;
@@ -530,6 +530,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
     att.followUpReady = true;
   }
   att.strikeForNextAttack = false;
+  att.deadshotForNextAttack = false;
   att.valorForNextAttack = false;
   att.gutsForNextAttack = false;
   att.snipeForNextAttack = false;
@@ -571,6 +572,7 @@ export function applyMapAttack(state: GameState, attackerUid: string, targetTile
   att.moved = true;
   att.acted = true;
   att.strikeForNextAttack = false;
+  att.deadshotForNextAttack = false;
   att.valorForNextAttack = false;
   att.gutsForNextAttack = false;
 
@@ -617,6 +619,7 @@ export function applyAllAttack(state: GameState, attackerUid: string, weaponId: 
   att.moved = true;
   att.acted = true;
   att.strikeForNextAttack = false;
+  att.deadshotForNextAttack = false;
   att.valorForNextAttack = false;
   att.gutsForNextAttack = false;
   att.soulForNextAttack = false;
@@ -715,6 +718,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break; // the stunned enemy is marked by the store pass
     case 'phalanx':
       break; // formation armor — the store flags every ally
+    case 'deadshot':
+      u.deadshotForNextAttack = true;
+      break;
     case 'expose':
       break; // enemies in radius are marked by the store pass
     case 'overdrive':

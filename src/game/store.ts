@@ -375,6 +375,8 @@ function hardEnemy(u: UnitState, difficulty: 'normal' | 'hard' | 'extreme') {
     u.def = { ...u.def, maxHp: Math.round(u.def.maxHp * 1.3), armor: Math.round(u.def.armor * 1.2), mobility: u.def.mobility + 14 };
     u.hp = u.def.maxHp;
     u.level += 4;
+    // extreme frames run veteran crews — counter-cut, deadlier crits, nanite regen
+    u.skills = { ...u.skills, countercut: 3, crit: 4, regen: 2 };
   }
 }
 
