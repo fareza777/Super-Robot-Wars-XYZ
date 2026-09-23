@@ -7,7 +7,23 @@ import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { bondMods } from '../game/bonds';
 import { bestCounterWeapon, critChance, damageOf, dist, formationBonus, hitChance, key, rallyBonus, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, useGame } from '../game/store';
-import { SpiritId } from '../game/types';
+import { SpiritId, UnitState } from '../game/types';
+
+/** active spirit flags on a unit, as display names */
+function buffNames(u: UnitState): string[] {
+  const names: string[] = [];
+  if (u.flashUntilEndOfEnemyPhase) names.push('FLASH');
+  if (u.gritUntilEndOfEnemyPhase) names.push('GRIT');
+  if (u.guardUntilEndOfEnemyPhase) names.push('GUARD');
+  if (u.focusUntilEndOfEnemyPhase) names.push('FOCUS');
+  if (u.strikeForNextAttack) names.push('STRIKE');
+  if (u.valorForNextAttack) names.push('VALOR');
+  if (u.soulForNextAttack) names.push('SOUL');
+  if (u.snipeForNextAttack) names.push('SNIPE');
+  if (u.fortuneForNextAttack) names.push('FORTUNE');
+  if (u.accelThisTurn) names.push('ACCEL');
+  return names;
+}
 
 function Bar({ label, val, max, color }: { label: string; val: number; max: number; color: string }) {
   return (
@@ -131,6 +147,11 @@ export function SidePanel() {
             {unit.def.pilot.trait && (
               <Text style={styles.traitLine} numberOfLines={1}>
                 ◆ {TRAITS[unit.def.pilot.trait].name} — {TRAITS[unit.def.pilot.trait].desc}
+              </Text>
+            )}
+            {buffNames(unit).length > 0 && (
+              <Text style={[styles.traitLine, { color: '#7de0ff' }]} numberOfLines={1}>
+                ✦ BUFFS: {buffNames(unit).join(' · ')}
               </Text>
             )}
             <Text style={styles.terrainLine}>{terrainDesc(s.map, unit.pos)}</Text>
@@ -361,6 +382,11 @@ export function SidePanel() {
             {inspect.def.pilot.trait && (
               <Text style={styles.traitLine} numberOfLines={1}>
                 ◆ {TRAITS[inspect.def.pilot.trait].name} — {TRAITS[inspect.def.pilot.trait].desc}
+              </Text>
+            )}
+            {buffNames(inspect).length > 0 && (
+              <Text style={[styles.traitLine, { color: '#7de0ff' }]} numberOfLines={1}>
+                ✦ BUFFS: {buffNames(inspect).join(' · ')}
               </Text>
             )}
             {inspect.def.weapons.map((w) => (

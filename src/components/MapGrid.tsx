@@ -197,7 +197,8 @@ export function MapGrid() {
   const bh = th * ROWS;
   const chip = Math.min(tw, th) * 0.9;
   const maxX = Math.max(0, bw - vw);
-  const maxY = Math.max(0, bh - vh);
+  // extra pan slack so the bottom board row clears the Android nav bar
+  const maxY = Math.max(0, bh - vh) + 34;
 
   const pan = useRef(new Animated.ValueXY({ x: -maxX / 2, y: -maxY / 2 })).current;
   const last = useRef({ x: -maxX / 2, y: -maxY / 2 });

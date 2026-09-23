@@ -1220,6 +1220,8 @@ export const useGame = create<Store>((set, get) => ({
     for (const q of defeatQuotes(s.units, state.units)) log2 = push(log2, q);
     const dead = deadEnemies(s.units, state.units);
     const killCount = dead.length;
+    const quip = bondQuip(s, att, dead);
+    if (quip) log2 = push(log2, `♥ ${quip}`);
     let inventory = s.inventory;
     let salvageQueue = s.salvageQueue;
     for (let i = 0; i < killCount; i++) {
@@ -1489,6 +1491,23 @@ function tallyKills(acc: Record<string, number>, dead: UnitState[]): Record<stri
   return next;
 }
 
+/** Bond banter — when a bonded partner stands within 2 tiles of the kill, they call it out. */
+const KILL_QUIPS: Record<string, string> = {
+  valstray: 'Ray: "That\'s how the X-1 does it!"',
+  gruntborg: 'Gara: "Heavy support on point."',
+  arielis: 'Mira: "Clean shot. Keep them coming."',
+  zephyra: 'Orin: "Beautiful work, wingmate."',
+  raxdenR: 'Rax: "Hah — leave some for me!"',
+  vexiaX: 'Vee: "Swift and sharp."',
+};
+function bondQuip(s: Store, killer: UnitState, dead: UnitState[]): string | null {
+  if (!dead.length || killer.side !== 'player') return null;
+  const partner = s.units.find(
+    (u) => u.alive && u.side === 'player' && !u.npc && u.uid !== killer.uid && dist(u.pos, killer.pos) <= 2 && bondLevel(s.bonds, u.def.id, killer.def.id) > 0,
+  );
+  return partner ? (KILL_QUIPS[partner.def.id] ?? null) : null;
+}
+
 function vossenDowned(before: UnitState[], after: UnitState[]): boolean {
   const wasUp = before.some((u) => u.def.id === 'vossDrake' && u.alive);
   const isUp = after.some((u) => u.def.id === 'vossDrake' && u.alive);
@@ -1529,10 +1548,16 @@ function simNextWave(set: SetFn, get: Get) {
   });
   const healed = s.units.map((u) => (u.side !== 'player' || !u.alive ? u : { ...u, hp: Math.min(u.def.maxHp, u.hp + Math.round(u.def.maxHp * 0.25)), en: Math.min(u.def.maxEn, u.en + 30), moved: false, acted: false }));
   const units = healed.concat(news);
+  // every 3rd wave a supply crate warps in with the hostiles
+  let crates = s.crates;
+  const crateItems = ['repairKit', 'enCell', 'ammoBox', 'megaKit', 'spiritWing'];
+  if (wave % 3 === 0 && free.length > news.length) {
+    crates = [...s.crates, { pos: free[news.length], itemId: crateItems[Math.floor(Math.random() * crateItems.length)] }];
+  }
   let log = push(s.log, `— Wave ${wave - 1} cleared — +${(wave - 1) * 150} pts`);
-  log = push(log, `▲ WAVE ${wave}: ${news.length} hostiles warp in (Lv ${lvl}${wave % 4 === 0 ? ' · ALL ELITE' : ''})`);
+  log = push(log, `▲ WAVE ${wave}: ${news.length} hostiles warp in (Lv ${lvl}${wave % 4 === 0 ? ' · ALL ELITE' : ''}${wave % 3 === 0 ? ' + supply crate' : ''})`);
   const notice = `▲ WAVE ${wave} — ${news.length} HOSTILES INBOUND · ${s.kills * 50 + (wave - 1) * 150} PTS`;
-  set({ units, simWave: wave, battle: null, phase: 'player', enemyBusy: false, selectedUid: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, pendingMove: null, attackTiles: new Set(), hazardWarn: [], notice, log });
+  set({ units, crates, simWave: wave, battle: null, phase: 'player', enemyBusy: false, selectedUid: null, menuForUid: null, spiritForUid: null, pendingWeapon: null, pendingMove: null, attackTiles: new Set(), hazardWarn: [], notice, log });
   setTimeout(() => set({ notice: null }), 2600);
 }
 
