@@ -1,6 +1,6 @@
 import chaptersJson from './chapters.json';
 import { PILOTS, UNITS, WEAPONS, TERRAIN_INFO, MISSION_SSS } from './data';
-import { MapDef, PartDef, PilotDef, PilotSkillId, Pos, Terrain, UnitDef } from './types';
+import { MapDef, PartDef, PilotDef, PilotSkillId, Pos, SpiritId, Terrain, UnitDef } from './types';
 
 // ---------- Items (usable in battle, bought at merchant) ----------
 
@@ -142,6 +142,34 @@ export function rosterFor(ch: ChapterDef): string[] {
 }
 
 export const MAX_SQUAD = 6;
+
+/** Career-kill milestones: pilots learn bonus spirits as their legend grows. */
+export const MILESTONE_SPIRITS: Record<string, { kills: number; spirit: SpiritId }[]> = {
+  valstray: [
+    { kills: 15, spirit: 'flash' },
+    { kills: 35, spirit: 'fortune' },
+  ],
+  gruntborg: [
+    { kills: 15, spirit: 'zeal' },
+    { kills: 35, spirit: 'bless' },
+  ],
+  arielis: [
+    { kills: 15, spirit: 'zeal' },
+    { kills: 35, spirit: 'soul' },
+  ],
+  zephyra: [
+    { kills: 15, spirit: 'trust' },
+    { kills: 35, spirit: 'zeal' },
+  ],
+  raxdenR: [
+    { kills: 15, spirit: 'roar' },
+    { kills: 35, spirit: 'soul' },
+  ],
+  vexiaX: [
+    { kills: 15, spirit: 'rouse' },
+    { kills: 35, spirit: 'fortune' },
+  ],
+};
 
 // ---------- Weapon upgrades (workshop tab) ----------
 
@@ -502,6 +530,21 @@ export function genMap(ch: ChapterDef): MapDef {
       }
   }
   const crates = genCrates(terrain2, used, rSpawn);
+  // minefields on hazardous themes — telegraphed tiles that detonate on entry
+  let mines: Pos[] | undefined;
+  if (ch.theme === 'ruins' || ch.theme === 'desert' || ch.theme === 'lava') {
+    mines = [];
+    const want = 2 + Math.floor(rSpawn() * 2);
+    for (let tries = 0; tries < 60 && mines.length < want; tries++) {
+      const x = 4 + Math.floor(rSpawn() * 6); // mid-field, between the two lines
+      const y = 2 + Math.floor(rSpawn() * 6);
+      const k = `${x},${y}`;
+      if (used.has(k) || mines.some((m) => m.x === x && m.y === y)) continue;
+      const ti = TERRAIN_INFO[terrain2[y][x]];
+      if (!ti.passable.land || ti.hpDmg) continue;
+      mines.push({ x, y });
+    }
+  }
   // seize chapters place the beacon deep in enemy territory — the squad must break through
   let beaconPos: Pos | undefined;
   if (ch.objectiveType === 'seize') {
@@ -570,6 +613,7 @@ export function genMap(ch: ChapterDef): MapDef {
     enemySpawns,
     allySpawns,
     crates,
+    mines,
     beaconPos,
     reachPos,
     bossHoldUntil: ch.boss ? 3 : undefined,

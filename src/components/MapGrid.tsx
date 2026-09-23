@@ -26,6 +26,7 @@ const Tile = React.memo(function Tile({
   beacon,
   reach,
   hazard,
+  mine,
   inBlast,
   aimed,
   inFog,
@@ -44,6 +45,8 @@ const Tile = React.memo(function Tile({
   beacon: boolean;
   reach: boolean;
   hazard: boolean;
+  /** minefield — detonates when a unit lands here */
+  mine: boolean;
   /** inside the aimed MAP blast radius */
   inBlast: boolean;
   /** the MAP aim tile itself */
@@ -72,6 +75,11 @@ const Tile = React.memo(function Tile({
       {hazard && (
         <View style={[styles.beaconOv, styles.hazardOv]} pointerEvents="none">
           <Text style={[styles.beaconTag, { color: '#ff9a4d', textShadowColor: 'rgba(255,140,40,0.9)' }]}>⚠</Text>
+        </View>
+      )}
+      {mine && (
+        <View style={styles.mineTag} pointerEvents="none">
+          <Text style={styles.mineTagTxt}>✦</Text>
         </View>
       )}
       {inThreat && !inMove && !inAtk && <View style={[styles.overlay, styles.threatOv]} pointerEvents="none" />}
@@ -287,6 +295,7 @@ export function MapGrid() {
             beacon={!!missionCh.seizePos && missionCh.seizePos.x === p.x && missionCh.seizePos.y === p.y}
             reach={!!missionCh.reachPos && missionCh.reachPos.x === p.x && missionCh.reachPos.y === p.y}
             hazard={hazardWarn.some((h) => h.x === p.x && h.y === p.y)}
+            mine={!!map.mines?.some((m) => m.x === p.x && m.y === p.y)}
             inBlast={!!(mapAim && pendingWeapon?.mapRange != null && dist(p, mapAim) <= pendingWeapon.mapRange)}
             aimed={!!mapAim && same(p, mapAim)}
             inFog={!!missionCh.fog && !fogLit(units, p)}
@@ -408,6 +417,8 @@ const styles = StyleSheet.create({
   hazardOv: { backgroundColor: 'rgba(255,90,30,0.22)', borderColor: 'rgba(255,140,60,0.9)', borderStyle: 'dashed' },
   dangerOv: { backgroundColor: 'rgba(255,50,50,0.16)' },
   crateTag: { position: 'absolute', top: 3, right: 3, color: '#ffd34d', fontSize: 15, fontWeight: '900', textShadowColor: 'rgba(255,190,40,0.9)', textShadowRadius: 5 },
+  mineTag: { position: 'absolute', bottom: 3, right: 3, width: 12, height: 12, borderRadius: 6, backgroundColor: 'rgba(255,60,60,0.9)', alignItems: 'center', justifyContent: 'center' },
+  mineTagTxt: { color: '#ffe0e0', fontSize: 8, lineHeight: 8, fontWeight: '900' },
   beaconOv: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(255,210,60,0.16)', borderWidth: 1.5, borderColor: 'rgba(255,220,90,0.7)', alignItems: 'center', justifyContent: 'center' },
   beaconTag: { color: '#ffd34d', fontSize: 20, fontWeight: '900', textShadowColor: 'rgba(255,210,60,0.9)', textShadowRadius: 8 },
   spiritTag: { position: 'absolute', bottom: 3, right: 2, color: '#9fe8ff', fontSize: 8, fontWeight: '800', textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },

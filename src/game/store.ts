@@ -28,6 +28,7 @@ import {
   enemyComp,
   upgradedStat,
   weaponUpgCost,
+  MILESTONE_SPIRITS,
 } from './campaign';
 import { BOND_EVENTS, MAX_BOND, bondKey, bondLevel, bondMods } from './bonds';
 
@@ -335,6 +336,9 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
       u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, ...(prog.skills ?? {}) };
       if ((prog.kills ?? 0) >= ACE_KILLS) u.will = 130; // ace pilots start hot
       if ((prog.kills ?? 0) >= ACE_MASTER_KILLS) u.aceMastery = true;
+      // career-kill milestones: extra spirits the pilot learned along the war
+      const earned = (MILESTONE_SPIRITS[s.defId] ?? []).filter((m) => (prog.kills ?? 0) >= m.kills).map((m) => m.spirit);
+      if (earned.length) u.bonusSpirits = earned;
     }
     u.parts = (parts[s.defId] ?? []).slice(0, MAX_PART_SLOTS);
     applyUpgrades(u, upgrades, wupg);
@@ -1179,6 +1183,7 @@ export const useGame = create<Store>((set, get) => ({
     }
     set({ units, walk: walking, pendingMove: p, preMovePos: sel.pos, pendingMovedFlag: !same(sel.pos, p), menuForUid: sel.uid, moveTiles: new Map(), selectedUid: sel.uid, inventory, crates, salvageQueue, tileInfo: null });
     if (crateIdx >= 0) drainSalvage(set, get, walking ? path.length * 320 + 400 : 600);
+    detonateMineAt(set, get, sel.uid, p, walking ? path.length * 320 + 300 : 350);
     if (walking) scheduleWalkClear(set, get, sel.uid, path.length);
     // seize objective: landing on the beacon wins the mission on the spot
     if (s.missionCh.objectiveType === 'seize' && sel.side === 'player' && checkEnd(units, s.missionCh, s.turn) === 'victory') {
@@ -1647,6 +1652,28 @@ function simNextWave(set: SetFn, get: Get) {
   setTimeout(() => set({ notice: null }), 2600);
 }
 
+/** minefields: a unit landing on a mined tile detonates it — 15% maxHP loss, never lethal */
+function detonateMineAt(set: SetFn, get: Get, uid: string, p: Pos, delayMs: number) {
+  const go = () => {
+    const cur = get();
+    if (!cur.map.mines?.some((m) => same(m, p))) return;
+    const u = cur.units.find((x) => x.uid === uid);
+    if (!u?.alive || !same(u.pos, p)) return; // never stepped there (or walked away)
+    const dmg = Math.max(1, Math.round(u.def.maxHp * 0.15));
+    const units = cur.units.map((x) => (x.uid === uid ? { ...x, hp: Math.max(1, x.hp - dmg) } : x));
+    set({
+      units,
+      map: { ...cur.map, mines: cur.map.mines!.filter((m) => !same(m, p)) },
+      notice: `💥 MINEFIELD — ${u.def.name} hit a mine (-${dmg} HP)`,
+      log: push(cur.log, `💥 ${u.def.name} detonated a mine — -${dmg} HP`),
+    });
+    setTimeout(() => set({ notice: null }), 2200);
+    if (u.side === 'player') void persistBattle(get());
+  };
+  if (delayMs > 0) setTimeout(go, delayMs);
+  else go();
+}
+
 function applyVictory(set: SetFn, get: Get) {
   const s = get();
   if (s.missionCh.sim) {
@@ -1663,6 +1690,8 @@ function applyVictory(set: SetFn, get: Get) {
       pilotProg[u.def.id] = { level: u.level, exp: u.exp, kills: total, pp: u.pp, skills: u.skills };
       if (prev < ACE_KILLS && total >= ACE_KILLS) aceLines.push(`★ ${u.def.pilot.name} is now an ACE (${total} career kills) — deploys at WILL 130`);
       if (prev < ACE_MASTER_KILLS && total >= ACE_MASTER_KILLS) aceLines.push(`★★ ${u.def.pilot.name} attained ACE MASTERY (${total} kills) — permanent +5% hit/dmg, +5 evade`);
+      for (const m of MILESTONE_SPIRITS[u.def.id] ?? [])
+        if (prev < m.kills && total >= m.kills) aceLines.push(`✦ PILOT MILESTONE — ${u.def.pilot.name} learned ${SPIRITS[m.spirit].name} (${m.kills} career kills)`);
     }
   }
   // each elite destroyed pays a bounty on top of the standard kill credit
@@ -1796,6 +1825,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       }));
       await sleep(path && path.length > 1 ? 160 + path.length * 190 : 200);
       set({ walk: null });
+      detonateMineAt(set, get, plan.unit.uid, plan.moveTo, 0);
     }
 
     if (plan.target && plan.weapon) {

@@ -248,7 +248,7 @@ export function SidePanel() {
                   ))}
               </>
             )}
-            {unit.def.pilot.spirits.length > 0 && <Btn label="✦ SPIRIT COMMANDS" sub={`SP ${unit.sp}`} onPress={() => s.openSpirits(unit.uid)} accent="#c9a0ff" />}
+            {unit.def.pilot.spirits.length + (unit.bonusSpirits?.length ?? 0) > 0 && <Btn label="✦ SPIRIT COMMANDS" sub={`SP ${unit.sp}`} onPress={() => s.openSpirits(unit.uid)} accent="#c9a0ff" />}
             {Object.values(ITEMS).some((it) => (s.inventory[it.id] ?? 0) > 0) && (
               <>
                 <Text style={styles.menuTitle}>ITEMS</Text>
@@ -347,10 +347,11 @@ export function SidePanel() {
         {spiritUnit && (
           <View style={styles.menu}>
             <Text style={styles.menuTitle}>SPIRIT · SP {spiritUnit.sp}</Text>
-            {spiritUnit.def.pilot.spirits.map((id: SpiritId) => {
+            {[...new Set([...spiritUnit.def.pilot.spirits, ...(spiritUnit.bonusSpirits ?? [])])].map((id: SpiritId) => {
               const sp = SPIRITS[id];
+              const milestone = !(spiritUnit.def.pilot.spirits as SpiritId[]).includes(id);
               return (
-                <Btn key={id} label={`✦ ${sp.name} · ${sp.cost} SP`} sub={sp.desc} disabled={spiritUnit.sp < sp.cost} onPress={() => s.castSpirit(spiritUnit.uid, id)} accent="#c9a0ff" />
+                <Btn key={id} label={`✦ ${sp.name} · ${sp.cost} SP${milestone ? ' · ★MILESTONE' : ''}`} sub={sp.desc} disabled={spiritUnit.sp < sp.cost} onPress={() => s.castSpirit(spiritUnit.uid, id)} accent={milestone ? '#ffd34d' : '#c9a0ff'} />
               );
             })}
             <Btn label="BACK" onPress={() => useGame.setState({ spiritForUid: null })} accent="#666" />
@@ -367,6 +368,7 @@ export function SidePanel() {
             </Text>
             <Text style={styles.terrainLine}>{terrainDesc(s.map, s.tileInfo)}</Text>
             {s.crates.some((c) => c.pos.x === s.tileInfo!.x && c.pos.y === s.tileInfo!.y) && <Text style={styles.crateHint}>▣ SALVAGE CRATE — land a unit here to claim it</Text>}
+            {s.map.mines?.some((m) => m.x === s.tileInfo!.x && m.y === s.tileInfo!.y) && <Text style={[styles.crateHint, { color: '#ff6b6b' }]}>💥 MINEFIELD — detonates on entry (-15% HP, can't kill)</Text>}
           </View>
         )}
 

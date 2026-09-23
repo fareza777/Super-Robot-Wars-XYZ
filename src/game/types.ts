@@ -126,6 +126,8 @@ export interface UnitState {
   skills: PilotSkills;
   /** ace mastery — career kills >= 50: permanent +5% hit/dmg/+5 evade */
   aceMastery?: boolean;
+  /** spirits unlocked via career-kill milestones — merged with pilot.spirits in menus */
+  bonusSpirits?: SpiritId[];
   /** boss one-time spirit cast flag (Grit at <50% HP) */
   bossBuffed?: boolean;
   /** boss phase-2: triggers at <50% HP — permanent armor/dmg buff for the rest of the fight */
@@ -187,6 +189,8 @@ export interface MapDef {
   allySpawns?: { defId: string; pos: Pos; armed?: boolean; escort?: boolean }[];
   /** hidden salvage crates: a player unit moving onto the tile claims the item */
   crates?: { pos: Pos; itemId: string }[];
+  /** minefields: entering the tile detonates it — 15% maxHP loss, never lethal */
+  mines?: Pos[];
   objective: string;
   /** boss units hold position (can still attack in place) until this turn number. */
   bossHoldUntil?: number;

@@ -4,7 +4,7 @@ import { Image as ExpoImage } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART, AudioKey, MECH_ART, NPC_ART, PILOT_ART } from '../assets';
 import { play } from '../audio';
-import { ALL_UNITS, CHAPTERS, CHAPTERS_COUNT, HONORS, ITEMS, MAX_PART_SLOTS, MAX_PILOT_SKILL, MAX_WEAPON_UPG, PARTS, PILOT_STATS, PLAYER_DEF_IDS, SIDE_MISSIONS, UPGRADE_STATS, WEAPON_UPG_POWER, honorDone, missionOf, rosterFor, weaponUpgCost } from '../game/campaign';
+import { ALL_UNITS, CHAPTERS, CHAPTERS_COUNT, HONORS, ITEMS, MAX_PART_SLOTS, MAX_PILOT_SKILL, MAX_WEAPON_UPG, MILESTONE_SPIRITS, PARTS, PILOT_STATS, PLAYER_DEF_IDS, SIDE_MISSIONS, UPGRADE_STATS, WEAPON_UPG_POWER, honorDone, missionOf, rosterFor, weaponUpgCost } from '../game/campaign';
 import { BOND_EVENTS, MAX_BOND, bondLevel } from '../game/bonds';
 import { SPIRITS, TRAITS } from '../game/data';
 import { useGame } from '../game/store';
@@ -227,7 +227,13 @@ export function HQScreen() {
                   )}
                   <Text style={styles.pilotCardSub} numberOfLines={1}>
                     Spirits: {ALL_UNITS[selUnit].pilot.spirits.map((id) => SPIRITS[id].name).join(' · ')}
+                    {(MILESTONE_SPIRITS[selUnit] ?? []).filter((m) => (s.pilotProg[selUnit]?.kills ?? 0) >= m.kills).map((m) => ` · ★${SPIRITS[m.spirit].name}`).join('')}
                   </Text>
+                  {(MILESTONE_SPIRITS[selUnit] ?? []).some((m) => (s.pilotProg[selUnit]?.kills ?? 0) < m.kills) && (
+                    <Text style={[styles.pilotCardSub, { color: '#8a94b8' }]} numberOfLines={1}>
+                      Next milestone: {(MILESTONE_SPIRITS[selUnit] ?? []).filter((m) => (s.pilotProg[selUnit]?.kills ?? 0) < m.kills).map((m) => `${SPIRITS[m.spirit].name} @ ${m.kills} kills`).join(' · ')}
+                    </Text>
+                  )}
                   <Text style={styles.pilotCardSub} numberOfLines={1}>
                     Bonds: {[...new Set(BOND_EVENTS.filter((ev) => ev.a === selUnit || ev.b === selUnit).map((ev) => (ev.a === selUnit ? ev.b : ev.a)))].map((pid) => `${ALL_UNITS[pid]?.pilot.callsign ?? '?'} Lv${bondLevel(s.bonds, selUnit, pid)}`).join(' · ') || '—'}
                   </Text>
@@ -450,6 +456,7 @@ const CODEX_ALLY_IDS = [...PLAYER_DEF_IDS, 'raxdenR', 'vexiaX'];
 function CodexRow({ id, ally }: { id: string; ally: boolean }) {
   const d = ALL_UNITS[id];
   const killsByDef = useGame((st) => st.killsByDef);
+  const pilotProg = useGame((st) => st.pilotProg);
   const tally = killsByDef[id] ?? 0;
   return (
     <View style={styles.codexRow}>
@@ -472,6 +479,7 @@ function CodexRow({ id, ally }: { id: string; ally: boolean }) {
         {ally && d.pilot.spirits.length > 0 && (
           <Text style={styles.codexSpirit} numberOfLines={1}>
             Spirits: {d.pilot.spirits.map((sp) => SPIRITS[sp].name).join(' · ')}
+            {(MILESTONE_SPIRITS[d.id] ?? []).filter((m) => (pilotProg[d.id]?.kills ?? 0) >= m.kills).map((m) => ` · ★${SPIRITS[m.spirit].name}`).join('')}
           </Text>
         )}
         {ally && d.pilot.trait && (
