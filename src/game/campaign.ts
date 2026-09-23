@@ -221,10 +221,63 @@ const REINFORCE: Record<number, { turn: number; comp: string[] }> = {
   30: { turn: 2, comp: ['nightmare', 'nightmare'] },
 };
 
+/** Mid-battle story beats keyed by chapter id — dialog fires at the start of that player turn. */
+const MID_EVENTS: Record<number, MapDef['events']> = {
+  1: [{
+    turn: 3,
+    lines: [
+      { speaker: 'kargan', text: 'So the Aegis pups finally crawled out. Every meter you advance is a meter of Imperial soil you bleed on.' },
+      { speaker: 'valstray', text: 'You hear that, squad? He talks like a man who has never held a line. Push on — we end this today.' },
+    ],
+  }] as MapDef['events'],
+  5: [{
+    turn: 2,
+    lines: [
+      { speaker: 'raxden', text: 'Surrender, little Valstray. Your frame is scrap metal the moment I decide it is.' },
+      { speaker: 'valstray', text: 'Raxden, is it? Come down here and say that to my face!' },
+    ],
+  }] as MapDef['events'],
+  10: [{
+    turn: 3,
+    lines: [
+      { speaker: 'vexia', text: 'Their formation is holding better than I expected. All units — tighten the ring, leave no gap.' },
+      { speaker: 'arielis', text: 'Energy stores at 60% here. Ray, we finish them before they finish us — move!' },
+    ],
+  }] as MapDef['events'],
+  15: [{
+    turn: 3,
+    lines: [
+      { speaker: 'serka', text: 'You fight for a dying world, children. The Emperor offers a seat at the table — kneel, and live.' },
+      { speaker: 'npc_captain', text: 'Do not answer her! The Ark does not kneel. Weapons free, all squadrons.' },
+    ],
+  }] as MapDef['events'],
+  20: [{
+    turn: 4,
+    lines: [
+      { speaker: 'gruntborg', text: 'Grunborg holding at 40% armor... this is the hardest fight of my life and I am loving every second of it.' },
+      { speaker: 'zephyra', text: 'Save the monologue for the debrief, old man. Reinforcements are still coming — eyes forward.' },
+    ],
+  }] as MapDef['events'],
+  25: [{
+    turn: 2,
+    lines: [
+      { speaker: 'warden', text: 'Beyond this door lies the Emperor himself. You will not pass while a single reactor on this station still burns.' },
+      { speaker: 'valstray', text: 'Then we will put out every reactor you have. For everyone who believed we would get this far — attack!' },
+    ],
+  }] as MapDef['events'],
+  30: [{
+    turn: 3,
+    lines: [
+      { speaker: 'emperor', text: 'I watched your ship die at Kharon and your pilots bleed across my empire. And still you come. Magnificent. Futile.' },
+      { speaker: 'valstray', text: 'We crossed your whole empire to stand here, Emperor. Every burn, every scar — let it answer you now.' },
+    ],
+  }] as MapDef['events'],
+};
+
 export function genMap(ch: ChapterDef): MapDef {
   if (ch.theme === 'custom') {
     const roster = rosterFor(ch);
-    return { ...MISSION_SSS, bossHoldUntil: 3, playerSpawns: MISSION_SSS.playerSpawns.slice(0, 4).map((s, i) => ({ defId: roster[i] ?? s.defId, pos: s.pos })) };
+    return { ...MISSION_SSS, bossHoldUntil: 3, events: MID_EVENTS[ch.id], playerSpawns: MISSION_SSS.playerSpawns.slice(0, 4).map((s, i) => ({ defId: roster[i] ?? s.defId, pos: s.pos })) };
   }
   const r = rng(ch.id * 7919);
   const terrain: Terrain[][] = [];
@@ -298,6 +351,7 @@ export function genMap(ch: ChapterDef): MapDef {
     enemySpawns,
     bossHoldUntil: ch.boss ? 3 : undefined,
     reinforce: REINFORCE[ch.id],
+    events: MID_EVENTS[ch.id],
   };
 }
 

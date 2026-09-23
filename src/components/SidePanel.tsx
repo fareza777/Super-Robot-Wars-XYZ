@@ -149,6 +149,11 @@ export function SidePanel() {
                           <Text style={styles.tgtHp}>
                             HP {e.hp}/{e.def.maxHp} · WILL {e.will}
                           </Text>
+                          {/* SRW damage preview — green = HP remaining after the hit */}
+                          <View style={styles.tgtBar}>
+                            <View style={[styles.tgtBarFill, { width: `${(e.hp / e.def.maxHp) * 100}%`, backgroundColor: '#ff5a5a' }]} />
+                            <View style={[styles.tgtBarFill, { width: `${(Math.max(0, e.hp - dmg) / e.def.maxHp) * 100}%`, backgroundColor: '#4dff7a' }]} />
+                          </View>
                           <Text style={styles.tgtCnt} numberOfLines={1}>
                             {cw ? `↩ CNT ~${cDmg} (${cHc}%)` : '↩ no counter in range'}
                           </Text>
@@ -263,6 +268,8 @@ const styles = StyleSheet.create({
   tgtRowKill: { borderColor: '#ffd34d', backgroundColor: '#2a2214' },
   tgtName: { color: '#ffe2e2', fontSize: 10.5, fontWeight: '800' },
   tgtHp: { color: '#8fa1c7', fontSize: 8.5, marginTop: 1 },
+  tgtBar: { height: 5, borderRadius: 3, backgroundColor: '#1a2036', marginTop: 4, overflow: 'hidden', position: 'relative' },
+  tgtBarFill: { position: 'absolute', left: 0, top: 0, bottom: 0, borderRadius: 3 },
   tgtHitBox: { alignItems: 'flex-end' },
   tgtHit: { fontSize: 15, fontWeight: '900' },
   tgtDmg: { color: '#9fb0d0', fontSize: 8.5, fontWeight: '700' },

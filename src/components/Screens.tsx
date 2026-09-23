@@ -104,6 +104,7 @@ export function BriefingScreen() {
 
 export function EndScreen({ victory }: { victory: boolean }) {
   const gotoHq = useGame((s) => s.gotoHq);
+  const gotoCredits = useGame((s) => s.gotoCredits);
   const gotoBriefing = useGame((s) => s.gotoBriefing);
   const turn = useGame((s) => s.turn);
   const chapter = useGame((s) => s.chapter);
@@ -134,6 +135,17 @@ export function EndScreen({ victory }: { victory: boolean }) {
           ))}
           {justUnlockedNg && <Text style={styles.resultsNg}>NEW GAME+ {ngPlus} — restart at Ch.1, keep everything, enemies +{Math.round(18 * ngPlus)}% HP</Text>}
         </View>
+      )}
+      {justUnlockedNg && (
+        <TouchableOpacity
+          style={[styles.bigBtn, { borderColor: '#c9a0ff', marginBottom: 12 }]}
+          onPress={() => {
+            play('ui_confirm');
+            gotoCredits();
+          }}
+        >
+          <Text style={[styles.bigBtnTxt, { color: '#c9a0ff' }]}>ROLL CREDITS ★</Text>
+        </TouchableOpacity>
       )}
       <TouchableOpacity
         style={styles.bigBtn}

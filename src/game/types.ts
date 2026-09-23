@@ -132,6 +132,8 @@ export interface MapDef {
   bossHoldUntil?: number;
   /** enemy reinforcement wave: at the start of player turn `turn`, `comp` units spawn on the enemy edge */
   reinforce?: { turn: number; comp: string[] };
+  /** mid-battle story beats: dialog plays at the start of player turn `turn` */
+  events?: { turn: number; lines: { speaker: string; text: string; voice?: string }[] }[];
 }
 
 export type Phase =
@@ -140,7 +142,9 @@ export type Phase =
   | 'home'
   | 'briefing'
   | 'dialog'
+  | 'deploy'
   | 'prologue'
+  | 'credits'
   | 'hq'
   | 'missions'
   | 'bond'

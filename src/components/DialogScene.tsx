@@ -9,7 +9,7 @@ import { ALL_UNITS } from '../game/campaign';
 
 export interface DialogLine {
   speaker: string; // unit defId or npc_* key
-  voice: AudioKey;
+  voice?: AudioKey; // omitted = no VO (mid-battle beats)
   text: string;
 }
 
@@ -60,7 +60,7 @@ export function DialogScene({ lines, tag, bg, onDone }: { lines: DialogLine[]; t
     cpsRef.current = 66;
     portIn.setValue(0);
     stopVo(voRef.current);
-    const p = playEx(line.voice);
+    const p = line.voice ? playEx(line.voice) : null;
     voRef.current = p;
     Animated.spring(portIn, { toValue: 1, useNativeDriver: true, friction: 7 }).start();
     // elapsed-time driven so starved timers on slow devices still finish on schedule;

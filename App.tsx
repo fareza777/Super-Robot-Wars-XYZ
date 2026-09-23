@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { BattleScene } from './src/components/BattleScene';
 import { BondDialog } from './src/components/BondDialog';
@@ -11,9 +11,12 @@ import { MapGrid } from './src/components/MapGrid';
 import { PrologueScreen } from './src/components/PrologueScreen';
 import { BriefingScreen, EndScreen, TitleScreen } from './src/components/Screens';
 import { SettingsScreen } from './src/components/SettingsScreen';
+import { CreditsScreen } from './src/components/CreditsScreen';
+import { DialogScene } from './src/components/DialogScene';
 import { SidePanel } from './src/components/SidePanel';
 import { StoryIntro } from './src/components/StoryIntro';
 import { bgm } from './src/audio';
+import { ART } from './src/assets';
 import { useGame } from './src/game/store';
 
 function EnemyBanner() {
@@ -26,6 +29,41 @@ function EnemyBanner() {
       <Text style={styles.enemyBannerTxt}>ENEMY PHASE</Text>
     </Animated.View>
   );
+}
+
+/** Deploy-phase bottom bar — reposition units, then launch into the chapter dialog. */
+function DeployBar() {
+  const begin = useGame((s) => s.beginMission);
+  const missionCh = useGame((s) => s.missionCh);
+  // swallow stray/queued taps for a beat after mount — the DEPLOY tap on the
+  // briefing screen can otherwise land on LAUNCH when the layout flips
+  const armedAt = useRef(Date.now() + 500);
+  const launch = () => {
+    if (Date.now() < armedAt.current) return;
+    begin();
+  };
+  return (
+    <View style={styles.deployBar}>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.deployTitle}>DEPLOY FORMATION</Text>
+        <Text style={styles.deployHint}>
+          {missionCh.name} — tap a unit, then tap a blue tile to reposition it
+        </Text>
+      </View>
+      <Pressable style={styles.launchBtn} onPress={launch}>
+        <Text style={styles.launchTxt}>LAUNCH ▸</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+/** Mid-battle story beat — plays over the map at its trigger turn, then returns control. */
+function MidDialog() {
+  const lines = useGame((s) => s.midDialog);
+  const finish = useGame((s) => s.finishMidDialog);
+  const missionCh = useGame((s) => s.missionCh);
+  if (!lines?.length) return null;
+  return <DialogScene lines={lines.map((l) => ({ speaker: l.speaker, text: l.text, voice: l.voice as never }))} tag={`${missionCh.name.toUpperCase()} · ONGOING BATTLE`} bg={ART.story[4]} onDone={finish} />;
 }
 
 export default function App() {
@@ -63,16 +101,18 @@ export default function App() {
       {phase === 'bond' && <BondDialog />}
       {phase === 'settings' && <SettingsScreen />}
       {phase === 'dialog' && <ChapterDialog />}
-      {(phase === 'player' || phase === 'enemy' || phase === 'battle') && (
+      {phase === 'credits' && <CreditsScreen />}
+      {(phase === 'player' || phase === 'enemy' || phase === 'battle' || phase === 'deploy') && (
         <View style={styles.gameRow}>
           <MapGrid />
-          <SidePanel />
+          {phase === 'deploy' ? <DeployBar /> : <SidePanel />}
           {phase === 'enemy' && <EnemyBanner />}
           {!!notice && <NoticeBanner text={notice} />}
         </View>
       )}
       {phase === 'victory' && <EndScreen victory />}
       {phase === 'defeat' && <EndScreen victory={false} />}
+      <MidDialog />
       {battle && <BattleScene key={`${battle.attacker.uid}-${battle.defender.uid}-${battle.weapon.id}`} />}
       <StatusBar style="light" hidden />
     </View>
@@ -113,5 +153,10 @@ const styles = StyleSheet.create({
     borderColor: '#ff5a5a',
     paddingVertical: 12,
   },
+  deployBar: { width: 237, backgroundColor: '#0a0e1a', borderLeftWidth: 1, borderLeftColor: '#2a3450', padding: 14, justifyContent: 'space-between' },
+  deployTitle: { color: '#ffd34d', fontSize: 14, fontWeight: '900', letterSpacing: 2, marginBottom: 6 },
+  deployHint: { color: '#9fb0d8', fontSize: 11, lineHeight: 17 },
+  launchBtn: { borderWidth: 1.5, borderColor: '#ffd34d', borderRadius: 10, paddingVertical: 12, alignItems: 'center', backgroundColor: 'rgba(255,211,77,0.08)' },
+  launchTxt: { color: '#ffd34d', fontSize: 14, fontWeight: '900', letterSpacing: 2 },
   enemyBannerTxt: { color: '#ffd0d0', fontSize: 26, fontWeight: '900', letterSpacing: 8, fontStyle: 'italic' },
 });

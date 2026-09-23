@@ -45,6 +45,7 @@ import {
   phaseRecovery,
   planEnemyActions,
   same,
+  terrainAt,
   unitAt,
   usableWeapons,
   weaponsAgainst,
@@ -128,6 +129,9 @@ interface Store {
   battleReaction: Reaction | null; // defender's pick while a reaction prompt is open
   bossWarned: boolean; // WARNING card already shown this mission
   notice: string | null; // transient map banner (e.g. ENEMY REINFORCEMENTS)
+  midDialog: { speaker: string; text: string; voice?: string }[] | null; // mid-battle story event playing
+  eventsFired: string[]; // mid-battle event indexes already shown this mission
+  deployTiles: Set<string>; // legal reposition tiles while in the deploy phase
   lastReward: number; // credits earned by the just-finished mission
   log: string[];
   enemyBusy: boolean;
@@ -168,6 +172,9 @@ interface Store {
   setReaction: (r: Reaction) => void;
   waitUnit: () => void;
   openSpirits: (uid: string) => void;
+  beginMission: () => void; // deploy phase -> chapter dialog
+  finishMidDialog: () => void;
+  gotoCredits: () => void;
   castSpirit: (uid: string, s: SpiritId) => void;
   endTurn: () => void;
   finishBattle: () => void;
@@ -202,6 +209,20 @@ function ngEnemy(u: UnitState, ngPlus: number) {
   u.def = { ...u.def, maxHp: Math.round(u.def.maxHp * (1 + 0.18 * ngPlus)), armor: Math.round(u.def.armor * (1 + 0.1 * ngPlus)), mobility: u.def.mobility + 6 * ngPlus };
   u.hp = u.def.maxHp;
   u.level += ngPlus * 2;
+}
+
+/** Tiles within 3 of any player spawn that a unit may redeploy to (empty + passable). */
+function deployZone(map: MapDef): Set<string> {
+  const out = new Set<string>();
+  for (const sp of map.playerSpawns)
+    for (let dy = -3; dy <= 3; dy++)
+      for (let dx = -3; dx <= 3; dx++) {
+        const p = { x: sp.pos.x + dx, y: sp.pos.y + dy };
+        if (Math.abs(dx) + Math.abs(dy) > 3) continue;
+        if (p.x < 0 || p.y < 0 || p.x >= map.cols || p.y >= map.rows) continue;
+        out.add(key(p));
+      }
+  return out;
 }
 
 function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: UpgradeMap, wupg: WeaponUpgMap, deploySel: string[], ngPlus: number, parts: Record<string, string[]>): { map: MapDef; units: UnitState[] } {
@@ -314,6 +335,9 @@ export const useGame = create<Store>((set, get) => ({
   battleReaction: null,
   bossWarned: false,
   notice: null,
+  midDialog: null,
+  eventsFired: [],
+  deployTiles: new Set<string>(),
   lastReward: 0,
 
   start: () => set({ phase: 'onboarding', units: [], log: [] }),
@@ -347,7 +371,7 @@ export const useGame = create<Store>((set, get) => ({
     if (!m || s.chapter < m.unlockCh || s.sideCleared.includes(id)) return;
     const ch = sideAsChapter(m);
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, [], s.ngPlus, s.parts);
-    set({ phase: 'player', sideId: id, missionCh: ch, map, units, kills: 0, turn: 1, bossWarned: false, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set() });
+    set({ phase: 'player', sideId: id, missionCh: ch, map, units, kills: 0, turn: 1, bossWarned: false, log: [`SIDE QUEST: ${m.name}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set(), midDialog: null, eventsFired: [] });
   },
   replayStory: () => set({ phase: 'onboarding' }),
   gotoSettings: () => set({ phase: 'settings' }),
@@ -536,7 +560,14 @@ export const useGame = create<Store>((set, get) => ({
     const s = get();
     const ch = chapterOf(s.chapter);
     const { map, units } = buildMission(ch, s.pilotProg, s.upgrades, s.weaponUpg, s.deploySel, s.ngPlus, s.parts);
-    set({ phase: 'dialog', sideId: null, missionCh: ch, map, units, kills: 0, turn: 1, bossWarned: false, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set() });
+    const zone = deployZone(map);
+    // paint the deploy zone with the move-range overlay so the player sees where units can go
+    const zoneTiles = new Map<string, MoveRec>();
+    for (const k of zone) {
+      const [x, y] = k.split(',').map(Number);
+      zoneTiles.set(k, { pos: { x, y }, cost: 0 });
+    }
+    set({ phase: 'deploy', sideId: null, missionCh: ch, map, units, kills: 0, turn: 1, bossWarned: false, log: [`Chapter ${ch.id}: ${ch.name}${s.ngPlus ? ` · NG+ ${s.ngPlus}` : ''}`, `Objective: ${ch.objective}`], inspectUid: null, threatTiles: new Set(), midDialog: null, eventsFired: [], deployTiles: zone, moveTiles: zoneTiles });
   },
   finishDialog: () => set({ phase: 'player' }),
 
@@ -566,6 +597,19 @@ export const useGame = create<Store>((set, get) => ({
 
   tapTile: (p) => {
     const s = get();
+    if (s.phase === 'deploy') {
+      const u = unitAt(s.units, p);
+      if (u?.side === 'player') {
+        set({ selectedUid: u.uid });
+        return;
+      }
+      const sel = s.units.find((x) => x.uid === s.selectedUid);
+      if (sel && !u && s.deployTiles.has(key(p)) && TERRAIN_INFO[terrainAt(s.map, p)].passable[sel.def.moveType]) {
+        const units = s.units.map((x) => (x.uid === sel.uid ? { ...x, pos: p } : x));
+        set({ units });
+      }
+      return;
+    }
     if (s.phase !== 'player' || s.battle || s.enemyBusy) return;
 
     // target selection mode
@@ -813,6 +857,13 @@ export const useGame = create<Store>((set, get) => ({
   },
 
   openSpirits: (uid) => set({ spiritForUid: uid }),
+
+  beginMission: () => {
+    if (get().phase !== 'deploy') return; // guard: only launchable from the deploy screen
+    set({ phase: 'dialog', selectedUid: null, deployTiles: new Set(), moveTiles: new Map() });
+  },
+  finishMidDialog: () => set({ midDialog: null }),
+  gotoCredits: () => set({ phase: 'credits' }),
 
   castSpirit: (uid, sp) => {
     const s = get();
@@ -1090,13 +1141,23 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       recovered.push(`Enemy reinforcements: ${rf.comp.length} units incoming!`);
       setTimeout(() => set({ notice: null }), 2800);
     }
+    // mid-battle story event fires once, at the start of its turn
+    let midDialog = st.midDialog;
+    const eventsFired = st.eventsFired;
+    if (st.map.events) {
+      const idx = st.map.events.findIndex((e, i) => e.turn === nextTurn && !eventsFired.includes(String(i)));
+      if (idx >= 0) {
+        midDialog = st.map.events[idx].lines;
+        eventsFired.push(String(idx));
+      }
+    }
     const end = checkEnd(units, st.missionCh, nextTurn);
     let log = push(st.log, `— Turn ${nextTurn} player phase —`);
     for (const l of recovered) log = push(log, l);
     if (end === 'victory') {
       // survive-objective reached its turn limit — resolve outside this updater
       pendingVictory = true;
-      return { units, turn: nextTurn };
+      return { units, turn: nextTurn, midDialog, eventsFired };
     }
     return {
       units,
@@ -1105,6 +1166,8 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       turn: nextTurn,
       log,
       notice,
+      midDialog,
+      eventsFired,
     };
   });
   if (pendingVictory) applyVictory(set, get);
