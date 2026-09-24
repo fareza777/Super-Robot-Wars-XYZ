@@ -70,6 +70,7 @@ export const PARTS: Record<string, PartDef> = {
   chaffDispenser: { id: 'chaffDispenser', name: 'Chaff Dispenser', desc: 'Attackers suffer -10 hit chance against this unit', price: 1300, chaff: 10 },
   seekerHead: { id: 'seekerHead', name: 'Seeker Head', desc: '+8% hit chance · +6% critical chance', price: 1500, hit: 8, crit: 6 },
   combatComp: { id: 'combatComp', name: 'Combat Computer', desc: '+10% hit chance · +5% damage', price: 1600, hit: 10, dmg: 5 },
+  fluxVent: { id: 'fluxVent', name: 'Plasma Vent', desc: 'Weapon EN cost −15%', price: 1800, enSaver: 15 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -111,6 +112,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'pointBlank', name: 'Point Blank', desc: '+6% damage per point attacking from 2 tiles or closer' },
   { id: 'bloodlust', name: 'Bloodlust', desc: '+5% damage per point after this unit\'s 3rd kill of the battle' },
   { id: 'reaver', name: 'Reaver', desc: '+5% damage per point against targets at full HP' },
+  { id: 'bulwark', name: 'Bulwark', desc: 'Defend reaction reduces damage an extra 8% per point' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1103,6 +1105,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_quartermaster', name: 'QUARTERMASTER', desc: 'Stockpile 12 consumable items at once', rewardCr: 800 },
   { id: 'h_simace', name: 'SIMULATOR ACE', desc: 'Score 3000+ in the VR Simulator', rewardCr: 1000 },
   { id: 'h_magma', name: 'MAGMA RUNNER', desc: 'Win a mission on a lava field', rewardCr: 700 },
+  { id: 'h_mogul', name: 'GRAND TREASURY', desc: 'Hold 50,000 credits at once', rewardCr: 2500 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1183,6 +1186,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.simBest ?? 0) >= 3000;
     case 'h_magma':
       return s.missionCh?.theme === 'lava';
+    case 'h_mogul':
+      return s.credits >= 50000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

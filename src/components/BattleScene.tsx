@@ -51,6 +51,7 @@ export function BattleScene() {
   const screenFlash = useRef(new Animated.Value(0)).current; // full-screen hit flash
   const defKnock = useRef(new Animated.Value(0)).current; // defender knocked back on hit
   const attKnock = useRef(new Animated.Value(0)).current; // attacker knocked back on counter hit
+  const zoomPunch = useRef(new Animated.Value(0)).current; // camera zoom kick on impact
 
   const atk = battle?.attacker;
   const def = battle?.defender;
@@ -72,6 +73,7 @@ export function BattleScene() {
     screenFlash.setValue(0);
     defKnock.setValue(0);
     attKnock.setValue(0);
+    zoomPunch.setValue(0);
     Animated.timing(fade, { toValue: 1, duration: 400, useNativeDriver: true }).start();
     bgZoom.setValue(0);
     Animated.timing(bgZoom, { toValue: 1, duration: 24000, easing: Easing.linear, useNativeDriver: true }).start();
@@ -136,6 +138,7 @@ export function BattleScene() {
         pulse(defFlash, shakeX);
         flashScreen(screenFlash, r.destroyed);
         knockback(defKnock);
+        punch(zoomPunch);
         if (r.reaction === 'defend') {
           Animated.sequence([
             Animated.timing(shieldAnim, { toValue: 1, duration: 280, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
@@ -162,6 +165,7 @@ export function BattleScene() {
         pulse(attFlash, shakeX);
         flashScreen(screenFlash, c.destroyed);
         knockback(attKnock);
+        punch(zoomPunch);
         if (c.destroyed) {
           Animated.timing(attFall, { toValue: 1, duration: 1100, delay: 420, easing: Easing.in(Easing.cubic), useNativeDriver: true }).start();
           const dv = UNIT_DEFEAT_VOICE[battle.attacker.def.id];
@@ -193,7 +197,7 @@ export function BattleScene() {
       </Animated.View>
       <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(4,6,16,0.35)' }]} />
 
-      <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateX: shakeX }] }]}>
+      <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateX: shakeX }, { scale: zoomPunch.interpolate({ inputRange: [0, 1], outputRange: [1, 1.07] }) }] }]}>
         {/* attacker mech panel */}
         <Animated.View
           style={[
@@ -377,6 +381,14 @@ function knockback(v: Animated.Value) {
   Animated.sequence([
     Animated.timing(v, { toValue: 1, duration: 55, easing: Easing.out(Easing.quad), useNativeDriver: true }),
     Animated.timing(v, { toValue: 0, duration: 420, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+  ]).start();
+}
+
+function punch(v: Animated.Value) {
+  v.setValue(0);
+  Animated.sequence([
+    Animated.timing(v, { toValue: 1, duration: 90, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+    Animated.timing(v, { toValue: 0, duration: 380, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
   ]).start();
 }
 

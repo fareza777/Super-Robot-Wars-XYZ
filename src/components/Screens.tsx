@@ -120,7 +120,7 @@ export function BriefingScreen() {
             const prog = pilotProg[id];
             const on = deploySel.includes(id);
             return (
-              <Pressable key={id} style={[styles.squadCard, !on && { opacity: 0.35 }]} onPress={() => toggleDeploy(id)}>
+              <Pressable key={id} style={({ pressed }) => [styles.squadCard, !on && { opacity: 0.35 }, pressed && { opacity: 0.6, transform: [{ scale: 0.94 }] }]} onPress={() => toggleDeploy(id)}>
                 <Image cachePolicy="memory" source={PILOT_ART[id]} style={[styles.squadFace, on && { borderColor: '#4dff7a', borderWidth: 2 }]} contentFit="cover" />
                 <Text style={[styles.squadName, !on && { color: '#667' }]}>{d.pilot.callsign} · Lv{prog?.level ?? d.level ?? 1}</Text>
                 <Text style={styles.squadUnit} numberOfLines={1}>{d.name}</Text>
@@ -311,13 +311,13 @@ const styles = StyleSheet.create({
   bigBtnTxt: { color: '#ffd34d', fontWeight: '900', fontSize: 16, letterSpacing: 3 },
   briefTitle: { color: '#fff', fontSize: 22, fontWeight: '900', letterSpacing: 3, textShadowColor: '#000', textShadowRadius: 8 },
   briefSub: { color: '#7ee7ff', fontSize: 14, fontWeight: '700', marginTop: 2, letterSpacing: 2 },
-  briefBox: { backgroundColor: 'rgba(14,17,28,0.88)', borderWidth: 1, borderColor: '#2a2f42', borderRadius: 12, padding: 12, margin: 8, maxWidth: 560 },
+  briefBox: { backgroundColor: 'rgba(14,17,28,0.9)', borderWidth: 1.5, borderColor: '#3d4a72', borderRadius: 14, padding: 14, margin: 8, maxWidth: 560, shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 14, shadowOffset: { width: 0, height: 5 }, elevation: 8 },
   briefTxt: { color: '#e6ecff', fontSize: 13, lineHeight: 20 },
   briefTxtSmall: { color: '#8fa1c7', fontSize: 10.5, lineHeight: 16, marginTop: 6 },
   squadRow: { flexDirection: 'row', gap: 10, marginTop: 6 },
   deployLbl: { color: '#9fd0ff', fontSize: 10, fontWeight: '800', letterSpacing: 1.5, marginTop: 8 },
   deployMark: { color: '#4dff7a', fontSize: 8.5, fontWeight: '800', marginTop: 2 },
-  squadCard: { alignItems: 'center', width: 76 },
+  squadCard: { alignItems: 'center', width: 78, backgroundColor: 'rgba(22,27,44,0.6)', borderRadius: 10, paddingVertical: 6, borderWidth: 1, borderColor: '#2c3350' },
   squadFace: { width: 56, height: 56, borderRadius: 10, borderWidth: 1, borderColor: '#3a4160' },
   squadName: { color: '#ffd34d', fontSize: 11, fontWeight: '800', marginTop: 4 },
   squadUnit: { color: '#9fb0d0', fontSize: 9, marginTop: 1 },

@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -103,7 +103,9 @@ export function movementRange(map: MapDef, units: UnitState[], u: UnitState): Ma
 export function enCostOf(u: UnitState, w: WeaponDef): number {
   if (u.frenzyThisTurn) return 0;
   const r = u.skills?.esave ?? 0;
-  return r ? Math.max(1, Math.round(w.enCost * (1 - 0.04 * r))) : w.enCost;
+  const p = partBonus(u, 'enSaver');
+  const mult = (1 - 0.04 * r) * (1 - p / 100);
+  return mult < 1 ? Math.max(1, Math.round(w.enCost * mult)) : w.enCost;
 }
 
 /** Ammo Rack part: extended magazine capacity for ammo-limited weapons. */
@@ -333,7 +335,7 @@ export function aiPickReaction(att: UnitState, def: UnitState, w: WeaponDef, map
 /** Resolve a full attack including a possible single counter-attack. Pure-ish: mutates nothing, returns result. */
 export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, attMods: CombatMods = NO_MODS, defMods: CombatMods = NO_MODS, reaction: Reaction = 'counter', units?: UnitState[]): AttackResult {
   const first = resolveHit(att, def, w, map, reaction === 'evade' ? { ...attMods, hitBonus: attMods.hitBonus - 30 } : attMods, units);
-  if (reaction === 'defend' && first.hit && !w.pierce) first.damage = Math.round(first.damage * 0.5);
+  if (reaction === 'defend' && first.hit && !w.pierce) first.damage = Math.round(first.damage * 0.5 * (1 - 0.08 * (def.skills?.bulwark ?? 0)));
   if (reaction === 'cover' && first.hit && !w.pierce) first.damage = Math.round(first.damage * Math.max(0.3, 0.7 - 0.1 * (def.skills?.bodyguard ?? 0)));
   let counter: AttackResult['counter'] = null;
   let counterCut = false;
