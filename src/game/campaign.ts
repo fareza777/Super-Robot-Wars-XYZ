@@ -99,6 +99,7 @@ export const PARTS: Record<string, PartDef> = {
   tracerRounds: { id: 'tracerRounds', name: 'Tracer Rounds', desc: 'Landed hits have a 30% chance to paint the target (mark)', price: 1500, statusMark: true },
   staticRounds: { id: 'staticRounds', name: 'Static Rounds', desc: 'Landed hits have a 15% chance to overload systems (stun)', price: 1900, statusStun: true },
   phaseCoat: { id: 'phaseCoat', name: 'Phase Coat', desc: 'Dispersive armor — incoming beam damage reduced by 25%', price: 1800, beamGuard: true },
+  kineticWeave: { id: 'kineticWeave', name: 'Kinetic Weave', desc: 'Shock-dampening frame — incoming melee damage reduced by 25%', price: 1800, meleeGuard: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -168,6 +169,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'luminance', name: 'Luminance', desc: '+5% damage per point with beam weapons' },
   { id: 'swarmer', name: 'Swarmer', desc: '+5% damage per point with funnel weapons' },
   { id: 'phantomstep', name: 'Phantom Step', desc: '+4 evade per point' },
+  { id: 'parry', name: 'Parry', desc: '-5% melee damage taken per point' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -210,7 +212,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1189,6 +1191,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_consistent', name: 'CONSISTENT', desc: 'Earn rank A or better on 10 missions', rewardCr: 1200 },
   { id: 'h_grim', name: 'GRIM HARVEST', desc: 'Reach 150 total career kills across the squad', rewardCr: 2500 },
   { id: 'h_eternal', name: 'ETERNAL PILGRIM', desc: 'Reach New Game+3', rewardCr: 3000 },
+  { id: 'h_omega', name: 'OMEGA PURGE', desc: 'Destroy 14+ enemy frames in a single battle', rewardCr: 1800 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1325,6 +1328,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.killsByDef ?? {}).reduce((a, b) => a + b, 0) >= 150;
     case 'h_eternal':
       return s.ngPlus >= 3;
+    case 'h_omega':
+      return (s.kills ?? 0) >= 14;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

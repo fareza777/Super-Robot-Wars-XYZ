@@ -40,6 +40,7 @@ function buffNames(u: UnitState): string[] {
   if (u.stalkNext) names.push('STALKER');
   if (u.veilUntilEndOfEnemyPhase) names.push('VEIL');
   if (u.counterBuffUntilEndOfEnemyPhase) names.push('WARHORN');
+  if (u.counterSealUntilEndOfEnemyPhase) names.push('NO-COUNTER');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');

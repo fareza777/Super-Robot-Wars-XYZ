@@ -73,6 +73,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   avenger: { id: 'avenger', name: 'Avenger', cost: 45, desc: 'Vengeful stance — your next counter-attack deals +50% damage' },
   reaper: { id: 'reaper', name: 'Reaper', cost: 50, desc: 'Dirge of the fallen — your next hit deals +10% damage per squad frame destroyed this battle' },
   stalker: { id: 'stalker', name: 'Stalker', cost: 40, desc: 'Predator instinct — your next hit deals +30% damage to a target carrying any status effect' },
+  interfere: { id: 'interfere', name: 'Interference', cost: 45, desc: 'ECM flood — enemies within 3 tiles cannot counter-attack until end of their next phase' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

@@ -94,7 +94,7 @@ export function MissionSelect() {
               const locked = s.chapter < m.unlockCh;
               const rank = s.missionRank[sideAsChapter({ ...m, lvl: m.lvl }).id];
               return (
-                <Pressable key={m.id} onPress={() => !locked && !cleared && s.startSideMission(m.id)} disabled={locked || cleared} style={({ pressed }) => [styles.sideCard, locked && { opacity: 0.45 }, cleared && { borderColor: '#4dff7a' }, m.repeatable && { borderColor: '#6fe0ff' }, pressed && !locked && !cleared && { opacity: 0.65, transform: [{ scale: 0.985 }] }]}>
+                <Pressable key={m.id} onPress={() => !locked && !cleared && s.startSideMission(m.id)} disabled={locked || cleared} style={({ pressed }) => [styles.sideCard, { borderLeftWidth: 4, borderLeftColor: THEME_ACCENT[m.theme] ?? '#9fd8ff' }, locked && { opacity: 0.45 }, cleared && { borderColor: '#4dff7a' }, m.repeatable && { borderColor: '#6fe0ff' }, pressed && !locked && !cleared && { opacity: 0.65, transform: [{ scale: 0.985 }] }]}>
                   <View style={{ flex: 1 }}>
                     <View style={styles.sideTop}>
                       <Text style={styles.sideName}>{m.name.toUpperCase()}</Text>
