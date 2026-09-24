@@ -9,7 +9,7 @@ export interface ItemDef {
   name: string;
   desc: string;
   price: number;
-  apply: 'hp' | 'en' | 'ammo' | 'sp' | 'valor' | 'willAll' | 'healArea' | 'purge' | 'barrage';
+  apply: 'hp' | 'en' | 'ammo' | 'sp' | 'valor' | 'willAll' | 'healArea' | 'purge' | 'barrage' | 'will';
   amount: number;
 }
 
@@ -22,6 +22,7 @@ export const ITEMS: Record<string, ItemDef> = {
   valorPill: { id: 'valorPill', name: 'Valor Pill', desc: 'Next attack damage x1.5', price: 600, apply: 'valor', amount: 0 },
   rallyBanner: { id: 'rallyBanner', name: 'Rally Banner', desc: '+10 Will to every ally', price: 900, apply: 'willAll', amount: 10 },
   repairDrone: { id: 'repairDrone', name: 'Repair Drone', desc: 'Heal 30% HP — unit + allies within 2 tiles', price: 750, apply: 'healArea', amount: 30 },
+  overclock: { id: 'overclock', name: 'Core Overclock', desc: '+15 Will to this unit', price: 550, apply: 'will', amount: 15 },
   ventKit: { id: 'ventKit', name: 'Emergency Vent', desc: 'Purge cripple and all status debuffs', price: 700, apply: 'purge', amount: 0 },
   arkBarrage: { id: 'arkBarrage', name: 'Ark Barrage', desc: 'Call a shipboard strike — radius-2 blast on any tile within 2-8', price: 1200, apply: 'barrage', amount: 0 },
 };
@@ -56,6 +57,7 @@ export const PARTS: Record<string, PartDef> = {
   stealthField: { id: 'stealthField', name: 'Stealth Field', desc: 'Enemies cannot target this unit beyond 3 tiles', price: 2400, stealthField: true },
   deepMags: { id: 'deepMags', name: 'Deep Magazines', desc: '+50% ammunition capacity', price: 1600, ammoPct: 50 },
   ablative: { id: 'ablative', name: 'Ablative Plating', desc: 'Sacrificial skin — the first fatal hit each battle leaves the frame at 1 HP', price: 2200, ablative: true },
+  cryoRounds: { id: 'cryoRounds', name: 'Cryo Rounds', desc: 'Hits have a 30% chance to SLOW the target', price: 1500, statusSlow: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -91,6 +93,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'initiative', name: 'Initiative', desc: '+10% damage per point on the first strike each battle' },
   { id: 'gunner', name: 'Gunner', desc: '+5% damage per point with ranged weapons' },
   { id: 'plunderer', name: 'Plunderer', desc: '+15% capture salvage per point' },
+  { id: 'bodyguard', name: 'Bodyguard', desc: 'Cover intercepts take 10% less damage per point' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1068,6 +1071,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_uns', name: 'UNSCATHED', desc: 'Win with every squad frame above 80% HP', rewardCr: 800 },
   { id: 'h_armory', name: 'ARMORY', desc: 'Own every equipment part', rewardCr: 1000 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
+  { id: 'h_vet', name: 'VETERAN CORPS', desc: 'Five pilots reach ACE rank — 25+ career kills each', rewardCr: 1500 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1126,6 +1130,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.flawlessHon === true;
     case 'h_acecorps':
       return kills.filter((p) => (p.kills ?? 0) >= 25).length >= 3;
+    case 'h_vet':
+      return kills.filter((p) => (p.kills ?? 0) >= 25).length >= 5;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

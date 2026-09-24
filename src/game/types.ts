@@ -241,7 +241,7 @@ export interface UnitState {
   overkillDealt?: number;
 }
 
-export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer';
+export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer' | 'bodyguard';
 export type PilotSkills = Record<PilotSkillId, number>;
 
 /** SRW-style enhancement parts equippable on a mecha. */
@@ -270,6 +270,8 @@ export interface PartDef {
   auraHit?: number;
   /** sacrificial skin — the first fatal hit each battle leaves the frame at 1 HP */
   ablative?: boolean;
+  /** cryo rounds — hits may chill the target: 30% chance of SLOW */
+  statusSlow?: boolean;
   /** cloaking field — enemies cannot target this unit beyond 3 tiles */
   stealthField?: boolean;
   unique?: boolean; // not sold — awarded by story

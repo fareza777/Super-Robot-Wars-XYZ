@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -324,7 +324,7 @@ export function aiPickReaction(att: UnitState, def: UnitState, w: WeaponDef, map
 export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, attMods: CombatMods = NO_MODS, defMods: CombatMods = NO_MODS, reaction: Reaction = 'counter'): AttackResult {
   const first = resolveHit(att, def, w, map, reaction === 'evade' ? { ...attMods, hitBonus: attMods.hitBonus - 30 } : attMods);
   if (reaction === 'defend' && first.hit && !w.pierce) first.damage = Math.round(first.damage * 0.5);
-  if (reaction === 'cover' && first.hit && !w.pierce) first.damage = Math.round(first.damage * 0.7);
+  if (reaction === 'cover' && first.hit && !w.pierce) first.damage = Math.round(first.damage * Math.max(0.3, 0.7 - 0.1 * (def.skills?.bodyguard ?? 0)));
   let counter: AttackResult['counter'] = null;
   let counterCut = false;
   if (reaction === 'counter') {
@@ -453,6 +453,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   if (result.hit && w.drain) att.hp = Math.min(att.def.maxHp, att.hp + Math.round(result.damage * 0.25));
   if (result.hit && def.alive) def.statuses = (def.statuses ?? []).filter((fx) => fx.id !== 'mark'); // paint spent by the strike
   if (result.hit && def.alive && w.status && !result.graze) applyStatus(def, w.status);
+  if (result.hit && def.alive && !w.status && !result.graze && partBonus(att, 'statusSlow') > 0 && rnd() < 0.3) applyStatus(def, 'slow');
   if (result.hit && def.alive && w.breaker && !result.graze) def.sundered = true;
   if (result.hit && def.alive && w.willDrain) def.will = Math.max(100, def.will - 5);
   // bash knockback — a landed hit hurls the survivor one tile away from the strike
