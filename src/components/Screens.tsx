@@ -224,7 +224,7 @@ export function EndScreen({ victory }: { victory: boolean }) {
           <Text style={[styles.resultsAce, { color: '#c8a8ff' }]}>{simScore > 0 && simScore >= simBest ? '★ NEW RECORD' : `BEST ${simBest} PTS`}</Text>
           {mvp && (mvp.dmgDealt ?? 0) > 0 && (
             <Text style={[styles.resultsAce, { color: '#ffd34d' }]}>
-              ♛ MVP — {mvp.def.pilot.name} · {mvp.dmgDealt} dmg dealt
+              ♛ MVP — {mvp.def.pilot.name} · {mvp.dmgDealt} dmg · {mvp.kills ?? 0} kills
             </Text>
           )}
         </View>
@@ -252,7 +252,7 @@ export function EndScreen({ victory }: { victory: boolean }) {
           ))}
           {mvp && (mvp.dmgDealt ?? 0) > 0 && (
             <Text style={[styles.resultsAce, { color: '#ffd34d' }]}>
-              ♛ MVP — {mvp.def.pilot.name} · {mvp.dmgDealt} dmg dealt
+              ♛ MVP — {mvp.def.pilot.name} · {mvp.dmgDealt} dmg · {mvp.kills ?? 0} kills
             </Text>
           )}
           {(() => {

@@ -208,6 +208,7 @@ export const PARTS: Record<string, PartDef> = {
   prismAegis: { id: 'prismAegis', name: 'Prism Aegis', desc: 'Layered ward — +100 armor and a 600-point barrier', price: 2300, armor: 100, barrier: 600 },
   swarmRack: { id: 'swarmRack', name: 'Swarm Rack', desc: 'Swarm launcher links — missile and funnel weapons +12% damage', price: 2200, missileDmg: 12, funnelDmg: 12 },
   riposteLattice: { id: 'riposteLattice', name: 'Riposte Lattice', desc: 'Counterweave frame — counter-attacks +15% damage and reach +1 range', price: 2300, counterDmg: 15, counterRange: true },
+  overdriveCore: { id: 'overdriveCore', name: 'Overdrive Core', desc: 'Turbine heart — +8% damage and +10 EN regen per turn', price: 2300, dmg: 8, enRegen: 10 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -388,6 +389,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'scrapper', name: 'Scrapper', desc: '+5% damage per point with weapons that cost no EN' },
   { id: 'ballisteur', name: 'Ballisteur', desc: '+5% damage per point with ammo-fed weapons' },
   { id: 'awestruck', name: 'Awestruck', desc: '+5% damage per point vs targets at 120+ Will' },
+  { id: 'lifeline', name: 'Lifeline', desc: '+4% damage per point while any ally is below 50% hull' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1520,6 +1522,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_vrapotheosis', name: 'VR APOTHEOSIS', desc: 'Score 50,000+ in the VR Simulator', rewardCr: 99000 },
   { id: 'h_hoardlord', name: 'HOARDLORD', desc: 'Hold 500,000 credits at once', rewardCr: 100000 },
   { id: 'h_peacelord', name: 'PEACELORD', desc: 'Clear 50 side missions', rewardCr: 100000 },
+  { id: 'h_centurion', name: 'CENTURION', desc: 'Fly 50 ranked missions', rewardCr: 100000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1879,6 +1882,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.credits >= 500000;
     case 'h_peacelord':
       return s.sideCleared.length >= 50;
+    case 'h_centurion':
+      return Object.keys(s.missionRank ?? {}).length >= 50;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

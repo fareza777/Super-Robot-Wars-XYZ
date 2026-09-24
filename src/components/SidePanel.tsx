@@ -107,6 +107,7 @@ function buffNames(u: UnitState): string[] {
   if (u.breachNext) names.push('BREACH EDGE');
   if (u.repulseUntilEndOfEnemyPhase) names.push('REPULSE VERSE');
   if (u.silencedUntilEndOfEnemyPhase) names.push('SILENCE VERSE');
+  if (u.palisadeUntilEndOfEnemyPhase) names.push('PALISADE VERSE');
   // magnumverse is instant — no chip
   if (u.rended) names.push('RENDED');
   if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
