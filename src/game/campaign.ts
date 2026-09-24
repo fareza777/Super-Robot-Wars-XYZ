@@ -58,6 +58,8 @@ export const PARTS: Record<string, PartDef> = {
   deepMags: { id: 'deepMags', name: 'Deep Magazines', desc: '+50% ammunition capacity', price: 1600, ammoPct: 50 },
   ablative: { id: 'ablative', name: 'Ablative Plating', desc: 'Sacrificial skin — the first fatal hit each battle leaves the frame at 1 HP', price: 2200, ablative: true },
   cryoRounds: { id: 'cryoRounds', name: 'Cryo Rounds', desc: 'Hits have a 30% chance to SLOW the target', price: 1500, statusSlow: true },
+  thrustVector: { id: 'thrustVector', name: 'Thrust Vector', desc: '+1 movement', price: 1800, move: 1 },
+  firewall: { id: 'firewall', name: 'Firewall Suite', desc: 'Immune to enemy status effects', price: 2000, statusProof: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -94,6 +96,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'gunner', name: 'Gunner', desc: '+5% damage per point with ranged weapons' },
   { id: 'plunderer', name: 'Plunderer', desc: '+15% capture salvage per point' },
   { id: 'bodyguard', name: 'Bodyguard', desc: 'Cover intercepts take 10% less damage per point' },
+  { id: 'opportunist', name: 'Opportunist', desc: '+7% damage per point vs targets with status effects' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -171,6 +174,7 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   ballista: U({ id: 'ballista', name: 'Valkyr Ballista', title: 'Siege Artillery', color: '#4a3a52', accent: '#e0b070', maxHp: 4600, maxEn: 90, armor: 800, mobility: 92, moveRange: 4, moveType: 'land', weapons: [WEAPONS.siegeRain, WEAPONS.vulcan], pilot: PILOTS.grunt }),
   // act-3 anchored defender — rooted in place, still swings hard
   bastion: U({ id: 'bastion', name: 'Bastion Anchor', title: 'Rooted Defender', color: '#5a4a42', accent: '#ffd8a8', maxHp: 5600, maxEn: 80, armor: 1900, mobility: 80, moveRange: 3, moveType: 'land', weapons: [WEAPONS.siegeCrusher, WEAPONS.vulcan], pilot: PILOTS.grunt, holdPos: true }),
+  sparkDrone: U({ id: 'sparkDrone', name: 'Spark Drone', title: 'Kamikaze Frame', color: '#3a2a2a', accent: '#ff5a3a', maxHp: 2600, maxEn: 60, armor: 500, mobility: 150, moveRange: 7, moveType: 'air', weapons: [WEAPONS.vulcan], pilot: PILOTS.grunt, kamikaze: true }),
   voidChanter: U({ id: 'voidChanter', name: 'Void Chanter', title: 'Hex Adept', color: '#3a1a4a', accent: '#c080ff', maxHp: 4600, maxEn: 130, armor: 500, mobility: 140, moveRange: 5, moveType: 'air', weapons: [WEAPONS.hexBolt, WEAPONS.nullChord], pilot: PILOTS.grunt }),
   blackguard: U({ id: 'blackguard', name: 'Blackguard', title: 'Veteran Elite', color: '#1a1a22', accent: '#ff5040', maxHp: 7400, maxEn: 120, armor: 1050, mobility: 118, moveRange: 5, moveType: 'land', weapons: [WEAPONS.vulcan, WEAPONS.havocMortar, WEAPONS.hexBolt], pilot: PILOTS.grunt }),
   dragoon: U({ id: 'dragoon', name: 'Dragoon Cavalry', title: 'Mounted Gunner', color: '#4a3a1a', accent: '#ffd080', maxHp: 5200, maxEn: 110, armor: 700, mobility: 130, moveRange: 6, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.stasisRay], pilot: PILOTS.grunt }),
@@ -825,7 +829,7 @@ export function enemyComp(ch: ChapterDef): string[] {
   const heavy = ch.act === 1 ? 'zoldaTank' : 'nightmare';
   const fast = ch.act === 3 ? 'cataphract' : 'lancer';
   const ghost = ch.act === 3 ? 'phantom' : 'vexia';
-  for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : (i % 11 === 9 && ch.act >= 2) ? 'medic' : (i % 13 === 11 && ch.act === 3) ? 'ballista' : (i % 11 === 10 && ch.act === 3) ? 'bastion' : (i % 12 === 8 && ch.act >= 2) ? 'voidChanter' : (i % 10 === 5 && ch.act === 3) ? 'blackguard' : (i % 13 === 4 && ch.act >= 2) ? 'dragoon' : i % 7 === 6 ? ghost : fill);
+  for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : (i % 11 === 9 && ch.act >= 2) ? 'medic' : (i % 13 === 11 && ch.act === 3) ? 'ballista' : (i % 11 === 10 && ch.act === 3) ? 'bastion' : (i % 12 === 8 && ch.act >= 2) ? 'voidChanter' : (i % 10 === 5 && ch.act === 3) ? 'blackguard' : (i % 13 === 4 && ch.act >= 2) ? 'dragoon' : (i % 15 === 12 && ch.act >= 2) ? 'sparkDrone' : i % 7 === 6 ? ghost : fill);
   if (ch.boss) comp.push(ch.boss);
   // Cpt. Vossen ambushes the squad on these chapters — a recurring ace duelist
   if ([6, 13, 19, 26].includes(ch.id)) comp.push('vossDrake');
@@ -1072,6 +1076,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_armory', name: 'ARMORY', desc: 'Own every equipment part', rewardCr: 1000 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
   { id: 'h_vet', name: 'VETERAN CORPS', desc: 'Five pilots reach ACE rank — 25+ career kills each', rewardCr: 1500 },
+  { id: 'h_fullhouse', name: 'FULL HOUSE', desc: 'Deploy all seven squad frames on one sortie', rewardCr: 900 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1132,6 +1137,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return kills.filter((p) => (p.kills ?? 0) >= 25).length >= 3;
     case 'h_vet':
       return kills.filter((p) => (p.kills ?? 0) >= 25).length >= 5;
+    case 'h_fullhouse':
+      return (s.units ?? []).filter((u) => u.side === 'player' && !u.npc).length >= 7;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -163,6 +163,7 @@ function armorOf(u: UnitState, map: MapDef): number {
 
 /** status applied on a landed hit — refreshes the same debuff instead of stacking */
 function applyStatus(u: UnitState, id: 'burn' | 'stun' | 'break' | 'slow' | 'mark' | 'supp'): void {
+  if (partBonus(u, 'statusProof') > 0) return; // firewall suite shrugs off status
   u.statuses = [...(u.statuses ?? []).filter((s) => s.id !== id), { id, turns: 2 }];
 }
 
@@ -201,6 +202,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if ((att.skills?.assassin ?? 0) > 0 && def.hp < def.def.maxHp * 0.4) dmg = Math.round(dmg * (1 + 0.06 * att.skills.assassin));
   if ((att.skills?.brawler ?? 0) > 0 && w.kind === 'melee') dmg = Math.round(dmg * (1 + 0.05 * att.skills.brawler));
   if ((att.skills?.gunner ?? 0) > 0 && w.kind !== 'melee') dmg = Math.round(dmg * (1 + 0.05 * att.skills.gunner));
+  if ((def.statuses ?? []).length > 0) dmg = Math.round(dmg * (1 + 0.07 * (att.skills?.opportunist ?? 0)));
   if (att.enraged) dmg = Math.round(dmg * 1.15);
   if (!att.hasAttacked && (att.skills?.initiative ?? 0) > 0) dmg = Math.round(dmg * (1 + 0.1 * att.skills.initiative));
   if (def.guardUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.5);
@@ -853,6 +855,8 @@ interface AiPlan {
   /** MAP barrage — aim point + weapon when a blast beats a single shot */
   mapAim?: Pos;
   mapWeapon?: WeaponDef;
+  /** kamikaze — detonate the reactor beside the nearest player */
+  detonate?: boolean;
 }
 
 /** For each enemy unit pick: best tile in range that can attack the weakest-hit player unit; else move toward nearest player. */
@@ -873,6 +877,26 @@ export function planEnemyActions(state: GameState): AiPlan[] {
       const best = (tiles.length ? tiles : [e.pos]).slice().sort((a, b) => b.x - a.x)[0];
       claimed.add(key(best));
       plans.push({ unit: e, moveTo: best });
+      continue;
+    }
+    // kamikaze drones make a beeline for the nearest player and blow their core
+    if (e.def.kamikaze) {
+      const dz = [...movementRange(map, units, e).values()].map((v) => v.pos).filter((p) => {
+        const occ = unitAt(units, p);
+        return (!occ || occ.uid === e.uid) && !claimed.has(key(p));
+      });
+      const nearest2 = players.slice().sort((a, b) => dist(e.pos, a.pos) - dist(e.pos, b.pos))[0];
+      if (!nearest2) {
+        plans.push({ unit: e, moveTo: e.pos });
+        continue;
+      }
+      const run = (dz.length ? dz : [e.pos]).slice().sort((a, b) => {
+        const da = Math.min(...players.map((p) => dist(a, p.pos)));
+        const db = Math.min(...players.map((p) => dist(b, p.pos)));
+        return da - db;
+      })[0];
+      claimed.add(key(run));
+      plans.push({ unit: e, moveTo: run, detonate: players.some((p) => dist(run, p.pos) <= 1) });
       continue;
     }
     // bosses hold position until the map's hold turn (commanding from the back line)

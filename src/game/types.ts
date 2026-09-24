@@ -124,6 +124,8 @@ export interface UnitDef {
   medic?: boolean;
   /** siege anchor — never moves; holds its ground and attacks in place */
   holdPos?: boolean;
+  /** kamikaze drone — beelines the nearest player and detonates its core */
+  kamikaze?: boolean;
 }
 
 export interface UnitState {
@@ -241,7 +243,7 @@ export interface UnitState {
   overkillDealt?: number;
 }
 
-export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer' | 'bodyguard';
+export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer' | 'bodyguard' | 'opportunist';
 export type PilotSkills = Record<PilotSkillId, number>;
 
 /** SRW-style enhancement parts equippable on a mecha. */
@@ -272,6 +274,8 @@ export interface PartDef {
   ablative?: boolean;
   /** cryo rounds — hits may chill the target: 30% chance of SLOW */
   statusSlow?: boolean;
+  /** firewall suite — immune to enemy status effects */
+  statusProof?: boolean;
   /** cloaking field — enemies cannot target this unit beyond 3 tiles */
   stealthField?: boolean;
   unique?: boolean; // not sold — awarded by story

@@ -395,7 +395,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
       u.level = prog.level;
       u.exp = prog.exp;
       u.pp = prog.pp ?? 0;
-      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, ...(prog.skills ?? {}) };
+      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, ...(prog.skills ?? {}) };
       if ((prog.kills ?? 0) >= ACE_KILLS) u.will = 130; // ace pilots start hot
       if ((prog.kills ?? 0) >= ACE_MASTER_KILLS) u.aceMastery = true;
       // career-kill milestones: extra spirits the pilot learned along the war
@@ -978,7 +978,7 @@ export const useGame = create<Store>((set, get) => ({
     const s = get();
     const prog = s.pilotProg[defId];
     if (!prog || (prog.pp ?? 0) < 1) return;
-    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, ...(prog.skills ?? {}) };
+    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, ...(prog.skills ?? {}) };
     if (skills[statId] >= MAX_PILOT_SKILL) return;
     skills[statId] += 1;
     const pilotProg = { ...s.pilotProg, [defId]: { ...prog, pp: (prog.pp ?? 0) - 1, skills } };
@@ -2652,6 +2652,35 @@ async function runEnemyPhase(set: SetFn, get: Get) {
           return;
         }
       }
+    }
+
+    // kamikaze drone — overloads its reactor, splashing every unit beside it
+    if (plan.detonate) {
+      const cur = get();
+      const att = cur.units.find((u) => u.uid === plan.unit.uid);
+      if (att && att.alive) {
+        let log2 = push(cur.log, `\u{1F4A5} ${att.def.name} overloads its reactor — CORE DETONATION`);
+        const victims = cur.units.filter((u) => u.alive && u.uid !== att.uid && dist(u.pos, att.pos) <= 1);
+        const units2 = cur.units.map((u) => {
+          if (u.uid === att.uid) return { ...u, alive: false, hp: 0 };
+          if (!victims.some((v) => v.uid === u.uid)) return u;
+          const dmg = Math.max(300, Math.round(u.def.maxHp * 0.18));
+          const hp = u.hp - dmg;
+          const dead = hp <= 0;
+          log2 = push(log2, `  ${u.def.name}: -${dmg} HP${dead ? ' — DESTROYED' : ''}`);
+          return { ...u, hp: Math.max(0, hp), alive: !dead };
+        });
+        set({ units: units2, log: log2, notice: `\u{1F4A5} CORE DETONATION — ${att.def.name}` });
+        setTimeout(() => set({ notice: null }), 2200);
+        await sleep(650);
+        const end = checkEnd(get().units, get().missionCh, get().turn);
+        if (end) {
+          if (end === 'victory') applyVictory(set, get);
+          else set({ phase: end, enemyBusy: false });
+          return;
+        }
+      }
+      continue;
     }
 
     // field medic — mends the most wounded ally within 3 tiles, then ends its turn
