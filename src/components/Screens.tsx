@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART, PILOT_ART } from '../assets';
 import { play } from '../audio';
-import { CHAPTERS_COUNT, ChapterDef, chapterOf, missionOf, rosterFor, ALL_UNITS, ROUTE_INFO, genMap } from '../game/campaign';
+import { CHAPTERS_COUNT, ChapterDef, chapterOf, missionOf, rosterFor, ALL_UNITS, ROUTE_INFO, genMap, HONORS, honorDone } from '../game/campaign';
 import { TERRAIN_INFO, TRAITS } from '../game/data';
 import { useGame } from '../game/store';
 
@@ -255,6 +255,11 @@ export function EndScreen({ victory }: { victory: boolean }) {
               ♛ MVP — {mvp.def.pilot.name} · {mvp.dmgDealt} dmg dealt
             </Text>
           )}
+          {(() => {
+            const st = useGame.getState();
+            const ready = HONORS.filter((h) => honorDone(h, st) && !st.honorsClaimed.includes(h.id));
+            return ready.length > 0 ? <Text style={[styles.resultsAce, { color: '#ffd34d' }]}>🏅 {ready.length} HONOR{ready.length > 1 ? 'S' : ''} READY — claim in HQ</Text> : null;
+          })()}
           {mvp && WIN_QUIPS[mvp.def.pilot.callsign] && (
             <Text style={[styles.resultsAce, { color: '#9fd0ff', fontStyle: 'italic' }]}>{WIN_QUIPS[mvp.def.pilot.callsign]}</Text>
           )}

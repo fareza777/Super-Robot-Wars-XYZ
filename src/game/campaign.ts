@@ -204,6 +204,7 @@ export const PARTS: Record<string, PartDef> = {
   triadCell: { id: 'triadCell', name: 'Triad Cell', desc: 'Tri-core array — beam and gun weapons +10% damage', price: 2100, beamDmg: 10, gunDmg: 10 },
   wardenPlate: { id: 'wardenPlate', name: 'Warden Plate', desc: 'Sentinel laminate — incoming melee and missile damage reduced by 25%', price: 2100, meleeGuard: true, missileGuard: true },
   furnaceRig: { id: 'furnaceRig', name: 'Furnace Rig', desc: 'Retribution lattice — melee attackers take 100 backlash and risk catching fire', price: 2200, shockCoil: true, blazeCoil: true },
+  twinVeins: { id: 'twinVeins', name: 'Twin Veins', desc: 'Dual-cycle core — +12 EN regen and +4% hull regen per turn', price: 2100, enRegen: 12, hpRegen: 4 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -380,6 +381,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'huntsman', name: 'Huntsman', desc: '+5% damage per point vs targets at 30-70% hull' },
   { id: 'guardbreaker', name: 'Guardbreaker', desc: '+6% damage per point vs targets under defensive stances (grit/guard/oath/fortress/defiance/bastion)' },
   { id: 'opening', name: 'Opening', desc: '+6% damage per point vs targets above 70% hull' },
+  { id: 'remembrance', name: 'Remembrance', desc: '+4% damage per point per fallen ally (max 3) — vengeance build' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1508,6 +1510,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_warpaint', name: 'WARPAINT', desc: '4000 total career kills across the squad', rewardCr: 94000 },
   { id: 'h_liberator', name: 'LIBERATOR', desc: 'Clear 40 side missions', rewardCr: 96000 },
   { id: 'h_millennium', name: 'MILLENNIUM', desc: 'One pilot reaches 1000 career kills', rewardCr: 98000 },
+  { id: 'h_butcherking', name: 'BUTCHER KING', desc: '5000 total career kills across the squad', rewardCr: 99000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1859,6 +1862,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.sideCleared.length >= 40;
     case 'h_millennium':
       return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 1000);
+    case 'h_butcherking':
+      return totalKills >= 5000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
