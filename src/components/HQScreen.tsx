@@ -87,7 +87,7 @@ export function HQScreen() {
           <HqCard title="BRIEF ROOM" sub="Talk with the crew" art={NPC_ART.captain} accent="#9fd0ff" onPress={goChat} />
           <HqCard title="MESS HALL" sub="Bonds & stories" art={PILOT_ART.valstray} accent="#ff9fd0" onPress={() => setTab('mess')} />
           <HqCard title="CODEX" sub="Frame & pilot archive" art={MECH_ART.valstray} accent="#b8a0ff" onPress={() => setTab('codex')} />
-          <Pressable style={styles.deployBtn} onPress={() => s.gotoMissions()}>
+          <Pressable onPress={() => s.gotoMissions()} style={({ pressed }) => [styles.deployBtn, pressed && { opacity: 0.75 }]}>
             <Text style={styles.deployTxt}>▶ MISSIONS</Text>
             <Text style={styles.deploySub}>CH.{ch.id} · {s.sideCleared.length} side cleared</Text>
           </Pressable>
@@ -130,7 +130,7 @@ export function HQScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, flexShrink: 0 }}>
             <View style={styles.unitRow}>
             {rosterFor(ch).map((id) => (
-              <Pressable key={id} style={[styles.unitChip, selUnit === id && { borderColor: '#6fe0ff' }]} onPress={() => setSelUnit(id)}>
+              <Pressable key={id} onPress={() => setSelUnit(id)} style={({ pressed }) => [styles.unitChip, selUnit === id && { borderColor: '#6fe0ff' }, pressed && { opacity: 0.7 }]}>
                 <Image source={MECH_ART[id]} style={{ width: 34, height: 34, borderRadius: 6 }} />
                 <Text style={styles.unitChipTxt} numberOfLines={1}>
                   {ALL_UNITS[id].name}
@@ -506,7 +506,7 @@ function CodexRow({ id, ally }: { id: string; ally: boolean }) {
 function HqCard({ title, sub, art, accent, onPress }: { title: string; sub: string; art: number; accent: string; onPress: () => void }) {
   const bob = useIdle(Math.random() * 400);
   return (
-    <Pressable style={styles.hqCard} onPress={onPress}>
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.hqCard, pressed && { opacity: 0.7, transform: [{ scale: 0.96 }] }]}>
       <Animated.View style={[styles.hqCardImg, { transform: [{ translateY: bob.interpolate({ inputRange: [0, 1], outputRange: [0, -6] }) }] }]}>
         <ExpoImage cachePolicy="memory" source={art} style={StyleSheet.absoluteFill} contentFit="cover" contentPosition="top center" />
       </Animated.View>

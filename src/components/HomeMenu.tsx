@@ -16,7 +16,7 @@ function MenuItem({ label, sub, accent, onPress, delay }: { label: string; sub?:
   return (
     <Animated.View style={{ opacity: v, transform: [{ translateX: v.interpolate({ inputRange: [0, 1], outputRange: [-36, 0] }) }] }}>
       <Pressable
-        style={[styles.item, hot && { borderColor: accent, backgroundColor: 'rgba(20,26,48,0.85)' }]}
+        style={({ pressed }) => [styles.item, hot && { borderColor: accent, backgroundColor: 'rgba(20,26,48,0.85)' }, pressed && { opacity: 0.7, transform: [{ scale: 0.985 }] }]}
         onPress={() => {
           play('ui_confirm');
           onPress();
@@ -83,7 +83,7 @@ export function HomeMenu() {
         <MenuItem label="SETTINGS" sub="Battle animation · speed · sound · music" accent="#9dffa0" delay={410} onPress={useGame.getState().gotoSettings} />
       </View>
 
-      <Text style={styles.foot}>v10.2.0 · original mecha tactics · not affiliated with Bandai Namco</Text>
+      <Text style={styles.foot}>v10.3.0 · original mecha tactics · not affiliated with Bandai Namco</Text>
     </View>
   );
 }

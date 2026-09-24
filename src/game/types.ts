@@ -284,6 +284,8 @@ export interface PartDef {
   auraEn?: boolean;
   /** melee weapon damage bonus % */
   meleeDmg?: number;
+  /** chaff dispenser — attackers suffer -this hit chance vs the holder */
+  chaff?: number;
   /** decoy beacon — broadcast signature; enemies prefer this target */
   aggro?: boolean;
   /** cloaking field — enemies cannot target this unit beyond 3 tiles */

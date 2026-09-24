@@ -67,6 +67,7 @@ export const PARTS: Record<string, PartDef> = {
   reactiveArmor: { id: 'reactiveArmor', name: 'Reactive Armor', desc: 'Reflects 15% of hit damage back at the attacker', price: 1900, reflect: 15 },
   relayMatrix: { id: 'relayMatrix', name: 'Relay Matrix', desc: 'Allies within 2 tiles recover +6 EN/turn', price: 1800, auraEn: true },
   raptorClaw: { id: 'raptorClaw', name: 'Raptor Claw', desc: '+15% melee weapon damage', price: 1700, meleeDmg: 15 },
+  chaffDispenser: { id: 'chaffDispenser', name: 'Chaff Dispenser', desc: 'Attackers suffer -10 hit chance against this unit', price: 1300, chaff: 10 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -1096,10 +1097,11 @@ export const HONORS: HonorDef[] = [
   { id: 'h_biggame', name: 'BIG GAME', desc: 'Destroy 5 ace or boss frames in total', rewardCr: 1200 },
   { id: 'h_aceofaces', name: 'ACE OF ACES', desc: 'Earn an S battle rank on 3 missions', rewardCr: 1500 },
   { id: 'h_fortress', name: 'FORTRESS BREAKER', desc: 'Destroy 3 siege frames (Ballista or Bastion)', rewardCr: 900 },
+  { id: 'h_quartermaster', name: 'QUARTERMASTER', desc: 'Stockpile 12 consumable items at once', rewardCr: 800 },
 ];
 
 /** Whether an honor's condition is currently met. */
-export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; turn?: number;
+export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; inventory?: Record<string, number>; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; turn?: number;
 missionCh?: { theme?: string; fog?: boolean };
 usedResupply?: boolean;
 kills?: number;
@@ -1170,6 +1172,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 3;
     case 'h_fortress':
       return ((s.killsByDef ?? {}).ballista ?? 0) + ((s.killsByDef ?? {}).bastion ?? 0) >= 3;
+    case 'h_quartermaster':
+      return Object.values(s.inventory ?? {}).reduce((n, c) => n + (c ?? 0), 0) >= 12;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

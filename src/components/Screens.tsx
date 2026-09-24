@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
   titleXyz: { color: '#ffd34d', fontSize: 58, fontWeight: '900', letterSpacing: 20, fontStyle: 'italic', marginTop: -4, textShadowColor: '#8a5c00', textShadowRadius: 18 },
   touch: { color: '#fff', fontSize: 18, fontWeight: '900', letterSpacing: 6 },
   small: { color: '#8fa1c7', position: 'absolute', bottom: 30, fontSize: 11, letterSpacing: 1.5 },
-  bigBtn: { borderWidth: 2, borderColor: '#ffd34d', borderRadius: 10, paddingVertical: 9, paddingHorizontal: 34, backgroundColor: 'rgba(26,20,48,0.9)', marginTop: 8 },
+  bigBtn: { borderWidth: 2, borderColor: '#ffd34d', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 38, backgroundColor: 'rgba(30,24,56,0.92)', marginTop: 8, shadowColor: '#ffd34d', shadowOpacity: 0.25, shadowRadius: 10, elevation: 5 },
   bigBtnTxt: { color: '#ffd34d', fontWeight: '900', fontSize: 16, letterSpacing: 3 },
   briefTitle: { color: '#fff', fontSize: 22, fontWeight: '900', letterSpacing: 3, textShadowColor: '#000', textShadowRadius: 8 },
   briefSub: { color: '#7ee7ff', fontSize: 14, fontWeight: '700', marginTop: 2, letterSpacing: 2 },
