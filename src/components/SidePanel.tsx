@@ -486,7 +486,7 @@ export function SidePanel() {
                       <Pressable key={e.uid} onPress={() => s.chooseTarget(e.uid)} style={({ pressed }) => [styles.tgtRow, kill && styles.tgtRowKill, pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] }]}>
                         <View style={{ flex: 1 }}>
                           <Text style={[styles.tgtName, { color: e.def.boss ? '#ffd34d' : e.elite ? '#ffb84d' : '#ffd0c0' }]} numberOfLines={1}>
-                            {e.def.name} {e.def.boss ? (e.phase2 ? 'Ω★' : '★') : ''}
+                            {e.def.name} {e.def.boss ? (e.phase2 ? 'Ω★' : '★') : ''}{kill ? ' ☠' : ''}
                           </Text>
                           <Text style={styles.tgtHp}>
                             HP {e.hp}/{e.def.maxHp} · WILL {e.will} · EN {e.en}
