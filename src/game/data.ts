@@ -125,6 +125,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   foresightverse: { id: 'foresightverse', name: 'Foresight Verse', cost: 45, desc: 'Precognition hymn — allies within 3 tiles gain +20 evade for 2 turns' },
   heavensverse: { id: 'heavensverse', name: 'Heaven Verse', cost: 50, desc: 'Storm wrath — a landed hit stuns the target and every enemy adjacent to it' },
   bastionverse: { id: 'bastionverse', name: 'Bastion Verse', cost: 50, desc: 'Fortress hymn — allies within 3 tiles gain +300 armor for 2 turns' },
+  furyverse: { id: 'furyverse', name: 'Fury Verse', cost: 45, desc: 'Kiai overflow — your next attack gains +1% damage per point of Will above 100' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

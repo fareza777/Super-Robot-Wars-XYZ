@@ -151,6 +151,7 @@ export const PARTS: Record<string, PartDef> = {
   blazeCoil: { id: 'blazeCoil', name: 'Blaze Coil', desc: 'Incendiary lattice — attackers have a 25% chance to catch fire', price: 1800, blazeCoil: true },
   rageCoil: { id: 'rageCoil', name: 'Rage Coil', desc: 'Adrenal harness — each hit taken grants the pilot +5 Will', price: 1800, rageCoil: true },
   stunGuard: { id: 'stunGuard', name: 'Stun Guard', desc: 'Gyro anchor — this frame cannot be stunned', price: 1600, stunGuard: true },
+  blazePlate: { id: 'blazePlate', name: 'Blaze Plate', desc: 'Fireproof laminate — this frame takes no burn damage', price: 1600, blazePlate: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -272,6 +273,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'myrmidon', name: 'Myrmidon', desc: '+5% damage per point when attacking without moving' },
   { id: 'sunderfist', name: 'Sunderfist', desc: '+5% damage per point with breaker weapons' },
   { id: 'bloodborne', name: 'Bloodborne', desc: '+5% damage per point while hull is above 80%' },
+  { id: 'harvester', name: 'Harvester', desc: '+4% damage per point per 10% hull the target has lost (cap +40%)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -310,7 +312,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1345,6 +1347,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_overlordvr', name: 'OVERLORD', desc: 'Score 30000+ in the VR Simulator', rewardCr: 6000 },
   { id: 'h_armory', name: 'ARMORY', desc: 'Own 45 different parts', rewardCr: 6500 },
   { id: 'h_genocide', name: 'GENOCIDE', desc: 'Destroy 500 frames across the squad', rewardCr: 7000 },
+  { id: 'h_duelking', name: 'DUEL KING', desc: 'One pilot reaches 150 career kills', rewardCr: 8000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1586,6 +1589,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.partsOwned ?? []).length >= 45;
     case 'h_genocide':
       return totalKills >= 500;
+    case 'h_duelking':
+      return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 150);
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
