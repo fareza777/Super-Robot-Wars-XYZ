@@ -77,6 +77,7 @@ function buffNames(u: UnitState): string[] {
   if (u.ravenousNext) names.push('RAVENOUS');
   if (u.breachAtkUntilEndOfEnemyPhase) names.push('BREACH VERSE');
   if (u.ebbUntilEndOfEnemyPhase) names.push('TIDE EBB');
+  if ((u.renewalTurns ?? 0) > 0) names.push('RENEWAL VERSE');
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');

@@ -142,6 +142,7 @@ export const PARTS: Record<string, PartDef> = {
   cloakWeave: { id: 'cloakWeave', name: 'Cloak Weave', desc: 'Shroud laminate — +10 evade while hull is below 50%', price: 1600, cloakWeave: true },
   skyBooster: { id: 'skyBooster', name: 'Sky Booster', desc: 'Vernier array — airframes gain +1 movement', price: 1500, skyBooster: true },
   reactorVent: { id: 'reactorVent', name: 'Reactor Vent', desc: 'Overclocked core — +15 EN regen per turn but -100 armor', price: 1500, ventEn: 15, ventArmor: true },
+  ramPlate: { id: 'ramPlate', name: 'Ram Plate', desc: 'Battering prow — +15% damage for knockback weapons', price: 1600, ramPlate: 15 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -254,6 +255,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'overkill', name: 'Overkill', desc: '+5% damage per point when the blow would destroy the target' },
   { id: 'pike', name: 'Pike', desc: '+5% damage per point when firing at maximum weapon reach' },
   { id: 'wildswing', name: 'Wild Swing', desc: '+8% damage per point on attacks below 60% hit' },
+  { id: 'zenith', name: 'Zenith', desc: '+6% damage per point while Will is at its peak (150)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1318,6 +1320,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_marathon', name: 'MARATHON', desc: 'Win a battle lasting 25 or more turns', rewardCr: 2500 },
   { id: 'h_imperator', name: 'IMPERATOR', desc: 'Earn battle rank S in 28 missions', rewardCr: 5000 },
   { id: 'h_quartermaster', name: 'QUARTERMASTER', desc: 'Own 35 different parts', rewardCr: 3200 },
+  { id: 'h_vrsaint', name: 'VR SAINT', desc: 'Score 25000+ in the VR Simulator', rewardCr: 5000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1541,6 +1544,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 28;
     case 'h_quartermaster':
       return (s.partsOwned ?? []).length >= 35;
+    case 'h_vrsaint':
+      return (s.simBest ?? 0) >= 25000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
