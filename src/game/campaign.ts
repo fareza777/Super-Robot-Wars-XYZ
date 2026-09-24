@@ -146,6 +146,7 @@ export const PARTS: Record<string, PartDef> = {
   pulseVernier: { id: 'pulseVernier', name: 'Pulse Verniers', desc: 'Afterburner banks — +2 movement while EN is above 75%', price: 1700, pulseVernier: 2 },
   landVernier: { id: 'landVernier', name: 'Land Verniers', desc: 'Traction array — ground frames gain +1 movement', price: 1500, landVernier: 1 },
   lastStandCore: { id: 'lastStandCore', name: 'Last Stand Core', desc: 'Final bulwark — +500 armor while hull is below 25%', price: 1800, lastStandCore: true },
+  siegePlate: { id: 'siegePlate', name: 'Siege Plate', desc: 'Anchored armor — +300 armor while this frame has not moved this turn', price: 1700, siegePlate: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -262,6 +263,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'closecombat', name: 'Close Combat', desc: '+5% damage per point when attacking at 2 tiles or closer' },
   { id: 'chainblade', name: 'Chainblade', desc: '+6% damage per point with chain-arc weapons' },
   { id: 'exploiter', name: 'Exploiter', desc: '+5% damage per point vs targets already dodging this phase' },
+  { id: 'viper', name: 'Viper', desc: '+6% damage per point vs slowed targets' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1330,6 +1332,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_warlegion', name: 'WAR LEGION', desc: '400 total career kills across the squad', rewardCr: 4500 },
   { id: 'h_dominator', name: 'DOMINATOR', desc: 'Earn A rank or better on 25 missions', rewardCr: 3800 },
   { id: 'h_ranger', name: 'RANGER', desc: 'Clear 25 side missions', rewardCr: 4200 },
+  { id: 'h_elitecorps', name: 'ELITE CORPS', desc: 'Six pilots reach 40 career kills', rewardCr: 5000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1561,6 +1564,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S' || r === 'A').length >= 25;
     case 'h_ranger':
       return (s.sideCleared ?? []).length >= 25;
+    case 'h_elitecorps':
+      return Object.values(s.pilotProg ?? {}).filter((p) => (p.kills ?? 0) >= 40).length >= 6;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
