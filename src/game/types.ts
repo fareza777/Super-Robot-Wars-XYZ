@@ -209,6 +209,8 @@ export interface UnitState {
   enraged?: boolean;
   /** has launched an attack this battle — gates the Initiative opening strike */
   hasAttacked?: boolean;
+  /** ablative plating already spent this battle */
+  ablativeUsed?: boolean;
   /** Guts — next attack deals +75% damage while under half HP */
   gutsForNextAttack?: boolean;
   /** Exposed — painted by targeting data: next hit lands +20 hit and +25% damage */
@@ -239,7 +241,7 @@ export interface UnitState {
   overkillDealt?: number;
 }
 
-export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner';
+export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer';
 export type PilotSkills = Record<PilotSkillId, number>;
 
 /** SRW-style enhancement parts equippable on a mecha. */
@@ -266,6 +268,8 @@ export interface PartDef {
   ammoPct?: number;
   /** command aura: allies within 2 tiles gain this much hit */
   auraHit?: number;
+  /** sacrificial skin — the first fatal hit each battle leaves the frame at 1 HP */
+  ablative?: boolean;
   /** cloaking field — enemies cannot target this unit beyond 3 tiles */
   stealthField?: boolean;
   unique?: boolean; // not sold — awarded by story
@@ -364,6 +368,8 @@ export interface AttackResult {
   miracle?: boolean;
   /** Mercy spirit — attacker pulled the killing blow (defender at 10 HP) */
   mercy?: boolean;
+  /** ablative plating — the frame's sacrificial skin ate a fatal hit */
+  ablative?: boolean;
   /** Counter-Cut pilot skill — the defender's counter struck first; a kill pre-empts the incoming hit entirely */
   counterCut?: boolean;
   /** a guardian frame intercepted — the boss this blow was meant for */

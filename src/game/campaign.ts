@@ -55,6 +55,7 @@ export const PARTS: Record<string, PartDef> = {
   commandRelay: { id: 'commandRelay', name: 'Command Relay', desc: 'Allies within 2 tiles gain +8% hit (squad aura)', price: 1400, auraHit: 8 },
   stealthField: { id: 'stealthField', name: 'Stealth Field', desc: 'Enemies cannot target this unit beyond 3 tiles', price: 2400, stealthField: true },
   deepMags: { id: 'deepMags', name: 'Deep Magazines', desc: '+50% ammunition capacity', price: 1600, ammoPct: 50 },
+  ablative: { id: 'ablative', name: 'Ablative Plating', desc: 'Sacrificial skin — the first fatal hit each battle leaves the frame at 1 HP', price: 2200, ablative: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -89,6 +90,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'brawler', name: 'Brawler', desc: '+5% damage per point with melee weapons' },
   { id: 'initiative', name: 'Initiative', desc: '+10% damage per point on the first strike each battle' },
   { id: 'gunner', name: 'Gunner', desc: '+5% damage per point with ranged weapons' },
+  { id: 'plunderer', name: 'Plunderer', desc: '+15% capture salvage per point' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -168,6 +170,7 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   bastion: U({ id: 'bastion', name: 'Bastion Anchor', title: 'Rooted Defender', color: '#5a4a42', accent: '#ffd8a8', maxHp: 5600, maxEn: 80, armor: 1900, mobility: 80, moveRange: 3, moveType: 'land', weapons: [WEAPONS.siegeCrusher, WEAPONS.vulcan], pilot: PILOTS.grunt, holdPos: true }),
   voidChanter: U({ id: 'voidChanter', name: 'Void Chanter', title: 'Hex Adept', color: '#3a1a4a', accent: '#c080ff', maxHp: 4600, maxEn: 130, armor: 500, mobility: 140, moveRange: 5, moveType: 'air', weapons: [WEAPONS.hexBolt, WEAPONS.nullChord], pilot: PILOTS.grunt }),
   blackguard: U({ id: 'blackguard', name: 'Blackguard', title: 'Veteran Elite', color: '#1a1a22', accent: '#ff5040', maxHp: 7400, maxEn: 120, armor: 1050, mobility: 118, moveRange: 5, moveType: 'land', weapons: [WEAPONS.vulcan, WEAPONS.havocMortar, WEAPONS.hexBolt], pilot: PILOTS.grunt }),
+  dragoon: U({ id: 'dragoon', name: 'Dragoon Cavalry', title: 'Mounted Gunner', color: '#4a3a1a', accent: '#ffd080', maxHp: 5200, maxEn: 110, armor: 700, mobility: 130, moveRange: 6, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.stasisRay], pilot: PILOTS.grunt }),
   // Cpt. Vossen's personal frame — recurring ace, guaranteed salvage drop when downed
   vossDrake: U({ id: 'vossDrake', name: 'Drake Eclipse', title: 'Rival Ace', color: '#3a2030', accent: '#ff6a5a', maxHp: 9800, maxEn: 160, armor: 1350, mobility: 150, moveRange: 7, moveType: 'air', weapons: [WEAPONS.megaBeam, WEAPONS.plasmaEdge, WEAPONS.missilePods], pilot: CAMPAIGN_PILOTS.vossen, boss: true, level: 8 }),
   // the Drake defects — after being downed twice he sorties as an armed Ark ally
@@ -819,7 +822,7 @@ export function enemyComp(ch: ChapterDef): string[] {
   const heavy = ch.act === 1 ? 'zoldaTank' : 'nightmare';
   const fast = ch.act === 3 ? 'cataphract' : 'lancer';
   const ghost = ch.act === 3 ? 'phantom' : 'vexia';
-  for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : (i % 11 === 9 && ch.act >= 2) ? 'medic' : (i % 13 === 11 && ch.act === 3) ? 'ballista' : (i % 11 === 10 && ch.act === 3) ? 'bastion' : (i % 12 === 8 && ch.act >= 2) ? 'voidChanter' : (i % 10 === 5 && ch.act === 3) ? 'blackguard' : i % 7 === 6 ? ghost : fill);
+  for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : (i % 11 === 9 && ch.act >= 2) ? 'medic' : (i % 13 === 11 && ch.act === 3) ? 'ballista' : (i % 11 === 10 && ch.act === 3) ? 'bastion' : (i % 12 === 8 && ch.act >= 2) ? 'voidChanter' : (i % 10 === 5 && ch.act === 3) ? 'blackguard' : (i % 13 === 4 && ch.act >= 2) ? 'dragoon' : i % 7 === 6 ? ghost : fill);
   if (ch.boss) comp.push(ch.boss);
   // Cpt. Vossen ambushes the squad on these chapters — a recurring ace duelist
   if ([6, 13, 19, 26].includes(ch.id)) comp.push('vossDrake');
@@ -1063,6 +1066,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_glory', name: 'SHARED GLORY', desc: 'Win with every deployed squad frame landing a kill', rewardCr: 900 },
   { id: 'h_light', name: 'LIGHTNING', desc: 'Win a battle in three turns or fewer', rewardCr: 700 },
   { id: 'h_uns', name: 'UNSCATHED', desc: 'Win with every squad frame above 80% HP', rewardCr: 800 },
+  { id: 'h_armory', name: 'ARMORY', desc: 'Own every equipment part', rewardCr: 1000 },
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
 ];
 
@@ -1178,6 +1182,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
     }
     case 'h_light':
       return (s.turn ?? 99) <= 3;
+    case 'h_armory':
+      return Object.keys(PARTS).every((id) => s.partsOwned?.includes(id));
     case 'h_uns': {
       const ps = (s.units ?? []).filter((u) => u.side === 'player' && u.alive && !u.npc);
       return ps.length > 0 && ps.every((u) => (u.hp ?? 0) >= (u.def.maxHp ?? 1) * 0.8);
