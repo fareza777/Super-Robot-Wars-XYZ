@@ -139,6 +139,7 @@ export const PARTS: Record<string, PartDef> = {
   apexRig: { id: 'apexRig', name: 'Apex Rig', desc: 'Resonant chamber — +10% damage for Will-requiring weapons', price: 1500, apexRig: true },
   reactorShield: { id: 'reactorShield', name: 'Reactor Shield', desc: 'Power sink — +400 armor while EN is above 50%', price: 1700, reactorShield: true },
   foilWeave: { id: 'foilWeave', name: 'Foil Weave', desc: 'Dune walker laminate — +10 evade on evasive terrain', price: 1500, foilWeave: true },
+  cloakWeave: { id: 'cloakWeave', name: 'Cloak Weave', desc: 'Shroud laminate — +10 evade while hull is below 50%', price: 1600, cloakWeave: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -248,6 +249,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'acehunter', name: 'Ace Hunter', desc: '+6% damage per point vs foes with 3+ battle kills' },
   { id: 'ravager', name: 'Ravager', desc: '+5% damage per point vs targets on open ground (no terrain armor)' },
   { id: 'sledge', name: 'Sledge', desc: '+6% damage per point with knockback weapons' },
+  { id: 'overkill', name: 'Overkill', desc: '+5% damage per point when the blow would destroy the target' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -286,7 +288,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1309,6 +1311,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_apocalypse', name: 'APOCALYPSE', desc: 'Land a single hit of 50000+ damage', rewardCr: 6000 },
   { id: 'h_strider', name: 'ETERNAL STRIDER', desc: 'Reach NG+4', rewardCr: 3500 },
   { id: 'h_salvagebaron', name: 'SALVAGE BARON', desc: 'Accumulate 60000 salvage credits', rewardCr: 3600 },
+  { id: 'h_marathon', name: 'MARATHON', desc: 'Win a battle lasting 25 or more turns', rewardCr: 2500 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1526,6 +1529,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.ngPlus ?? 0) >= 4;
     case 'h_salvagebaron':
       return (s.salvageCr ?? 0) >= 60000;
+    case 'h_marathon':
+      return (s.turn ?? 0) >= 25;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

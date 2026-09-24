@@ -74,6 +74,7 @@ function buffNames(u: UnitState): string[] {
   if ((u.graceTurns ?? 0) > 0) names.push('GRACE HYMN');
   if (u.sunderstormNext) names.push('SUNDERSTORM');
   if (u.mirrorwallUntilEndOfEnemyPhase) names.push('MIRROR WALL');
+  if (u.ravenousNext) names.push('RAVENOUS');
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');

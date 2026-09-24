@@ -113,6 +113,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   gracehymn: { id: 'gracehymn', name: 'Grace Hymn', cost: 45, desc: 'Renewal chorus — allies within 3 tiles recover +5% hull per turn for 2 turns' },
   sunderstorm: { id: 'sunderstorm', name: 'Sunderstorm', cost: 50, desc: 'Crushing wave — the next landed hit cracks the armor of the target and every foe adjacent to it' },
   mirrorwall: { id: 'mirrorwall', name: 'Mirror Wall', cost: 50, desc: 'Reflective anthem — allies within 3 tiles bounce 10% of damage taken back to the attacker until the end of the enemy phase' },
+  ravenous: { id: 'ravenous', name: 'Ravenous', cost: 45, desc: 'Blood hunt — the next landed hit restores hull equal to 15% of damage and siphons 15 EN from the target' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

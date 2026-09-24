@@ -124,6 +124,9 @@ export function BriefingScreen() {
             return `⚠ HOSTILES ${sp.length} — ${names.join(' · ')}`;
           })()}
         </Text>
+        <Text style={{ color: '#9fe8a9', fontSize: 9, fontWeight: '700', letterSpacing: 0.5, marginTop: 3 }}>
+          {`▸ ALLIES ${roster.length} — ${roster.map((id) => ALL_UNITS[id]?.name ?? id).join(' · ')}`}
+        </Text>
         <Text style={styles.deployLbl}>DEPLOY SQUAD — tap to toggle ({deploySel.length}/{roster.length})</Text>
         <View style={styles.squadRow}>
           {roster.map((id) => {
