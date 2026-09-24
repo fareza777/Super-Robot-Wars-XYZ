@@ -93,6 +93,7 @@ function buffNames(u: UnitState): string[] {
   if (u.savageNext) names.push('SAVAGE EDGE');
   if (u.truthedgeNext) names.push('TRUTH EDGE');
   if (u.novaNext) names.push('NOVA EDGE');
+  if (u.cullNext) names.push('CULL EDGE');
   if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
   if (u.crimsonUntilEndOfEnemyPhase) names.push('CRIMSON VERSE');
   if (u.goreUntilEndOfEnemyPhase) names.push('GORE VERSE');
@@ -560,7 +561,7 @@ export function SidePanel() {
                       <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.hp / u.def.maxHp > 0.5 ? '#4dff7a' : u.hp / u.def.maxHp > 0.25 ? '#ffd34d' : '#ff8a5a' }]} />
                     </View>
                     <View style={[styles.rosterBarTrack, { marginTop: 2 }]}>
-                      <View style={[styles.rosterBarFill, { width: `${Math.min(100, (u.en / (u.def.maxEn || 1)) * 100)}%`, backgroundColor: '#35c9ff', height: 2 }]} />
+                      <View style={[styles.rosterBarFill, { width: `${Math.min(100, (u.en / (u.def.maxEn || 1)) * 100)}%`, backgroundColor: u.en < u.def.maxEn * 0.25 ? '#ff8a5a' : '#35c9ff', height: 2 }]} />
                     </View>
                   </View>
                   <Text style={[styles.rosterHp, u.hp / u.def.maxHp < 0.25 && { color: '#ff8a8a' }]}>{u.hp / u.def.maxHp < 0.25 ? '⚠' : ''}{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>

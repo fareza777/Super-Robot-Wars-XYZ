@@ -175,6 +175,7 @@ export const PARTS: Record<string, PartDef> = {
   benedictionSeal: { id: 'benedictionSeal', name: 'Benediction Seal', desc: 'Hymn conduits — allies within 2 tiles regen +3% hull per turn', price: 1700, auraHeal: 3 },
   horizonLens: { id: 'horizonLens', name: 'Horizon Lens', desc: 'Horizon array — +12% damage vs targets 4+ tiles away', price: 1800, rangeDmg: 12 },
   citadelPlate: { id: 'citadelPlate', name: 'Citadel Plate', desc: 'Fortress shell — +100 armor, plus +400 more on defensive terrain', price: 1900, armor: 100, fortArmor: true },
+  gutsRipper: { id: 'gutsRipper', name: 'Guts Ripper', desc: 'Shredder maw — attacks ignore 20% of target armor', price: 1700, armorShred: 20 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -320,6 +321,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'graceful', name: 'Graceful', desc: '+5% damage per point after dodging at least once this phase' },
   { id: 'flakmaster', name: 'Flakmaster', desc: '+6% damage per point vs air frames' },
   { id: 'shepherd', name: 'Shepherd', desc: '+4% damage per point while adjacent to a wounded ally' },
+  { id: 'madmen', name: 'Madmen', desc: '+4% damage per point per debuff on this frame (max 2)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -358,7 +360,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse', 'goreverse'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse', 'goreverse', 'culledge'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1417,6 +1419,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_seraphim', name: 'SERAPHIM', desc: 'Reach NG+8 or beyond', rewardCr: 30000 },
   { id: 'h_godslayer', name: 'GODSLAYER', desc: 'Earn S rank on 60 missions', rewardCr: 32000 },
   { id: 'h_immovable', name: 'IMMOVABLE', desc: 'Earn MASTERY ★ on 50 missions', rewardCr: 34000 },
+  { id: 'h_apocalypse', name: 'APOCALYPSE GOD', desc: 'Land a single blow of 200,000+ damage', rewardCr: 36000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1706,6 +1709,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 60;
     case 'h_immovable':
       return (s.masteryDone?.length ?? 0) >= 50;
+    case 'h_apocalypse':
+      return (s.maxHitEver ?? 0) >= 200000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

@@ -28,7 +28,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0, truesight: 0, backliner: 0, bombard: 0, ruinbreaker: 0, artillerist: 0, paintburst: 0, fortsoul: 0, hexsurge: 0, coldsteel: 0, capacitor: 0, ironbound: 0, coolloop: 0, gritguard: 0, savant: 0, shieldpierce: 0, pureshot: 0, finisher: 0, aerobat: 0, sureshot: 0, wildfire: 0, archer: 0, stormeye: 0, acehunter: 0, ravager: 0, sledge: 0, overkill: 0, pike: 0, wildswing: 0, zenith: 0, closecombat: 0, chainblade: 0, exploiter: 0, viper: 0, disruptor: 0, myrmidon: 0, sunderfist: 0, bloodborne: 0, harvester: 0, gridshock: 0, shockjock: 0, biggame: 0, razor: 0, retribution: 0, bloodhound: 0, headhunter: 0, soulcut: 0, wardancer: 0, butcher: 0, punisher: 0, wrathborn: 0, tracker: 0, carver: 0, highvolt: 0, ironwill: 0, vigilant: 0, bloodfrenzy: 0, spectral: 0, hexblade: 0, graceful: 0, flakmaster: 0, shepherd: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0, truesight: 0, backliner: 0, bombard: 0, ruinbreaker: 0, artillerist: 0, paintburst: 0, fortsoul: 0, hexsurge: 0, coldsteel: 0, capacitor: 0, ironbound: 0, coolloop: 0, gritguard: 0, savant: 0, shieldpierce: 0, pureshot: 0, finisher: 0, aerobat: 0, sureshot: 0, wildfire: 0, archer: 0, stormeye: 0, acehunter: 0, ravager: 0, sledge: 0, overkill: 0, pike: 0, wildswing: 0, zenith: 0, closecombat: 0, chainblade: 0, exploiter: 0, viper: 0, disruptor: 0, myrmidon: 0, sunderfist: 0, bloodborne: 0, harvester: 0, gridshock: 0, shockjock: 0, biggame: 0, razor: 0, retribution: 0, bloodhound: 0, headhunter: 0, soulcut: 0, wardancer: 0, butcher: 0, punisher: 0, wrathborn: 0, tracker: 0, carver: 0, highvolt: 0, ironwill: 0, vigilant: 0, bloodfrenzy: 0, spectral: 0, hexblade: 0, graceful: 0, flakmaster: 0, shepherd: 0, madmen: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
@@ -220,6 +220,8 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (att.ravageNext) dmg = Math.round(dmg * 1.35);
   if (att.savageNext) dmg = Math.round(dmg * 1.2);
   if (att.novaNext) dmg = Math.round(dmg * 1.25);
+  if (att.cullNext && def.hp * 5 < def.def.maxHp * 2) dmg = Math.round(dmg * 1.3);
+  if ((att.statuses ?? []).length > 0) dmg = Math.round(dmg * (1 + (att.skills?.madmen ?? 0) * 0.04 * Math.min(2, att.statuses!.length)));
   if (def.hp >= def.def.maxHp) dmg = Math.round(dmg * (1 + (att.skills?.butcher ?? 0) * 0.06));
   if (def.acted) dmg = Math.round(dmg * (1 + (att.skills?.punisher ?? 0) * 0.06));
   if (att.hp * 5 <= att.def.maxHp * 2) dmg = Math.round(dmg * (1 + (att.skills?.wrathborn ?? 0) * 0.06));
@@ -886,7 +888,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   att.bladeNext = false;
   att.trueShotNext = false;
   att.judgeNext = false;
-  att.goreNext = false; att.rampageNext = false; att.hemoNext = false; att.voidedgeNext = false; att.plunderNext = false; att.knockNext = false; att.lacerateNext = false; att.hellfireNext = false; att.thrillNext = false; att.sunderstormNext = false; att.ravenousNext = false; att.quakeedgeNext = false; att.rageverseNext = false; att.heavensverseNext = false; att.furyverseNext = false; att.levinedgeNext = false; att.ravageNext = false; att.ghostNext = false; att.savageNext = false; att.truthedgeNext = false; att.novaNext = false;
+  att.goreNext = false; att.rampageNext = false; att.hemoNext = false; att.voidedgeNext = false; att.plunderNext = false; att.knockNext = false; att.lacerateNext = false; att.hellfireNext = false; att.thrillNext = false; att.sunderstormNext = false; att.ravenousNext = false; att.quakeedgeNext = false; att.rageverseNext = false; att.heavensverseNext = false; att.furyverseNext = false; att.levinedgeNext = false; att.ravageNext = false; att.ghostNext = false; att.savageNext = false; att.truthedgeNext = false; att.novaNext = false; att.cullNext = false;
   att.gutsForNextAttack = false;
   att.snipeForNextAttack = false;
   att.soulForNextAttack = false;
@@ -952,7 +954,7 @@ export function applyMapAttack(state: GameState, attackerUid: string, targetTile
   att.bladeNext = false;
   att.trueShotNext = false;
   att.judgeNext = false;
-  att.goreNext = false; att.rampageNext = false; att.hemoNext = false; att.voidedgeNext = false; att.plunderNext = false; att.knockNext = false; att.lacerateNext = false; att.hellfireNext = false; att.thrillNext = false; att.sunderstormNext = false; att.ravenousNext = false; att.quakeedgeNext = false; att.rageverseNext = false; att.heavensverseNext = false; att.furyverseNext = false; att.levinedgeNext = false; att.ravageNext = false; att.ghostNext = false; att.savageNext = false; att.truthedgeNext = false; att.novaNext = false;
+  att.goreNext = false; att.rampageNext = false; att.hemoNext = false; att.voidedgeNext = false; att.plunderNext = false; att.knockNext = false; att.lacerateNext = false; att.hellfireNext = false; att.thrillNext = false; att.sunderstormNext = false; att.ravenousNext = false; att.quakeedgeNext = false; att.rageverseNext = false; att.heavensverseNext = false; att.furyverseNext = false; att.levinedgeNext = false; att.ravageNext = false; att.ghostNext = false; att.savageNext = false; att.truthedgeNext = false; att.novaNext = false; att.cullNext = false;
   att.gutsForNextAttack = false;
 
   let hits = 0;
@@ -1029,7 +1031,7 @@ export function applyAllAttack(state: GameState, attackerUid: string, weaponId: 
   att.bladeNext = false;
   att.trueShotNext = false;
   att.judgeNext = false;
-  att.goreNext = false; att.rampageNext = false; att.hemoNext = false; att.voidedgeNext = false; att.plunderNext = false; att.knockNext = false; att.lacerateNext = false; att.hellfireNext = false; att.thrillNext = false; att.sunderstormNext = false; att.ravenousNext = false; att.quakeedgeNext = false; att.rageverseNext = false; att.heavensverseNext = false; att.furyverseNext = false; att.levinedgeNext = false; att.ravageNext = false; att.ghostNext = false; att.savageNext = false; att.truthedgeNext = false; att.novaNext = false;
+  att.goreNext = false; att.rampageNext = false; att.hemoNext = false; att.voidedgeNext = false; att.plunderNext = false; att.knockNext = false; att.lacerateNext = false; att.hellfireNext = false; att.thrillNext = false; att.sunderstormNext = false; att.ravenousNext = false; att.quakeedgeNext = false; att.rageverseNext = false; att.heavensverseNext = false; att.furyverseNext = false; att.levinedgeNext = false; att.ravageNext = false; att.ghostNext = false; att.savageNext = false; att.truthedgeNext = false; att.novaNext = false; att.cullNext = false;
   att.gutsForNextAttack = false;
   att.soulForNextAttack = false;
   att.gutsForNextAttack = false;
@@ -1414,6 +1416,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       u.savageNext = true;
       break;
     case 'fortressverse':
+      break;
+    case 'culledge':
+      u.cullNext = true;
       break;
     case 'novaedge':
       u.novaNext = true;

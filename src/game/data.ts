@@ -149,6 +149,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   triumphverse: { id: 'triumphverse', name: 'Triumph Verse', cost: 50, desc: 'Victory chant — allies within 3 tiles deal +10% damage until end of enemy phase' },
   novaedge: { id: 'novaedge', name: 'Nova Edge', cost: 50, desc: 'Supernova strike — the next hit deals +25% damage and surges +10 Will' },
   fortressverse: { id: 'fortressverse', name: 'Fortress Verse', cost: 50, desc: 'Bastion aura — allies within 3 tiles take -20% damage from melee attacks until end of enemy phase' },
+  culledge: { id: 'culledge', name: 'Cull Edge', cost: 45, desc: 'Executioner strike — the next hit deals +30% damage vs targets below 40% hull' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
