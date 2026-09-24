@@ -145,6 +145,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   oathverse: { id: 'oathverse', name: 'Oath Verse', cost: 55, desc: 'Shared vow — allies within 3 tiles gain +600 armor until end of enemy phase' },
   goreverse: { id: 'goreverse', name: 'Gore Verse', cost: 45, desc: 'Berserk aura — allies within 3 tiles deal +12% damage while hull is below 50%, until end of enemy phase' },
   mirageverse: { id: 'mirageverse', name: 'Mirage Verse', cost: 45, desc: 'Mirage field — allies within 3 tiles gain +15 evade until end of enemy phase' },
+  hexverse: { id: 'hexverse', name: 'Hex Verse', cost: 50, desc: 'Hex web — enemies within 3 tiles are marked and suppressed' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
