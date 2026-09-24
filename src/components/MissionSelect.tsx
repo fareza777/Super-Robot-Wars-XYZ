@@ -47,6 +47,7 @@ export function MissionSelect() {
             <Text style={styles.mainCh}>{done ? 'CAMPAIGN COMPLETE' : `CHAPTER ${ch.id}`}</Text>
             <Text style={styles.mainName}>{ch.name.toUpperCase()}</Text>
             <Text style={styles.mainSub}>{ch.subtitle}</Text>
+            <Text style={[styles.themeTag, { color: THEME_ACCENT[ch.theme] ?? '#9fd8ff' }]}>◈ THEATRE — {ch.theme.toUpperCase()}</Text>
             <Text style={styles.mainObj}>◈ {ch.objective}</Text>
             {ch.mastery && (
               <Text style={styles.masteryLine}>{s.masteryDone.includes(ch.id) ? '★' : '☆'} MASTERY: {ch.mastery.desc}{s.masteryDone.includes(ch.id) ? ' ✓' : ''}</Text>
@@ -124,6 +125,12 @@ export function MissionSelect() {
   );
 }
 
+const THEME_ACCENT: Record<string, string> = {
+  void: '#b48aff', desert: '#e8c06a', fortress: '#8fb0d8', moon: '#c8d0e0', ruins: '#7ad88a',
+  lava: '#ff8a5a', colony: '#5ad8e8', ice: '#9fd8ff', snow: '#cfe8ff', mountain: '#a8987a',
+  sea: '#5aa8e8', volcano: '#ff7a4d',
+};
+
 const styles = StyleSheet.create({
   root: { ...StyleSheet.absoluteFill, backgroundColor: '#04060f' },
   header: { position: 'absolute', top: 12, left: 18, zIndex: 5 },
@@ -158,6 +165,7 @@ const styles = StyleSheet.create({
   resumeMeta: { color: '#d8c8a8', fontSize: 10.5, marginTop: 4 },
   resumeBtn: { marginTop: 10, alignSelf: 'flex-start', backgroundColor: '#3a2408', borderWidth: 1.5, borderColor: '#ffaa2f', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 7 },
   resumeBtnTxt: { color: '#ffaa2f', fontWeight: '900', fontSize: 12, letterSpacing: 1.5 },
+  themeTag: { fontSize: 9, fontWeight: '800', letterSpacing: 1.6, marginTop: 4 },
   masteryLine: { color: '#ffd34d', fontSize: 10.5, marginTop: 6, fontWeight: '700', letterSpacing: 0.5 },
   simCard: { borderRadius: 12, borderWidth: 1.5, borderColor: '#a06fff', overflow: 'hidden', padding: 14, marginTop: 10 },
   simName: { color: '#c8a8ff', fontWeight: '900', fontSize: 12.5, letterSpacing: 2 },
