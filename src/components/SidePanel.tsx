@@ -71,6 +71,7 @@ function buffNames(u: UnitState): string[] {
   if (u.thrillNext) names.push('THRILL KILL');
   if (u.pinverseUntilEndOfEnemyPhase) names.push('PIN VERSE');
   if (u.tideUntilEndOfEnemyPhase) names.push('TIDE VERSE');
+  if ((u.graceTurns ?? 0) > 0) names.push('GRACE HYMN');
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
@@ -580,6 +581,9 @@ export function SidePanel() {
               <Text style={styles.statTxt}>▸ MOV {inspect.def.moveRange} {inspect.def.moveType === 'air' ? '✈' : '⬢'}</Text>
             </View>
             {(() => { const ti = TERRAIN_INFO[terrainAt(s.map, inspect.pos)]; return ti && (ti.def !== 0 || ti.eva !== 0) ? <Text style={{ color: '#8fa1c7', fontSize: 10.5, marginTop: 3 }}>{ti.glyph} {ti.name}: {ti.def !== 0 ? `${ti.def > 0 ? '+' : ''}${ti.def} ARM` : ''}{ti.def !== 0 && ti.eva !== 0 ? ' · ' : ''}{ti.eva !== 0 ? `${ti.eva > 0 ? '+' : ''}${ti.eva} EVA` : ''}</Text> : null; })()}
+            {(inspect.parts ?? []).length > 0 && (
+              <Text style={{ color: '#8fb8ff', fontSize: 10.5, marginTop: 3 }}>◈ {(inspect.parts ?? []).map((p) => PARTS[p]?.name ?? p).join(' · ')}</Text>
+            )}
             {inspect.def.pilot.trait && (
               <Text style={styles.traitLine} numberOfLines={1}>
                 ◆ {TRAITS[inspect.def.pilot.trait].name} — {TRAITS[inspect.def.pilot.trait].desc}
