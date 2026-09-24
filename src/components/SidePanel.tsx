@@ -103,6 +103,7 @@ function buffNames(u: UnitState): string[] {
   if (u.doomNext) names.push('DOOM EDGE');
   if (u.flareNext) names.push('FLARE EDGE');
   if ((u.mendTurns ?? 0) > 0) names.push(`MEND VERSE ${u.mendTurns}`);
+  if (u.maimNext) names.push('MAIM EDGE');
   if (u.rended) names.push('RENDED');
   if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
   if (u.crimsonUntilEndOfEnemyPhase) names.push('CRIMSON VERSE');
