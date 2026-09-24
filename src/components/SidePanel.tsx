@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS } from '../game/campaign';
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { bondMods } from '../game/bonds';
-import { armorOf, bestCounterWeapon, moveRangeOf, evadeOf, critChance, damageOf, dist, enCostOf, findSupport, formationBonus, hasPincer, hitChance, key, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
+import { armorOf, bestCounterWeapon, moveRangeOf, evadeOf, critChance, damageOf, dist, enCostOf, findSupport, formationBonus, hasPincer, hitChance, key, partBonus, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, fogLit, useGame } from '../game/store';
 import { SpiritId, UnitState } from '../game/types';
 
@@ -512,7 +512,7 @@ export function SidePanel() {
                             <View style={[styles.tgtBarFill, { width: `${(Math.max(0, e.hp - dmg) / e.def.maxHp) * 100}%`, backgroundColor: '#4dff7a' }]} />
                           </View>
                           <Text style={styles.tgtCnt} numberOfLines={1}>
-                            {cw ? `↩ CNT ~${cDmg} (${cHc}%)` : '↩ no counter in range'} · CRIT {critChance(unit, e)}%{fb > 0 ? ` · ▣FORM +${fb}` : ''}{pin ? ' · ⇄PIN +10%' : ''}
+                            {cw ? `↩ CNT ~${cDmg} (${cHc}%)` : '↩ no counter in range'} · CRIT {critChance(unit, e)}%{fb > 0 ? ` · ▣FORM +${fb}` : ''}{pin ? ` · ⇄PIN +${10 + partBonus(unit, 'pinDmg')}%` : ''}
                             {(e.def.resists?.[s.pendingWeapon!.kind] ?? 0) > 0 ? ` · 🛡RES −${Math.round((e.def.resists![s.pendingWeapon!.kind] ?? 0) * 100)}%` : ''}
                             {` · ⇢${dist(s.pendingMove ?? unit.pos, e.pos)}t`}{findSupport(s.units, unit.uid, e) ? ' · ⇒SUP' : ''}
                           </Text>

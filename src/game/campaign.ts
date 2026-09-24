@@ -192,6 +192,7 @@ export const PARTS: Record<string, PartDef> = {
   throneRelic: { id: 'throneRelic', name: 'Throne Relic', desc: 'Sovereign core — pilot regenerates +5 SP each turn', price: 2000, spRegen: 5 },
   reactorMk2: { id: 'reactorMk2', name: 'Reactor MK-II', desc: 'Second-stage core — +20 EN regenerated each turn', price: 2000, enRegen: 20 },
   marksmanCore: { id: 'marksmanCore', name: 'Marksman Core', desc: 'Deadeye matrix — +15 hit and +12% critical chance', price: 2000, accBoost: 15, crit: 12 },
+  viceJaws: { id: 'viceJaws', name: 'Vice Jaws', desc: 'Crushing pincer servos — +18% damage against enemies pinned between two allies', price: 1900, pinDmg: 18 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -357,6 +358,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'sunderborn', name: 'Sunderborn', desc: '+6% damage per point against targets with sundered or rended armor' },
   { id: 'landslide', name: 'Landslide', desc: '+5% damage per point against land-type frames' },
   { id: 'sapper', name: 'Sapper', desc: '+5% damage per point against targets on defensive terrain' },
+  { id: 'flanker', name: 'Flanker', desc: '+4% damage per point when the target is pinned between two allies' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1473,6 +1475,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_vrgod', name: 'VR GOD', desc: 'Score 40,000+ in the VR Simulator', rewardCr: 70000 },
   { id: 'h_warmachine', name: 'WARMACHINE', desc: '3000 total career kills across the squad', rewardCr: 72000 },
   { id: 'h_soulforge', name: 'SOULFORGE', desc: 'Witness 18 bond events', rewardCr: 74000 },
+  { id: 'h_kingslayer', name: 'KINGSLAYER', desc: 'Destroy 10 boss frames across your career', rewardCr: 76000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1800,6 +1803,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return totalKills >= 3000;
     case 'h_soulforge':
       return s.bondSeen.length >= 18;
+    case 'h_kingslayer':
+      return Object.entries(s.killsByDef ?? {}).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) >= 10;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
