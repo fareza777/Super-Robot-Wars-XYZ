@@ -214,6 +214,7 @@ export const PARTS: Record<string, PartDef> = {
   gambitWeave: { id: 'gambitWeave', name: 'Gambit Weave', desc: 'Feint laminate — +8 evade and counter-attacks +15% damage', price: 2200, evade: 8, counterDmg: 15 },
   radiantPlate: { id: 'radiantPlate', name: 'Radiant Plate', desc: 'Prism laminate — +100 armor and incoming beam damage reduced by 25%', price: 2300, armor: 100, beamGuard: true },
   vulcanChamber: { id: 'vulcanChamber', name: 'Vulcan Chamber', desc: 'High-pressure bore — gun weapons +15% damage and +8% critical chance', price: 2400, gunDmg: 15, crit: 8 },
+  zephyrLoom: { id: 'zephyrLoom', name: 'Zephyr Loom', desc: 'Aerowoven frame — +12 mobility and +6 evade', price: 2400, mobility: 12, evade: 6 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -400,6 +401,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'irongroove', name: 'Iron Groove', desc: '+5% damage per point while own hull is between 40-80%' },
   { id: 'ashstalker', name: 'Ashstalker', desc: '+6% damage per point vs targets standing on hostile terrain (lava/void)' },
   { id: 'dominant', name: 'Dominant', desc: '+5% damage per point vs targets carrying a smaller arsenal' },
+  { id: 'crossfire', name: 'Crossfire', desc: '+5% damage per point vs targets covered by 2+ other allies' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1538,6 +1540,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_paradox', name: 'PARADOX', desc: 'Reach NG+12', rewardCr: 100000 },
   { id: 'h_purgeking', name: 'PURGE KING', desc: '6000 total career kills across the squad', rewardCr: 100000 },
   { id: 'h_sage', name: 'SAGE', desc: 'Earn MASTERY ★ on 70 missions', rewardCr: 100000 },
+  { id: 'h_dreamteam', name: 'DREAM TEAM', desc: 'Every pilot reaches 150 career kills', rewardCr: 100000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1909,6 +1912,10 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return totalKills >= 6000;
     case 'h_sage':
       return Object.keys(s.masteryDone).length >= 70;
+    case 'h_dreamteam': {
+      const ps = Object.values(s.pilotProg);
+      return ps.length >= 4 && ps.every((p) => (p.kills ?? 0) >= 150);
+    }
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
