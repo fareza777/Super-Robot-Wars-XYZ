@@ -73,6 +73,7 @@ function buffNames(u: UnitState): string[] {
   if (u.tideUntilEndOfEnemyPhase) names.push('TIDE VERSE');
   if ((u.graceTurns ?? 0) > 0) names.push('GRACE HYMN');
   if (u.sunderstormNext) names.push('SUNDERSTORM');
+  if (u.mirrorwallUntilEndOfEnemyPhase) names.push('MIRROR WALL');
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
@@ -576,6 +577,7 @@ export function SidePanel() {
             <Bar label="HP" val={inspect.hp} max={inspect.def.maxHp} color="#ff5a5a" />
             <Bar label="EN" val={inspect.en} max={inspect.def.maxEn} color="#4db4ff" />
             <Bar label="WILL" val={inspect.will} max={150} color="#ff7a9d" />
+            <Bar label="SP" val={inspect.sp} max={inspect.def.pilot.maxSp} color="#c9a0ff" />
             <View style={styles.statRow}>
               <Text style={styles.statTxt}>🛡 ARM {inspect.def.armor}</Text>
               <Text style={styles.statTxt}>≫ MOB {inspect.def.mobility}</Text>
