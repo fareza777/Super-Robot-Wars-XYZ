@@ -94,6 +94,7 @@ function buffNames(u: UnitState): string[] {
   if (u.truthedgeNext) names.push('TRUTH EDGE');
   if (u.novaNext) names.push('NOVA EDGE');
   if (u.cullNext) names.push('CULL EDGE');
+  if (u.mortalNext) names.push('MORTAL EDGE');
   if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
   if (u.crimsonUntilEndOfEnemyPhase) names.push('CRIMSON VERSE');
   if (u.goreUntilEndOfEnemyPhase) names.push('GORE VERSE');
@@ -179,7 +180,7 @@ export function SidePanel() {
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Pressable onPress={() => setShowRoster((v) => !v)} style={({ pressed }) => [{ flex: 1 }, pressed && { opacity: 0.7 }]}>
           <Text style={styles.counts}>
-            <Text style={{ color: '#8affc0' }}>Ally {alivePlayers(s).length}</Text> · <Text style={{ color: '#ff8a8a' }}>Enemy</Text> {s.missionCh.fog ? `${aliveEnemies(s).filter((e) => fogLit(s.units, e.pos)).length}/${aliveEnemies(s).length}` : aliveEnemies(s).length} · <Text style={{ color: '#ffd34d' }}>☠{s.kills}</Text>  · <Text style={{ color: '#9fd8ff' }}>T{s.turn}</Text> · <Text style={{ color: '#ffd34d' }}>¢{s.credits >= 1000 ? `${Math.floor(s.credits / 1000)}k` : s.credits}</Text> {showRoster ? '▲' : '▼'}
+            <Text style={{ color: '#8affc0' }}>Ally {alivePlayers(s).length}</Text> · <Text style={{ color: '#ff8a8a' }}>Enemy</Text> {s.missionCh.fog ? `${aliveEnemies(s).filter((e) => fogLit(s.units, e.pos)).length}/${aliveEnemies(s).length}` : aliveEnemies(s).length} · <Text style={{ color: '#ffd34d' }}>☠{s.kills}</Text>  · <Text style={{ color: '#9fd8ff' }}>T{s.turn}</Text> · <Text style={{ color: '#ffd34d' }}>¢{s.credits >= 1000 ? `${Math.floor(s.credits / 1000)}k` : s.credits}</Text> · <Text style={{ color: '#8af0ff' }}>⛽{Math.round(s.units.filter((x) => x.alive && x.side === 'player').reduce((a, x) => a + x.en, 0) / Math.max(1, s.units.filter((x) => x.alive && x.side === 'player').length))}</Text> {showRoster ? '▲' : '▼'}
           </Text>
         </Pressable>
         <Pressable onPress={s.toggleDanger} style={({ pressed }) => [styles.dangerBtn, s.dangerZone && styles.dangerBtnOn, pressed && { opacity: 0.7 }]}>
