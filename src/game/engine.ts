@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -203,6 +203,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if ((att.skills?.brawler ?? 0) > 0 && w.kind === 'melee') dmg = Math.round(dmg * (1 + 0.05 * att.skills.brawler));
   if ((att.skills?.gunner ?? 0) > 0 && w.kind !== 'melee') dmg = Math.round(dmg * (1 + 0.05 * att.skills.gunner));
   if ((def.statuses ?? []).length > 0) dmg = Math.round(dmg * (1 + 0.07 * (att.skills?.opportunist ?? 0)));
+  if (dist(att.pos, def.pos) <= 2) dmg = Math.round(dmg * (1 + 0.06 * (att.skills?.pointBlank ?? 0)));
   if (att.enraged) dmg = Math.round(dmg * 1.15);
   if (!att.hasAttacked && (att.skills?.initiative ?? 0) > 0) dmg = Math.round(dmg * (1 + 0.1 * att.skills.initiative));
   if (def.guardUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.5);
@@ -453,6 +454,13 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
     }
   }
   if (result.hit && w.drain) att.hp = Math.min(att.def.maxHp, att.hp + Math.round(result.damage * 0.25));
+  if (result.hit && def.alive && partBonus(def, 'reflect') > 0) {
+    const rd = Math.min(att.hp - 1, Math.round(result.damage * (partBonus(def, 'reflect') / 100)));
+    if (rd > 0) {
+      att.hp -= rd;
+      result.expEvents.push(`\u21C4 REACTIVE ARMOR — ${att.def.name} takes ${rd} backlash`);
+    }
+  }
   if (result.hit && def.alive) def.statuses = (def.statuses ?? []).filter((fx) => fx.id !== 'mark'); // paint spent by the strike
   if (result.hit && def.alive && w.status && !result.graze) applyStatus(def, w.status);
   if (result.hit && def.alive && !w.status && !result.graze && partBonus(att, 'statusSlow') > 0 && rnd() < 0.3) applyStatus(def, 'slow');
