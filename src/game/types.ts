@@ -244,7 +244,7 @@ export interface UnitState {
   overkillDealt?: number;
 }
 
-export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer' | 'bodyguard' | 'opportunist' | 'warcry' | 'pointBlank' | 'bloodlust' | 'reaver' | 'bulwark';
+export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer' | 'bodyguard' | 'opportunist' | 'warcry' | 'pointBlank' | 'bloodlust' | 'reaver' | 'bulwark' | 'duelist';
 export type PilotSkills = Record<PilotSkillId, number>;
 
 /** SRW-style enhancement parts equippable on a mecha. */
@@ -270,6 +270,7 @@ export interface PartDef {
   /** magazine extension — +% ammo capacity on ammo-limited weapons */
   ammoPct?: number;
   enSaver?: number;
+  antiAir?: number;
   /** command aura: allies within 2 tiles gain this much hit */
   auraHit?: number;
   /** sacrificial skin — the first fatal hit each battle leaves the frame at 1 HP */

@@ -159,15 +159,15 @@ export function DialogScene({ lines, tag, bg, onDone }: { lines: DialogLine[]; t
 
 const styles = StyleSheet.create({
   root: { ...StyleSheet.absoluteFill, backgroundColor: '#03050e', zIndex: 44 },
-  chapterTag: { position: 'absolute', top: 18, alignSelf: 'center', borderWidth: 1, borderColor: 'rgba(255,211,77,0.5)', paddingHorizontal: 14, paddingVertical: 4, backgroundColor: 'rgba(5,8,18,0.7)' },
+  chapterTag: { position: 'absolute', top: 18, alignSelf: 'center', borderWidth: 1.5, borderColor: 'rgba(255,211,77,0.6)', borderRadius: 14, paddingHorizontal: 18, paddingVertical: 5, backgroundColor: 'rgba(5,8,18,0.78)' },
   chapterTxt: { color: '#ffd34d', fontSize: 11, fontWeight: '800', letterSpacing: 3 },
-  portrait: { position: 'absolute', borderRadius: 12, overflow: 'hidden', borderWidth: 2, backgroundColor: '#0a0e1e' },
-  box: { position: 'absolute', bottom: 40, alignSelf: 'center', backgroundColor: 'rgba(7,10,22,0.92)', borderWidth: 1.5, borderRadius: 12, padding: 16, paddingTop: 20, minHeight: 110 },
-  nameTag: { position: 'absolute', top: -13, left: 14, borderWidth: 1, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 3 },
+  portrait: { position: 'absolute', borderRadius: 12, overflow: 'hidden', borderWidth: 2, backgroundColor: '#0a0e1e', shadowColor: '#000', shadowOpacity: 0.6, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 8 },
+  box: { position: 'absolute', bottom: 40, alignSelf: 'center', backgroundColor: 'rgba(7,10,22,0.94)', borderWidth: 1.5, borderRadius: 14, padding: 18, paddingTop: 22, minHeight: 110, shadowColor: '#000', shadowOpacity: 0.55, shadowRadius: 16, shadowOffset: { width: 0, height: 6 }, elevation: 10 },
+  nameTag: { position: 'absolute', top: -13, left: 14, borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 4, shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 6 },
   nameTxt: { color: '#fff', fontWeight: '900', fontSize: 12, letterSpacing: 1.5 },
   lineTxt: { color: '#eef2ff', fontSize: 16.5, lineHeight: 25, fontWeight: '500' },
   cursor: { color: '#ffd34d' },
   next: { position: 'absolute', right: 12, bottom: 8, color: '#ffd34d', fontSize: 10, fontWeight: '800', letterSpacing: 2 },
-  skip: { position: 'absolute', top: 20, right: 24, padding: 8 },
+  skip: { position: 'absolute', top: 20, right: 24, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.35)', backgroundColor: 'rgba(8,12,24,0.6)' },
   skipTxt: { color: 'rgba(255,255,255,0.75)', fontWeight: '800', letterSpacing: 2, fontSize: 13 },
 });

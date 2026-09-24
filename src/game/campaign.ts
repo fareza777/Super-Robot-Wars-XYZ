@@ -72,6 +72,7 @@ export const PARTS: Record<string, PartDef> = {
   seekerHead: { id: 'seekerHead', name: 'Seeker Head', desc: '+8% hit chance · +6% critical chance', price: 1500, hit: 8, crit: 6 },
   combatComp: { id: 'combatComp', name: 'Combat Computer', desc: '+10% hit chance · +5% damage', price: 1600, hit: 10, dmg: 5 },
   fluxVent: { id: 'fluxVent', name: 'Plasma Vent', desc: 'Weapon EN cost −15%', price: 1800, enSaver: 15 },
+  flakPods: { id: 'flakPods', name: 'Flak Pods', desc: 'All weapons gain anti-air: +25% dmg vs AIR frames', price: 1500, antiAir: 1 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -114,6 +115,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'bloodlust', name: 'Bloodlust', desc: '+5% damage per point after this unit\'s 3rd kill of the battle' },
   { id: 'reaver', name: 'Reaver', desc: '+5% damage per point against targets at full HP' },
   { id: 'bulwark', name: 'Bulwark', desc: 'Defend reaction reduces damage an extra 8% per point' },
+  { id: 'duelist', name: 'Duelist', desc: '+6% damage per point against isolated foes (no ally within 2 tiles)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1110,6 +1112,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_mogul', name: 'GRAND TREASURY', desc: 'Hold 50,000 credits at once', rewardCr: 2500 },
   { id: 'h_simvet', name: 'SIM VETERAN', desc: 'Score 6000+ in the VR Simulator', rewardCr: 1500 },
   { id: 'h_storm', name: 'STORMCHASER', desc: 'Destroy 2 Stormcaller tempest frames', rewardCr: 800 },
+  { id: 'h_pack', name: 'PACK BREAKER', desc: 'Destroy 2 Hellhound frames', rewardCr: 700 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1196,6 +1199,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.simBest ?? 0) >= 6000;
     case 'h_storm':
       return (s.killsByDef?.stormcaller ?? 0) >= 2;
+    case 'h_pack':
+      return (s.killsByDef?.hellhound ?? 0) >= 2;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
