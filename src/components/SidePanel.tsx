@@ -58,6 +58,7 @@ function buffNames(u: UnitState): string[] {
   if (u.hemoNext) names.push('HEMORRHAGE');
   if (u.voidedgeNext) names.push('VOID EDGE');
   if (u.standFirmUntilEndOfEnemyPhase) names.push('STAND FIRM');
+  if (u.plunderNext) names.push('PLUNDER EDGE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
@@ -587,7 +588,7 @@ export function SidePanel() {
               </Text>
             )}
             {inspect.def.weapons.map((w) => (
-              <Text key={w.id} style={styles.weapLine} numberOfLines={1}>
+              <Text key={w.id} style={[styles.weapLine, w.ammo != null && (inspect.ammo[w.id] ?? 0) <= 0 && { color: '#ff8a8a' }]} numberOfLines={1}>
                 {w.kind === 'melee' ? '⚔' : w.kind === 'gun' ? '⌖' : w.kind === 'beam' ? '✦' : w.kind === 'missile' ? '▲' : '◈'} {w.name} · POW {w.power} · R{w.rangeMin}-{w.rangeMax}
                 {w.mapRange != null ? ` · AREA ${w.mapRange}` : ''}
                 {w.willReq ? ` · W${w.willReq}` : ''}

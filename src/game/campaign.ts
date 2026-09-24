@@ -121,6 +121,7 @@ export const PARTS: Record<string, PartDef> = {
   soulLantern: { id: 'soulLantern', name: 'Soul Lantern', desc: 'Spirit-fed reactor — +5 Will for every kill this frame lands', price: 1600, willOnKill: true },
   linkageGear: { id: 'linkageGear', name: 'Linkage Gear', desc: 'Squad uplink — support-fire contribution raised to 70% damage', price: 1700, supportDmg: true },
   revengeFeed: { id: 'revengeFeed', name: 'Revenge Feed', desc: 'Vengeance loop — taking a hit feeds the pilot +4 SP', price: 1600, spOnHurt: true },
+  lastReserve: { id: 'lastReserve', name: 'Last Reserve', desc: 'Emergency cells — weapon EN costs drop 40% while hull is below 50%', price: 1700, rageEn: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -212,6 +213,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'artillerist', name: 'Artillerist', desc: '+5% damage per point vs targets 4 or more tiles away' },
   { id: 'paintburst', name: 'Paintburst', desc: '+7% damage per point vs painted targets (marked or exposed)' },
   { id: 'fortsoul', name: 'Fortress Soul', desc: '-5% damage taken per point while on defensive terrain' },
+  { id: 'hexsurge', name: 'Hex Surge', desc: '+5% damage per point for each debuff on the target (cap 3)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -250,7 +252,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1255,6 +1257,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_tide', name: 'TIDEBREAKER', desc: 'Win a mission on the open sea', rewardCr: 800 },
   { id: 'h_ashwalker', name: 'ASH WALKER', desc: 'Win a mission on a volcano map', rewardCr: 800 },
   { id: 'h_summit', name: 'SUMMIT', desc: 'Win a mission on a mountain map', rewardCr: 800 },
+  { id: 'h_frostbound', name: 'FROSTBOUND', desc: 'Win a mission on an ice map', rewardCr: 800 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1435,6 +1438,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.missionCh?.theme === 'volcano';
     case 'h_summit':
       return s.missionCh?.theme === 'mountain';
+    case 'h_frostbound':
+      return s.missionCh?.theme === 'ice';
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

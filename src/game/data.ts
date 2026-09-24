@@ -95,6 +95,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   aegis: { id: 'aegis', name: 'Aegis Hymn', cost: 45, desc: 'Aegis hymn — allies within 3 tiles cannot be struck by critical hits until the end of the enemy phase' },
   voidedge: { id: 'voidedge', name: 'Void Edge', cost: 45, desc: 'Phase blade — your next hit ignores all weapon-kind resistance on the target' },
   standfirm: { id: 'standfirm', name: 'Stand Firm', cost: 35, desc: 'Last bastion — this frame refuses the next fatal hit this phase (left at 1 HP)' },
+  plunderedge: { id: 'plunderedge', name: 'Plunder Edge', cost: 45, desc: 'Scavenger blade — your next hit strips salvage worth 8% of the damage dealt' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
