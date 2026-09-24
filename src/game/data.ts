@@ -127,6 +127,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   bastionverse: { id: 'bastionverse', name: 'Bastion Verse', cost: 50, desc: 'Fortress hymn — allies within 3 tiles gain +300 armor for 2 turns' },
   furyverse: { id: 'furyverse', name: 'Fury Verse', cost: 45, desc: 'Kiai overflow — your next attack gains +1% damage per point of Will above 100' },
   tracerverse: { id: 'tracerverse', name: 'Tracer Verse', cost: 45, desc: 'Beacon net — attacks by allies within 3 tiles also paint the target until the end of the enemy phase' },
+  sirenverse: { id: 'sirenverse', name: 'Siren Verse', cost: 50, desc: 'Wailing fog — enemies within 3 tiles take -15 hit for 2 turns' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

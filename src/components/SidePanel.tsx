@@ -87,6 +87,7 @@ function buffNames(u: UnitState): string[] {
   if (u.heavensverseNext) names.push('HEAVEN VERSE');
   if (u.furyverseNext) names.push('FURY VERSE');
   if (u.tracerAllyUntilEndOfEnemyPhase) names.push('TRACER VERSE');
+  if ((u.sirenTurns ?? 0) > 0) names.push(`SIREN VERSE ${u.sirenTurns}`);
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
@@ -565,7 +566,7 @@ export function SidePanel() {
                   ) : (
                     <View key={u.uid} style={styles.rosterRow}>
                       <Text style={[styles.rosterName, { color: '#ffb0a0' }]} numberOfLines={1}>
-                        {u.def.boss || u.elite ? '★ ' : ''}
+                        {u.def.boss || u.elite ? '★ ' : ''}{u.phase2 ? 'Ω ' : ''}
                         {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>
                         {(u.statuses?.length ?? 0) > 0 ? <Text style={{ color: '#ff9d7a' }}> ⌛{u.statuses!.length}</Text> : null}
                       </Text>
