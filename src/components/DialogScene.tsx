@@ -150,7 +150,7 @@ export function DialogScene({ lines, tag, bg, onDone }: { lines: DialogLine[]; t
         <Text style={styles.next}>{done ? 'TAP ▸' : ' '}</Text>
       </Animated.View>
 
-      <Pressable style={styles.skip} onPress={quit} hitSlop={14}>
+      <Pressable style={({ pressed }) => [styles.skip, pressed && { opacity: 0.6 }]} onPress={quit} hitSlop={14}>
         <Text style={styles.skipTxt}>SKIP ▸▸</Text>
       </Pressable>
     </Pressable>

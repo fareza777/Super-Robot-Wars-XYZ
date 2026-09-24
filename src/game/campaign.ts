@@ -86,6 +86,7 @@ export const PARTS: Record<string, PartDef> = {
   funnelAmp: { id: 'funnelAmp', name: 'Funnel Amplifier', desc: '+10% damage for funnel weapons', price: 1600, funnelDmg: 10 },
   missileBay: { id: 'missileBay', name: 'Missile Bay', desc: '+10% damage for missile weapons', price: 1600, missileDmg: 10 },
   gunBarrel: { id: 'gunBarrel', name: 'Gun Barrel', desc: '+10% damage for gun weapons', price: 1600, gunDmg: 10 },
+  ammoSynth: { id: 'ammoSynth', name: 'Ammo Synthesizer', desc: 'Fabricate +1 ammo for every weapon each turn', price: 1500, ammoRegen: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -142,6 +143,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'underdog', name: 'Underdog', desc: '+5% damage per point against higher-level frames' },
   { id: 'skirmisher', name: 'Skirmisher', desc: '+5% damage per point when attacking after moving' },
   { id: 'engineer', name: 'Engineer', desc: 'REPAIR restores +10% more HP per point' },
+  { id: 'cohort', name: 'Cohort', desc: '+4% damage per point while an ally is within 2 tiles' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1152,6 +1154,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_dustrider', name: 'DUST RIDER', desc: 'Win a mission on a desert field', rewardCr: 700 },
   { id: 'h_ironmarch', name: 'IRON MARCH', desc: 'Win a mission on a fortress field', rewardCr: 700 },
   { id: 'h_lunar', name: 'LUNAR', desc: 'Win a mission on the lunar surface', rewardCr: 700 },
+  { id: 'h_delver', name: 'RUIN DELVER', desc: 'Win a mission in the ancient ruins', rewardCr: 700 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1266,6 +1269,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.missionCh?.theme === 'fortress';
     case 'h_lunar':
       return s.missionCh?.theme === 'moon';
+    case 'h_delver':
+      return s.missionCh?.theme === 'ruins';
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
