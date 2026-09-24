@@ -69,6 +69,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   veil: { id: 'veil', name: 'Veil', cost: 45, desc: 'Sensor mist — allies within 3 tiles gain +20 evade until end of enemy phase' },
   cantata: { id: 'cantata', name: 'Cantata', cost: 40, desc: 'Chorus of resolve — allies within 3 tiles recover +10 SP' },
   warhorn: { id: 'warhorn', name: 'Warhorn', cost: 40, desc: 'Battle horn — allies within 3 tiles deal +10% counter damage until end of enemy phase' },
+  skyfall: { id: 'skyfall', name: 'Skyfall', cost: 45, desc: 'Anti-air dive — your next hit deals +35% damage to an airborne frame' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
@@ -150,7 +151,7 @@ export const WEAPONS = {
 const P = (p: PilotDef) => p;
 
 export const PILOTS = {
-  ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul', 'frenzy', 'soulburn', 'pyre'], faceColor: '#ffb347', trait: 'ace_instinct' }),
+  ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul', 'frenzy', 'soulburn', 'pyre', 'skyfall'], faceColor: '#ffb347', trait: 'ace_instinct' }),
   mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse', 'fortune', 'trust', 'emp', 'deadshot', 'scan', 'marksman', 'shatter', 'tracer', 'veil'], faceColor: '#7ee7ff', trait: 'deadeye' }),
   gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor', 'sunder', 'provoke', 'phalanx', 'breach', 'charity', 'intimidate', 'warsong', 'fluster', 'overrun'], faceColor: '#ff9d9d', trait: 'siege_breaker' }),
   orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless', 'lucky', 'mercy', 'purge', 'cheer', 'expose', 'decoy', 'hymn', 'sanctuary', 'empower', 'ward', 'relay', 'inspire', 'warhorn'], faceColor: '#b6ff9d', trait: 'field_medic' }),

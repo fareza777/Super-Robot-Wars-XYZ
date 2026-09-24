@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus' | 'beamDmg' | 'funnelDmg' | 'missileDmg' | 'gunDmg' | 'ammoRegen' | 'markDmg' | 'spRegen' | 'lowHpDmg' | 'aimBoost' | 'shieldBreak' | 'pinDmg' | 'jamProof' | 'statusBurn'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus' | 'beamDmg' | 'funnelDmg' | 'missileDmg' | 'gunDmg' | 'ammoRegen' | 'markDmg' | 'spRegen' | 'lowHpDmg' | 'aimBoost' | 'shieldBreak' | 'pinDmg' | 'jamProof' | 'statusBurn' | 'statusBreak'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -218,6 +218,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (w.kind === 'beam') dmg = Math.round(dmg * (1 + partBonus(att, 'beamDmg') / 100));
   if (w.kind === 'funnel') dmg = Math.round(dmg * (1 + partBonus(att, 'funnelDmg') / 100));
   if (w.kind === 'missile') dmg = Math.round(dmg * (1 + partBonus(att, 'missileDmg') / 100) * (1 + (att.skills?.cannonade ?? 0) * 0.05));
+  if (w.kind === 'gun') dmg = Math.round(dmg * (1 + (att.skills?.gunsmith ?? 0) * 0.05));
   if (w.kind === 'gun') dmg = Math.round(dmg * (1 + partBonus(att, 'gunDmg') / 100));
   if ((att.kills ?? 0) >= 3) dmg = Math.round(dmg * (1 + 0.05 * (att.skills?.bloodlust ?? 0)));
   if (def.hp >= def.def.maxHp) dmg = Math.round(dmg * (1 + 0.05 * (att.skills?.reaver ?? 0)));
@@ -232,6 +233,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (att.soulburnNext) dmg = Math.round(dmg * 1.5);
   if (att.huntNext && def.hp * 2 < def.def.maxHp) dmg = Math.round(dmg * 1.3);
   if (att.strafeNext && def.def.moveType !== 'air') dmg = Math.round(dmg * 1.35);
+  if (att.skyfallNext && def.def.moveType === 'air') dmg = Math.round(dmg * 1.35);
   if (att.exertNext) dmg = Math.round(dmg * 1.15);
   if (att.hp * 2 < att.def.maxHp) dmg = Math.round(dmg * (1 + partBonus(att, 'lowHpDmg') / 100));
   if (att.en * 4 > att.def.maxEn * 3) dmg = Math.round(dmg * (1 + (att.skills?.surge ?? 0) * 0.04));
@@ -540,6 +542,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   if (result.hit && def.alive && att.tracerNext && !result.graze) applyStatus(def, 'mark');
   if (result.hit && def.alive && !w.status && !result.graze && partBonus(att, 'statusSlow') > 0 && rnd() < 0.3) applyStatus(def, 'slow');
   if (result.hit && def.alive && !result.graze && partBonus(att, 'statusBurn') > 0 && rnd() < 0.25) applyStatus(def, 'burn');
+  if (result.hit && def.alive && !result.graze && partBonus(att, 'statusBreak') > 0 && rnd() < 0.2) applyStatus(def, 'break');
   if (result.hit && def.alive && w.breaker && !result.graze) def.sundered = true;
   if (result.hit && def.alive && w.willDrain) def.will = Math.max(100, def.will - 5);
   // bash knockback — a landed hit hurls the survivor one tile away from the strike
@@ -664,6 +667,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   att.pyreNext = false;
   att.overrunNext = false;
   att.exertNext = false;
+  att.skyfallNext = false;
   att.gutsForNextAttack = false;
   att.snipeForNextAttack = false;
   att.soulForNextAttack = false;
@@ -722,6 +726,7 @@ export function applyMapAttack(state: GameState, attackerUid: string, targetTile
   att.pyreNext = false;
   att.overrunNext = false;
   att.exertNext = false;
+  att.skyfallNext = false;
   att.gutsForNextAttack = false;
 
   let hits = 0;
@@ -785,6 +790,7 @@ export function applyAllAttack(state: GameState, attackerUid: string, weaponId: 
   att.pyreNext = false;
   att.overrunNext = false;
   att.exertNext = false;
+  att.skyfallNext = false;
   att.gutsForNextAttack = false;
   att.soulForNextAttack = false;
   att.gutsForNextAttack = false;
@@ -1003,6 +1009,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'cantata':
       break;
     case 'warhorn':
+      break;
+    case 'skyfall':
+      u.skyfallNext = true;
       break;
     // 'rouse', 'disrupt' and 'trust' affect neighbouring units — applied in store.castSpirit
   }

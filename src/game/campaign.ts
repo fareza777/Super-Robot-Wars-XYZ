@@ -95,6 +95,7 @@ export const PARTS: Record<string, PartDef> = {
   pinBreaker: { id: 'pinBreaker', name: 'Pin Breaker', desc: '+12% damage against enemies pinned between two allies', price: 1700, pinDmg: 12 },
   eccmSuite: { id: 'eccmSuite', name: 'ECCM Suite', desc: 'Targeting suite immune to enemy ECM jammer fields', price: 1500, jamProof: true },
   incendiaryRounds: { id: 'incendiaryRounds', name: 'Incendiary Rounds', desc: 'Landed hits have a 25% chance to ignite the target (burn)', price: 1600, statusBurn: true },
+  sunderRounds: { id: 'sunderRounds', name: 'Sunder Rounds', desc: 'Landed hits have a 20% chance to crack armor (break)', price: 1600, statusBreak: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -160,6 +161,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'outflank', name: 'Outflank', desc: '+6% damage per point against targets that cannot counter' },
   { id: 'foeswarm', name: 'Foeswarm', desc: '+3% damage per point for each enemy within 2 tiles' },
   { id: 'cannonade', name: 'Cannonade', desc: '+5% damage per point with missile weapons' },
+  { id: 'gunsmith', name: 'Gunsmith', desc: '+5% damage per point with gun weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1177,6 +1179,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_records', name: 'ACE RECORDS', desc: 'Earn S rank on 7 missions', rewardCr: 1400 },
   { id: 'h_simlord', name: 'SIM LORD', desc: 'Score 9000+ in the VR Simulator', rewardCr: 2000 },
   { id: 'h_scholar', name: 'MASTERY SCHOLAR', desc: 'Earn MASTERY ★ on 8 missions', rewardCr: 1500 },
+  { id: 'h_cataclysm', name: 'CATACLYSM', desc: 'Deal 12000+ damage in a single strike', rewardCr: 2000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1305,6 +1308,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.simBest ?? 0) >= 9000;
     case 'h_scholar':
       return s.masteryDone.length >= 8;
+    case 'h_cataclysm':
+      return (s.maxHitEver ?? 0) >= 12000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

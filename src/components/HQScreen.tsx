@@ -607,7 +607,7 @@ const styles = StyleSheet.create({
   codexWep: { color: '#c8b060', fontSize: 10, marginTop: 3 },
   codexSpirit: { color: '#b09ae8', fontSize: 10, marginTop: 2 },
   codexSide: { borderWidth: 1, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 },
-  recordBox: { backgroundColor: 'rgba(12,15,26,0.85)', borderWidth: 1, borderColor: '#2a2f42', borderRadius: 10, padding: 12, gap: 6 },
+  recordBox: { backgroundColor: 'rgba(12,15,26,0.85)', borderWidth: 1, borderColor: '#2a2f42', borderLeftWidth: 3, borderLeftColor: '#ffd34d', borderRadius: 10, padding: 12, gap: 6 },
   recordRow: { color: '#c8d4f0', fontSize: 11.5, fontWeight: '700', letterSpacing: 0.6 },
   honorRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: 'rgba(42,47,66,0.6)' },
   honorName: { color: '#ffd34d', fontSize: 11.5, fontWeight: '900', letterSpacing: 1 },
