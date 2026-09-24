@@ -186,6 +186,7 @@ export const PARTS: Record<string, PartDef> = {
   sabotRounds: { id: 'sabotRounds', name: 'Sabot Rounds', desc: 'Demolition load — landed hits have a 25% chance to crack the target\'s armor (break)', price: 1800, statusBreak: true },
   gyroStabilizer: { id: 'gyroStabilizer', name: 'Gyro Stabilizer', desc: 'Inertial rig — +1 movement and +8 evade', price: 1900, move: 1, evade: 8 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
+  aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -342,6 +343,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'scourge', name: 'Scourge', desc: '+5% damage per point vs targets suffering 2+ statuses' },
   { id: 'bombardier', name: 'Bombardier', desc: '+5% damage per point with MAP/area weapons' },
   { id: 'snipersoul', name: 'Snipersoul', desc: '+6% damage per point with sniper-tagged weapons' },
+  { id: 'aegisshield', name: 'Aegis Shield', desc: '+4% damage per point while standing on defensive terrain' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1450,6 +1452,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_divine', name: 'DIVINE', desc: 'Reach NG+10 or beyond', rewardCr: 54000 },
   { id: 'h_infinite', name: 'INFINITE', desc: 'Earn MASTERY ★ on 75 missions', rewardCr: 56000 },
   { id: 'h_pantheon', name: 'PANTHEON', desc: '2000 total career kills across the squad', rewardCr: 58000 },
+  { id: 'h_omniscient', name: 'OMNISCIENT', desc: 'Reach NG+11 or beyond', rewardCr: 60000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1761,6 +1764,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.masteryDone?.length ?? 0) >= 75;
     case 'h_pantheon':
       return totalKills >= 2000;
+    case 'h_omniscient':
+      return (s.ngPlus ?? 0) >= 11;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

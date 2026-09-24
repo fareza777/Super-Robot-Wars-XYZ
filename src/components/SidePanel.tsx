@@ -108,6 +108,7 @@ function buffNames(u: UnitState): string[] {
   if (u.sentinelUntilEndOfEnemyPhase) names.push('SENTINEL VERSE');
   if (u.siphonUntilEndOfEnemyPhase) names.push('SIPHON VERSE');
   if (u.salvoUntilEndOfEnemyPhase) names.push('SALVO VERSE');
+  if (u.shelterUntilEndOfEnemyPhase) names.push('SHELTER VERSE');
   if (u.scopeUntilEndOfEnemyPhase) names.push('SCOPE VERSE');
   if ((u.doomTurns ?? 0) > 0) names.push(`DOOM ${u.doomTurns}`);
   if (u.ghostNext) names.push('GHOST VERSE');
