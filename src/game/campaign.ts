@@ -157,6 +157,7 @@ export const PARTS: Record<string, PartDef> = {
   witchPlate: { id: 'witchPlate', name: 'Witch Plate', desc: 'Hex ward — this frame cannot be suppressed', price: 1700, witchPlate: true },
   octaneCell: { id: 'octaneCell', name: 'Octane Cell', desc: 'Hot ammunition — +15% ammo weapon damage, -100 armor', price: 1700, ammoDmg: 15, ventArmor: true },
   orbShield: { id: 'orbShield', name: 'Orb Shield', desc: 'Deflector field — -15% damage from attacks at range 3+', price: 1700, orbShield: 15 },
+  vendettaRig: { id: 'vendettaRig', name: 'Vendetta Rig', desc: 'Retaliation targeting — counter-attacks deal +15% damage', price: 1600, counterDmg: 15 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -284,6 +285,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'biggame', name: 'Big Game', desc: '+6% damage per point vs frames with over 12000 max HP' },
   { id: 'razor', name: 'Razor', desc: '+5% damage per point with pierce weapons' },
   { id: 'retribution', name: 'Retribution', desc: '+6% counter damage per point when hull below half' },
+  { id: 'bloodhound', name: 'Bloodhound', desc: '+5% damage per point vs crippled or wounded targets' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -322,7 +324,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1363,6 +1365,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_demigod', name: 'DEMIGOD', desc: 'Earn S rank on 35 missions', rewardCr: 10000 },
   { id: 'h_valhalla', name: 'VALHALLA', desc: 'Reach NG+2 or beyond', rewardCr: 12000 },
   { id: 'h_wareternal', name: 'WAR ETERNAL', desc: 'Score 750 total career kills across the squad', rewardCr: 9000 },
+  { id: 'h_harbinger', name: 'HARBINGER', desc: 'One pilot reaches 200 career kills', rewardCr: 8000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1616,6 +1619,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.ngPlus ?? 0) >= 2;
     case 'h_wareternal':
       return totalKills >= 750;
+    case 'h_harbinger':
+      return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 200);
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

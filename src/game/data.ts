@@ -131,6 +131,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   clarionverse: { id: 'clarionverse', name: 'Clarion Verse', cost: 45, desc: 'War song — allies within 3 tiles gain +10 hit for 2 turns' },
   levinedge: { id: 'levinedge', name: 'Levin Edge', cost: 50, desc: 'Storm blade — your next attack deals +40% damage vs stunned foes' },
   rampartverse: { id: 'rampartverse', name: 'Rampart Verse', cost: 50, desc: 'Shield anthem — allies within 3 tiles take -20% damage from attacks at range 3+ until end of enemy phase' },
+  ravageverse: { id: 'ravageverse', name: 'Ravage Verse', cost: 50, desc: 'Mauling strike — the next hit deals +35% damage and cripples the target frame' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
