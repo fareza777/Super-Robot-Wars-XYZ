@@ -104,6 +104,7 @@ function buffNames(u: UnitState): string[] {
   if (u.flareNext) names.push('FLARE EDGE');
   if ((u.mendTurns ?? 0) > 0) names.push(`MEND VERSE ${u.mendTurns}`);
   if (u.maimNext) names.push('MAIM EDGE');
+  if (u.breachNext) names.push('BREACH EDGE');
   if (u.repulseUntilEndOfEnemyPhase) names.push('REPULSE VERSE');
   if (u.silencedUntilEndOfEnemyPhase) names.push('SILENCE VERSE');
   // magnumverse is instant — no chip

@@ -258,7 +258,7 @@ export function EndScreen({ victory }: { victory: boolean }) {
           {(() => {
             const st = useGame.getState();
             const ready = HONORS.filter((h) => honorDone(h, st) && !st.honorsClaimed.includes(h.id));
-            return ready.length > 0 ? <Text style={[styles.resultsAce, { color: '#ffd34d' }]}>🏅 {ready.length} HONOR{ready.length > 1 ? 'S' : ''} READY — claim in HQ</Text> : null;
+            return ready.length > 0 ? <Text style={[styles.resultsAce, { color: '#ffd34d' }]}>🏅 {ready.slice(0, 3).map((h) => h.name).join(' · ')}{ready.length > 3 ? ` +${ready.length - 3}` : ''} READY — claim in HQ</Text> : null;
           })()}
           {mvp && WIN_QUIPS[mvp.def.pilot.callsign] && (
             <Text style={[styles.resultsAce, { color: '#9fd0ff', fontStyle: 'italic' }]}>{WIN_QUIPS[mvp.def.pilot.callsign]}</Text>
