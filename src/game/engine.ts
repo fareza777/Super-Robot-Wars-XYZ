@@ -28,7 +28,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0, truesight: 0, backliner: 0, bombard: 0, ruinbreaker: 0, artillerist: 0, paintburst: 0, fortsoul: 0, hexsurge: 0, coldsteel: 0, capacitor: 0, ironbound: 0, coolloop: 0, gritguard: 0, savant: 0, shieldpierce: 0, pureshot: 0, finisher: 0, aerobat: 0, sureshot: 0, wildfire: 0, archer: 0, stormeye: 0, acehunter: 0, ravager: 0, sledge: 0, overkill: 0, pike: 0, wildswing: 0, zenith: 0, closecombat: 0, chainblade: 0, exploiter: 0, viper: 0, disruptor: 0, myrmidon: 0, sunderfist: 0, bloodborne: 0, harvester: 0, gridshock: 0, shockjock: 0, biggame: 0, razor: 0, retribution: 0, bloodhound: 0, headhunter: 0, soulcut: 0, wardancer: 0, butcher: 0, punisher: 0, wrathborn: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0, truesight: 0, backliner: 0, bombard: 0, ruinbreaker: 0, artillerist: 0, paintburst: 0, fortsoul: 0, hexsurge: 0, coldsteel: 0, capacitor: 0, ironbound: 0, coolloop: 0, gritguard: 0, savant: 0, shieldpierce: 0, pureshot: 0, finisher: 0, aerobat: 0, sureshot: 0, wildfire: 0, archer: 0, stormeye: 0, acehunter: 0, ravager: 0, sledge: 0, overkill: 0, pike: 0, wildswing: 0, zenith: 0, closecombat: 0, chainblade: 0, exploiter: 0, viper: 0, disruptor: 0, myrmidon: 0, sunderfist: 0, bloodborne: 0, harvester: 0, gridshock: 0, shockjock: 0, biggame: 0, razor: 0, retribution: 0, bloodhound: 0, headhunter: 0, soulcut: 0, wardancer: 0, butcher: 0, punisher: 0, wrathborn: 0, tracker: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
@@ -190,7 +190,7 @@ export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: Map
   if (att.strikeForNextAttack) return 100;
   const trait = att.def.pilot.trait;
   const traitHit = (trait === 'deadeye' ? 8 : 0) + (trait === 'falcon_wing' && def.def.moveType === 'air' ? 10 : 0) + (trait === 'crimson_fury' && att.hp < att.def.maxHp / 2 ? 8 : 0);
-  const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus + traitHit + willHitBonus(att) + partBonus(att, 'hit') + (w.rangeMax >= 6 ? partBonus(att, 'haloScope') : 0) + (att.skills?.hit ?? 0) + (att.aceMastery ? 5 : 0) + (att.hymnUntilEndOfEnemyPhase ? 15 : 0) + (att.absolveUntilEndOfEnemyPhase ? 15 : 0) + (att.bannerUntilEndOfEnemyPhase ? 10 : 0) + (att.aimed ? 15 + partBonus(att, 'aimBoost') : 0) + (att.exertNext ? 20 : 0) + (def.exposed ? 20 : 0) + (def.statuses?.some((fx) => fx.id === 'mark') ? 25 : 0) - (att.statuses?.some((fx) => fx.id === 'supp') ? 20 : 0) - (att.sirenTurns ? 15 : 0) + (att.clarionTurns ? 10 : 0) + partBonus(att, 'accBoost') - partBonus(def, 'chaff') - evadeOf(def, map) * 0.55;
+  const raw = 72 + statFor(att, w) * 0.6 + w.hitMod + att.def.mobility * 0.25 + hitBonus + traitHit + willHitBonus(att) + partBonus(att, 'hit') + (w.rangeMax >= 6 ? partBonus(att, 'haloScope') : 0) + (att.skills?.hit ?? 0) + (att.aceMastery ? 5 : 0) + (att.hymnUntilEndOfEnemyPhase ? 15 : 0) + (att.absolveUntilEndOfEnemyPhase ? 15 : 0) + (att.bannerUntilEndOfEnemyPhase ? 10 : 0) + (att.aimed ? 15 + partBonus(att, 'aimBoost') : 0) + (att.exertNext ? 20 : 0) + (def.exposed ? 20 : 0) + (def.statuses?.some((fx) => fx.id === 'mark') ? 25 : 0) - (att.statuses?.some((fx) => fx.id === 'supp') ? 20 : 0) - (att.sirenTurns ? 15 : 0) + (att.clarionTurns ? 10 : 0) + partBonus(att, 'accBoost') + (att.scopeUntilEndOfEnemyPhase && (def.exposed || def.statuses?.some((fx) => fx.id === 'mark')) ? 15 : 0) - partBonus(def, 'chaff') - evadeOf(def, map) * 0.55;
   return Math.max(10, Math.min(100, Math.round(raw * (att.wounded ? 0.85 : 1))));
 }
 
@@ -222,6 +222,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (def.hp >= def.def.maxHp) dmg = Math.round(dmg * (1 + (att.skills?.butcher ?? 0) * 0.06));
   if (def.acted) dmg = Math.round(dmg * (1 + (att.skills?.punisher ?? 0) * 0.06));
   if (att.hp * 5 <= att.def.maxHp * 2) dmg = Math.round(dmg * (1 + (att.skills?.wrathborn ?? 0) * 0.06));
+  if (def.exposed || def.statuses?.some((fx) => fx.id === 'mark')) dmg = Math.round(dmg * (1 + (att.skills?.tracker ?? 0) * 0.06));
   if (partBonus(att, 'rangeDmg') > 0 && dist(att.pos, def.pos) >= 4) dmg = Math.round(dmg * (1 + partBonus(att, 'rangeDmg') / 100));
   if (att.ghostNext) dmg = Math.round(dmg * 1.25);
   if (def.cursedUntilEndOfEnemyPhase) dmg = Math.round(dmg * 1.15);
@@ -1397,6 +1398,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break;
     case 'crimsonverse':
       break;
+    case 'scopeverse':
+      break;
     case 'ghostverse':
       u.ghostNext = true;
       break;
@@ -1453,6 +1456,7 @@ export function clearTransientForOwnPhase(u: UnitState): void {
   u.relentlessUntilEndOfEnemyPhase = false;
   u.phantomUntilEndOfEnemyPhase = false;
   u.crimsonUntilEndOfEnemyPhase = false;
+  u.scopeUntilEndOfEnemyPhase = false;
   u.dodges = 0;
 }
 

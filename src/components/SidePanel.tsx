@@ -93,6 +93,7 @@ function buffNames(u: UnitState): string[] {
   if (u.savageNext) names.push('SAVAGE EDGE');
   if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
   if (u.crimsonUntilEndOfEnemyPhase) names.push('CRIMSON VERSE');
+  if (u.scopeUntilEndOfEnemyPhase) names.push('SCOPE VERSE');
   if (u.ghostNext) names.push('GHOST VERSE');
   if (u.cursedUntilEndOfEnemyPhase) names.push('CURSE VERSE');
   if ((u.sirenTurns ?? 0) > 0) names.push(`SIREN VERSE ${u.sirenTurns}`);
@@ -546,7 +547,7 @@ export function SidePanel() {
                 <View key={u.uid} style={styles.rosterRow}>
                   <Text style={[styles.rosterName, u.acted && styles.rosterActed]} numberOfLines={1}>
                     {u.npc ? '🛡 ' : ''}{u.dmgDealt === topDealt && topDealt > 0 ? '◆ ' : ''}
-                    {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>
+                    {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>{u.acted ? <Text style={{ color: '#4dff7a' }}> ✓</Text> : null}
                   </Text>
                   <View style={{ flex: 1 }}>
                     <View style={styles.rosterBarTrack}>

@@ -164,6 +164,7 @@ export const PARTS: Record<string, PartDef> = {
   deadeyeLens: { id: 'deadeyeLens', name: 'Deadeye Lens', desc: 'Precision optics — +10 hit', price: 1600, accBoost: 10 },
   siegeOptics: { id: 'siegeOptics', name: 'Siege Optics', desc: 'Long-focus array — +10% damage vs targets 4+ tiles away', price: 1600, rangeDmg: 10 },
   shredGauge: { id: 'shredGauge', name: 'Shred Gauge', desc: 'Armor-piercing oscillator — attacks ignore 15% of target armor', price: 1700, armorShred: 15 },
+  riposteRig: { id: 'riposteRig', name: 'Riposte Rig', desc: 'Counter servos — counter-attacks deal +10% damage', price: 1500, counterDmg: 10 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -298,6 +299,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'butcher', name: 'Butcher', desc: '+6% damage per point vs targets at full hull' },
   { id: 'punisher', name: 'Punisher', desc: '+6% damage per point vs targets that already acted' },
   { id: 'wrathborn', name: 'Wrathborn', desc: '+6% damage per point while hull at or below 40%' },
+  { id: 'tracker', name: 'Tracker', desc: '+6% damage per point vs marked or exposed targets' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1384,6 +1386,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_eternalflame', name: 'ETERNAL FLAME', desc: 'Land a single blow of 100,000+ damage', rewardCr: 14000 },
   { id: 'h_conqueror', name: 'CONQUEROR', desc: 'Earn S rank on 40 missions', rewardCr: 15000 },
   { id: 'h_singularity', name: 'SINGULARITY', desc: 'Earn MASTERY star on 40 missions', rewardCr: 16000 },
+  { id: 'h_obsidian', name: 'OBSIDIAN', desc: 'Reach NG+6 or beyond', rewardCr: 17000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1651,6 +1654,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 40;
     case 'h_singularity':
       return (s.masteryDone?.length ?? 0) >= 40;
+    case 'h_obsidian':
+      return (s.ngPlus ?? 0) >= 6;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
