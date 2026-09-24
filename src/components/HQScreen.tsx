@@ -349,7 +349,7 @@ export function HQScreen() {
                 );
               })}
             </ScrollView>
-            <Pressable style={styles.backBtn} onPress={() => setTab('main')}>
+            <Pressable style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.6 }]} onPress={() => setTab('main')}>
               <Text style={styles.backTxt}>◂ BACK TO HQ</Text>
             </Pressable>
           </View>
@@ -420,7 +420,7 @@ export function HQScreen() {
                 })}
               </View>
             </ScrollView>
-            <Pressable style={styles.backBtn} onPress={() => setTab('main')}>
+            <Pressable style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.6 }]} onPress={() => setTab('main')}>
               <Text style={styles.backTxt}>◂ BACK TO HQ</Text>
             </Pressable>
           </View>
@@ -532,7 +532,7 @@ function HqPanel({ npc, onBack, npcImgH, bob, children }: { npc: (typeof NPCS)[k
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 12 }}>
           {children}
         </ScrollView>
-        <Pressable style={styles.backBtn} onPress={onBack}>
+        <Pressable style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.6 }]} onPress={onBack}>
           <Text style={styles.backTxt}>◂ BACK TO HQ</Text>
         </Pressable>
       </View>

@@ -89,6 +89,7 @@ export const PARTS: Record<string, PartDef> = {
   ammoSynth: { id: 'ammoSynth', name: 'Ammo Synthesizer', desc: 'Fabricate +1 ammo for every weapon each turn', price: 1500, ammoRegen: true },
   analysisCore: { id: 'analysisCore', name: 'Analysis Core', desc: '+12% damage against marked or exposed targets', price: 1700, markDmg: 12 },
   neuralLink: { id: 'neuralLink', name: 'Neural Link', desc: 'Pilot regenerates +2 SP every turn', price: 1600, spRegen: 2 },
+  berserkCore: { id: 'berserkCore', name: 'Berserker Core', desc: '+8% damage while your hull is below 50% HP', price: 1800, lowHpDmg: 8 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -148,6 +149,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'cohort', name: 'Cohort', desc: '+4% damage per point while an ally is within 2 tiles' },
   { id: 'entrench', name: 'Entrench', desc: '+5% damage per point while standing on defensive terrain' },
   { id: 'steadfast', name: 'Steadfast', desc: 'Take 6% less damage per point' },
+  { id: 'precision', name: 'Precision', desc: 'Critical hits deal +5% more damage per point' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1160,7 +1162,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_lunar', name: 'LUNAR', desc: 'Win a mission on the lunar surface', rewardCr: 700 },
   { id: 'h_delver', name: 'RUIN DELVER', desc: 'Win a mission in the ancient ruins', rewardCr: 700 },
   { id: 'h_hearts', name: 'HEARTSTRINGS', desc: 'Witness 18 mess hall bond events', rewardCr: 1200 },
-  { id: 'h_magma', name: 'MAGMA PROOF', desc: 'Win a mission on volcanic ground', rewardCr: 700 },
+  { id: 'h_colony', name: 'STAR COLONIST', desc: 'Win a mission on the colony map', rewardCr: 700 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1279,8 +1281,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.missionCh?.theme === 'ruins';
     case 'h_hearts':
       return s.bondSeen.length >= 18;
-    case 'h_magma':
-      return s.missionCh?.theme === 'lava';
+    case 'h_colony':
+      return s.missionCh?.theme === 'colony';
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
