@@ -183,6 +183,7 @@ export const PARTS: Record<string, PartDef> = {
   judgeRig: { id: 'judgeRig', name: 'Judge Rig', desc: 'Arbiter servos — counter-attacks deal +25% damage', price: 1900, counterDmg: 25 },
   titanRipper: { id: 'titanRipper', name: 'Titan Ripper', desc: 'Colossus shredder — attacks ignore 25% of target armor', price: 1900, armorShred: 25 },
   conductorSeal: { id: 'conductorSeal', name: 'Conductor Seal', desc: 'Choir amplifier — pilot regenerates +4 SP every turn', price: 1900, spRegen: 4 },
+  sabotRounds: { id: 'sabotRounds', name: 'Sabot Rounds', desc: 'Demolition load — landed hits have a 25% chance to crack the target\'s armor (break)', price: 1800, statusBreak: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -336,6 +337,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'phalanx', name: 'Phalanx', desc: '+4% damage per point per adjacent ally (max 3)' },
   { id: 'polymath', name: 'Polymath', desc: '+4% damage per point per weapon carried beyond the second' },
   { id: 'isolator', name: 'Isolator', desc: '+6% damage per point vs targets with no adjacent ally' },
+  { id: 'scourge', name: 'Scourge', desc: '+5% damage per point vs targets suffering 2+ statuses' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -378,7 +380,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse', 'terrorverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1441,6 +1443,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_warmonger', name: 'WARMONGER', desc: '1500 total career kills across the squad', rewardCr: 46000 },
   { id: 'h_ragnarok', name: 'RAGNAROK', desc: 'Land a single hit of 500,000+ damage', rewardCr: 50000 },
   { id: 'h_immaculate', name: 'IMMACULATE', desc: 'Earn S rank on 75 missions', rewardCr: 52000 },
+  { id: 'h_divine', name: 'DIVINE', desc: 'Reach NG+10 or beyond', rewardCr: 54000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1746,6 +1749,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.maxHitEver ?? 0) >= 500000;
     case 'h_immaculate':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 75;
+    case 'h_divine':
+      return (s.ngPlus ?? 0) >= 10;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

@@ -154,6 +154,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   siphonverse: { id: 'siphonverse', name: 'Siphon Verse', cost: 50, desc: 'Leech uplink — hits landed by allies within 3 tiles drain 10 EN until end of enemy phase' },
   bindverse: { id: 'bindverse', name: 'Bind Verse', cost: 50, desc: 'Snare web — enemies within 3 tiles are slowed and marked' },
   blightverse: { id: 'blightverse', name: 'Blight Verse', cost: 50, desc: 'Corrosion wave — enemies within 3 tiles burn and suffer cracked armor' },
+  terrorverse: { id: 'terrorverse', name: 'Terror Verse', cost: 50, desc: 'Dread wave — enemies within 3 tiles are stunned and marked' },
   vigilverse: { id: 'vigilverse', name: 'Vigil Verse', cost: 50, desc: 'Watchful hymn — allies within 3 tiles counter at +15% damage until end of enemy phase' },
   mortaledge: { id: 'mortaledge', name: 'Mortal Edge', cost: 50, desc: 'Execution focus — the next attack that lands is a guaranteed critical' },
   sentinelverse: { id: 'sentinelverse', name: 'Sentinel Verse', cost: 50, desc: 'Guardian hymn — allies within 3 tiles intercept attacks aimed at their adjacent allies until end of enemy phase' },
