@@ -152,6 +152,7 @@ export const PARTS: Record<string, PartDef> = {
   rageCoil: { id: 'rageCoil', name: 'Rage Coil', desc: 'Adrenal harness — each hit taken grants the pilot +5 Will', price: 1800, rageCoil: true },
   stunGuard: { id: 'stunGuard', name: 'Stun Guard', desc: 'Gyro anchor — this frame cannot be stunned', price: 1600, stunGuard: true },
   blazePlate: { id: 'blazePlate', name: 'Blaze Plate', desc: 'Fireproof laminate — this frame takes no burn damage', price: 1600, blazePlate: true },
+  frostPlate: { id: 'frostPlate', name: 'Frost Plate', desc: 'Thermal lattice — this frame cannot be slowed', price: 1600, frostPlate: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -274,6 +275,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'sunderfist', name: 'Sunderfist', desc: '+5% damage per point with breaker weapons' },
   { id: 'bloodborne', name: 'Bloodborne', desc: '+5% damage per point while hull is above 80%' },
   { id: 'harvester', name: 'Harvester', desc: '+4% damage per point per 10% hull the target has lost (cap +40%)' },
+  { id: 'gridshock', name: 'Gridshock', desc: '+5% damage per point with energy (EN-cost) weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1348,6 +1350,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_armory', name: 'ARMORY', desc: 'Own 45 different parts', rewardCr: 6500 },
   { id: 'h_genocide', name: 'GENOCIDE', desc: 'Destroy 500 frames across the squad', rewardCr: 7000 },
   { id: 'h_duelking', name: 'DUEL KING', desc: 'One pilot reaches 150 career kills', rewardCr: 8000 },
+  { id: 'h_immortal', name: 'IMMORTAL', desc: 'Win a battle lasting 30+ turns', rewardCr: 8500 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1591,6 +1594,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return totalKills >= 500;
     case 'h_duelking':
       return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 150);
+    case 'h_immortal':
+      return (s.turn ?? 0) >= 30;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

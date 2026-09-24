@@ -86,6 +86,7 @@ function buffNames(u: UnitState): string[] {
   if ((u.bastionTurns ?? 0) > 0) names.push(`BASTION VERSE ${u.bastionTurns}`);
   if (u.heavensverseNext) names.push('HEAVEN VERSE');
   if (u.furyverseNext) names.push('FURY VERSE');
+  if (u.tracerAllyUntilEndOfEnemyPhase) names.push('TRACER VERSE');
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
