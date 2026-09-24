@@ -194,6 +194,7 @@ export const PARTS: Record<string, PartDef> = {
   marksmanCore: { id: 'marksmanCore', name: 'Marksman Core', desc: 'Deadeye matrix — +15 hit and +12% critical chance', price: 2000, accBoost: 15, crit: 12 },
   viceJaws: { id: 'viceJaws', name: 'Vice Jaws', desc: 'Crushing pincer servos — +18% damage against enemies pinned between two allies', price: 1900, pinDmg: 18 },
   hexRounds: { id: 'hexRounds', name: 'Hex Rounds', desc: 'Cursed ammunition — hits may mark (30%) and slow (30%) the target', price: 1800, statusMark: true, statusSlow: true },
+  prismField: { id: 'prismField', name: 'Prism Field', desc: 'Refractive barrier — cuts incoming damage below 1500 to 20%', price: 2200, barrier: 1500 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -361,6 +362,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'sapper', name: 'Sapper', desc: '+5% damage per point against targets on defensive terrain' },
   { id: 'flanker', name: 'Flanker', desc: '+4% damage per point when the target is pinned between two allies' },
   { id: 'tormentor', name: 'Tormentor', desc: '+6% damage per point against decaying targets' },
+  { id: 'godsbreaker', name: 'Godsbreaker', desc: '+5% damage per point against phase-2 bosses' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1479,6 +1481,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_soulforge', name: 'SOULFORGE', desc: 'Witness 18 bond events', rewardCr: 74000 },
   { id: 'h_kingslayer', name: 'KINGSLAYER', desc: 'Destroy 10 boss frames across your career', rewardCr: 76000 },
   { id: 'h_hoarder', name: 'HOARDER', desc: 'Hold 60 items in the inventory at once', rewardCr: 78000 },
+  { id: 'h_veterano', name: 'VETERANO', desc: 'Clear 30 distinct missions', rewardCr: 80000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1810,6 +1813,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.entries(s.killsByDef ?? {}).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) >= 10;
     case 'h_hoarder':
       return Object.values(s.inventory ?? {}).reduce((a, b) => a + b, 0) >= 60;
+    case 'h_veterano':
+      return Object.keys(s.missionRank ?? {}).length >= 30;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
