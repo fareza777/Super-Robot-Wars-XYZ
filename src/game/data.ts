@@ -75,6 +75,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   stalker: { id: 'stalker', name: 'Stalker', cost: 40, desc: 'Predator instinct — your next hit deals +30% damage to a target carrying any status effect' },
   interfere: { id: 'interfere', name: 'Interference', cost: 45, desc: 'ECM flood — enemies within 3 tiles cannot counter-attack until end of their next phase' },
   safeguard: { id: 'safeguard', name: 'Safeguard', cost: 40, desc: 'Defensive perimeter — allies within 3 tiles take -10% damage until end of enemy phase' },
+  blade: { id: 'blade', name: 'Bladestorm', cost: 45, desc: 'Blade dance — your next melee hit deals +40% damage' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
@@ -156,7 +157,7 @@ export const WEAPONS = {
 const P = (p: PilotDef) => p;
 
 export const PILOTS = {
-  ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul', 'frenzy', 'soulburn', 'pyre', 'skyfall'], faceColor: '#ffb347', trait: 'ace_instinct' }),
+  ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul', 'frenzy', 'soulburn', 'pyre', 'skyfall', 'blade'], faceColor: '#ffb347', trait: 'ace_instinct' }),
   mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse', 'fortune', 'trust', 'emp', 'deadshot', 'scan', 'marksman', 'shatter', 'tracer', 'veil', 'stalker'], faceColor: '#7ee7ff', trait: 'deadeye' }),
   gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor', 'sunder', 'provoke', 'phalanx', 'breach', 'charity', 'intimidate', 'warsong', 'fluster', 'overrun', 'avenger'], faceColor: '#ff9d9d', trait: 'siege_breaker' }),
   orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless', 'lucky', 'mercy', 'purge', 'cheer', 'expose', 'decoy', 'hymn', 'sanctuary', 'empower', 'ward', 'relay', 'inspire', 'warhorn', 'safeguard'], faceColor: '#b6ff9d', trait: 'field_medic' }),

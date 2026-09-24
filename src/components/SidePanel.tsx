@@ -42,6 +42,7 @@ function buffNames(u: UnitState): string[] {
   if (u.counterBuffUntilEndOfEnemyPhase) names.push('WARHORN');
   if (u.counterSealUntilEndOfEnemyPhase) names.push('NO-COUNTER');
   if (u.guardAuraUntilEndOfEnemyPhase) names.push('SAFEGUARD');
+  if (u.bladeNext) names.push('BLADE');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');
@@ -105,7 +106,7 @@ export function SidePanel() {
     <View style={styles.panel}>
       <View style={styles.topBar}>
         <Text style={styles.phaseTxt}>{s.phase === 'enemy' ? 'ENEMY PHASE' : 'PLAYER PHASE'}</Text>
-        <Text style={styles.turnTxt}>T{s.turn}</Text>
+        <Text style={styles.turnChip}>T{s.turn}</Text>
       </View>
       {s.blizzard ? <Text style={styles.blizzChip}>{s.missionCh.theme === 'desert' ? '🏜 SANDSTORM — ground units -15% hit' : s.missionCh.theme === 'ruins' ? '🌫 ASH STORM — ground units -15% hit' : '❄ BLIZZARD — ground units -15% hit'}</Text> : null}
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -622,7 +623,7 @@ const styles = StyleSheet.create({
   panel: { width: 236, backgroundColor: '#12141c', borderLeftWidth: 1, borderLeftColor: '#2a2f42', padding: 7, paddingBottom: 30 },
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   phaseTxt: { color: '#ffd34d', fontWeight: '800', fontSize: 11.5, letterSpacing: 1 },
-  turnTxt: { color: '#9fb0d0', fontWeight: '700', fontSize: 11.5 },
+  turnChip: { color: '#ffd34d', fontWeight: '900', fontSize: 11, letterSpacing: 0.8, borderWidth: 1, borderColor: '#4a5168', borderRadius: 6, paddingHorizontal: 7, paddingVertical: 2, backgroundColor: 'rgba(20,26,44,0.85)' },
   counts: { color: '#6b7694', fontSize: 9.5, marginTop: 1 },
   body: { flex: 1, marginTop: 6 },
   unitCard: { backgroundColor: '#1a1e2c', borderRadius: 8, padding: 7 },
