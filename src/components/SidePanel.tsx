@@ -83,6 +83,7 @@ function buffNames(u: UnitState): string[] {
   if (u.rageverseNext) names.push('RAGE VERSE');
   if (u.exposed) names.push('EXPOSED');
   if ((u.foresightTurns ?? 0) > 0) names.push('FORESIGHT VERSE');
+  if (u.heavensverseNext) names.push('HEAVEN VERSE');
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');

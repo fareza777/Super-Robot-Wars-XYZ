@@ -121,7 +121,7 @@ export function BriefingScreen() {
             const by: Record<string, number> = {};
             for (const e of sp) by[e.defId] = (by[e.defId] ?? 0) + 1;
             const names = Object.entries(by).sort((x, y) => y[1] - x[1]).slice(0, 5).map(([id, n]) => `${ALL_UNITS[id]?.name ?? id} ×${n}`);
-            return `⚠ HOSTILES ${sp.length} — ${names.join(' · ')}`;
+            return `⚠ HOSTILES ${sp.length} — ${names.join(' · ')}${ch.turnLimit ? ` · ⏱ LIMIT ${ch.turnLimit}` : ''}`;
           })()}
         </Text>
         <Text style={{ color: '#9fe8a9', fontSize: 9, fontWeight: '700', letterSpacing: 0.5, marginTop: 3 }}>
