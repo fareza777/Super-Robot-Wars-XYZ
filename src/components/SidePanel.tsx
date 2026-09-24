@@ -45,6 +45,7 @@ function buffNames(u: UnitState): string[] {
   if (u.suppressDmgUntilEndOfEnemyPhase) names.push('SUPPRESSED');
   if (u.bladeNext) names.push('BLADE');
   if (u.carnageNext) names.push('CARNAGE');
+  if (u.trueShotNext) names.push('TRUE SHOT');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');
@@ -573,7 +574,7 @@ export function SidePanel() {
             )}
             {inspect.def.weapons.map((w) => (
               <Text key={w.id} style={styles.weapLine} numberOfLines={1}>
-                ⚔ {w.name} · POW {w.power} · R{w.rangeMin}-{w.rangeMax}
+                {w.kind === 'melee' ? '⚔' : w.kind === 'gun' ? '⌖' : w.kind === 'beam' ? '✦' : w.kind === 'missile' ? '▲' : '◈'} {w.name} · POW {w.power} · R{w.rangeMin}-{w.rangeMax}
                 {w.mapRange != null ? ` · AREA ${w.mapRange}` : ''}
                 {w.willReq ? ` · W${w.willReq}` : ''}
                 {w.critMod ? ` · CRIT+${w.critMod}` : ''}

@@ -104,6 +104,7 @@ export const PARTS: Record<string, PartDef> = {
   regenPlate: { id: 'regenPlate', name: 'Regen Plate', desc: 'Nanoweave armor — each landed hit regenerates 5% max HP', price: 2000, regenPlate: true },
   vampCoil: { id: 'vampCoil', name: 'Vampiric Coil', desc: 'Energy siphon — attacks restore 10% of damage dealt as HP', price: 1900, drainCoil: true },
   bulwarkShell: { id: 'bulwarkShell', name: 'Bulwark Shell', desc: 'Ballistic weave — incoming gun damage reduced by 25%', price: 1800, gunGuard: true },
+  funnelLattice: { id: 'funnelLattice', name: 'Funnel Lattice', desc: 'Phase mesh — incoming funnel damage reduced by 25%', price: 1800, funnelGuard: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -178,6 +179,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'heavycal', name: 'Heavy Caliber', desc: '+5% damage per point with ammunition weapons' },
   { id: 'anchor', name: 'Anchor', desc: '-5% damage taken per point while this frame did not move' },
   { id: 'dreadnought', name: 'Dreadnought', desc: '+4% damage per point against lower-level frames' },
+  { id: 'resolute', name: 'Resolute', desc: '+6% damage per point while Will is 120 or higher' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1204,6 +1206,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_warchest', name: 'WAR CHEST', desc: 'Hold 100,000 credits', rewardCr: 3000 },
   { id: 'h_forge', name: 'ELITE FORGE', desc: 'Four pilots reach 35 career kills', rewardCr: 2200 },
   { id: 'h_legend', name: 'LEGEND', desc: 'Earn S rank on 12 missions', rewardCr: 2500 },
+  { id: 'h_sweeper', name: 'IRON SWEEP', desc: 'Earn rank B or better on 15 missions', rewardCr: 1600 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1350,6 +1353,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.pilotProg ?? {}).filter((p) => (p.kills ?? 0) >= 35).length >= 4;
     case 'h_legend':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 12;
+    case 'h_sweeper':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S' || r === 'A' || r === 'B').length >= 15;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
