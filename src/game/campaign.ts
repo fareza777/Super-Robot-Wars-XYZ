@@ -184,9 +184,10 @@ export const PARTS: Record<string, PartDef> = {
   titanRipper: { id: 'titanRipper', name: 'Titan Ripper', desc: 'Colossus shredder — attacks ignore 25% of target armor', price: 1900, armorShred: 25 },
   conductorSeal: { id: 'conductorSeal', name: 'Conductor Seal', desc: 'Choir amplifier — pilot regenerates +4 SP every turn', price: 1900, spRegen: 4 },
   sabotRounds: { id: 'sabotRounds', name: 'Sabot Rounds', desc: 'Demolition load — landed hits have a 25% chance to crack the target\'s armor (break)', price: 1800, statusBreak: true },
-  gyroStabilizer: { id: 'gyroStabilizer', name: 'Gyro Stabilizer', desc: 'Inertial rig — +1 movement and +8 evade', price: 1900, move: 1, evade: 8 },
+  gyroStabilizer: { id: 'gyroStabilizer', name: 'Cyclone Gyro', desc: 'Inertial rig — +1 movement and +8 evade', price: 1900, move: 1, evade: 8 },
   blitzVerniers: { id: 'blitzVerniers', name: 'Blitz Verniers', desc: 'Assault thrusters — +1 movement and +10 EN regen each turn', price: 1900, move: 1, enRegen: 10 },
   oracleLens: { id: 'oracleLens', name: 'Oracle Lens', desc: 'Predictive array — +15 hit', price: 1900, accBoost: 15 },
+  mirageWeave: { id: 'mirageWeave', name: 'Mirage Weave', desc: 'Phase-shift coating — +15 evade', price: 1900, evade: 15 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -347,6 +348,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'snipersoul', name: 'Snipersoul', desc: '+6% damage per point with sniper-tagged weapons' },
   { id: 'aegisshield', name: 'Aegis Shield', desc: '+4% damage per point while standing on defensive terrain' },
   { id: 'stunlock', name: 'Stunlock', desc: '+6% damage per point against stunned targets' },
+  { id: 'polluter', name: 'Polluter', desc: '+4% damage per point against targets carrying any status effect' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -389,7 +391,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse', 'terrorverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse', 'terrorverse', 'mireverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1458,6 +1460,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_omniscient', name: 'OMNISCIENT', desc: 'Reach NG+11 or beyond', rewardCr: 60000 },
   { id: 'h_warlord', name: 'WARLORD', desc: 'One pilot reaches 750 career kills', rewardCr: 62000 },
   { id: 'h_arsenal', name: 'ARSENAL', desc: 'Own 60 different parts', rewardCr: 64000 },
+  { id: 'h_tycoon', name: 'TYCOON', desc: 'Hold 250,000 credits at once', rewardCr: 66000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1775,6 +1778,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 750);
     case 'h_arsenal':
       return (s.partsOwned ?? []).length >= 60;
+    case 'h_tycoon':
+      return (s.credits ?? 0) >= 250000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

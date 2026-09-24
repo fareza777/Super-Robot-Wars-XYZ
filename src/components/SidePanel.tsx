@@ -580,6 +580,7 @@ export function SidePanel() {
                   <Text style={[styles.rosterHp, { color: '#c9a0ff' }]}>✦{u.sp}</Text>
                   {(u.statuses?.length ?? 0) > 0 ? <Text style={[styles.rosterHp, { color: '#ff9d7a' }]}>⌛{u.statuses!.length}</Text> : null}
                   {u.crippled ? <Text style={[styles.rosterHp, { color: '#ff9d7a' }]}>⛓</Text> : null}
+                  <Text style={[styles.rosterHp, { color: '#9fd8ff' }]}>⇄{moveRangeOf(u)}</Text>
                   <Text style={[styles.rosterHp, { color: '#ffd34d' }]}>{u.kills}K</Text>
                   {(u.parts?.length ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#7ac7ff' }]}>◈{u.parts.length}</Text>}
                 </View>
