@@ -101,6 +101,7 @@ function buffNames(u: UnitState): string[] {
   if (u.arcNext) names.push('ARC EDGE');
   if (u.splatterNext) names.push('SPLATTER EDGE');
   if (u.doomNext) names.push('DOOM EDGE');
+  if (u.flareNext) names.push('FLARE EDGE');
   if (u.rended) names.push('RENDED');
   if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
   if (u.crimsonUntilEndOfEnemyPhase) names.push('CRIMSON VERSE');
@@ -534,7 +535,7 @@ export function SidePanel() {
                         </View>
                         <View style={styles.tgtHitBox}>
                           <Text style={[styles.tgtHit, hc >= 80 ? { color: '#4dff7a' } : hc >= 55 ? { color: '#ffd34d' } : { color: '#ff8a5a' }]}>{hc}%</Text>
-                          <Text style={[styles.tgtDmg, kill && { color: '#ff6b6b' }]}>{kill ? 'DESTROY' : `~${dmg}`}</Text>
+                          <Text style={[styles.tgtDmg, kill ? { color: '#ff6b6b' } : dmg >= e.hp * 0.5 ? { color: '#ffb84d' } : {}]}>{kill ? 'DESTROY' : `~${dmg}`}</Text>
                         </View>
                       </Pressable>
                     );
