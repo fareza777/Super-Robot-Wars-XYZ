@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0, truesight: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus' | 'beamDmg' | 'funnelDmg' | 'missileDmg' | 'gunDmg' | 'ammoRegen' | 'markDmg' | 'spRegen' | 'lowHpDmg' | 'aimBoost' | 'shieldBreak' | 'pinDmg' | 'jamProof' | 'statusBurn' | 'statusBreak' | 'statusMark' | 'statusStun' | 'beamGuard' | 'meleeGuard' | 'missileGuard' | 'regenPlate' | 'drainCoil' | 'gunGuard' | 'funnelGuard' | 'counterRange' | 'mapGuard' | 'killDmg' | 'lowHpArmor' | 'chargeBoost' | 'terrainArmor' | 'mapDmg' | 'jammerSkin' | 'lowHpRegen'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus' | 'beamDmg' | 'funnelDmg' | 'missileDmg' | 'gunDmg' | 'ammoRegen' | 'markDmg' | 'spRegen' | 'lowHpDmg' | 'aimBoost' | 'shieldBreak' | 'pinDmg' | 'jamProof' | 'statusBurn' | 'statusBreak' | 'statusMark' | 'statusStun' | 'beamGuard' | 'meleeGuard' | 'missileGuard' | 'regenPlate' | 'drainCoil' | 'gunGuard' | 'funnelGuard' | 'counterRange' | 'mapGuard' | 'killDmg' | 'lowHpArmor' | 'chargeBoost' | 'terrainArmor' | 'mapDmg' | 'jammerSkin' | 'lowHpRegen' | 'sniperGuard'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -190,6 +190,7 @@ export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: Map
 
 export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, crit: boolean, dmgMult = 1, units?: UnitState[]): number {
   let armor = att.breachNextAttack ? 0 : armorOf(def, map);
+  armor += dist(att.pos, def.pos) >= 5 ? partBonus(def, 'sniperGuard') : 0;
   if (att.shatterNext) armor = Math.round(armor * 0.5);
   if (att.skills?.piercer) armor = Math.round(armor * (1 - att.skills.piercer * 0.04));
   if (partBonus(att, 'terrainArmor') > 0) armor = Math.max(0, armor - TERRAIN_INFO[terrainAt(map, def.pos)].def);
@@ -240,6 +241,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (att.def.moveType === 'air' && def.def.moveType !== 'air') dmg = Math.round(dmg * (1 + (att.skills?.divebomb ?? 0) * 0.06));
   dmg = Math.round(dmg * (1 + (att.skills?.arsenalmind ?? 0) * 0.03 * Math.min(att.parts?.length ?? 0, 4)));
   dmg = Math.round(dmg * (1 + (att.skills?.titanbreaker ?? 0) * (def.def.moveRange <= 4 ? 0.06 : 0)));
+  if (att.aimed) dmg = Math.round(dmg * (1 + (att.skills?.truesight ?? 0) * 0.05));
   if (att.rampageNext) dmg = Math.round(dmg * (1 + Math.min(att.kills ?? 0, 5) * 0.08));
   if (w.kind === 'gun') dmg = Math.round(dmg * (1 + partBonus(att, 'gunDmg') / 100));
   if ((att.kills ?? 0) >= 3) dmg = Math.round(dmg * (1 + 0.05 * (att.skills?.bloodlust ?? 0)));
@@ -1124,6 +1126,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'rampage':
       u.rampageNext = true;
       break;
+    case 'drawfire':
+      u.drawfireUntilEndOfEnemyPhase = true;
+      break;
     // 'rouse', 'disrupt' and 'trust' affect neighbouring units — applied in store.castSpirit
   }
 }
@@ -1147,6 +1152,7 @@ export function clearTransientForOwnPhase(u: UnitState): void {
   u.dischordUntilEndOfEnemyPhase = false;
   u.absolveUntilEndOfEnemyPhase = false;
   u.bannerUntilEndOfEnemyPhase = false;
+  u.drawfireUntilEndOfEnemyPhase = false;
   u.marksmanUntilEndOfEnemyPhase = false;
   u.warsongUntilEndOfEnemyPhase = false;
   u.frenzyThisTurn = false;
@@ -1243,7 +1249,7 @@ export function planEnemyActions(state: GameState): AiPlan[] {
           const hc = hitChance(e, p, w, map, rallyBonus(units, e) + formationBonus(units, e) - jammerPenalty(units, e));
           const dmg = damageOf(e, p, w, map, false);
           // convoy priority: protect-mission NPCs are the AI's preferred prey
-          const score = dmg * (hc / 100) + (p.hp - dmg <= 0 ? 5000 : 0) + (p.escort ? 800 : 0) + (partBonus(p, 'aggro') > 0 ? 900 : 0) + w.power * 0.01;
+          const score = dmg * (hc / 100) + (p.hp - dmg <= 0 ? 5000 : 0) + (p.escort ? 800 : 0) + (partBonus(p, 'aggro') > 0 || p.drawfireUntilEndOfEnemyPhase ? 900 : 0) + w.power * 0.01;
           if (!best || score > best.score) best = { pos: tile, target: p, weapon: w, score };
         }
       }

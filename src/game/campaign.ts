@@ -114,6 +114,7 @@ export const PARTS: Record<string, PartDef> = {
   warheadCache: { id: 'warheadCache', name: 'Warhead Cache', desc: 'Deep magazines — MAP/area weapons deal +15% damage', price: 1700, mapDmg: true },
   jammerSkin: { id: 'jammerSkin', name: 'Jammer Skin', desc: 'ECM coating — attackers that hit this frame have a 25% chance of a suppress glitch (-20 hit)', price: 1700, jammerSkin: true },
   survivalRig: { id: 'survivalRig', name: 'Survival Rig', desc: 'Emergency nanoloom — regenerates +8% hull per turn while below 40% HP', price: 1600, lowHpRegen: true },
+  flakShield: { id: 'flakShield', name: 'Flak Shield', desc: 'Point-defense lattice — +400 armor against attacks from 5+ tiles away', price: 1700, sniperGuard: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -198,6 +199,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'divebomb', name: 'Divebomb', desc: '+6% damage per point when an air frame strikes a ground target' },
   { id: 'arsenalmind', name: 'Arsenal Mind', desc: '+3% damage per point for each part equipped on this frame' },
   { id: 'titanbreaker', name: 'Titanbreaker', desc: '+6% damage per point vs slow siege frames (move range 4 or less)' },
+  { id: 'truesight', name: 'Truesight', desc: '+5% damage per point while AIM focus is active — rewards the patient shot' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1234,6 +1236,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_tycoon', name: 'TYCOON', desc: 'Hold 200000 credits', rewardCr: 4000 },
   { id: 'h_bloodbath', name: 'BLOODBATH', desc: 'Destroy 18 enemies in a single battle', rewardCr: 1500 },
   { id: 'h_paragon', name: 'PARAGON', desc: 'Earn battle rank S in 18 missions', rewardCr: 2500 },
+  { id: 'h_apex', name: 'APEX PILOT', desc: 'Score 15000+ in the VR Simulator', rewardCr: 4000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1400,6 +1403,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.kills ?? 0) >= 18;
     case 'h_paragon':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 18;
+    case 'h_apex':
+      return (s.simBest ?? 0) >= 15000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

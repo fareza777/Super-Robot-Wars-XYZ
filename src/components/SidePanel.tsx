@@ -52,6 +52,7 @@ function buffNames(u: UnitState): string[] {
   if (u.bannerUntilEndOfEnemyPhase) names.push('BANNER');
   if (u.goreNext) names.push('GORELUST');
   if (u.rampageNext) names.push('RAMPAGE');
+  if (u.drawfireUntilEndOfEnemyPhase) names.push('DRAWFIRE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
@@ -309,7 +310,7 @@ export function SidePanel() {
             {unit.def.repairer &&
               s.units.some((t) => t.alive && t.side === 'player' && t.uid !== unit.uid && dist(t.pos, unit.pos) <= 2 && (t.hp < t.def.maxHp || t.en < t.def.maxEn)) && (
                 <>
-                  <Text style={styles.menuTitle}>REPAIR</Text>
+                  <Text style={[styles.menuTitle, { color: '#7ac7ff' }]}>REPAIR</Text>
                   {s.units
                     .filter((t) => t.alive && t.side === 'player' && t.uid !== unit.uid && dist(t.pos, unit.pos) <= 2 && (t.hp < t.def.maxHp || t.en < t.def.maxEn))
                     .map((t) => (
@@ -320,7 +321,7 @@ export function SidePanel() {
             {unit.def.supplier &&
               s.units.some((t) => t.alive && t.side === 'player' && t.uid !== unit.uid && dist(t.pos, unit.pos) <= 3 && (t.en < t.def.maxEn || t.def.weapons.some((w) => w.ammo != null && (t.ammo[w.id] ?? 0) < w.ammo))) && (
                 <>
-                  <Text style={styles.menuTitle}>RESUPPLY</Text>
+                  <Text style={[styles.menuTitle, { color: '#7ac7ff' }]}>RESUPPLY</Text>
                   {s.units
                     .filter((t) => t.alive && t.side === 'player' && t.uid !== unit.uid && dist(t.pos, unit.pos) <= 3 && (t.en < t.def.maxEn || t.def.weapons.some((w) => w.ammo != null && (t.ammo[w.id] ?? 0) < w.ammo)))
                     .map((t) => (
@@ -330,7 +331,7 @@ export function SidePanel() {
               )}
             {s.units.some((t) => t.alive && t.side === 'enemy' && !t.def.boss && t.hp <= t.def.maxHp * 0.25 && dist(t.pos, unit.pos) <= 1) && (
               <>
-                <Text style={styles.menuTitle}>CAPTURE</Text>
+                <Text style={[styles.menuTitle, { color: '#ffb84d' }]}>CAPTURE</Text>
                 {s.units
                   .filter((t) => t.alive && t.side === 'enemy' && !t.def.boss && t.hp <= t.def.maxHp * 0.25 && dist(t.pos, unit.pos) <= 1)
                   .map((t) => (
