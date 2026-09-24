@@ -97,6 +97,7 @@ function buffNames(u: UnitState): string[] {
   if (u.mortalNext) names.push('MORTAL EDGE');
   if (u.rendNext) names.push('REND EDGE');
   if (u.snareNext) names.push('SNARE EDGE');
+  if (u.overNext) names.push('OVEREDGE');
   if (u.rended) names.push('RENDED');
   if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
   if (u.crimsonUntilEndOfEnemyPhase) names.push('CRIMSON VERSE');
@@ -608,6 +609,7 @@ export function SidePanel() {
                       <Text style={[styles.rosterHp, u.hp / u.def.maxHp < 0.25 && { color: '#ff8a8a' }]}>{u.hp / u.def.maxHp < 0.25 ? '⚠' : ''}{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
                       <Text style={[styles.rosterHp, { color: '#9fd8ff', width: 30 }]}>R{Math.max(0, ...u.def.weapons.map((w) => w.rangeMax))}</Text>
                       <Text style={[styles.rosterHp, { color: '#8b94b8', width: 34 }]}>🛡{armorOf(u, s.map)}</Text>
+                      <Text style={[styles.rosterHp, { color: '#7fd0b0', width: 30 }]}>≫{Math.round(evadeOf(u, s.map))}</Text>
                     </View>
                   ),
                 )}

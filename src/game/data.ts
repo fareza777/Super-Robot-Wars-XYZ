@@ -158,6 +158,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   salvoverse: { id: 'salvoverse', name: 'Salvo Verse', cost: 50, desc: 'Fire-support hymn — allies within 3 tiles deal +15% damage with ranged weapons until end of enemy phase' },
   snaredge: { id: 'snaredge', name: 'Snare Edge', cost: 45, desc: 'Entangling strike — the next hit deals +15% damage and lands suppress + slow' },
   shelterverse: { id: 'shelterverse', name: 'Shelter Verse', cost: 50, desc: 'Warding hymn — allies within 3 tiles take 25% less damage from MAP/area weapons until end of enemy phase' },
+  overedge: { id: 'overedge', name: 'Overedge', cost: 45, desc: 'Overdrive strike — next hit deals +40% damage but recoils 10% of own max hull' },
   vigilverse: { id: 'vigilverse', name: 'Vigil Verse', cost: 50, desc: 'Watchful hymn — allies within 3 tiles counter at +15% damage until end of enemy phase' },
   mortaledge: { id: 'mortaledge', name: 'Mortal Edge', cost: 50, desc: 'Execution focus — the next attack that lands is a guaranteed critical' },
   sentinelverse: { id: 'sentinelverse', name: 'Sentinel Verse', cost: 50, desc: 'Guardian hymn — allies within 3 tiles intercept attacks aimed at their adjacent allies until end of enemy phase' },

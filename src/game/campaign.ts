@@ -185,6 +185,7 @@ export const PARTS: Record<string, PartDef> = {
   conductorSeal: { id: 'conductorSeal', name: 'Conductor Seal', desc: 'Choir amplifier — pilot regenerates +4 SP every turn', price: 1900, spRegen: 4 },
   sabotRounds: { id: 'sabotRounds', name: 'Sabot Rounds', desc: 'Demolition load — landed hits have a 25% chance to crack the target\'s armor (break)', price: 1800, statusBreak: true },
   gyroStabilizer: { id: 'gyroStabilizer', name: 'Gyro Stabilizer', desc: 'Inertial rig — +1 movement and +8 evade', price: 1900, move: 1, evade: 8 },
+  blitzVerniers: { id: 'blitzVerniers', name: 'Blitz Verniers', desc: 'Assault thrusters — +1 movement and +10 EN regen each turn', price: 1900, move: 1, enRegen: 10 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -341,7 +342,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'polymath', name: 'Polymath', desc: '+4% damage per point per weapon carried beyond the second' },
   { id: 'isolator', name: 'Isolator', desc: '+6% damage per point vs targets with no adjacent ally' },
   { id: 'scourge', name: 'Scourge', desc: '+5% damage per point vs targets suffering 2+ statuses' },
-  { id: 'bombardier', name: 'Bombardier', desc: '+5% damage per point with MAP/area weapons' },
+  { id: 'bloodtrance', name: 'Bloodtrance', desc: '+4% damage per point for each enemy adjacent to this frame (up to 3)' },
   { id: 'snipersoul', name: 'Snipersoul', desc: '+6% damage per point with sniper-tagged weapons' },
   { id: 'aegisshield', name: 'Aegis Shield', desc: '+4% damage per point while standing on defensive terrain' },
 ];
@@ -382,7 +383,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse', 'goreverse', 'culledge', 'rendedge'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse', 'goreverse', 'culledge', 'rendedge', 'overedge'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1453,6 +1454,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_infinite', name: 'INFINITE', desc: 'Earn MASTERY ★ on 75 missions', rewardCr: 56000 },
   { id: 'h_pantheon', name: 'PANTHEON', desc: '2000 total career kills across the squad', rewardCr: 58000 },
   { id: 'h_omniscient', name: 'OMNISCIENT', desc: 'Reach NG+11 or beyond', rewardCr: 60000 },
+  { id: 'h_warlord', name: 'WARLORD', desc: 'One pilot reaches 750 career kills', rewardCr: 62000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1766,6 +1768,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return totalKills >= 2000;
     case 'h_omniscient':
       return (s.ngPlus ?? 0) >= 11;
+    case 'h_warlord':
+      return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 750);
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
