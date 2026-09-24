@@ -42,6 +42,7 @@ function buffNames(u: UnitState): string[] {
   if (u.counterBuffUntilEndOfEnemyPhase) names.push('WARHORN');
   if (u.counterSealUntilEndOfEnemyPhase) names.push('NO-COUNTER');
   if (u.guardAuraUntilEndOfEnemyPhase) names.push('SAFEGUARD');
+  if (u.suppressDmgUntilEndOfEnemyPhase) names.push('SUPPRESSED');
   if (u.bladeNext) names.push('BLADE');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
@@ -667,7 +668,7 @@ const styles = StyleSheet.create({
   retreatTxt: { color: '#8fa1c7', fontWeight: '800', fontSize: 9, letterSpacing: 1 },
   terrainLine: { color: '#7fd4a8', fontSize: 8.5, marginTop: 4, fontWeight: '700' },
   objCard: { backgroundColor: '#1a2416', borderWidth: 1, borderColor: '#3a5a48', borderRadius: 6, padding: 5, marginTop: 4 },
-  objTxt: { color: '#7dff9d', fontSize: 9, fontWeight: '800', letterSpacing: 0.6 },
+  objTxt: { color: '#7dff9d', fontSize: 9, fontWeight: '800', letterSpacing: 0.6, borderWidth: 1, borderColor: '#2f6b46', borderRadius: 5, paddingHorizontal: 6, paddingVertical: 3, backgroundColor: 'rgba(30,90,55,0.18)', marginBottom: 3, overflow: 'hidden' },
   tileCoords: { color: '#6b7694', fontSize: 8.5, marginTop: 1 },
   crateHint: { color: '#ffd34d', fontSize: 8.5, marginTop: 4, fontWeight: '700' },
   rosterBox: { marginTop: 7, backgroundColor: '#0c0e16', borderRadius: 6, padding: 6 },

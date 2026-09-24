@@ -102,6 +102,7 @@ export const PARTS: Record<string, PartDef> = {
   kineticWeave: { id: 'kineticWeave', name: 'Kinetic Weave', desc: 'Shock-dampening frame — incoming melee damage reduced by 25%', price: 1800, meleeGuard: true },
   flakCoat: { id: 'flakCoat', name: 'Flak Coat', desc: 'Ablative plating — incoming missile damage reduced by 25%', price: 1800, missileGuard: true },
   regenPlate: { id: 'regenPlate', name: 'Regen Plate', desc: 'Nanoweave armor — each landed hit regenerates 5% max HP', price: 2000, regenPlate: true },
+  vampCoil: { id: 'vampCoil', name: 'Vampiric Coil', desc: 'Energy siphon — attacks restore 10% of damage dealt as HP', price: 1900, drainCoil: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -174,6 +175,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'parry', name: 'Parry', desc: '-5% melee damage taken per point' },
   { id: 'piercer', name: 'Piercer', desc: 'Attacks ignore +4% of target armor per point' },
   { id: 'heavycal', name: 'Heavy Caliber', desc: '+5% damage per point with ammunition weapons' },
+  { id: 'anchor', name: 'Anchor', desc: '-5% damage taken per point while this frame did not move' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1198,6 +1200,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_omega', name: 'OMEGA PURGE', desc: 'Destroy 14+ enemy frames in a single battle', rewardCr: 1800 },
   { id: 'h_centurion', name: 'CENTURION', desc: 'One pilot reaches 100 career kills', rewardCr: 4000 },
   { id: 'h_warchest', name: 'WAR CHEST', desc: 'Hold 100,000 credits', rewardCr: 3000 },
+  { id: 'h_forge', name: 'ELITE FORGE', desc: 'Four pilots reach 35 career kills', rewardCr: 2200 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1340,6 +1343,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 100);
     case 'h_warchest':
       return s.credits >= 100000;
+    case 'h_forge':
+      return Object.values(s.pilotProg ?? {}).filter((p) => (p.kills ?? 0) >= 35).length >= 4;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
