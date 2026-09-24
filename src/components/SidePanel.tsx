@@ -75,6 +75,7 @@ function buffNames(u: UnitState): string[] {
   if (u.sunderstormNext) names.push('SUNDERSTORM');
   if (u.mirrorwallUntilEndOfEnemyPhase) names.push('MIRROR WALL');
   if (u.ravenousNext) names.push('RAVENOUS');
+  if (u.breachAtkUntilEndOfEnemyPhase) names.push('BREACH VERSE');
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
@@ -625,7 +626,8 @@ export function SidePanel() {
                 {w.mapRange != null ? ` · AREA ${w.mapRange}` : ''}
                 {w.willReq ? ` · W${w.willReq}` : ''}
                 {w.critMod ? ` · CRIT+${w.critMod}` : ''}
-                {w.ammo != null ? ` · ×${inspect.ammo[w.id] ?? 0}` : ` · EN ${w.enCost}`}
+                {w.ammo != null ? ` · ×${inspect.ammo[w.id] ?? 0}` : ''}
+                {w.ammo == null && <Text style={{ color: inspect.en < w.enCost ? '#ff6b6b' : '#5f7199' }}>{` · EN ${w.enCost}`}</Text>}
                 {w.pierce ? ' · ◆PIERCE' : ''}
                 {w.drain ? ' · ✚DRAIN' : ''}
                 {w.antiAir ? ' · ☄AA' : ''}

@@ -140,6 +140,7 @@ export const PARTS: Record<string, PartDef> = {
   reactorShield: { id: 'reactorShield', name: 'Reactor Shield', desc: 'Power sink — +400 armor while EN is above 50%', price: 1700, reactorShield: true },
   foilWeave: { id: 'foilWeave', name: 'Foil Weave', desc: 'Dune walker laminate — +10 evade on evasive terrain', price: 1500, foilWeave: true },
   cloakWeave: { id: 'cloakWeave', name: 'Cloak Weave', desc: 'Shroud laminate — +10 evade while hull is below 50%', price: 1600, cloakWeave: true },
+  skyBooster: { id: 'skyBooster', name: 'Sky Booster', desc: 'Vernier array — airframes gain +1 movement', price: 1500, skyBooster: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -250,6 +251,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'ravager', name: 'Ravager', desc: '+5% damage per point vs targets on open ground (no terrain armor)' },
   { id: 'sledge', name: 'Sledge', desc: '+6% damage per point with knockback weapons' },
   { id: 'overkill', name: 'Overkill', desc: '+5% damage per point when the blow would destroy the target' },
+  { id: 'pike', name: 'Pike', desc: '+5% damage per point when firing at maximum weapon reach' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1312,6 +1314,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_strider', name: 'ETERNAL STRIDER', desc: 'Reach NG+4', rewardCr: 3500 },
   { id: 'h_salvagebaron', name: 'SALVAGE BARON', desc: 'Accumulate 60000 salvage credits', rewardCr: 3600 },
   { id: 'h_marathon', name: 'MARATHON', desc: 'Win a battle lasting 25 or more turns', rewardCr: 2500 },
+  { id: 'h_imperator', name: 'IMPERATOR', desc: 'Earn battle rank S in 28 missions', rewardCr: 5000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1531,6 +1534,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.salvageCr ?? 0) >= 60000;
     case 'h_marathon':
       return (s.turn ?? 0) >= 25;
+    case 'h_imperator':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 28;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
