@@ -91,6 +91,7 @@ function buffNames(u: UnitState): string[] {
   if (u.rampartUntilEndOfEnemyPhase) names.push('RAMPART VERSE');
   if (u.ravageNext) names.push('RAVAGE VERSE');
   if (u.ghostNext) names.push('GHOST VERSE');
+  if (u.cursedUntilEndOfEnemyPhase) names.push('CURSE VERSE');
   if ((u.sirenTurns ?? 0) > 0) names.push(`SIREN VERSE ${u.sirenTurns}`);
   if ((u.clarionTurns ?? 0) > 0) names.push(`CLARION VERSE ${u.clarionTurns}`);
   if (u.lacerateNext) names.push('LACERATE');
@@ -534,7 +535,7 @@ export function SidePanel() {
         {/* squad roster — toggle from the counts row */}
         {showRoster && !s.menuForUid && !s.pendingWeapon && !s.spiritForUid && !inspect && (
           <View style={styles.rosterBox}>
-            <Text style={[styles.menuTitle, { color: '#4dff7a' }]}>SQUAD</Text>
+            <Text style={[styles.menuTitle, { color: '#4dff7a' }]}>SQUAD · {s.units.filter((u) => u.side === 'player' && u.alive).length}</Text>
             {s.units
               .filter((u) => u.side === 'player' && u.alive)
               .map((u) => (
@@ -559,7 +560,7 @@ export function SidePanel() {
                   {(u.parts?.length ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#7ac7ff' }]}>◈{u.parts.length}</Text>}
                 </View>
               ))}
-            <Text style={[styles.menuTitle, { color: '#ff6b6b' }]}>HOSTILES</Text>
+            <Text style={[styles.menuTitle, { color: '#ff6b6b' }]}>HOSTILES · {s.units.filter((u) => u.side === 'enemy' && u.alive).length}</Text>
             <ScrollView style={{ maxHeight: 92 }} nestedScrollEnabled>
               {s.units
                 .filter((u) => u.side === 'enemy' && u.alive && (!s.missionCh.fog || fogLit(s.units, u.pos)))

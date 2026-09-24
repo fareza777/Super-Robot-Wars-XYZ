@@ -133,6 +133,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   rampartverse: { id: 'rampartverse', name: 'Rampart Verse', cost: 50, desc: 'Shield anthem — allies within 3 tiles take -20% damage from attacks at range 3+ until end of enemy phase' },
   ravageverse: { id: 'ravageverse', name: 'Ravage Verse', cost: 50, desc: 'Mauling strike — the next hit deals +35% damage and cripples the target frame' },
   ghostverse: { id: 'ghostverse', name: 'Ghost Verse', cost: 45, desc: 'Untraceable shot — the next hit deals +25% damage and cannot be countered' },
+  curseverse: { id: 'curseverse', name: 'Curse Verse', cost: 50, desc: 'Withering chant — enemies within 3 tiles take +15% damage until end of enemy phase' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
