@@ -80,6 +80,7 @@ function buffNames(u: UnitState): string[] {
   if ((u.renewalTurns ?? 0) > 0) names.push('RENEWAL VERSE');
   if (u.quakeedgeNext) names.push('QUAKE EDGE');
   if (u.valiantUntilEndOfEnemyPhase) names.push('VALIANT VERSE');
+  if (u.rageverseNext) names.push('RAGE VERSE');
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');

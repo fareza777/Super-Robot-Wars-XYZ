@@ -119,6 +119,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   renewalverse: { id: 'renewalverse', name: 'Renewal Verse', cost: 50, desc: 'Sustaining hymn — allies within 3 tiles regenerate +10 EN each turn for 2 turns' },
   quakeedge: { id: 'quakeedge', name: 'Quake Edge', cost: 45, desc: 'Seismic blade — the next landed hit slows the target and every foe adjacent to it' },
   valiantverse: { id: 'valiantverse', name: 'Valiant Verse', cost: 45, desc: 'Underdog anthem — allies within 3 tiles gain +12% damage while outnumbered until the end of the enemy phase' },
+  rageverse: { id: 'rageverse', name: 'Rage Verse', cost: 40, desc: 'Berserker hymn — the next attack hits harder the lower this frame hull is (up to +40%)' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
