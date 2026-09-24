@@ -115,6 +115,7 @@ function buffNames(u: UnitState): string[] {
   if (u.shelterUntilEndOfEnemyPhase) names.push('SHELTER VERSE');
   if (u.juggernautUntilEndOfEnemyPhase) names.push('JUGGERNAUT VERSE');
   if (u.defianceUntilEndOfEnemyPhase) names.push('DEFIANCE VERSE');
+  if (u.havocUntilEndOfEnemyPhase) names.push('HAVOC VERSE');
   if (u.scopeUntilEndOfEnemyPhase) names.push('SCOPE VERSE');
   if ((u.doomTurns ?? 0) > 0) names.push(`DOOM ${u.doomTurns}`);
   if (u.ghostNext) names.push('GHOST VERSE');
@@ -478,7 +479,7 @@ export function SidePanel() {
                           </Text>
                         </View>
                         <View style={styles.tgtHitBox}>
-                          <Text style={[styles.tgtHit, { color: '#ffd34d' }]}>{hitChance(unit, e, s.pendingWeapon!, s.map)}%</Text>
+                          <Text style={[styles.tgtHit, hitChance(unit, e, s.pendingWeapon!, s.map) >= 80 ? { color: '#4dff7a' } : hitChance(unit, e, s.pendingWeapon!, s.map) >= 55 ? { color: '#ffd34d' } : { color: '#ff8a5a' }]}>{hitChance(unit, e, s.pendingWeapon!, s.map)}%</Text>
                           <Text style={[styles.tgtDmg, e.hp - damageOf(unit, e, s.pendingWeapon!, s.map, false) <= 0 && { color: '#ff6b6b' }]}>{e.hp - damageOf(unit, e, s.pendingWeapon!, s.map, false) <= 0 ? 'DESTROY' : `~${damageOf(unit, e, s.pendingWeapon!, s.map, false)}`}</Text>
                         </View>
                       </View>
