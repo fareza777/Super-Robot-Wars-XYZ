@@ -207,6 +207,7 @@ export interface UnitState {
   overwatch?: boolean;
   /** charge stance — the next attack lands at 1.5x damage with +15 crit; consumed on the attack */
   charged?: boolean;
+  aimed?: boolean;
   /** desperation fury — a cornered boss at <20% HP gains +15% damage and +10 crit */
   enraged?: boolean;
   /** has launched an attack this battle — gates the Initiative opening strike */
@@ -243,7 +244,7 @@ export interface UnitState {
   overkillDealt?: number;
 }
 
-export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer' | 'bodyguard' | 'opportunist' | 'warcry' | 'pointBlank' | 'bloodlust';
+export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer' | 'bodyguard' | 'opportunist' | 'warcry' | 'pointBlank' | 'bloodlust' | 'reaver';
 export type PilotSkills = Record<PilotSkillId, number>;
 
 /** SRW-style enhancement parts equippable on a mecha. */

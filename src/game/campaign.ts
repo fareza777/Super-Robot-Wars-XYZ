@@ -68,6 +68,8 @@ export const PARTS: Record<string, PartDef> = {
   relayMatrix: { id: 'relayMatrix', name: 'Relay Matrix', desc: 'Allies within 2 tiles recover +6 EN/turn', price: 1800, auraEn: true },
   raptorClaw: { id: 'raptorClaw', name: 'Raptor Claw', desc: '+15% melee weapon damage', price: 1700, meleeDmg: 15 },
   chaffDispenser: { id: 'chaffDispenser', name: 'Chaff Dispenser', desc: 'Attackers suffer -10 hit chance against this unit', price: 1300, chaff: 10 },
+  seekerHead: { id: 'seekerHead', name: 'Seeker Head', desc: '+8% hit chance · +6% critical chance', price: 1500, hit: 8, crit: 6 },
+  combatComp: { id: 'combatComp', name: 'Combat Computer', desc: '+10% hit chance · +5% damage', price: 1600, hit: 10, dmg: 5 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -108,6 +110,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'warcry', name: 'War Cry', desc: 'Your kills grant allies within 2 tiles +2 Will per point' },
   { id: 'pointBlank', name: 'Point Blank', desc: '+6% damage per point attacking from 2 tiles or closer' },
   { id: 'bloodlust', name: 'Bloodlust', desc: '+5% damage per point after this unit\'s 3rd kill of the battle' },
+  { id: 'reaver', name: 'Reaver', desc: '+5% damage per point against targets at full HP' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1098,6 +1101,8 @@ export const HONORS: HonorDef[] = [
   { id: 'h_aceofaces', name: 'ACE OF ACES', desc: 'Earn an S battle rank on 3 missions', rewardCr: 1500 },
   { id: 'h_fortress', name: 'FORTRESS BREAKER', desc: 'Destroy 3 siege frames (Ballista or Bastion)', rewardCr: 900 },
   { id: 'h_quartermaster', name: 'QUARTERMASTER', desc: 'Stockpile 12 consumable items at once', rewardCr: 800 },
+  { id: 'h_simace', name: 'SIMULATOR ACE', desc: 'Score 3000+ in the VR Simulator', rewardCr: 1000 },
+  { id: 'h_magma', name: 'MAGMA RUNNER', desc: 'Win a mission on a lava field', rewardCr: 700 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1174,6 +1179,10 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return ((s.killsByDef ?? {}).ballista ?? 0) + ((s.killsByDef ?? {}).bastion ?? 0) >= 3;
     case 'h_quartermaster':
       return Object.values(s.inventory ?? {}).reduce((n, c) => n + (c ?? 0), 0) >= 12;
+    case 'h_simace':
+      return (s.simBest ?? 0) >= 3000;
+    case 'h_magma':
+      return s.missionCh?.theme === 'lava';
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

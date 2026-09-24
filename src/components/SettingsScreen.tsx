@@ -27,7 +27,7 @@ function Seg<T extends string | number>({ options, value, onPick, accent = '#6fe
         return (
           <Pressable
             key={String(o.v)}
-            style={[styles.seg, on && { borderColor: accent, backgroundColor: 'rgba(20,40,60,0.85)' }]}
+            style={({ pressed }) => [styles.seg, on && { borderColor: accent, backgroundColor: 'rgba(20,40,60,0.85)' }, pressed && { opacity: 0.6, transform: [{ scale: 0.95 }] }]}
             onPress={() => {
               play('ui_select');
               onPick(o.v);
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   rowLbl: { color: '#e6ecff', fontWeight: '800', fontSize: 12.5, letterSpacing: 1.5 },
   rowSub: { color: '#8fa0c8', fontSize: 10, marginTop: 2 },
   segRow: { flexDirection: 'row', gap: 6 },
-  seg: { borderWidth: 1, borderColor: '#3a4160', borderRadius: 7, paddingHorizontal: 14, paddingVertical: 7, backgroundColor: '#0a0e1e' },
+  seg: { borderWidth: 1, borderColor: '#3a4160', borderRadius: 9, paddingHorizontal: 16, paddingVertical: 9, backgroundColor: '#0a0e1e' },
   segTxt: { color: '#8fa0c8', fontWeight: '900', fontSize: 11, letterSpacing: 1 },
   danger: { borderWidth: 1.5, borderColor: '#ff5a5a', borderRadius: 8, paddingHorizontal: 14, paddingVertical: 7, backgroundColor: 'rgba(60,10,14,0.6)' },
   dangerTxt: { color: '#ff8a8a', fontWeight: '900', fontSize: 11, letterSpacing: 1.5 },
