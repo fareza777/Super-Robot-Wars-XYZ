@@ -61,6 +61,7 @@ function buffNames(u: UnitState): string[] {
   if (u.plunderNext) names.push('PLUNDER EDGE');
   if (u.firelinkUntilEndOfEnemyPhase) names.push('FIRELINK');
   if (u.dreadedUntilEndOfEnemyPhase) names.push('DREADED');
+  if (u.sanctumUntilEndOfEnemyPhase) names.push('SANCTUM');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
@@ -618,7 +619,7 @@ export function SidePanel() {
             <Text style={styles.logHead}>BATTLE LOG</Text>
             <ScrollView nestedScrollEnabled>
               {s.log.map((l, i) => {
-                const c = /^[☠✖💀💥]/.test(l) ? '#ff8a8a' : /^[✚♪💞]/.test(l) ? '#8affc0' : /^[⚔▣🛡⇄📡⚡☄⛓]/.test(l) ? '#9fd8ff' : /^[★✦🏅♛◆]/.test(l) ? '#ffd34d' : undefined;
+                const c = /^⚓/.test(l) ? '#ffd34d' : /^[🔧⛽🛰]/.test(l) ? '#7ac7ff' : /^[☠✖💀💥]/.test(l) ? '#ff8a8a' : /^[✚♪💞]/.test(l) ? '#8affc0' : /^[⚔▣🛡⇄📡⚡☄⛓]/.test(l) ? '#9fd8ff' : /^[★✦🏅♛◆]/.test(l) ? '#ffd34d' : undefined;
                 return (
                   <Text key={i} style={[styles.logLine, i === 0 && styles.logLineHot, c ? { color: c } : null]}>
                     {l}

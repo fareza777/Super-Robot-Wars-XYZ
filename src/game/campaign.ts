@@ -124,6 +124,7 @@ export const PARTS: Record<string, PartDef> = {
   lastReserve: { id: 'lastReserve', name: 'Last Reserve', desc: 'Emergency cells — weapon EN costs drop 40% while hull is below 50%', price: 1700, rageEn: true },
   warStandart: { id: 'warStandart', name: 'War Standart', desc: 'Offensive banner — allies within 2 tiles deal +8% damage', price: 2000, auraDmg: true },
   aegisHull: { id: 'aegisHull', name: 'Aegis Hull', desc: 'Blast curtain — this frame cannot suffer critical hits', price: 2000, critGuard: true },
+  voltTap: { id: 'voltTap', name: 'Voltage Tap', desc: 'Kill reactor — each kill restores +15 EN', price: 1600, enOnKill: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -218,6 +219,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'hexsurge', name: 'Hex Surge', desc: '+5% damage per point for each debuff on the target (cap 3)' },
   { id: 'coldsteel', name: 'Cold Steel', desc: '+5% damage per point while this frame is untouched (full hull)' },
   { id: 'capacitor', name: 'Capacitor', desc: '+4% damage per point per 25 EN remaining (cap +16%)' },
+  { id: 'ironbound', name: 'Ironbound', desc: '+100 armor per point' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1264,6 +1266,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_frostbound', name: 'FROSTBOUND', desc: 'Win a mission on an ice map', rewardCr: 800 },
   { id: 'h_company', name: 'FULL COMPANY', desc: 'Every pilot earns 25+ career kills', rewardCr: 3000 },
   { id: 'h_scrapking', name: 'SCRAP KING', desc: 'Earn 30,000 salvage credits', rewardCr: 1800 },
+  { id: 'h_virtuoso', name: 'VIRTUOSO', desc: 'Score 12,000+ in the VR Simulator', rewardCr: 2500 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1451,6 +1454,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.pilotProg ?? {}).length >= 7 && Object.values(s.pilotProg ?? {}).every((p) => (p.kills ?? 0) >= 25);
     case 'h_scrapking':
       return (s.salvageCr ?? 0) >= 30000;
+    case 'h_virtuoso':
+      return (s.simBest ?? 0) >= 12000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
