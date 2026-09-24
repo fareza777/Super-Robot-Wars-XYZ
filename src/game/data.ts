@@ -107,6 +107,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   miraclechorus: { id: 'miraclechorus', name: 'Miracle Chorus', cost: 50, desc: 'Hymn of preservation — allies within 3 tiles survive their next fatal hit at 1 HP until the end of the enemy phase' },
   hellfire: { id: 'hellfire', name: 'Hellfire', cost: 50, desc: 'Incendiary aria — the next landed hit ignites the target and every foe adjacent to it' },
   bulwarkaria: { id: 'bulwarkaria', name: 'Bulwark Aria', cost: 45, desc: 'Anchoring hymn — allies within 3 tiles cannot be knocked back until the end of the enemy phase' },
+  thrillkill: { id: 'thrillkill', name: 'Thrill Kill', cost: 40, desc: 'Predator rush — your next hit grants +15 Will if it kills' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

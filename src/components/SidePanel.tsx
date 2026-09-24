@@ -68,6 +68,7 @@ function buffNames(u: UnitState): string[] {
   if (u.chorusUntilEndOfEnemyPhase) names.push('MIRACLE CHORUS');
   if (u.hellfireNext) names.push('HELLFIRE');
   if (u.anchoredUntilEndOfEnemyPhase) names.push('BULWARK ARIA');
+  if (u.thrillNext) names.push('THRILL KILL');
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
@@ -574,7 +575,7 @@ export function SidePanel() {
             <View style={styles.statRow}>
               <Text style={styles.statTxt}>🛡 ARM {inspect.def.armor}</Text>
               <Text style={styles.statTxt}>≫ MOB {inspect.def.mobility}</Text>
-              <Text style={styles.statTxt}>▸ MOV {inspect.def.moveRange}</Text>
+              <Text style={styles.statTxt}>▸ MOV {inspect.def.moveRange} {inspect.def.moveType === 'air' ? '✈' : '⬢'}</Text>
             </View>
             {(() => { const ti = TERRAIN_INFO[terrainAt(s.map, inspect.pos)]; return ti && (ti.def !== 0 || ti.eva !== 0) ? <Text style={{ color: '#8fa1c7', fontSize: 10.5, marginTop: 3 }}>{ti.glyph} {ti.name}: {ti.def !== 0 ? `${ti.def > 0 ? '+' : ''}${ti.def} ARM` : ''}{ti.def !== 0 && ti.eva !== 0 ? ' · ' : ''}{ti.eva !== 0 ? `${ti.eva > 0 ? '+' : ''}${ti.eva} EVA` : ''}</Text> : null; })()}
             {inspect.def.pilot.trait && (

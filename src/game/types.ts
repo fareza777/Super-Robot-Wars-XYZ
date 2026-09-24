@@ -57,7 +57,7 @@ export interface StatusFx {
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy' | 'hymn' | 'emp' | 'phalanx' | 'deadshot' | 'frenzy' | 'breach' | 'relentless' | 'reboot' | 'sanctuary' | 'awaken' | 'charity' | 'siphon' | 'intimidate' | 'scan' | 'empower' | 'marksman' | 'ward' | 'warsong' | 'execute' | 'shatter' | 'glacial' | 'relay' | 'soulburn' | 'fluster' | 'hunt' | 'tracer' | 'strafe' | 'inspire' | 'pyre' | 'overrun' | 'exert' | 'veil' | 'cantata' | 'warhorn' | 'skyfall' | 'avenger' | 'reaper' | 'stalker' | 'interfere' | 'safeguard' | 'blade' | 'suppress' | 'carnage' | 'trueshot' | 'dischord' | 'absolution' | 'judge' | 'banner' | 'gorelust' | 'armorrot' | 'winterverse' | 'litany' | 'rampage' | 'drawfire' | 'hemorrhage' | 'lockcascade' | 'wardmist' | 'aegis' | 'voidedge' | 'standfirm' | 'plunderedge' | 'firelink' | 'dreadverse' | 'sanctumhymn' | 'tempestedge' | 'ironoath' | 'lacerate' | 'staticchoir' | 'dirgemist' | 'miraclechorus' | 'hellfire' | 'bulwarkaria';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy' | 'hymn' | 'emp' | 'phalanx' | 'deadshot' | 'frenzy' | 'breach' | 'relentless' | 'reboot' | 'sanctuary' | 'awaken' | 'charity' | 'siphon' | 'intimidate' | 'scan' | 'empower' | 'marksman' | 'ward' | 'warsong' | 'execute' | 'shatter' | 'glacial' | 'relay' | 'soulburn' | 'fluster' | 'hunt' | 'tracer' | 'strafe' | 'inspire' | 'pyre' | 'overrun' | 'exert' | 'veil' | 'cantata' | 'warhorn' | 'skyfall' | 'avenger' | 'reaper' | 'stalker' | 'interfere' | 'safeguard' | 'blade' | 'suppress' | 'carnage' | 'trueshot' | 'dischord' | 'absolution' | 'judge' | 'banner' | 'gorelust' | 'armorrot' | 'winterverse' | 'litany' | 'rampage' | 'drawfire' | 'hemorrhage' | 'lockcascade' | 'wardmist' | 'aegis' | 'voidedge' | 'standfirm' | 'plunderedge' | 'firelink' | 'dreadverse' | 'sanctumhymn' | 'tempestedge' | 'ironoath' | 'lacerate' | 'staticchoir' | 'dirgemist' | 'miraclechorus' | 'hellfire' | 'bulwarkaria' | 'thrillkill';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -233,6 +233,7 @@ export interface UnitState {
   knockNext?: boolean;
   lacerateNext?: boolean;
   hellfireNext?: boolean;
+  thrillNext?: boolean;
   /** elite enemy: tougher stats, more EXP/credits on kill */
   elite?: boolean;
   /** NPC ally (side 'player') — uncontrollable, must be protected on protect missions */
@@ -294,7 +295,7 @@ export interface UnitState {
   overkillDealt?: number;
 }
 
-export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer' | 'bodyguard' | 'opportunist' | 'warcry' | 'pointBlank' | 'bloodlust' | 'reaver' | 'bulwark' | 'duelist' | 'juggernaut' | 'giantSlayer' | 'loneWolf' | 'overwhelm' | 'outgunned' | 'tankbuster' | 'coordinator' | 'sentinel' | 'gambit' | 'warcaster' | 'underdog' | 'skirmisher' | 'engineer' | 'cohort' | 'entrench' | 'steadfast' | 'precision' | 'surge' | 'reflex' | 'outflank' | 'foeswarm' | 'cannonade' | 'gunsmith' | 'luminance' | 'swarmer' | 'phantomstep' | 'parry' | 'piercer' | 'heavycal' | 'anchor' | 'dreadnought' | 'resolute' | 'siegeadept' | 'cadence' | 'wingman' | 'fullmag' | 'dirgesong' | 'burnout' | 'divebomb' | 'arsenalmind' | 'titanbreaker' | 'truesight' | 'backliner' | 'bombard' | 'ruinbreaker' | 'artillerist' | 'paintburst' | 'fortsoul' | 'hexsurge' | 'coldsteel' | 'capacitor' | 'ironbound' | 'coolloop' | 'gritguard' | 'savant' | 'shieldpierce' | 'pureshot' | 'finisher' | 'aerobat' | 'sureshot';
+export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer' | 'bodyguard' | 'opportunist' | 'warcry' | 'pointBlank' | 'bloodlust' | 'reaver' | 'bulwark' | 'duelist' | 'juggernaut' | 'giantSlayer' | 'loneWolf' | 'overwhelm' | 'outgunned' | 'tankbuster' | 'coordinator' | 'sentinel' | 'gambit' | 'warcaster' | 'underdog' | 'skirmisher' | 'engineer' | 'cohort' | 'entrench' | 'steadfast' | 'precision' | 'surge' | 'reflex' | 'outflank' | 'foeswarm' | 'cannonade' | 'gunsmith' | 'luminance' | 'swarmer' | 'phantomstep' | 'parry' | 'piercer' | 'heavycal' | 'anchor' | 'dreadnought' | 'resolute' | 'siegeadept' | 'cadence' | 'wingman' | 'fullmag' | 'dirgesong' | 'burnout' | 'divebomb' | 'arsenalmind' | 'titanbreaker' | 'truesight' | 'backliner' | 'bombard' | 'ruinbreaker' | 'artillerist' | 'paintburst' | 'fortsoul' | 'hexsurge' | 'coldsteel' | 'capacitor' | 'ironbound' | 'coolloop' | 'gritguard' | 'savant' | 'shieldpierce' | 'pureshot' | 'finisher' | 'aerobat' | 'sureshot' | 'wildfire';
 export type PilotSkills = Record<PilotSkillId, number>;
 
 /** SRW-style enhancement parts equippable on a mecha. */
@@ -381,6 +382,7 @@ export interface PartDef {
   longsight?: boolean;
   surveyRig?: boolean;
   pointMauler?: boolean;
+  omenScope?: boolean;
   /** command aura: allies within 2 tiles gain this much hit */
   auraHit?: number;
   /** sacrificial skin — the first fatal hit each battle leaves the frame at 1 HP */
