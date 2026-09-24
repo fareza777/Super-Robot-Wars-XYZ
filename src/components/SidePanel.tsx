@@ -59,6 +59,7 @@ function buffNames(u: UnitState): string[] {
   if (u.voidedgeNext) names.push('VOID EDGE');
   if (u.standFirmUntilEndOfEnemyPhase) names.push('STAND FIRM');
   if (u.plunderNext) names.push('PLUNDER EDGE');
+  if (u.firelinkUntilEndOfEnemyPhase) names.push('FIRELINK');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');

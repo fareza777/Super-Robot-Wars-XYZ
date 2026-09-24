@@ -122,6 +122,7 @@ export const PARTS: Record<string, PartDef> = {
   linkageGear: { id: 'linkageGear', name: 'Linkage Gear', desc: 'Squad uplink — support-fire contribution raised to 70% damage', price: 1700, supportDmg: true },
   revengeFeed: { id: 'revengeFeed', name: 'Revenge Feed', desc: 'Vengeance loop — taking a hit feeds the pilot +4 SP', price: 1600, spOnHurt: true },
   lastReserve: { id: 'lastReserve', name: 'Last Reserve', desc: 'Emergency cells — weapon EN costs drop 40% while hull is below 50%', price: 1700, rageEn: true },
+  warStandart: { id: 'warStandart', name: 'War Standart', desc: 'Offensive banner — allies within 2 tiles deal +8% damage', price: 2000, auraDmg: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -214,6 +215,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'paintburst', name: 'Paintburst', desc: '+7% damage per point vs painted targets (marked or exposed)' },
   { id: 'fortsoul', name: 'Fortress Soul', desc: '-5% damage taken per point while on defensive terrain' },
   { id: 'hexsurge', name: 'Hex Surge', desc: '+5% damage per point for each debuff on the target (cap 3)' },
+  { id: 'coldsteel', name: 'Cold Steel', desc: '+5% damage per point while this frame is untouched (full hull)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1258,6 +1260,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_ashwalker', name: 'ASH WALKER', desc: 'Win a mission on a volcano map', rewardCr: 800 },
   { id: 'h_summit', name: 'SUMMIT', desc: 'Win a mission on a mountain map', rewardCr: 800 },
   { id: 'h_frostbound', name: 'FROSTBOUND', desc: 'Win a mission on an ice map', rewardCr: 800 },
+  { id: 'h_company', name: 'FULL COMPANY', desc: 'Every pilot earns 25+ career kills', rewardCr: 3000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1440,6 +1443,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.missionCh?.theme === 'mountain';
     case 'h_frostbound':
       return s.missionCh?.theme === 'ice';
+    case 'h_company':
+      return Object.values(s.pilotProg ?? {}).length >= 7 && Object.values(s.pilotProg ?? {}).every((p) => (p.kills ?? 0) >= 25);
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

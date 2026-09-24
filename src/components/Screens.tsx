@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   briefSub: { color: '#7ee7ff', fontSize: 14, fontWeight: '700', marginTop: 2, letterSpacing: 2 },
   briefBox: { backgroundColor: 'rgba(14,17,28,0.9)', borderWidth: 1.5, borderColor: '#3d4a72', borderRadius: 14, padding: 14, margin: 8, maxWidth: 560, shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 14, shadowOffset: { width: 0, height: 5 }, elevation: 8 },
   briefTxt: { color: '#e6ecff', fontSize: 13, lineHeight: 20 },
-  briefTxtSmall: { color: '#8fa1c7', fontSize: 10.5, lineHeight: 16, marginTop: 6 },
+    briefTxtSmall: { color: '#8fa1c7', fontSize: 10.5, lineHeight: 16, marginTop: 6, borderLeftWidth: 3, borderLeftColor: '#3a6a8a', paddingLeft: 8 },
   squadRow: { flexDirection: 'row', gap: 10, marginTop: 6 },
   deployLbl: { color: '#9fd0ff', fontSize: 10, fontWeight: '800', letterSpacing: 1.5, marginTop: 8 },
   deployMark: { color: '#4dff7a', fontSize: 8.5, fontWeight: '800', marginTop: 2 },
