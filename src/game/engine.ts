@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus' | 'beamDmg'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -213,6 +213,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
     if ((att.skills?.coordinator ?? 0) > 0 && assists > 0) dmg = Math.round(dmg * (1 + 0.05 * att.skills.coordinator));
   }
   if (w.kind === 'melee') dmg = Math.round(dmg * (1 + partBonus(att, 'meleeDmg') / 100));
+  if (w.kind === 'beam') dmg = Math.round(dmg * (1 + partBonus(att, 'beamDmg') / 100));
   if ((att.kills ?? 0) >= 3) dmg = Math.round(dmg * (1 + 0.05 * (att.skills?.bloodlust ?? 0)));
   if (def.hp >= def.def.maxHp) dmg = Math.round(dmg * (1 + 0.05 * (att.skills?.reaver ?? 0)));
   if ((att.skills?.duelist ?? 0) > 0 && !(units ?? []).some((x) => x.uid !== def.uid && x.side === def.side && x.alive && Math.abs(x.pos.x - def.pos.x) + Math.abs(x.pos.y - def.pos.y) <= 2)) dmg = Math.round(dmg * (1 + 0.06 * att.skills.duelist));
@@ -780,9 +781,11 @@ function awardExp(u: UnitState, amount: number, events: string[]) {
   if (u.level >= MAX_LEVEL) u.exp = 0;
 }
 
+export const spiritCost = (u: UnitState, spirit: SpiritId): number =>
+  Math.max(1, Math.round(SPIRITS[spirit].cost * (1 - (u.skills?.warcaster ?? 0) * 0.04)));
+
 export function applySpirit(u: UnitState, spirit: SpiritId): void {
-  const s = SPIRITS[spirit];
-  u.sp = Math.max(0, u.sp - s.cost);
+  u.sp = Math.max(0, u.sp - spiritCost(u, spirit));
   switch (spirit) {
     case 'focus':
       u.focusUntilEndOfEnemyPhase = true;
@@ -909,6 +912,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break;
     case 'glacial':
       u.glacialNext = true;
+      break;
+    case 'relay':
       break;
     // 'rouse', 'disrupt' and 'trust' affect neighbouring units — applied in store.castSpirit
   }

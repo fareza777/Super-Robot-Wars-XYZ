@@ -1,11 +1,11 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS } from '../game/campaign';
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { bondMods } from '../game/bonds';
-import { bestCounterWeapon, critChance, damageOf, dist, formationBonus, hasPincer, hitChance, key, rallyBonus, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
+import { bestCounterWeapon, critChance, damageOf, dist, formationBonus, hasPincer, hitChance, key, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, fogLit, useGame } from '../game/store';
 import { SpiritId, UnitState } from '../game/types';
 
@@ -93,14 +93,14 @@ export function SidePanel() {
       </View>
       {s.blizzard ? <Text style={styles.blizzChip}>{s.missionCh.theme === 'desert' ? '🏜 SANDSTORM — ground units -15% hit' : s.missionCh.theme === 'ruins' ? '🌫 ASH STORM — ground units -15% hit' : '❄ BLIZZARD — ground units -15% hit'}</Text> : null}
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <TouchableOpacity onPress={() => setShowRoster((v) => !v)} style={{ flex: 1 }}>
+        <Pressable onPress={() => setShowRoster((v) => !v)} style={({ pressed }) => [{ flex: 1 }, pressed && { opacity: 0.7 }]}>
           <Text style={styles.counts}>
             Ally {alivePlayers(s).length} · Enemy {s.missionCh.fog ? `${aliveEnemies(s).filter((e) => fogLit(s.units, e.pos)).length}/${aliveEnemies(s).length}` : aliveEnemies(s).length} · ☠{s.kills}  {showRoster ? '▲' : '▼'}
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={s.toggleDanger} style={[styles.dangerBtn, s.dangerZone && styles.dangerBtnOn]}>
+        </Pressable>
+        <Pressable onPress={s.toggleDanger} style={({ pressed }) => [styles.dangerBtn, s.dangerZone && styles.dangerBtnOn, pressed && { opacity: 0.7 }]}>
           <Text style={[styles.dangerTxt, s.dangerZone && { color: '#ff8080' }]}>⚠ DANGER</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
       {objType === 'protect' && npcU && (
         <View style={styles.objCard}>
@@ -390,7 +390,7 @@ export function SidePanel() {
                     const cDmg = cw ? damageOf(e, unit, cw, s.map, false) : 0;
                     const cHc = cw ? hitChance(e, unit, cw, s.map, s.blizzard && e.def.moveType !== 'air' ? -15 : 0) : 0;
                     return (
-                      <TouchableOpacity key={e.uid} onPress={() => s.chooseTarget(e.uid)} style={[styles.tgtRow, kill && styles.tgtRowKill]}>
+                      <Pressable key={e.uid} onPress={() => s.chooseTarget(e.uid)} style={({ pressed }) => [styles.tgtRow, kill && styles.tgtRowKill, pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] }]}>
                         <View style={{ flex: 1 }}>
                           <Text style={styles.tgtName} numberOfLines={1}>
                             {e.def.name} {e.def.boss ? (e.phase2 ? 'Ω★' : '★') : ''}
@@ -412,7 +412,7 @@ export function SidePanel() {
                           <Text style={[styles.tgtHit, hc >= 80 ? { color: '#4dff7a' } : hc >= 55 ? { color: '#ffd34d' } : { color: '#ff8a5a' }]}>{hc}%</Text>
                           <Text style={styles.tgtDmg}>{kill ? 'DESTROY' : `~${dmg}`}</Text>
                         </View>
-                      </TouchableOpacity>
+                      </Pressable>
                     );
                   })}
               </>
@@ -428,7 +428,7 @@ export function SidePanel() {
               const sp = SPIRITS[id];
               const milestone = !(spiritUnit.def.pilot.spirits as SpiritId[]).includes(id);
               return (
-                <Btn key={id} label={`✦ ${sp.name} · ${sp.cost} SP${milestone ? ' · ★MILESTONE' : ''}`} sub={sp.desc} disabled={spiritUnit.sp < sp.cost} onPress={() => s.castSpirit(spiritUnit.uid, id)} accent={milestone ? '#ffd34d' : '#c9a0ff'} />
+                <Btn key={id} label={`✦ ${sp.name} · ${spiritCost(spiritUnit, id)} SP${milestone ? ' · ★MILESTONE' : ''}`} sub={sp.desc} disabled={spiritUnit.sp < spiritCost(spiritUnit, id)} onPress={() => s.castSpirit(spiritUnit.uid, id)} accent={milestone ? '#ffd34d' : '#c9a0ff'} />
               );
             })}
             <Btn label="BACK" onPress={() => useGame.setState({ spiritForUid: null })} accent="#666" />
@@ -573,12 +573,12 @@ export function SidePanel() {
 
       {s.phase === 'player' && !s.enemyBusy && (
         <View>
-          <TouchableOpacity onPress={s.endTurn} style={[styles.endTurn, allActed && styles.endTurnReady]}>
+          <Pressable onPress={s.endTurn} style={({ pressed }) => [styles.endTurn, allActed && styles.endTurnReady, pressed && { opacity: 0.8 }]}>
             <Text style={styles.endTurnTxt}>{allActed ? 'END TURN ▸ ALL UNITS ACTED' : 'END TURN ▸'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={s.retreatMission} style={styles.retreat}>
+          </Pressable>
+          <Pressable onPress={s.retreatMission} style={({ pressed }) => [styles.retreat, pressed && { opacity: 0.6 }]}>
             <Text style={styles.retreatTxt}>◂ RETREAT MISSION</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       )}
     </View>

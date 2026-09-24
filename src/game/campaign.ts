@@ -82,6 +82,7 @@ export const PARTS: Record<string, PartDef> = {
   anchorPlate: { id: 'anchorPlate', name: 'Anchor Plating', desc: 'Frame cannot be knocked back', price: 1400, knockProof: true },
   energyCap: { id: 'energyCap', name: 'Energy Capacitor', desc: '+10% damage for EN weapons', price: 1600, enDmg: 10 },
   powerLoader: { id: 'powerLoader', name: 'Power Loader', desc: 'Knockback weapons hurl targets 1 extra tile', price: 1500, knockPlus: true },
+  prismCoat: { id: 'prismCoat', name: 'Prism Coating', desc: '+10% damage for beam weapons', price: 1600, beamDmg: 10 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -134,6 +135,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'coordinator', name: 'Coordinator', desc: '+5% damage per point while assisted by coordinated fire' },
   { id: 'sentinel', name: 'Sentinel', desc: '+5% damage on counter-attacks per point' },
   { id: 'gambit', name: 'Gambit', desc: '+8% damage per point but -8 evade per point' },
+  { id: 'warcaster', name: 'Warcaster', desc: 'Spirits cost 4% less SP per point' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1140,6 +1142,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_elitesq', name: 'ELITE SQUADRON', desc: 'Six pilots reach 15 career kills each', rewardCr: 1200 },
   { id: 'h_rivalry', name: 'RIVALRY', desc: 'Destroy the Drake Eclipse three times', rewardCr: 1000 },
   { id: 'h_blitz', name: 'BLITZ', desc: 'Win any battle within 6 turns', rewardCr: 700 },
+  { id: 'h_demigod', name: 'DEMIGOD', desc: 'One pilot reaches 60 career kills', rewardCr: 1200 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1246,6 +1249,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.killsByDef?.vossDrake ?? 0) >= 3;
     case 'h_blitz':
       return (s.turn ?? 99) <= 6;
+    case 'h_demigod':
+      return kills.some((p) => (p.kills ?? 0) >= 60);
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
