@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Image } from 'expo-image';
 import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS } from '../game/campaign';
@@ -22,6 +22,7 @@ function buffNames(u: UnitState): string[] {
   if (u.empowerForNextAttack) names.push('EMPOWER');
   if (u.marksmanUntilEndOfEnemyPhase) names.push('MARKSMAN');
   if (u.wardenArmed) names.push('WARD');
+  if (u.warsongUntilEndOfEnemyPhase) names.push('WARSONG');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');
@@ -61,10 +62,10 @@ function Bar({ label, val, max, color }: { label: string; val: number; max: numb
 
 function Btn({ label, sub, onPress, disabled, accent }: { label: string; sub?: string; onPress: () => void; disabled?: boolean; accent?: string }) {
   return (
-    <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.72} style={[styles.btn, disabled && styles.btnOff, accent ? { borderColor: accent, borderLeftWidth: 4 } : null]}>
+    <Pressable onPress={onPress} disabled={disabled} style={({ pressed }) => [styles.btn, disabled && styles.btnOff, accent ? { borderColor: accent, borderLeftWidth: 4 } : null, pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] }]}>
       <Text style={[styles.btnText, disabled && styles.btnTextOff]}>{label}</Text>
       {!!sub && <Text style={styles.btnSub}>{sub}</Text>}
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 

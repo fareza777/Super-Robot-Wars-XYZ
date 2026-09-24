@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -230,6 +230,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if ((def.def.boss || def.elite) && (att.skills?.giantSlayer ?? 0) > 0) dmg = Math.round(dmg * (1 + 0.06 * att.skills.giantSlayer));
   if ((def.def.boss || def.elite) && partBonus(att, 'bossDmg')) dmg = Math.round(dmg * (1 + partBonus(att, 'bossDmg') / 100));
   if (att.empowerForNextAttack) dmg = Math.round(dmg * 1.4);
+  if (att.warsongUntilEndOfEnemyPhase) dmg = Math.round(dmg * 1.1);
   if ((att.skills?.loneWolf ?? 0) > 0 && !(units ?? []).some((x) => x !== att && x.alive && x.side === att.side && dist(x.pos, att.pos) <= 2)) dmg = Math.round(dmg * (1 + 0.06 * att.skills.loneWolf));
   if ((att.skills?.overwhelm ?? 0) > 0 && !def.acted) dmg = Math.round(dmg * (1 + 0.05 * att.skills.overwhelm));
   if ((att.skills?.outgunned ?? 0) > 0 && units) {
@@ -237,6 +238,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
     const theirs = units.filter((x) => x.alive && x.side !== att.side).length;
     if (mine < theirs) dmg = Math.round(dmg * (1 + 0.06 * att.skills.outgunned));
   }
+  if ((att.skills?.tankbuster ?? 0) > 0 && def.def.armor >= 1200) dmg = Math.round(dmg * (1 + 0.06 * att.skills.tankbuster));
   if (trait === 'crimson_fury' && att.hp < att.def.maxHp / 2) dmg = Math.round(dmg * 1.1);
   if (trait === 'sovereign') dmg = Math.round(dmg * 1.08);
   // damage-type resistance — beam coats, phase armor, disperser fields
@@ -874,6 +876,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break; // squad fire control — the store flags every ally
     case 'ward':
       break; // aegis prayer — the warded ally is chosen by the store pass
+    case 'warsong':
+      break; // anthem — the store flags every ally
     // 'rouse', 'disrupt' and 'trust' affect neighbouring units — applied in store.castSpirit
   }
 }
@@ -890,6 +894,7 @@ export function clearTransientForOwnPhase(u: UnitState): void {
   u.overwatch = false;
   u.hymnUntilEndOfEnemyPhase = false;
   u.marksmanUntilEndOfEnemyPhase = false;
+  u.warsongUntilEndOfEnemyPhase = false;
   u.frenzyThisTurn = false;
   u.relentlessUntilEndOfEnemyPhase = false;
   u.dodges = 0;
@@ -1203,8 +1208,9 @@ function timedOut(obj: EndObjective | null | undefined, turn?: number): boolean 
 export function phaseRecovery(u: UnitState, map: MapDef, units?: UnitState[]): { hpGain: number; enGain: number; hpLoss: number } {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
   const aura = units ? units.filter((a) => a.alive && a.side === u.side && a.uid !== u.uid && partBonus(a, 'auraEn') > 0 && dist(a.pos, u.pos) <= 2).length * 6 : 0;
+  const healPct = units ? units.filter((a) => a.alive && a.side === u.side && a.uid !== u.uid && partBonus(a, 'auraHeal') > 0 && dist(a.pos, u.pos) <= 2).reduce((n, a) => n + partBonus(a, 'auraHeal'), 0) : 0;
   const enGain = Math.min(u.def.maxEn - u.en, 5 + (t.enRegen ?? 0) + partBonus(u, 'enRegen') + aura);
-  const hpGain = Math.min(u.def.maxHp - u.hp, Math.round(u.def.maxHp * (t.hpRegen ?? 0)) + Math.round(u.def.maxHp * (partBonus(u, 'hpRegen') / 100)) + Math.round(u.def.maxHp * 0.01 * (u.skills?.regen ?? 0)));
+  const hpGain = Math.min(u.def.maxHp - u.hp, Math.round(u.def.maxHp * (t.hpRegen ?? 0)) + Math.round(u.def.maxHp * (partBonus(u, 'hpRegen') / 100)) + Math.round(u.def.maxHp * 0.01 * (u.skills?.regen ?? 0)) + Math.round(u.def.maxHp * healPct / 100));
   const hpLoss = Math.min(u.hp - 1, Math.round(u.def.maxHp * (t.hpDmg ?? 0))); // terrain can't kill — leaves 1 HP
   u.en += enGain;
   u.hp = Math.max(1, u.hp + hpGain - Math.max(0, hpLoss));

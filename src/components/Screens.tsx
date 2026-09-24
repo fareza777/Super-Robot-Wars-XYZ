@@ -120,7 +120,7 @@ export function BriefingScreen() {
             const prog = pilotProg[id];
             const on = deploySel.includes(id);
             return (
-              <Pressable key={id} style={({ pressed }) => [styles.squadCard, !on && { opacity: 0.35 }, pressed && { opacity: 0.6, transform: [{ scale: 0.94 }] }]} onPress={() => toggleDeploy(id)}>
+              <Pressable key={id} style={({ pressed }) => [styles.squadCard, !on && { opacity: 0.35 }, on && { borderColor: '#4dff7a', shadowColor: '#4dff7a', shadowOpacity: 0.4, shadowRadius: 6, elevation: 4 }, pressed && { opacity: 0.6, transform: [{ scale: 0.94 }] }]} onPress={() => toggleDeploy(id)}>
                 <Image cachePolicy="memory" source={PILOT_ART[id]} style={[styles.squadFace, on && { borderColor: '#4dff7a', borderWidth: 2 }]} contentFit="cover" />
                 <Text style={[styles.squadName, !on && { color: '#667' }]}>{d.pilot.callsign} · Lv{prog?.level ?? d.level ?? 1}</Text>
                 <Text style={styles.squadUnit} numberOfLines={1}>{d.name}</Text>
