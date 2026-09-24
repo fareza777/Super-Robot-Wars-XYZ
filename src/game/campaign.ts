@@ -150,6 +150,7 @@ export const PARTS: Record<string, PartDef> = {
   shockCoil: { id: 'shockCoil', name: 'Shock Coil', desc: 'Thornweb — melee attackers take 100 backlash damage', price: 1700, shockCoil: true },
   blazeCoil: { id: 'blazeCoil', name: 'Blaze Coil', desc: 'Incendiary lattice — attackers have a 25% chance to catch fire', price: 1800, blazeCoil: true },
   rageCoil: { id: 'rageCoil', name: 'Rage Coil', desc: 'Adrenal harness — each hit taken grants the pilot +5 Will', price: 1800, rageCoil: true },
+  stunGuard: { id: 'stunGuard', name: 'Stun Guard', desc: 'Gyro anchor — this frame cannot be stunned', price: 1600, stunGuard: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -270,6 +271,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'disruptor', name: 'Disruptor', desc: '+5% damage per point vs targets below 50% EN' },
   { id: 'myrmidon', name: 'Myrmidon', desc: '+5% damage per point when attacking without moving' },
   { id: 'sunderfist', name: 'Sunderfist', desc: '+5% damage per point with breaker weapons' },
+  { id: 'bloodborne', name: 'Bloodborne', desc: '+5% damage per point while hull is above 80%' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1342,6 +1344,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_transcendent', name: 'TRANSCENDENT', desc: 'Earn MASTERY ★ in 30 missions', rewardCr: 5500 },
   { id: 'h_overlordvr', name: 'OVERLORD', desc: 'Score 30000+ in the VR Simulator', rewardCr: 6000 },
   { id: 'h_armory', name: 'ARMORY', desc: 'Own 45 different parts', rewardCr: 6500 },
+  { id: 'h_genocide', name: 'GENOCIDE', desc: 'Destroy 500 frames across the squad', rewardCr: 7000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1581,6 +1584,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.simBest ?? 0) >= 30000;
     case 'h_armory':
       return (s.partsOwned ?? []).length >= 45;
+    case 'h_genocide':
+      return totalKills >= 500;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

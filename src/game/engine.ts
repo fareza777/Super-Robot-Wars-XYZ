@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0, truesight: 0, backliner: 0, bombard: 0, ruinbreaker: 0, artillerist: 0, paintburst: 0, fortsoul: 0, hexsurge: 0, coldsteel: 0, capacitor: 0, ironbound: 0, coolloop: 0, gritguard: 0, savant: 0, shieldpierce: 0, pureshot: 0, finisher: 0, aerobat: 0, sureshot: 0, wildfire: 0, archer: 0, stormeye: 0, acehunter: 0, ravager: 0, sledge: 0, overkill: 0, pike: 0, wildswing: 0, zenith: 0, closecombat: 0, chainblade: 0, exploiter: 0, viper: 0, disruptor: 0, myrmidon: 0, sunderfist: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0, truesight: 0, backliner: 0, bombard: 0, ruinbreaker: 0, artillerist: 0, paintburst: 0, fortsoul: 0, hexsurge: 0, coldsteel: 0, capacitor: 0, ironbound: 0, coolloop: 0, gritguard: 0, savant: 0, shieldpierce: 0, pureshot: 0, finisher: 0, aerobat: 0, sureshot: 0, wildfire: 0, archer: 0, stormeye: 0, acehunter: 0, ravager: 0, sledge: 0, overkill: 0, pike: 0, wildswing: 0, zenith: 0, closecombat: 0, chainblade: 0, exploiter: 0, viper: 0, disruptor: 0, myrmidon: 0, sunderfist: 0, bloodborne: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus' | 'beamDmg' | 'funnelDmg' | 'missileDmg' | 'gunDmg' | 'ammoRegen' | 'markDmg' | 'spRegen' | 'lowHpDmg' | 'aimBoost' | 'shieldBreak' | 'pinDmg' | 'jamProof' | 'statusBurn' | 'statusBreak' | 'statusMark' | 'statusStun' | 'beamGuard' | 'meleeGuard' | 'missileGuard' | 'regenPlate' | 'drainCoil' | 'gunGuard' | 'funnelGuard' | 'counterRange' | 'mapGuard' | 'killDmg' | 'lowHpArmor' | 'chargeBoost' | 'terrainArmor' | 'mapDmg' | 'jammerSkin' | 'lowHpRegen' | 'sniperGuard' | 'terraProof' | 'fortArmor' | 'willOnKill' | 'supportDmg' | 'spOnHurt' | 'rageEn' | 'auraDmg' | 'critGuard' | 'enOnKill' | 'lastAmmo' | 'spSaver' | 'ammoScalp' | 'clusterAmp' | 'thrallWeave' | 'longsight' | 'surveyRig' | 'pointMauler' | 'omenScope' | 'eagleEye' | 'haloScope' | 'apexRig' | 'reactorShield' | 'foilWeave' | 'cloakWeave' | 'skyBooster' | 'ventEn' | 'ventArmor' | 'ramPlate' | 'pulseVernier' | 'landVernier' | 'lastStandCore' | 'siegePlate' | 'shockCoil' | 'blazeCoil' | 'rageCoil'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus' | 'beamDmg' | 'funnelDmg' | 'missileDmg' | 'gunDmg' | 'ammoRegen' | 'markDmg' | 'spRegen' | 'lowHpDmg' | 'aimBoost' | 'shieldBreak' | 'pinDmg' | 'jamProof' | 'statusBurn' | 'statusBreak' | 'statusMark' | 'statusStun' | 'beamGuard' | 'meleeGuard' | 'missileGuard' | 'regenPlate' | 'drainCoil' | 'gunGuard' | 'funnelGuard' | 'counterRange' | 'mapGuard' | 'killDmg' | 'lowHpArmor' | 'chargeBoost' | 'terrainArmor' | 'mapDmg' | 'jammerSkin' | 'lowHpRegen' | 'sniperGuard' | 'terraProof' | 'fortArmor' | 'willOnKill' | 'supportDmg' | 'spOnHurt' | 'rageEn' | 'auraDmg' | 'critGuard' | 'enOnKill' | 'lastAmmo' | 'spSaver' | 'ammoScalp' | 'clusterAmp' | 'thrallWeave' | 'longsight' | 'surveyRig' | 'pointMauler' | 'omenScope' | 'eagleEye' | 'haloScope' | 'apexRig' | 'reactorShield' | 'foilWeave' | 'cloakWeave' | 'skyBooster' | 'ventEn' | 'ventArmor' | 'ramPlate' | 'pulseVernier' | 'landVernier' | 'lastStandCore' | 'siegePlate' | 'shockCoil' | 'blazeCoil' | 'rageCoil' | 'stunGuard'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -161,13 +161,14 @@ function evadeOf(u: UnitState, map: MapDef): number {
 
 export function armorOf(u: UnitState, map: MapDef): number {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
-  const base = u.def.armor + (u.level - 1) * 40 + t.def + (u.en > u.def.maxEn * 0.5 ? partBonus(u, 'reactorShield') : 0) - (partBonus(u, 'ventArmor') > 0 ? 100 : 0) + (u.hp < u.def.maxHp * 0.25 ? partBonus(u, 'lastStandCore') * 500 : 0) + (!u.moved ? partBonus(u, 'siegePlate') * 300 : 0) + (u.gritUntilEndOfEnemyPhase ? 400 : 0) + (partBonus(u, 'lowHpArmor') > 0 && u.hp < u.def.maxHp * 0.4 ? 400 : 0) + (u.sanctumUntilEndOfEnemyPhase ? 400 : 0) + (u.oathUntilEndOfEnemyPhase ? 600 : 0) + (u.skills?.ironbound ?? 0) * 100 + willArmor(u) + partBonus(u, 'armor') + (u.phase2 ? 300 : 0) + (t.def > 0 ? partBonus(u, 'fortArmor') : 0);
+  const base = u.def.armor + (u.level - 1) * 40 + t.def + (u.en > u.def.maxEn * 0.5 ? partBonus(u, 'reactorShield') : 0) - (partBonus(u, 'ventArmor') > 0 ? 100 : 0) + (u.hp < u.def.maxHp * 0.25 ? partBonus(u, 'lastStandCore') * 500 : 0) + (!u.moved ? partBonus(u, 'siegePlate') * 300 : 0) + (u.bastionTurns ? 300 : 0) + (u.gritUntilEndOfEnemyPhase ? 400 : 0) + (partBonus(u, 'lowHpArmor') > 0 && u.hp < u.def.maxHp * 0.4 ? 400 : 0) + (u.sanctumUntilEndOfEnemyPhase ? 400 : 0) + (u.oathUntilEndOfEnemyPhase ? 600 : 0) + (u.skills?.ironbound ?? 0) * 100 + willArmor(u) + partBonus(u, 'armor') + (u.phase2 ? 300 : 0) + (t.def > 0 ? partBonus(u, 'fortArmor') : 0);
   return Math.round((base - (u.sundered ? 300 : 0)) * (u.statuses?.some((s) => s.id === 'break') ? 0.7 : 1));
 }
 
 /** status applied on a landed hit — refreshes the same debuff instead of stacking */
 export function applyStatus(u: UnitState, id: 'burn' | 'stun' | 'break' | 'slow' | 'mark' | 'supp'): void {
   if (partBonus(u, 'statusProof') > 0 || u.statusproofUntilEndOfEnemyPhase) return; // firewall suite shrugs off status
+  if (id === 'stun' && partBonus(u, 'stunGuard') > 0) return;
   u.statuses = [...(u.statuses ?? []).filter((s) => s.id !== id), { id, turns: 2 }];
 }
 
@@ -280,6 +281,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (def.statuses?.some((fx) => fx.id === 'slow')) dmg = Math.round(dmg * (1 + (att.skills?.viper ?? 0) * 0.06));
   if (def.en < def.def.maxEn * 0.5) dmg = Math.round(dmg * (1 + (att.skills?.disruptor ?? 0) * 0.05));
   if (!att.moved) dmg = Math.round(dmg * (1 + (att.skills?.myrmidon ?? 0) * 0.05));
+  if (att.hp > att.def.maxHp * 0.8) dmg = Math.round(dmg * (1 + (att.skills?.bloodborne ?? 0) * 0.05));
   if (w.breaker) dmg = Math.round(dmg * (1 + (att.skills?.sunderfist ?? 0) * 0.05));
   if ((units?.filter((a) => a.alive && a.side === def.side && a.uid !== def.uid && dist(a.pos, def.pos) <= 2).length ?? 0) >= 2 && partBonus(att, 'clusterAmp') > 0) dmg = Math.round(dmg * 1.1);
   dmg = Math.round(dmg * (1 + (units?.filter((a) => a.alive && a.side === att.side && a.uid !== att.uid && partBonus(a, 'auraDmg') > 0 && dist(a.pos, att.pos) <= 2).length ?? 0) * 0.08));
@@ -1334,6 +1336,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'heavensverse':
       u.heavensverseNext = true;
       break;
+    case 'bastionverse':
+      break;
     // 'rouse', 'disrupt' and 'trust' affect neighbouring units — applied in store.castSpirit
   }
 }
@@ -1695,6 +1699,7 @@ export function phaseRecovery(u: UnitState, map: MapDef, units?: UnitState[]): {
   if (u.graceTurns) u.graceTurns -= 1;
   if (u.renewalTurns) u.renewalTurns -= 1;
   if (u.foresightTurns) u.foresightTurns -= 1;
+  if (u.bastionTurns) u.bastionTurns -= 1;
   const hpLoss = partBonus(u, 'terraProof') > 0 ? 0 : Math.min(u.hp - 1, Math.round(u.def.maxHp * (t.hpDmg ?? 0))); // terrain can't kill — leaves 1 HP
   if (partBonus(u, 'ammoRegen') > 0) {
     for (const w of u.def.weapons) {

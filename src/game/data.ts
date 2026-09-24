@@ -124,6 +124,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   darkverse: { id: 'darkverse', name: 'Dark Verse', cost: 45, desc: 'Reactor drain — enemies within 3 tiles lose 15 EN instantly' },
   foresightverse: { id: 'foresightverse', name: 'Foresight Verse', cost: 45, desc: 'Precognition hymn — allies within 3 tiles gain +20 evade for 2 turns' },
   heavensverse: { id: 'heavensverse', name: 'Heaven Verse', cost: 50, desc: 'Storm wrath — a landed hit stuns the target and every enemy adjacent to it' },
+  bastionverse: { id: 'bastionverse', name: 'Bastion Verse', cost: 50, desc: 'Fortress hymn — allies within 3 tiles gain +300 armor for 2 turns' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
@@ -207,7 +208,7 @@ const P = (p: PilotDef) => p;
 export const PILOTS = {
   ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul', 'frenzy', 'soulburn', 'pyre', 'skyfall', 'blade', 'judge', 'rampage', 'voidedge', 'tempestedge', 'hellfire', 'sunderstorm', 'quakeedge', 'heavensverse'], faceColor: '#ffb347', trait: 'ace_instinct' }),
   mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse', 'fortune', 'trust', 'emp', 'deadshot', 'scan', 'marksman', 'shatter', 'tracer', 'veil', 'stalker', 'trueshot', 'armorrot', 'lockcascade', 'firelink', 'staticchoir', 'pinverse', 'breachverse', 'exposeverse'], faceColor: '#7ee7ff', trait: 'deadeye' }),
-  gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor', 'sunder', 'provoke', 'phalanx', 'breach', 'charity', 'intimidate', 'warsong', 'fluster', 'overrun', 'avenger', 'suppress', 'banner', 'drawfire', 'standfirm', 'ironoath', 'bulwarkaria', 'mirrorwall', 'valiantverse'], faceColor: '#ff9d9d', trait: 'siege_breaker' }),
+  gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor', 'sunder', 'provoke', 'phalanx', 'breach', 'charity', 'intimidate', 'warsong', 'fluster', 'overrun', 'avenger', 'suppress', 'banner', 'drawfire', 'standfirm', 'ironoath', 'bulwarkaria', 'mirrorwall', 'valiantverse', 'bastionverse'], faceColor: '#ff9d9d', trait: 'siege_breaker' }),
   orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless', 'lucky', 'mercy', 'purge', 'cheer', 'expose', 'decoy', 'hymn', 'sanctuary', 'empower', 'ward', 'relay', 'inspire', 'warhorn', 'safeguard', 'absolution', 'litany', 'aegis', 'sanctumhymn', 'miraclechorus', 'gracehymn', 'renewalverse', 'foresightverse'], faceColor: '#b6ff9d', trait: 'field_medic' }),
   karg: P({ name: 'Col. Karg Draven', callsign: 'BOSS', melee: 75, ranged: 75, defense: 70, evade: 65, maxSp: 70, spirits: ['valor', 'strike'], faceColor: '#d0a0ff', lastWords: 'Rex is scrap... the Empire builds another. Always.', killQuip: 'Another Aegis relic for the pyre.' }),
   grunt: P({ name: 'Soldier', callsign: 'GR', melee: 56, ranged: 56, defense: 52, evade: 52, maxSp: 30, spirits: [], faceColor: '#bbbbbb' }),
