@@ -94,8 +94,8 @@ android {
         applicationId 'com.fareza777.srwxyz'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 111
-        versionName "12.8.0"
+        versionCode 112
+        versionName "12.9.0"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }

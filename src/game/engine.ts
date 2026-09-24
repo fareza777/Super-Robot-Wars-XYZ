@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus' | 'beamDmg' | 'funnelDmg' | 'missileDmg' | 'gunDmg' | 'ammoRegen' | 'markDmg' | 'spRegen' | 'lowHpDmg' | 'aimBoost' | 'shieldBreak'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus' | 'beamDmg' | 'funnelDmg' | 'missileDmg' | 'gunDmg' | 'ammoRegen' | 'markDmg' | 'spRegen' | 'lowHpDmg' | 'aimBoost' | 'shieldBreak' | 'pinDmg'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -154,7 +154,7 @@ export function attackTiles(map: MapDef, from: Pos, w: WeaponDef, u?: UnitState)
 
 function evadeOf(u: UnitState, map: MapDef): number {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
-  return u.def.mobility + u.def.pilot.evade + (u.level - 1) * 2 + t.eva + (u.focusUntilEndOfEnemyPhase ? 30 : 0) + (u.hymnUntilEndOfEnemyPhase ? 15 : 0) + willEvade(u) + partBonus(u, 'mobility') + partBonus(u, 'evade') * 1.8 + (u.skills?.evade ?? 0) - (u.skills?.gambit ?? 0) * 8 + (u.aceMastery ? 5 : 0) - (u.dodges ?? 0) * 8 - (u.sundered ? 15 : 0);
+  return u.def.mobility + u.def.pilot.evade + (u.level - 1) * 2 + t.eva + (u.focusUntilEndOfEnemyPhase ? 30 : 0) + (u.veilUntilEndOfEnemyPhase ? 20 : 0) + (u.hymnUntilEndOfEnemyPhase ? 15 : 0) + willEvade(u) + partBonus(u, 'mobility') + partBonus(u, 'evade') * 1.8 + (u.skills?.evade ?? 0) - (u.skills?.gambit ?? 0) * 8 + (u.aceMastery ? 5 : 0) - (u.dodges ?? 0) * 8 - (u.sundered ? 15 : 0);
 }
 
 function armorOf(u: UnitState, map: MapDef): number {
@@ -235,6 +235,8 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (att.exertNext) dmg = Math.round(dmg * 1.15);
   if (att.hp * 2 < att.def.maxHp) dmg = Math.round(dmg * (1 + partBonus(att, 'lowHpDmg') / 100));
   if (att.en * 4 > att.def.maxEn * 3) dmg = Math.round(dmg * (1 + (att.skills?.surge ?? 0) * 0.04));
+  if ((att.skills?.outflank ?? 0) > 0 && !bestCounterWeapon(def, att.pos)) dmg = Math.round(dmg * (1 + att.skills.outflank * 0.06));
+  if (units && partBonus(att, 'pinDmg') > 0 && hasPincer(units, att, def)) dmg = Math.round(dmg * (1 + partBonus(att, 'pinDmg') / 100));
   if (TERRAIN_INFO[terrainAt(map, att.pos)].def) dmg = Math.round(dmg * (1 + (att.skills?.entrench ?? 0) * 0.05));
   if (def.level > att.level) dmg = Math.round(dmg * (1 + (att.skills?.underdog ?? 0) * 0.05));
   if (att.moved) dmg = Math.round(dmg * (1 + (att.skills?.skirmisher ?? 0) * 0.05));
@@ -988,6 +990,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       u.exertNext = true;
       u.en = Math.max(0, u.en - 10);
       break;
+    case 'veil':
+      break;
     // 'rouse', 'disrupt' and 'trust' affect neighbouring units — applied in store.castSpirit
   }
 }
@@ -1003,6 +1007,7 @@ export function clearTransientForOwnPhase(u: UnitState): void {
   u.followUpReady = false;
   u.overwatch = false;
   u.hymnUntilEndOfEnemyPhase = false;
+  u.veilUntilEndOfEnemyPhase = false;
   u.marksmanUntilEndOfEnemyPhase = false;
   u.warsongUntilEndOfEnemyPhase = false;
   u.frenzyThisTurn = false;

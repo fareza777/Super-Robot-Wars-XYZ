@@ -92,6 +92,7 @@ export const PARTS: Record<string, PartDef> = {
   berserkCore: { id: 'berserkCore', name: 'Berserker Core', desc: '+8% damage while your hull is below 50% HP', price: 1800, lowHpDmg: 8 },
   aimEnhancer: { id: 'aimEnhancer', name: 'Aim Enhancer', desc: 'The AIM action grants +12 extra hit', price: 1300, aimBoost: 12 },
   breachCharge: { id: 'breachCharge', name: 'Breach Charge', desc: '+15% damage against barrier-protected frames', price: 1600, shieldBreak: 15 },
+  pinBreaker: { id: 'pinBreaker', name: 'Pin Breaker', desc: '+12% damage against enemies pinned between two allies', price: 1700, pinDmg: 12 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -154,6 +155,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'precision', name: 'Precision', desc: 'Critical hits deal +5% more damage per point' },
   { id: 'surge', name: 'Surge', desc: '+4% damage per point while reactor EN is above 75%' },
   { id: 'reflex', name: 'Reflex', desc: 'Take 5% less counter-attack damage per point' },
+  { id: 'outflank', name: 'Outflank', desc: '+6% damage per point against targets that cannot counter' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1168,6 +1170,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_colony', name: 'STAR COLONIST', desc: 'Win a mission on the colony map', rewardCr: 700 },
   { id: 'h_returner', name: 'SECOND TOUR', desc: 'Reach New Game++ (NG+2)', rewardCr: 2000 },
   { id: 'h_reaper', name: 'REAPER COMPANY', desc: 'Log 100 total career kills across the squad', rewardCr: 1800 },
+  { id: 'h_records', name: 'ACE RECORDS', desc: 'Earn S rank on 7 missions', rewardCr: 1400 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1290,6 +1293,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.ngPlus >= 2;
     case 'h_reaper':
       return Object.values(s.killsByDef ?? {}).reduce((a, b) => a + b, 0) >= 100;
+    case 'h_records':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 7;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

@@ -34,6 +34,7 @@ function buffNames(u: UnitState): string[] {
   if (u.pyreNext) names.push('PYRE');
   if (u.overrunNext) names.push('OVERRUN');
   if (u.exertNext) names.push('EXERT');
+  if (u.veilUntilEndOfEnemyPhase) names.push('VEIL');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');
@@ -375,7 +376,7 @@ export function SidePanel() {
                         </View>
                         <View style={styles.tgtHitBox}>
                           <Text style={[styles.tgtHit, { color: '#ffd34d' }]}>{hitChance(unit, e, s.pendingWeapon!, s.map)}%</Text>
-                          <Text style={styles.tgtDmg}>~{damageOf(unit, e, s.pendingWeapon!, s.map, false)}</Text>
+                          <Text style={styles.tgtDmg}>{e.hp - damageOf(unit, e, s.pendingWeapon!, s.map, false) <= 0 ? 'DESTROY' : `~${damageOf(unit, e, s.pendingWeapon!, s.map, false)}`}</Text>
                         </View>
                       </View>
                     ))}
