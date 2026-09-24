@@ -168,6 +168,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   voidverse: { id: 'voidverse', name: 'Void Verse', cost: 50, desc: 'Dispel wave — enemies within 3 tiles lose every phase buff and buffing aura' },
   ruinverse: { id: 'ruinverse', name: 'Ruin Verse', cost: 50, desc: 'Entropy wave — enemies within 3 tiles suffer armor break and decay 8% hull per turn for 2 turns' },
   anthemverse: { id: 'anthemverse', name: 'Anthem Verse', cost: 55, desc: 'Restoration hymn — allies within 3 tiles instantly recover 15% hull' },
+  doomedge: { id: 'doomedge', name: 'Doom Edge', cost: 45, desc: 'Entropy strike — next hit deals +10% damage and dooms the target to decay 8% hull per turn for 3 turns' },
   vigilverse: { id: 'vigilverse', name: 'Vigil Verse', cost: 50, desc: 'Watchful hymn — allies within 3 tiles counter at +15% damage until end of enemy phase' },
   mortaledge: { id: 'mortaledge', name: 'Mortal Edge', cost: 50, desc: 'Execution focus — the next attack that lands is a guaranteed critical' },
   sentinelverse: { id: 'sentinelverse', name: 'Sentinel Verse', cost: 50, desc: 'Guardian hymn — allies within 3 tiles intercept attacks aimed at their adjacent allies until end of enemy phase' },

@@ -100,6 +100,7 @@ function buffNames(u: UnitState): string[] {
   if (u.overNext) names.push('OVEREDGE');
   if (u.arcNext) names.push('ARC EDGE');
   if (u.splatterNext) names.push('SPLATTER EDGE');
+  if (u.doomNext) names.push('DOOM EDGE');
   if (u.rended) names.push('RENDED');
   if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
   if (u.crimsonUntilEndOfEnemyPhase) names.push('CRIMSON VERSE');
@@ -142,6 +143,10 @@ function buffNames(u: UnitState): string[] {
   if (u.def.jammer) names.push('📡JAMMER');
   if (u.baseDefId && u.def.id !== u.baseDefId) names.push('⇄ALT-FORM');
   return names;
+}
+
+function debuffCount(u: UnitState): number {
+  return (u.statuses?.length ?? 0) + (u.doomTurns ? 1 : 0) + (u.sirenTurns ? 1 : 0) + (u.exposed ? 1 : 0) + (u.rended ? 1 : 0) + (u.sundered ? 1 : 0) + (u.crippled ? 1 : 0);
 }
 
 function Bar({ label, val, max, color }: { label: string; val: number; max: number; color: string }) {
@@ -582,7 +587,7 @@ export function SidePanel() {
                   {u.will !== 100 && <Text style={[styles.rosterHp, { color: u.will >= 130 ? '#ffd34d' : '#ff7a9d' }]}>W{u.will}</Text>}
                   <Text style={[styles.rosterHp, { color: '#c9a0ff' }]}>✦{u.sp}</Text>
                   {buffNames(u).length > 0 && <Text style={[styles.rosterHp, { color: '#8af0ff' }]}>✧{buffNames(u).length}</Text>}
-                  {(u.statuses?.length ?? 0) > 0 ? <Text style={[styles.rosterHp, { color: '#ff9d7a' }]}>⌛{u.statuses!.length}</Text> : null}
+                  {debuffCount(u) > 0 ? <Text style={[styles.rosterHp, { color: '#ff9d7a' }]}>⌛{debuffCount(u)}</Text> : null}
                   {u.crippled ? <Text style={[styles.rosterHp, { color: '#ff9d7a' }]}>⛓</Text> : null}
                   <Text style={[styles.rosterHp, { color: '#7fd0b0', width: 30 }]}>≫{Math.round(evadeOf(u, s.map))}</Text>
                   <Text style={[styles.rosterHp, { color: '#9fd8ff' }]}>⇄{moveRangeOf(u)}</Text>
