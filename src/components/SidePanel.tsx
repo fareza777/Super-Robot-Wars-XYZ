@@ -54,6 +54,7 @@ function buffNames(u: UnitState): string[] {
   if (u.rampageNext) names.push('RAMPAGE');
   if (u.drawfireUntilEndOfEnemyPhase) names.push('DRAWFIRE');
   if (u.statusproofUntilEndOfEnemyPhase) names.push('WARD MIST');
+  if (u.aegisUntilEndOfEnemyPhase) names.push('AEGIS');
   if (u.hemoNext) names.push('HEMORRHAGE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
@@ -397,7 +398,7 @@ export function SidePanel() {
                             {e.def.name} {e.def.boss ? (e.phase2 ? 'Ω★' : '★') : ''}
                           </Text>
                           <Text style={styles.tgtHp}>
-                            HP {e.hp}/{e.def.maxHp} · WILL {e.will}
+                            HP {e.hp}/{e.def.maxHp} · WILL {e.will} · EN {e.en}
                           </Text>
                         </View>
                         <View style={styles.tgtHitBox}>
@@ -433,7 +434,7 @@ export function SidePanel() {
                             {e.def.name} {e.def.boss ? (e.phase2 ? 'Ω★' : '★') : ''}
                           </Text>
                           <Text style={styles.tgtHp}>
-                            HP {e.hp}/{e.def.maxHp} · WILL {e.will}
+                            HP {e.hp}/{e.def.maxHp} · WILL {e.will} · EN {e.en}
                           </Text>
                           {/* SRW damage preview — green = HP remaining after the hit */}
                           <View style={styles.tgtBar}>

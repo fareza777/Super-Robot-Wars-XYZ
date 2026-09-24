@@ -118,6 +118,7 @@ export const PARTS: Record<string, PartDef> = {
   sealedHull: { id: 'sealedHull', name: 'Sealed Hull', desc: 'Hazard plating — immune to terrain damage (lava, void, corrosive fields)', price: 1400, terraProof: true },
   defuseKit: { id: 'defuseKit', name: 'Defuse Kit', desc: 'Mine sweeper rig — this frame steps through minefields without detonating them', price: 1500, defuseKit: true },
   bulwarkPlate: { id: 'bulwarkPlate', name: 'Bulwark Plate', desc: 'Terrain-locked armor — +400 armor while standing on defensive ground', price: 1500, fortArmor: true },
+  soulLantern: { id: 'soulLantern', name: 'Soul Lantern', desc: 'Spirit-fed reactor — +5 Will for every kill this frame lands', price: 1600, willOnKill: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -206,6 +207,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'backliner', name: 'Backliner', desc: '+6% damage per point while no enemy stands adjacent — clean shooting lanes' },
   { id: 'bombard', name: 'Bombard', desc: '+5% damage per point with MAP/area weapons' },
   { id: 'ruinbreaker', name: 'Ruin Breaker', desc: '+7% damage per point vs frames with crumbling armor (sundered or broken)' },
+  { id: 'artillerist', name: 'Artillerist', desc: '+5% damage per point vs targets 4 or more tiles away' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1246,6 +1248,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_perfectionist', name: 'PERFECTIONIST', desc: 'Earn MASTERY ★ in 25 missions', rewardCr: 3500 },
   { id: 'h_frontier', name: 'FRONTIER SWEEP', desc: 'Clear 8 side missions', rewardCr: 2200 },
   { id: 'h_hoarder', name: 'HOARDER', desc: 'Stockpile 40 consumable items', rewardCr: 2000 },
+  { id: 'h_tide', name: 'TIDEBREAKER', desc: 'Win a mission on the open sea', rewardCr: 800 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1420,6 +1423,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.sideCleared ?? []).length >= 8;
     case 'h_hoarder':
       return Object.values(s.inventory ?? {}).reduce((a, b) => a + b, 0) >= 40;
+    case 'h_tide':
+      return s.missionCh?.theme === 'sea';
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
