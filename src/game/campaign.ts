@@ -91,6 +91,7 @@ export const PARTS: Record<string, PartDef> = {
   neuralLink: { id: 'neuralLink', name: 'Neural Link', desc: 'Pilot regenerates +2 SP every turn', price: 1600, spRegen: 2 },
   berserkCore: { id: 'berserkCore', name: 'Berserker Core', desc: '+8% damage while your hull is below 50% HP', price: 1800, lowHpDmg: 8 },
   aimEnhancer: { id: 'aimEnhancer', name: 'Aim Enhancer', desc: 'The AIM action grants +12 extra hit', price: 1300, aimBoost: 12 },
+  breachCharge: { id: 'breachCharge', name: 'Breach Charge', desc: '+15% damage against barrier-protected frames', price: 1600, shieldBreak: 15 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -152,6 +153,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'steadfast', name: 'Steadfast', desc: 'Take 6% less damage per point' },
   { id: 'precision', name: 'Precision', desc: 'Critical hits deal +5% more damage per point' },
   { id: 'surge', name: 'Surge', desc: '+4% damage per point while reactor EN is above 75%' },
+  { id: 'reflex', name: 'Reflex', desc: 'Take 5% less counter-attack damage per point' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -190,7 +192,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1165,6 +1167,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_delver', name: 'RUIN DELVER', desc: 'Win a mission in the ancient ruins', rewardCr: 700 },
   { id: 'h_colony', name: 'STAR COLONIST', desc: 'Win a mission on the colony map', rewardCr: 700 },
   { id: 'h_returner', name: 'SECOND TOUR', desc: 'Reach New Game++ (NG+2)', rewardCr: 2000 },
+  { id: 'h_reaper', name: 'REAPER COMPANY', desc: 'Log 100 total career kills across the squad', rewardCr: 1800 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1285,6 +1288,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.missionCh?.theme === 'colony';
     case 'h_returner':
       return s.ngPlus >= 2;
+    case 'h_reaper':
+      return Object.values(s.killsByDef ?? {}).reduce((a, b) => a + b, 0) >= 100;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

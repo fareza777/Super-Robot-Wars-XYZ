@@ -33,6 +33,7 @@ function buffNames(u: UnitState): string[] {
   if (u.strafeNext) names.push('STRAFE');
   if (u.pyreNext) names.push('PYRE');
   if (u.overrunNext) names.push('OVERRUN');
+  if (u.exertNext) names.push('EXERT');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');
@@ -221,9 +222,11 @@ export function SidePanel() {
               </Text>
             )}
             {buffNames(unit).length > 0 && (
-              <Text style={[styles.traitLine, { color: '#7de0ff' }]} numberOfLines={1}>
-                ✦ STATUS: {buffNames(unit).join(' · ')}
-              </Text>
+              <View style={styles.buffRow}>
+                {buffNames(unit).map((n) => (
+                  <Text key={n} style={styles.buffChip}>✦ {n}</Text>
+                ))}
+              </View>
             )}
             <Text style={styles.terrainLine}>{terrainDesc(s.map, unit.pos)}</Text>
           </View>
@@ -529,9 +532,11 @@ export function SidePanel() {
               </Text>
             )}
             {buffNames(inspect).length > 0 && (
-              <Text style={[styles.traitLine, { color: '#7de0ff' }]} numberOfLines={1}>
-                ✦ STATUS: {buffNames(inspect).join(' · ')}
-              </Text>
+              <View style={styles.buffRow}>
+                {buffNames(inspect).map((n) => (
+                  <Text key={n} style={styles.buffChip}>✦ {n}</Text>
+                ))}
+              </View>
             )}
             {(inspect.def.barrier ?? 0) > 0 && (
               <Text style={[styles.traitLine, { color: '#8ef0e8' }]} numberOfLines={1}>
@@ -645,6 +650,8 @@ const styles = StyleSheet.create({
   crateHint: { color: '#ffd34d', fontSize: 8.5, marginTop: 4, fontWeight: '700' },
   rosterBox: { marginTop: 7, backgroundColor: '#0c0e16', borderRadius: 6, padding: 6 },
   traitLine: { color: '#b8a0ff', fontSize: 9, marginTop: 3 },
+  buffRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4 },
+  buffChip: { color: '#7de0ff', fontSize: 8, fontWeight: '800', letterSpacing: 1, borderWidth: 1, borderColor: 'rgba(125,224,255,0.4)', backgroundColor: 'rgba(125,224,255,0.08)', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
   rosterRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
   rosterName: { color: '#cfd8f0', fontSize: 9, fontWeight: '700', width: 78 },
   rosterActed: { opacity: 0.4 },

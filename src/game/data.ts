@@ -65,6 +65,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   inspire: { id: 'inspire', name: 'Inspire', cost: 35, desc: 'A rallying cry — every ally gains +8 Will' },
   pyre: { id: 'pyre', name: 'Pyre', cost: 40, desc: 'Incendiary load — your next landed hit ignites the target (burn, 2 turns)' },
   overrun: { id: 'overrun', name: 'Overrun', cost: 45, desc: 'Shock assault — your next attack cannot be countered' },
+  exert: { id: 'exert', name: 'Exert', cost: 40, desc: 'Push the reactor — your next attack gains +20 hit and +15% damage (costs 10 EN)' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
