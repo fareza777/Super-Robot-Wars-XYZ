@@ -66,6 +66,7 @@ function buffNames(u: UnitState): string[] {
   if (u.oathUntilEndOfEnemyPhase) names.push('IRON OATH');
   if (u.dirgeHealUntilEndOfEnemyPhase) names.push('DIRGE MIST');
   if (u.chorusUntilEndOfEnemyPhase) names.push('MIRACLE CHORUS');
+  if (u.hellfireNext) names.push('HELLFIRE');
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
@@ -520,6 +521,7 @@ export function SidePanel() {
                     </View>
                   </View>
                   <Text style={styles.rosterHp}>{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
+                  <Text style={[styles.rosterHp, { color: '#c9a0ff' }]}>✦{u.sp}</Text>
                   <Text style={[styles.rosterHp, { color: '#ffd34d' }]}>{u.kills}K</Text>
                 </View>
               ))}
