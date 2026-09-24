@@ -109,6 +109,7 @@ export const PARTS: Record<string, PartDef> = {
   blastDeflector: { id: 'blastDeflector', name: 'Blast Deflector', desc: 'Chaff weave — damage from MAP/area weapons reduced by 30%', price: 1700, mapGuard: true },
   warTrophyCore: { id: 'warTrophyCore', name: 'War Trophy Core', desc: 'Predator furnace — +3% damage per kill this battle (up to 15%)', price: 2000, killDmg: true },
   lastBastionPlate: { id: 'lastBastionPlate', name: 'Last Bastion Plate', desc: 'Reactive armor — +400 armor while hull is below 40%', price: 2100, lowHpArmor: true },
+  overchargeCell: { id: 'overchargeCell', name: 'Overcharge Cell', desc: 'Volatile reactor — CHARGE grants an additional +15% damage', price: 1700, chargeBoost: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -188,6 +189,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'cadence', name: 'Cadence', desc: '+4% damage per point per kill this battle (up to 3 kills)' },
   { id: 'wingman', name: 'Wingman', desc: '+5% damage per point while an ally is adjacent to the target' },
   { id: 'fullmag', name: 'Full Mag', desc: '+6% damage per point when firing a weapon with a full clip' },
+  { id: 'dirgesong', name: 'Dirge Song', desc: '+8% damage per point while a squad frame lies fallen this battle' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -226,7 +228,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1219,6 +1221,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_triumvirate', name: 'TRIUMVIRATE', desc: 'Three pilots reach 25 career kills', rewardCr: 1600 },
   { id: 'h_grandmaster', name: 'GRANDMASTER', desc: 'Earn MASTERY ★ on 15 missions', rewardCr: 2500 },
   { id: 'h_warpath', name: 'WARPATH', desc: 'Two hundred total career kills across the squad', rewardCr: 3000 },
+  { id: 'h_devastator', name: 'DEVASTATOR', desc: 'Land a single hit of 20000 damage', rewardCr: 2000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1375,6 +1378,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.masteryDone ?? []).length >= 15;
     case 'h_warpath':
       return Object.values(s.pilotProg ?? {}).reduce((a, p) => a + (p.kills ?? 0), 0) >= 200;
+    case 'h_devastator':
+      return (s.maxHitEver ?? 0) >= 20000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

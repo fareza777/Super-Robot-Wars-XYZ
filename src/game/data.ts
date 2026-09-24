@@ -83,6 +83,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   absolution: { id: 'absolution', name: 'Absolution', cost: 45, desc: 'Cleansing hymn — allies within 3 tiles shed all debuffs and gain +15 hit until the end of the enemy phase' },
   judge: { id: 'judge', name: 'Judgement', cost: 50, desc: 'Executioner sight — your next hit deals +50% damage against boss and elite frames' },
   banner: { id: 'banner', name: 'Banner', cost: 55, desc: 'Rally standard — allies within 3 tiles gain +10 hit and +20% counter damage until the end of the enemy phase' },
+  gorelust: { id: 'gorelust', name: 'Gorelust', cost: 40, desc: 'Blood siphon — your next hit restores your hull by 25% of the damage dealt' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
