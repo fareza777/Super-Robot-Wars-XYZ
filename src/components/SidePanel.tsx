@@ -32,6 +32,7 @@ function buffNames(u: UnitState): string[] {
   if (u.tracerNext) names.push('TRACER');
   if (u.strafeNext) names.push('STRAFE');
   if (u.pyreNext) names.push('PYRE');
+  if (u.overrunNext) names.push('OVERRUN');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');

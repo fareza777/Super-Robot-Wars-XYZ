@@ -264,7 +264,7 @@ export function HQScreen() {
                         ))}
                       </View>
                     </View>
-                    <Pressable style={[styles.buyBtn, (pp < 1 || maxed) && { opacity: 0.35 }]} onPress={() => s.allocPP(selUnit, st.id)} disabled={pp < 1 || maxed}>
+                    <Pressable style={({ pressed }) => [styles.buyBtn, (pp < 1 || maxed) && { opacity: 0.35 }, pressed && { opacity: 0.6, transform: [{ scale: 0.95 }] }]} onPress={() => s.allocPP(selUnit, st.id)} disabled={pp < 1 || maxed}>
                       <Text style={styles.buyTxt}>{maxed ? 'MAX' : '+1 (1PP)'}</Text>
                     </Pressable>
                   </View>
@@ -295,7 +295,7 @@ export function HQScreen() {
                       ))}
                     </View>
                   </View>
-                  <Pressable style={[styles.buyBtn, (!afford || maxed) && { opacity: 0.35 }]} onPress={() => s.upgradeWeapon(selUnit, w.id)} disabled={!afford || maxed}>
+                  <Pressable style={({ pressed }) => [styles.buyBtn, (!afford || maxed) && { opacity: 0.35 }, pressed && { opacity: 0.6, transform: [{ scale: 0.95 }] }]} onPress={() => s.upgradeWeapon(selUnit, w.id)} disabled={!afford || maxed}>
                     <Text style={styles.buyTxt}>{maxed ? 'MAX' : `${cost} CR`}</Text>
                   </Pressable>
                 </View>
@@ -341,7 +341,7 @@ export function HQScreen() {
                       </View>
                     </View>
                     {!locked && (
-                      <Pressable style={styles.buyBtn} onPress={() => s.openBondEvent(ev.id)}>
+                      <Pressable style={({ pressed }) => [styles.buyBtn, pressed && { opacity: 0.6, transform: [{ scale: 0.95 }] }]} onPress={() => s.openBondEvent(ev.id)}>
                         <Text style={styles.buyTxt}>{seen ? 'REPLAY' : 'WATCH ▸'}</Text>
                       </Pressable>
                     )}
@@ -409,7 +409,7 @@ export function HQScreen() {
                       {claimed ? (
                         <Text style={styles.honorClaimed}>CLAIMED</Text>
                       ) : done ? (
-                        <Pressable style={styles.honorBtn} onPress={() => s.claimHonor(h.id)}>
+                        <Pressable style={({ pressed }) => [styles.honorBtn, pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] }]} onPress={() => s.claimHonor(h.id)}>
                           <Text style={styles.honorBtnTxt}>CLAIM</Text>
                         </Pressable>
                       ) : (
@@ -437,7 +437,7 @@ export function HQScreen() {
             </Text>
             <Text style={styles.chatTxt}>{CHAT_LINES[chatLine].text}</Text>
             <Pressable
-              style={styles.chatNext}
+              style={({ pressed }) => [styles.chatNext, pressed && { opacity: 0.7 }]}
               onPress={() => {
                 if (chatLine < CHAT_LINES.length - 1) {
                   const n = chatLine + 1;
@@ -449,7 +449,7 @@ export function HQScreen() {
               <Text style={styles.chatNextTxt}>{chatLine < CHAT_LINES.length - 1 ? 'NEXT ▸' : 'DONE ▸'}</Text>
             </Pressable>
           </View>
-          <Pressable style={styles.backCorner} onPress={() => setTab('main')}>
+          <Pressable style={({ pressed }) => [styles.backCorner, pressed && { opacity: 0.6 }]} onPress={() => setTab('main')}>
             <Text style={styles.backTxt}>◂ HQ</Text>
           </Pressable>
         </View>
