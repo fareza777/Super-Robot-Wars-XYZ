@@ -91,6 +91,7 @@ function buffNames(u: UnitState): string[] {
   if (u.rampartUntilEndOfEnemyPhase) names.push('RAMPART VERSE');
   if (u.ravageNext) names.push('RAVAGE VERSE');
   if (u.savageNext) names.push('SAVAGE EDGE');
+  if (u.truthedgeNext) names.push('TRUTH EDGE');
   if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
   if (u.crimsonUntilEndOfEnemyPhase) names.push('CRIMSON VERSE');
   if (u.scopeUntilEndOfEnemyPhase) names.push('SCOPE VERSE');
@@ -678,7 +679,7 @@ export function SidePanel() {
             <Text style={styles.logHead}>BATTLE LOG</Text>
             <ScrollView nestedScrollEnabled>
               {s.log.map((l, i) => {
-                const c = /^⚓/.test(l) ? '#ffd34d' : /^[🔧⛽🛰]/.test(l) ? '#7ac7ff' : /^[☠✖💀💥]/.test(l) ? '#ff8a8a' : /^[✚♪💞]/.test(l) ? '#8affc0' : /^[⚔▣🛡⇄📡⚡☄⛓]/.test(l) ? '#9fd8ff' : /^[★✦🏅♛◆]/.test(l) ? '#ffd34d' : undefined;
+                const c = l.includes(' uses ') ? '#c9a0ff' : /^⚓/.test(l) ? '#ffd34d' : /^[🔧⛽🛰]/.test(l) ? '#7ac7ff' : /^[☠✖💀💥]/.test(l) ? '#ff8a8a' : /^[✚♪💞]/.test(l) ? '#8affc0' : /^[⚔▣🛡⇄📡⚡☄⛓]/.test(l) ? '#9fd8ff' : /^[★✦🏅♛◆]/.test(l) ? '#ffd34d' : undefined;
                 return (
                   <Text key={i} style={[styles.logLine, i === 0 && styles.logLineHot, c ? { color: c } : null]}>
                     {l}
