@@ -150,6 +150,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   novaedge: { id: 'novaedge', name: 'Nova Edge', cost: 50, desc: 'Supernova strike — the next hit deals +25% damage and surges +10 Will' },
   fortressverse: { id: 'fortressverse', name: 'Fortress Verse', cost: 50, desc: 'Bastion aura — allies within 3 tiles take -20% damage from melee attacks until end of enemy phase' },
   culledge: { id: 'culledge', name: 'Cull Edge', cost: 45, desc: 'Executioner strike — the next hit deals +30% damage vs targets below 40% hull' },
+  rendedge: { id: 'rendedge', name: 'Rend Edge', cost: 45, desc: 'Rend plate — the next hit deals +20% damage and permanently compromises the target\'s armor (+10% damage taken)' },
   bindverse: { id: 'bindverse', name: 'Bind Verse', cost: 50, desc: 'Snare web — enemies within 3 tiles are slowed and marked' },
   blightverse: { id: 'blightverse', name: 'Blight Verse', cost: 50, desc: 'Corrosion wave — enemies within 3 tiles burn and suffer cracked armor' },
   vigilverse: { id: 'vigilverse', name: 'Vigil Verse', cost: 50, desc: 'Watchful hymn — allies within 3 tiles counter at +15% damage until end of enemy phase' },

@@ -181,6 +181,7 @@ export const PARTS: Record<string, PartDef> = {
   choirRelic: { id: 'choirRelic', name: 'Choir Relic', desc: 'Anthem core — pilot regenerates +3 SP every turn', price: 1800, spRegen: 3 },
   warlordSigil: { id: 'warlordSigil', name: 'Warlord Sigil', desc: 'Command crest — adjacent allies deal +12% damage', price: 1900, auraDmg: 12 },
   judgeRig: { id: 'judgeRig', name: 'Judge Rig', desc: 'Arbiter servos — counter-attacks deal +25% damage', price: 1900, counterDmg: 25 },
+  titanRipper: { id: 'titanRipper', name: 'Titan Ripper', desc: 'Colossus shredder — attacks ignore 25% of target armor', price: 1900, armorShred: 25 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -332,6 +333,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'grandstand', name: 'Grandstand', desc: '+5% damage per point while at least 3 allies are alive' },
   { id: 'vanguard', name: 'Vanguard', desc: '+6% damage per point on the unit\'s first attack each battle' },
   { id: 'phalanx', name: 'Phalanx', desc: '+4% damage per point per adjacent ally (max 3)' },
+  { id: 'polymath', name: 'Polymath', desc: '+4% damage per point per weapon carried beyond the second' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -370,7 +372,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse', 'goreverse', 'culledge'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse', 'goreverse', 'culledge', 'rendedge'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1435,6 +1437,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_overgod', name: 'OVERGOD', desc: 'Reach NG+9 or beyond', rewardCr: 42000 },
   { id: 'h_peacemaker', name: 'PEACEMAKER', desc: 'Clear 30 side missions', rewardCr: 44000 },
   { id: 'h_warmonger', name: 'WARMONGER', desc: '1500 total career kills across the squad', rewardCr: 46000 },
+  { id: 'h_ragnarok', name: 'RAGNAROK', desc: 'Land a single hit of 500,000+ damage', rewardCr: 50000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1736,6 +1739,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.sideCleared?.length ?? 0) >= 30;
     case 'h_warmonger':
       return totalKills >= 1500;
+    case 'h_ragnarok':
+      return (s.maxHitEver ?? 0) >= 500000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
