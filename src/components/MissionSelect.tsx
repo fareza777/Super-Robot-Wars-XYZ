@@ -20,7 +20,7 @@ export function MissionSelect() {
         <Text style={styles.title}>MISSION SELECT</Text>
         <Text style={styles.sub}>AEGIS ARK · OPERATIONS BOARD</Text>
       </View>
-      <Pressable style={styles.back} onPress={s.gotoHq}>
+      <Pressable style={({ pressed }) => [styles.back, pressed && { opacity: 0.6 }]} onPress={s.gotoHq}>
         <Text style={styles.backTxt}>◂ HQ</Text>
       </Pressable>
 
@@ -30,7 +30,7 @@ export function MissionSelect() {
           <Text style={styles.colTitle}>MAIN CAMPAIGN</Text>
           <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 10 }}>
           {s.savedBattle && (
-            <Pressable style={styles.resumeCard} onPress={s.resumeBattle}>
+            <Pressable style={({ pressed }) => [styles.resumeCard, pressed && { opacity: 0.7, transform: [{ scale: 0.985 }] }]} onPress={s.resumeBattle}>
               <LinearGradient colors={['rgba(58,32,8,0.95)', 'rgba(20,12,4,0.95)']} style={StyleSheet.absoluteFill} />
               <Text style={styles.resumeTitle}>⚔ BATTLE IN PROGRESS</Text>
               <Text style={styles.resumeName}>{s.savedBattle.missionCh.name.toUpperCase()}</Text>
