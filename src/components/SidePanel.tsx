@@ -106,6 +106,7 @@ function buffNames(u: UnitState): string[] {
   if (u.maimNext) names.push('MAIM EDGE');
   if (u.breachNext) names.push('BREACH EDGE');
   if (u.hollowNext) names.push('HOLLOW EDGE');
+  if (u.cinderNext) names.push('CINDER EDGE');
   if (u.repulseUntilEndOfEnemyPhase) names.push('REPULSE VERSE');
   if (u.silencedUntilEndOfEnemyPhase) names.push('SILENCE VERSE');
   if (u.weakenUntilEndOfEnemyPhase) names.push('FEAR VERSE');
@@ -162,7 +163,7 @@ function buffNames(u: UnitState): string[] {
 }
 
 function debuffCount(u: UnitState): number {
-  return (u.statuses?.length ?? 0) + (u.doomTurns ? 1 : 0) + (u.sirenTurns ? 1 : 0) + (u.exposed ? 1 : 0) + (u.rended ? 1 : 0) + (u.sundered ? 1 : 0) + (u.crippled ? 1 : 0) + (u.silencedUntilEndOfEnemyPhase ? 1 : 0) + (u.cursedUntilEndOfEnemyPhase ? 1 : 0) + (u.weakenUntilEndOfEnemyPhase ? 1 : 0);
+  return (u.statuses?.length ?? 0) + (u.doomTurns ? 1 : 0) + (u.sirenTurns ? 1 : 0) + (u.exposed ? 1 : 0) + (u.rended ? 1 : 0) + (u.sundered ? 1 : 0) + (u.crippled ? 1 : 0) + (u.silencedUntilEndOfEnemyPhase ? 1 : 0) + (u.cursedUntilEndOfEnemyPhase ? 1 : 0) + (u.weakenUntilEndOfEnemyPhase ? 1 : 0) + (u.obscuredTurns ? 1 : 0);
 }
 
 function Bar({ label, val, max, color }: { label: string; val: number; max: number; color: string }) {
