@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0, truesight: 0, backliner: 0, bombard: 0, ruinbreaker: 0, artillerist: 0, paintburst: 0, fortsoul: 0, hexsurge: 0, coldsteel: 0, capacitor: 0, ironbound: 0, coolloop: 0, gritguard: 0, savant: 0, shieldpierce: 0, pureshot: 0, finisher: 0, aerobat: 0, sureshot: 0, wildfire: 0, archer: 0, stormeye: 0, acehunter: 0, ravager: 0, sledge: 0, overkill: 0, pike: 0, wildswing: 0, zenith: 0, closecombat: 0, chainblade: 0, exploiter: 0, viper: 0, disruptor: 0, myrmidon: 0, sunderfist: 0, bloodborne: 0, harvester: 0, gridshock: 0, shockjock: 0, biggame: 0, razor: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0, truesight: 0, backliner: 0, bombard: 0, ruinbreaker: 0, artillerist: 0, paintburst: 0, fortsoul: 0, hexsurge: 0, coldsteel: 0, capacitor: 0, ironbound: 0, coolloop: 0, gritguard: 0, savant: 0, shieldpierce: 0, pureshot: 0, finisher: 0, aerobat: 0, sureshot: 0, wildfire: 0, archer: 0, stormeye: 0, acehunter: 0, ravager: 0, sledge: 0, overkill: 0, pike: 0, wildswing: 0, zenith: 0, closecombat: 0, chainblade: 0, exploiter: 0, viper: 0, disruptor: 0, myrmidon: 0, sunderfist: 0, bloodborne: 0, harvester: 0, gridshock: 0, shockjock: 0, biggame: 0, razor: 0, retribution: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus' | 'beamDmg' | 'funnelDmg' | 'missileDmg' | 'gunDmg' | 'ammoRegen' | 'markDmg' | 'spRegen' | 'lowHpDmg' | 'aimBoost' | 'shieldBreak' | 'pinDmg' | 'jamProof' | 'statusBurn' | 'statusBreak' | 'statusMark' | 'statusStun' | 'beamGuard' | 'meleeGuard' | 'missileGuard' | 'regenPlate' | 'drainCoil' | 'gunGuard' | 'funnelGuard' | 'counterRange' | 'mapGuard' | 'killDmg' | 'lowHpArmor' | 'chargeBoost' | 'terrainArmor' | 'mapDmg' | 'jammerSkin' | 'lowHpRegen' | 'sniperGuard' | 'terraProof' | 'fortArmor' | 'willOnKill' | 'supportDmg' | 'spOnHurt' | 'rageEn' | 'auraDmg' | 'critGuard' | 'enOnKill' | 'lastAmmo' | 'spSaver' | 'ammoScalp' | 'clusterAmp' | 'thrallWeave' | 'longsight' | 'surveyRig' | 'pointMauler' | 'omenScope' | 'eagleEye' | 'haloScope' | 'apexRig' | 'reactorShield' | 'foilWeave' | 'cloakWeave' | 'skyBooster' | 'ventEn' | 'ventArmor' | 'ramPlate' | 'pulseVernier' | 'landVernier' | 'lastStandCore' | 'siegePlate' | 'shockCoil' | 'blazeCoil' | 'rageCoil' | 'stunGuard' | 'blazePlate' | 'frostPlate' | 'voidPlate' | 'witchPlate'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus' | 'beamDmg' | 'funnelDmg' | 'missileDmg' | 'gunDmg' | 'ammoRegen' | 'markDmg' | 'spRegen' | 'lowHpDmg' | 'aimBoost' | 'shieldBreak' | 'pinDmg' | 'jamProof' | 'statusBurn' | 'statusBreak' | 'statusMark' | 'statusStun' | 'beamGuard' | 'meleeGuard' | 'missileGuard' | 'regenPlate' | 'drainCoil' | 'gunGuard' | 'funnelGuard' | 'counterRange' | 'mapGuard' | 'killDmg' | 'lowHpArmor' | 'chargeBoost' | 'terrainArmor' | 'mapDmg' | 'jammerSkin' | 'lowHpRegen' | 'sniperGuard' | 'terraProof' | 'fortArmor' | 'willOnKill' | 'supportDmg' | 'spOnHurt' | 'rageEn' | 'auraDmg' | 'critGuard' | 'enOnKill' | 'lastAmmo' | 'spSaver' | 'ammoScalp' | 'clusterAmp' | 'thrallWeave' | 'longsight' | 'surveyRig' | 'pointMauler' | 'omenScope' | 'eagleEye' | 'haloScope' | 'apexRig' | 'reactorShield' | 'foilWeave' | 'cloakWeave' | 'skyBooster' | 'ventEn' | 'ventArmor' | 'ramPlate' | 'pulseVernier' | 'landVernier' | 'lastStandCore' | 'siegePlate' | 'shockCoil' | 'blazeCoil' | 'rageCoil' | 'stunGuard' | 'blazePlate' | 'frostPlate' | 'voidPlate' | 'witchPlate' | 'orbShield'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -215,6 +215,8 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (def.skills?.anchor && !def.moved) dmg = Math.round(dmg * (1 - def.skills.anchor * 0.05));
   if (def.skills?.fortsoul && TERRAIN_INFO[terrainAt(map, def.pos)].def > 0) dmg = Math.round(dmg * (1 - def.skills.fortsoul * 0.05));
   if (def.skills?.gritguard && def.hp < def.def.maxHp * 0.5) dmg = Math.round(dmg * (1 - def.skills.gritguard * 0.08));
+  if (def.rampartUntilEndOfEnemyPhase && dist(att.pos, def.pos) >= 3) dmg = Math.round(dmg * 0.8);
+  if (partBonus(def, 'orbShield') > 0 && dist(att.pos, def.pos) >= 3) dmg = Math.round(dmg * Math.max(0.3, 1 - partBonus(def, 'orbShield') / 100));
   if (w.kind === 'melee' && def.skills?.parry) dmg = Math.round(dmg * (1 - def.skills.parry * 0.05));
   if (att.relentlessUntilEndOfEnemyPhase && def.hp < def.def.maxHp / 2) dmg = Math.round(dmg * 1.25);
   if (att.charged) dmg = Math.round(dmg * (1.5 + (partBonus(att, 'chargeBoost') > 0 ? 0.15 : 0)));
@@ -490,6 +492,7 @@ export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map
       if (def.counterBuffUntilEndOfEnemyPhase) c.damage = Math.round(c.damage * 1.1);
       if (def.avengerNext) { c.damage = Math.round(c.damage * 1.5); def.avengerNext = false; }
       if (def.bannerUntilEndOfEnemyPhase) c.damage = Math.round(c.damage * 1.2);
+      if (def.skills?.retribution && def.hp * 2 < def.def.maxHp) c.damage = Math.round(c.damage * (1 + 0.06 * def.skills.retribution));
       counter = { weapon: cw, ...c };
       counterCut = true;
       if (c.destroyed) {
@@ -504,6 +507,7 @@ export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map
       if (def.counterBuffUntilEndOfEnemyPhase) c.damage = Math.round(c.damage * 1.1);
       if (def.avengerNext) { c.damage = Math.round(c.damage * 1.5); def.avengerNext = false; }
       if (def.bannerUntilEndOfEnemyPhase) c.damage = Math.round(c.damage * 1.2);
+      if (def.skills?.retribution && def.hp * 2 < def.def.maxHp) c.damage = Math.round(c.damage * (1 + 0.06 * def.skills.retribution));
       counter = { weapon: cw!, ...c };
     }
   }
@@ -1361,6 +1365,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'levinedge':
       u.levinedgeNext = true;
       break;
+    case 'rampartverse':
+      break;
     // 'rouse', 'disrupt' and 'trust' affect neighbouring units — applied in store.castSpirit
   }
 }
@@ -1399,6 +1405,7 @@ export function clearTransientForOwnPhase(u: UnitState): void {
   u.tracerAllyUntilEndOfEnemyPhase = false;
   u.tideUntilEndOfEnemyPhase = false;
   u.mirrorwallUntilEndOfEnemyPhase = false;
+  u.rampartUntilEndOfEnemyPhase = false;
   u.breachAtkUntilEndOfEnemyPhase = false;
   u.ebbUntilEndOfEnemyPhase = false;
   u.valiantUntilEndOfEnemyPhase = false;

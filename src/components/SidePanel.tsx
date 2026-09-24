@@ -88,6 +88,7 @@ function buffNames(u: UnitState): string[] {
   if (u.furyverseNext) names.push('FURY VERSE');
   if (u.tracerAllyUntilEndOfEnemyPhase) names.push('TRACER VERSE');
   if (u.levinedgeNext) names.push('LEVIN EDGE');
+  if (u.rampartUntilEndOfEnemyPhase) names.push('RAMPART VERSE');
   if ((u.sirenTurns ?? 0) > 0) names.push(`SIREN VERSE ${u.sirenTurns}`);
   if ((u.clarionTurns ?? 0) > 0) names.push(`CLARION VERSE ${u.clarionTurns}`);
   if (u.lacerateNext) names.push('LACERATE');
@@ -551,6 +552,7 @@ export function SidePanel() {
                   <Text style={styles.rosterHp}>{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
                   {u.will !== 100 && <Text style={[styles.rosterHp, { color: '#ff7a9d' }]}>W{u.will}</Text>}
                   <Text style={[styles.rosterHp, { color: '#c9a0ff' }]}>✦{u.sp}</Text>
+                  {(u.statuses?.length ?? 0) > 0 ? <Text style={[styles.rosterHp, { color: '#ff9d7a' }]}>⌛{u.statuses!.length}</Text> : null}
                   <Text style={[styles.rosterHp, { color: '#ffd34d' }]}>{u.kills}K</Text>
                   {(u.parts?.length ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#7ac7ff' }]}>◈{u.parts.length}</Text>}
                 </View>

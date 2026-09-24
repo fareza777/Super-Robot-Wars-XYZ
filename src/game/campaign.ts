@@ -156,6 +156,7 @@ export const PARTS: Record<string, PartDef> = {
   voidPlate: { id: 'voidPlate', name: 'Void Plate', desc: 'Sensor dark — this frame cannot be painted or exposed', price: 1600, voidPlate: true },
   witchPlate: { id: 'witchPlate', name: 'Witch Plate', desc: 'Hex ward — this frame cannot be suppressed', price: 1700, witchPlate: true },
   octaneCell: { id: 'octaneCell', name: 'Octane Cell', desc: 'Hot ammunition — +15% ammo weapon damage, -100 armor', price: 1700, ammoDmg: 15, ventArmor: true },
+  orbShield: { id: 'orbShield', name: 'Orb Shield', desc: 'Deflector field — -15% damage from attacks at range 3+', price: 1700, orbShield: 15 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -282,6 +283,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'shockjock', name: 'Shockjock', desc: '+5% damage per point with status weapons' },
   { id: 'biggame', name: 'Big Game', desc: '+6% damage per point vs frames with over 12000 max HP' },
   { id: 'razor', name: 'Razor', desc: '+5% damage per point with pierce weapons' },
+  { id: 'retribution', name: 'Retribution', desc: '+6% counter damage per point when hull below half' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1360,6 +1362,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_colossus', name: 'COLOSSUS', desc: 'Land a single hit for 75000+ damage', rewardCr: 9000 },
   { id: 'h_demigod', name: 'DEMIGOD', desc: 'Earn S rank on 35 missions', rewardCr: 10000 },
   { id: 'h_valhalla', name: 'VALHALLA', desc: 'Reach NG+2 or beyond', rewardCr: 12000 },
+  { id: 'h_wareternal', name: 'WAR ETERNAL', desc: 'Score 750 total career kills across the squad', rewardCr: 9000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1611,6 +1614,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 35;
     case 'h_valhalla':
       return (s.ngPlus ?? 0) >= 2;
+    case 'h_wareternal':
+      return totalKills >= 750;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
