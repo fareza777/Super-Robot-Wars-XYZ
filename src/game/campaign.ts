@@ -106,6 +106,7 @@ export const PARTS: Record<string, PartDef> = {
   bulwarkShell: { id: 'bulwarkShell', name: 'Bulwark Shell', desc: 'Ballistic weave — incoming gun damage reduced by 25%', price: 1800, gunGuard: true },
   funnelLattice: { id: 'funnelLattice', name: 'Funnel Lattice', desc: 'Phase mesh — incoming funnel damage reduced by 25%', price: 1800, funnelGuard: true },
   retaliationRig: { id: 'retaliationRig', name: 'Retaliation Rig', desc: 'Long-arm mount — your counter-attacks reach 1 tile further', price: 1900, counterRange: true },
+  blastDeflector: { id: 'blastDeflector', name: 'Blast Deflector', desc: 'Chaff weave — damage from MAP/area weapons reduced by 30%', price: 1700, mapGuard: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -182,6 +183,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'dreadnought', name: 'Dreadnought', desc: '+4% damage per point against lower-level frames' },
   { id: 'resolute', name: 'Resolute', desc: '+6% damage per point while Will is 120 or higher' },
   { id: 'siegeadept', name: 'Siege Adept', desc: '+5% damage per point against enemies dug into defensive terrain' },
+  { id: 'cadence', name: 'Cadence', desc: '+4% damage per point per kill this battle (up to 3 kills)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1210,6 +1212,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_legend', name: 'LEGEND', desc: 'Earn S rank on 12 missions', rewardCr: 2500 },
   { id: 'h_sweeper', name: 'IRON SWEEP', desc: 'Earn rank B or better on 15 missions', rewardCr: 1600 },
   { id: 'h_stockpile', name: 'STOCKPILE', desc: 'Hold 20 consumable items at once', rewardCr: 1800 },
+  { id: 'h_triumvirate', name: 'TRIUMVIRATE', desc: 'Three pilots reach 25 career kills', rewardCr: 1600 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1360,6 +1363,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S' || r === 'A' || r === 'B').length >= 15;
     case 'h_stockpile':
       return Object.values(s.inventory ?? {}).reduce((a, b) => a + b, 0) >= 20;
+    case 'h_triumvirate':
+      return Object.values(s.pilotProg ?? {}).filter((p) => (p.kills ?? 0) >= 25).length >= 3;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
