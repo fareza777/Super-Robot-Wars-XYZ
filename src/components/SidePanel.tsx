@@ -67,6 +67,7 @@ function buffNames(u: UnitState): string[] {
   if (u.dirgeHealUntilEndOfEnemyPhase) names.push('DIRGE MIST');
   if (u.chorusUntilEndOfEnemyPhase) names.push('MIRACLE CHORUS');
   if (u.hellfireNext) names.push('HELLFIRE');
+  if (u.anchoredUntilEndOfEnemyPhase) names.push('BULWARK ARIA');
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');

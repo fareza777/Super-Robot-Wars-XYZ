@@ -106,6 +106,7 @@ export function BriefingScreen() {
               </Text>
             )}
             {hard && <Text style={{ color: '#ff8a5c', fontSize: 11, fontWeight: '800', letterSpacing: 1.5, marginTop: 4 }}>▲ HARD MODE — enemies +15% · mission rewards +25%</Text>}
+            {ch.fog && <Text style={{ color: '#b6a8ff', fontSize: 11, fontWeight: '800', letterSpacing: 1.5, marginTop: 4 }}>◈ FOG OF WAR — hostiles hidden beyond 4 tiles</Text>}
             {ch.requiredDefId && (
               <Text style={{ color: '#ff5a4a', fontSize: 11, fontWeight: '800', letterSpacing: 1.2, marginTop: 4 }}>
                 ⚠ {ALL_UNITS[ch.requiredDefId]?.name.toUpperCase()} MUST SURVIVE — losing it ends the mission

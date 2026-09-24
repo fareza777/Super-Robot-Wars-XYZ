@@ -132,6 +132,7 @@ export const PARTS: Record<string, PartDef> = {
   witchLoom: { id: 'witchLoom', name: 'Witch Loom', desc: 'Spirit weft — each kill grants +3 SP', price: 1600, thrallWeave: true },
   farSight: { id: 'farSight', name: 'Far Sight', desc: 'Long-range optics — +10% damage at range 5+', price: 1500, longsight: true },
   surveyRig: { id: 'surveyRig', name: 'Survey Rig', desc: 'Ambush optics — +12% damage vs targets that have not acted', price: 1500, surveyRig: true },
+  pointMauler: { id: 'pointMauler', name: 'Point Mauler', desc: 'Close-quarters chamber — +15% damage at point-blank range', price: 1600, pointMauler: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -234,6 +235,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'pureshot', name: 'Pure Shot', desc: '+6% damage per point vs targets free of debuffs' },
   { id: 'finisher', name: 'Finisher', desc: '+7% damage per point vs targets below 30% HP' },
   { id: 'aerobat', name: 'Aerobat', desc: '+5% damage per point while your mobility beats the target' },
+  { id: 'sureshot', name: 'Sure Shot', desc: '+6% damage per point on shots at 85%+ hit' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1288,6 +1290,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_longwar', name: 'ATTRITION', desc: 'Win a battle that lasts 15+ turns', rewardCr: 1600 },
   { id: 'h_simdeity', name: 'SIM DEITY', desc: 'Score 20000+ in the VR Simulator', rewardCr: 4500 },
   { id: 'h_graveyard', name: 'GRAVEMAKER', desc: 'Reach 300 total career kills across the squad', rewardCr: 4500 },
+  { id: 'h_partsbaron', name: 'PARTS BARON', desc: 'Own 20 different equipment parts', rewardCr: 2200 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1491,6 +1494,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.simBest ?? 0) >= 20000;
     case 'h_graveyard':
       return totalKills >= 300;
+    case 'h_partsbaron':
+      return (s.partsOwned ?? []).length >= 20;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
