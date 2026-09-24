@@ -126,6 +126,7 @@ export const PARTS: Record<string, PartDef> = {
   aegisHull: { id: 'aegisHull', name: 'Aegis Hull', desc: 'Blast curtain — this frame cannot suffer critical hits', price: 2000, critGuard: true },
   voltTap: { id: 'voltTap', name: 'Voltage Tap', desc: 'Kill reactor — each kill restores +15 EN', price: 1600, enOnKill: true },
   lastRounds: { id: 'lastRounds', name: 'Last Rounds', desc: 'Desperate load — ammo weapons deal +15% damage while at 2 ammo or less', price: 1600, lastAmmo: true },
+  coreTap: { id: 'coreTap', name: 'Core Tap', desc: 'Pilot conduit — spirit costs reduced 10%', price: 1800, spSaver: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -222,6 +223,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'capacitor', name: 'Capacitor', desc: '+4% damage per point per 25 EN remaining (cap +16%)' },
   { id: 'ironbound', name: 'Ironbound', desc: '+100 armor per point' },
   { id: 'coolloop', name: 'Coolant Loop', desc: 'Weapon EN cost −6% per point (cap −30%)' },
+  { id: 'gritguard', name: 'Grit Guard', desc: '−8% incoming damage per point while hull is below 50%' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1270,6 +1272,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_scrapking', name: 'SCRAP KING', desc: 'Earn 30,000 salvage credits', rewardCr: 1800 },
   { id: 'h_virtuoso', name: 'VIRTUOSO', desc: 'Score 12,000+ in the VR Simulator', rewardCr: 2500 },
   { id: 'h_annihilation', name: 'ANNIHILATION', desc: 'Destroy 25 frames in a single battle', rewardCr: 2800 },
+  { id: 'h_apexstrike', name: 'APEX STRIKE', desc: 'Land a single hit of 30,000+ damage', rewardCr: 3000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1461,6 +1464,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.simBest ?? 0) >= 12000;
     case 'h_annihilation':
       return (s.kills ?? 0) >= 25;
+    case 'h_apexstrike':
+      return (s.maxHitEver ?? 0) >= 30000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
