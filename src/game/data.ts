@@ -172,6 +172,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   mendverse: { id: 'mendverse', name: 'Mend Verse', cost: 50, desc: 'Repair hymn — allies within 3 tiles regenerate 5% hull per turn for 2 turns' },
   maimedge: { id: 'maimedge', name: 'Maim Edge', cost: 45, desc: 'Maiming strike — next hit +15% damage and permanently wounds the target (-15% hit & damage)' },
   repulseverse: { id: 'repulseverse', name: 'Repulse Verse', cost: 50, desc: 'Counterfield hymn — allies within 3 tiles counter-attack at +1 range until end of enemy phase' },
+  silenceverse: { id: 'silenceverse', name: 'Silence Verse', cost: 50, desc: 'Muting wave — enemies within 3 tiles cannot counter-attack until end of enemy phase' },
   ruinverse: { id: 'ruinverse', name: 'Ruin Verse', cost: 50, desc: 'Entropy wave — enemies within 3 tiles suffer armor break and decay 8% hull per turn for 2 turns' },
   anthemverse: { id: 'anthemverse', name: 'Anthem Verse', cost: 55, desc: 'Restoration hymn — allies within 3 tiles instantly recover 15% hull' },
   doomedge: { id: 'doomedge', name: 'Doom Edge', cost: 45, desc: 'Entropy strike — next hit deals +10% damage and dooms the target to decay 8% hull per turn for 3 turns' },
