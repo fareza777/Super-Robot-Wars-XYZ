@@ -20,6 +20,7 @@ function buffNames(u: UnitState): string[] {
   if (u.valorForNextAttack) names.push('VALOR');
   if (u.soulForNextAttack) names.push('SOUL');
   if (u.empowerForNextAttack) names.push('EMPOWER');
+  if (u.marksmanUntilEndOfEnemyPhase) names.push('MARKSMAN');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');
@@ -552,13 +553,16 @@ export function SidePanel() {
         )}
 
         {!s.menuForUid && !s.pendingWeapon && !s.spiritForUid && !inspect && (
-          <ScrollView style={styles.logBox} nestedScrollEnabled>
-            {s.log.map((l, i) => (
-              <Text key={i} style={styles.logLine}>
-                {l}
-              </Text>
-            ))}
-          </ScrollView>
+          <View style={styles.logBox}>
+            <Text style={styles.logHead}>BATTLE LOG</Text>
+            <ScrollView nestedScrollEnabled>
+              {s.log.map((l, i) => (
+                <Text key={i} style={[styles.logLine, i === 0 && styles.logLineHot]}>
+                  {l}
+                </Text>
+              ))}
+            </ScrollView>
+          </View>
         )}
       </ScrollView>
 
@@ -609,7 +613,9 @@ const styles = StyleSheet.create({
   tgtHitBox: { alignItems: 'flex-end' },
   tgtHit: { fontSize: 15, fontWeight: '900' },
   tgtDmg: { color: '#9fb0d0', fontSize: 8.5, fontWeight: '700' },
-  logBox: { marginTop: 7, backgroundColor: '#0c0e16', borderRadius: 6, padding: 6, minHeight: 60, maxHeight: 110 },
+  logBox: { marginTop: 7, backgroundColor: '#0c0e16', borderRadius: 6, padding: 6, minHeight: 60, maxHeight: 110, borderWidth: 1, borderColor: '#2a3450' },
+  logHead: { color: '#5a6484', fontSize: 8, fontWeight: '900', letterSpacing: 2, marginBottom: 4, borderBottomWidth: 1, borderBottomColor: '#1c2338', paddingBottom: 3 },
+  logLineHot: { color: '#ffd34d' },
   dangerBtn: { borderWidth: 1, borderColor: '#ff5a5a55', borderRadius: 5, paddingHorizontal: 6, paddingVertical: 2, marginLeft: 6 },
   dangerBtnOn: { borderColor: '#ff5a5a', backgroundColor: '#3a1010' },
   blizzChip: { color: '#9fd8ff', fontSize: 10, fontWeight: '700', letterSpacing: 0.6, marginBottom: 4, backgroundColor: 'rgba(90,160,255,0.14)', borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2, overflow: 'hidden' },

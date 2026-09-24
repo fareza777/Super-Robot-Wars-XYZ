@@ -50,6 +50,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   intimidate: { id: 'intimidate', name: 'Intimidate', cost: 40, desc: 'War cry — enemies within 3 tiles suffer -20 hit for 2 turns' },
   scan: { id: 'scan', name: 'Scan', cost: 30, desc: 'Sensor sweep — enemies within 5 tiles are painted (+20 hit, +25% dmg taken)' },
   empower: { id: 'empower', name: 'Empower', cost: 40, desc: 'War blessing — the strongest ally within 3 tiles gains +40% damage on their next attack' },
+  marksman: { id: 'marksman', name: 'Deadeye Call', cost: 45, desc: 'Squad fire control — every ally gains +15 crit until end of enemy phase' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
@@ -132,7 +133,7 @@ const P = (p: PilotDef) => p;
 
 export const PILOTS = {
   ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul', 'frenzy'], faceColor: '#ffb347', trait: 'ace_instinct' }),
-  mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse', 'fortune', 'trust', 'emp', 'deadshot', 'scan'], faceColor: '#7ee7ff', trait: 'deadeye' }),
+  mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse', 'fortune', 'trust', 'emp', 'deadshot', 'scan', 'marksman'], faceColor: '#7ee7ff', trait: 'deadeye' }),
   gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor', 'sunder', 'provoke', 'phalanx', 'breach', 'charity', 'intimidate'], faceColor: '#ff9d9d', trait: 'siege_breaker' }),
   orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless', 'lucky', 'mercy', 'purge', 'cheer', 'expose', 'decoy', 'hymn', 'sanctuary', 'empower'], faceColor: '#b6ff9d', trait: 'field_medic' }),
   karg: P({ name: 'Col. Karg Draven', callsign: 'BOSS', melee: 75, ranged: 75, defense: 70, evade: 65, maxSp: 70, spirits: ['valor', 'strike'], faceColor: '#d0a0ff', lastWords: 'Rex is scrap... the Empire builds another. Always.', killQuip: 'Another Aegis relic for the pyre.' }),

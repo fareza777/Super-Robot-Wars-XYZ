@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -130,7 +130,7 @@ export const willGain = (u: UnitState, n: number) => {
 };
 
 /** Weapon's effective max range — Snipe spirit adds +2 for the next attack. */
-export const rangeMaxOf = (u: UnitState, w: WeaponDef) => w.rangeMax + (u.snipeForNextAttack ? 2 : 0);
+export const rangeMaxOf = (u: UnitState, w: WeaponDef) => w.rangeMax + (u.snipeForNextAttack ? 2 : 0) + (w.kind === 'melee' ? 0 : partBonus(u, 'range'));
 
 /** Weapons that can attack `target` from `from`. postMove=false weapons require !moved. */
 export function weaponsAgainst(u: UnitState, from: Pos, target: UnitState, moved: boolean): WeaponDef[] {
@@ -231,6 +231,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if ((def.def.boss || def.elite) && partBonus(att, 'bossDmg')) dmg = Math.round(dmg * (1 + partBonus(att, 'bossDmg') / 100));
   if (att.empowerForNextAttack) dmg = Math.round(dmg * 1.4);
   if ((att.skills?.loneWolf ?? 0) > 0 && !(units ?? []).some((x) => x !== att && x.alive && x.side === att.side && dist(x.pos, att.pos) <= 2)) dmg = Math.round(dmg * (1 + 0.06 * att.skills.loneWolf));
+  if ((att.skills?.overwhelm ?? 0) > 0 && !def.acted) dmg = Math.round(dmg * (1 + 0.05 * att.skills.overwhelm));
   if (trait === 'crimson_fury' && att.hp < att.def.maxHp / 2) dmg = Math.round(dmg * 1.1);
   if (trait === 'sovereign') dmg = Math.round(dmg * 1.08);
   // damage-type resistance — beam coats, phase armor, disperser fields
@@ -247,7 +248,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
 }
 
 const rnd = () => Math.random() * 100;
-export const critChance = (att: UnitState, def: UnitState, w?: WeaponDef) => Math.max(5, Math.round(8 + (att.def.mobility - def.def.mobility) * 0.2 + (w?.critMod ?? 0) + partBonus(att, 'crit') + (att.charged ? 15 : 0) + (att.enraged ? 10 : 0) + (att.skills?.crit ?? 0) * 2));
+export const critChance = (att: UnitState, def: UnitState, w?: WeaponDef) => Math.max(5, Math.round(8 + (att.def.mobility - def.def.mobility) * 0.2 + (w?.critMod ?? 0) + partBonus(att, 'crit') + (att.charged ? 15 : 0) + (att.marksmanUntilEndOfEnemyPhase ? 15 : 0) + (att.enraged ? 10 : 0) + (att.skills?.crit ?? 0) * 2));
 const critRoll = (att: UnitState, def: UnitState, w?: WeaponDef) => att.deadshotForNextAttack === true || rnd() < critChance(att, def, w);
 
 interface SimAttack {
@@ -857,6 +858,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break;
     case 'empower':
       break; // war blessing — the blessed ally is chosen by the store pass
+    case 'marksman':
+      break; // squad fire control — the store flags every ally
     // 'rouse', 'disrupt' and 'trust' affect neighbouring units — applied in store.castSpirit
   }
 }
@@ -872,6 +875,7 @@ export function clearTransientForOwnPhase(u: UnitState): void {
   u.followUpReady = false;
   u.overwatch = false;
   u.hymnUntilEndOfEnemyPhase = false;
+  u.marksmanUntilEndOfEnemyPhase = false;
   u.frenzyThisTurn = false;
   u.relentlessUntilEndOfEnemyPhase = false;
   u.dodges = 0;
