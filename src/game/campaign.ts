@@ -183,6 +183,7 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   sparkDrone: U({ id: 'sparkDrone', name: 'Spark Drone', title: 'Kamikaze Frame', color: '#3a2a2a', accent: '#ff5a3a', maxHp: 2600, maxEn: 60, armor: 500, mobility: 150, moveRange: 7, moveType: 'air', weapons: [WEAPONS.vulcan], pilot: PILOTS.grunt, kamikaze: true }),
   centurion: U({ id: 'centurion', name: 'Centurion', title: 'Imperial Officer', color: '#4a3a5a', accent: '#e0c0ff', maxHp: 4800, maxEn: 110, armor: 1050, mobility: 112, moveRange: 5, moveType: 'land', weapons: [WEAPONS.railgun, WEAPONS.gatling, WEAPONS.missilePods], pilot: PILOTS.centurion }),
   scorcher: U({ id: 'scorcher', name: 'Scorcher', title: 'Incendiary Frame', color: '#5a3a2a', accent: '#ff9060', maxHp: 4000, maxEn: 100, armor: 800, mobility: 96, moveRange: 5, moveType: 'land', weapons: [WEAPONS.heatRod, WEAPONS.flareDart, WEAPONS.vulcan], pilot: PILOTS.grunt }),
+  hellhound: U({ id: 'hellhound', name: 'Hellhound', title: 'Pack Hunter', color: '#4a2a30', accent: '#ff7070', maxHp: 3600, maxEn: 90, armor: 700, mobility: 118, moveRange: 8, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.heatRod, WEAPONS.vulcan], pilot: PILOTS.grunt }),
   voidChanter: U({ id: 'voidChanter', name: 'Void Chanter', title: 'Hex Adept', color: '#3a1a4a', accent: '#c080ff', maxHp: 4600, maxEn: 130, armor: 500, mobility: 140, moveRange: 5, moveType: 'air', weapons: [WEAPONS.hexBolt, WEAPONS.nullChord], pilot: PILOTS.grunt }),
   blackguard: U({ id: 'blackguard', name: 'Blackguard', title: 'Veteran Elite', color: '#1a1a22', accent: '#ff5040', maxHp: 7400, maxEn: 120, armor: 1050, mobility: 118, moveRange: 5, moveType: 'land', weapons: [WEAPONS.vulcan, WEAPONS.havocMortar, WEAPONS.hexBolt], pilot: PILOTS.grunt }),
   dragoon: U({ id: 'dragoon', name: 'Dragoon Cavalry', title: 'Mounted Gunner', color: '#4a3a1a', accent: '#ffd080', maxHp: 5200, maxEn: 110, armor: 700, mobility: 130, moveRange: 6, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.stasisRay], pilot: PILOTS.grunt }),
@@ -837,7 +838,7 @@ export function enemyComp(ch: ChapterDef): string[] {
   const heavy = ch.act === 1 ? 'zoldaTank' : 'nightmare';
   const fast = ch.act === 3 ? 'cataphract' : 'lancer';
   const ghost = ch.act === 3 ? 'phantom' : 'vexia';
-  for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : (i % 11 === 9 && ch.act >= 2) ? 'medic' : (i % 13 === 11 && ch.act === 3) ? 'ballista' : (i % 11 === 10 && ch.act === 3) ? 'bastion' : (i % 12 === 8 && ch.act >= 2) ? 'voidChanter' : (i % 10 === 5 && ch.act === 3) ? 'blackguard' : (i % 13 === 4 && ch.act >= 2) ? 'dragoon' : (i % 15 === 12 && ch.act >= 2) ? 'sparkDrone' : (i % 17 === 14 && ch.act >= 2) ? 'centurion' : (i % 19 === 16 && ch.act >= 2) ? 'scorcher' : i % 7 === 6 ? ghost : fill);
+  for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : (i % 11 === 9 && ch.act >= 2) ? 'medic' : (i % 13 === 11 && ch.act === 3) ? 'ballista' : (i % 11 === 10 && ch.act === 3) ? 'bastion' : (i % 12 === 8 && ch.act >= 2) ? 'voidChanter' : (i % 10 === 5 && ch.act === 3) ? 'blackguard' : (i % 13 === 4 && ch.act >= 2) ? 'dragoon' : (i % 15 === 12 && ch.act >= 2) ? 'sparkDrone' : (i % 17 === 14 && ch.act >= 2) ? 'centurion' : (i % 19 === 16 && ch.act >= 2) ? 'scorcher' : (i % 23 === 20 && ch.act === 3) ? 'hellhound' : i % 7 === 6 ? ghost : fill);
   if (ch.boss) comp.push(ch.boss);
   // Cpt. Vossen ambushes the squad on these chapters — a recurring ace duelist
   if ([6, 13, 19, 26].includes(ch.id)) comp.push('vossDrake');
@@ -1088,6 +1089,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_drone', name: 'DRONE HUNTER', desc: 'Shoot down 3 Spark Drones before they detonate', rewardCr: 700 },
   { id: 'h_duo', name: 'DYNAMIC DUO', desc: 'Two pilots each reach 30 career kills', rewardCr: 800 },
   { id: 'h_campaign', name: 'CAMPAIGNER', desc: 'Earn a battle rank on 8 missions', rewardCr: 1000 },
+  { id: 'h_biggame', name: 'BIG GAME', desc: 'Destroy 5 ace or boss frames in total', rewardCr: 1200 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1156,6 +1158,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return kills.filter((p) => (p.kills ?? 0) >= 30).length >= 2;
     case 'h_campaign':
       return Object.keys(s.missionRank ?? {}).length >= 8;
+    case 'h_biggame':
+      return Object.entries(s.killsByDef ?? {}).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) >= 5;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

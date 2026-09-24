@@ -186,7 +186,7 @@ export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: Map
   return Math.max(10, Math.min(100, Math.round(raw * (att.wounded ? 0.85 : 1))));
 }
 
-export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, crit: boolean, dmgMult = 1): number {
+export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, crit: boolean, dmgMult = 1, units?: UnitState[]): number {
   const armor = att.breachNextAttack ? 0 : armorOf(def, map);
   const raw = w.power + statFor(att, w) * 10 - (w.pierce ? Math.round(armor * 0.65) : armor);
   let dmg = Math.max(120, Math.round(raw));
@@ -204,6 +204,10 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if ((att.skills?.gunner ?? 0) > 0 && w.kind !== 'melee') dmg = Math.round(dmg * (1 + 0.05 * att.skills.gunner));
   if ((def.statuses ?? []).length > 0) dmg = Math.round(dmg * (1 + 0.07 * (att.skills?.opportunist ?? 0)));
   if (dist(att.pos, def.pos) <= 2) dmg = Math.round(dmg * (1 + 0.06 * (att.skills?.pointBlank ?? 0)));
+  if (units) {
+    const assists = units.filter((u) => u.alive && u.side === att.side && u.uid !== att.uid && u.uid !== def.uid && !u.acted && dist(u.pos, def.pos) <= 2).length;
+    dmg = Math.round(dmg * (1 + 0.12 * Math.min(2, assists)));
+  }
   if (att.enraged) dmg = Math.round(dmg * 1.15);
   if (!att.hasAttacked && (att.skills?.initiative ?? 0) > 0) dmg = Math.round(dmg * (1 + 0.1 * att.skills.initiative));
   if (def.guardUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.5);
@@ -246,19 +250,19 @@ interface SimAttack {
 /** an attack that just misses the hit roll by a small margin grazes for 45% damage */
 const GRAZE_MARGIN = 12;
 
-function resolveHit(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, mods: CombatMods = NO_MODS): SimAttack {
+function resolveHit(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, mods: CombatMods = NO_MODS, units?: UnitState[]): SimAttack {
   const hc = hitChance(att, def, w, map, mods.hitBonus);
   const strike = (remainingHp: number): SimAttack => {
     const roll = rnd();
     if (roll >= hc) {
       if (roll < hc + GRAZE_MARGIN && remainingHp > 0) {
-        const g = Math.round(damageOf(att, def, w, map, false, mods.dmgMult) * 0.45);
+        const g = Math.round(damageOf(att, def, w, map, false, mods.dmgMult, units) * 0.45);
         return { hit: true, crit: false, graze: true, damage: g, hitChance: hc, destroyed: remainingHp - g <= 0 };
       }
       return { hit: false, crit: false, damage: 0, hitChance: hc, destroyed: false };
     }
     const crit = critRoll(att, def, w);
-    const damage = damageOf(att, def, w, map, crit, mods.dmgMult);
+    const damage = damageOf(att, def, w, map, crit, mods.dmgMult, units);
     return { hit: true, crit, damage, hitChance: hc, destroyed: remainingHp - damage <= 0 };
   };
   // multi-hit weapons resolve each strike independently against the remaining HP
@@ -324,8 +328,8 @@ export function aiPickReaction(att: UnitState, def: UnitState, w: WeaponDef, map
 }
 
 /** Resolve a full attack including a possible single counter-attack. Pure-ish: mutates nothing, returns result. */
-export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, attMods: CombatMods = NO_MODS, defMods: CombatMods = NO_MODS, reaction: Reaction = 'counter'): AttackResult {
-  const first = resolveHit(att, def, w, map, reaction === 'evade' ? { ...attMods, hitBonus: attMods.hitBonus - 30 } : attMods);
+export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, attMods: CombatMods = NO_MODS, defMods: CombatMods = NO_MODS, reaction: Reaction = 'counter', units?: UnitState[]): AttackResult {
+  const first = resolveHit(att, def, w, map, reaction === 'evade' ? { ...attMods, hitBonus: attMods.hitBonus - 30 } : attMods, units);
   if (reaction === 'defend' && first.hit && !w.pierce) first.damage = Math.round(first.damage * 0.5);
   if (reaction === 'cover' && first.hit && !w.pierce) first.damage = Math.round(first.damage * Math.max(0.3, 0.7 - 0.1 * (def.skills?.bodyguard ?? 0)));
   let counter: AttackResult['counter'] = null;
@@ -335,7 +339,7 @@ export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map
     // Counter-Cut skill: trained pilots strike BEFORE the enemy lands — a kill pre-empts the hit entirely
     const cutRank = def.skills?.countercut ?? 0;
     if (cw && cutRank > 0 && Math.random() * 100 < cutRank * 4) {
-      const c = resolveHit(def, att, cw, map, defMods);
+      const c = resolveHit(def, att, cw, map, defMods, units);
       if (def.skills?.riposte) c.damage = Math.round(c.damage * (1 + 0.08 * def.skills.riposte));
       counter = { weapon: cw, ...c };
       counterCut = true;
@@ -344,7 +348,7 @@ export function simulateAttack(att: UnitState, def: UnitState, w: WeaponDef, map
       }
     }
     if (!counter && !first.destroyed) {
-      const c = resolveHit(def, att, cw!, map, defMods);
+      const c = resolveHit(def, att, cw!, map, defMods, units);
       if (def.skills?.riposte) c.damage = Math.round(c.damage * (1 + 0.08 * def.skills.riposte));
       counter = { weapon: cw!, ...c };
     }
@@ -417,7 +421,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   const pin = hasPincer(units, att, def);
   let attMods0 = mods ? mods(att) : NO_MODS;
   if (state.blizzard && att.def.moveType !== 'air') attMods0 = { ...attMods0, hitBonus: attMods0.hitBonus - 15 };
-  const result0 = simulateAttack(att, def, w, state.map, pin ? { ...attMods0, dmgMult: attMods0.dmgMult * 1.1 } : attMods0, mods ? mods(def) : NO_MODS, reaction);
+  const result0 = simulateAttack(att, def, w, state.map, pin ? { ...attMods0, dmgMult: attMods0.dmgMult * 1.1 } : attMods0, mods ? mods(def) : NO_MODS, reaction, units);
   const result: AttackResult = { ...result0, pincer: pin };
   if (guarded) { result.guarded = guarded; result.struckUid = def.uid; }
 
