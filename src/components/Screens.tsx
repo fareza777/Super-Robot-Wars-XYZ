@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { Animated, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ART, PILOT_ART } from '../assets';
@@ -137,18 +137,18 @@ export function BriefingScreen() {
       </View>
 
       <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
-        <TouchableOpacity
-          style={styles.bigBtn}
+        <Pressable
+          style={({ pressed }) => [styles.bigBtn, pressed && { opacity: 0.75, transform: [{ scale: 0.97 }] }]}
           onPress={() => {
             play('ui_confirm');
             startMission();
           }}
         >
           <Text style={styles.bigBtnTxt}>DEPLOY ▸</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.bigBtn, { borderColor: '#3a4160' }]} onPress={gotoHq}>
+        </Pressable>
+        <Pressable style={({ pressed }) => [styles.bigBtn, { borderColor: '#3a4160' }, pressed && { opacity: 0.7 }]} onPress={gotoHq}>
           <Text style={[styles.bigBtnTxt, { color: '#9fd0ff' }]}>◂ HQ</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );
@@ -246,18 +246,18 @@ export function EndScreen({ victory }: { victory: boolean }) {
         </View>
       )}
       {justUnlockedNg && (
-        <TouchableOpacity
-          style={[styles.bigBtn, { borderColor: '#c9a0ff', marginBottom: 12 }]}
+        <Pressable
+          style={({ pressed }) => [styles.bigBtn, { borderColor: '#c9a0ff', marginBottom: 12 }, pressed && { opacity: 0.75, transform: [{ scale: 0.97 }] }]}
           onPress={() => {
             play('ui_confirm');
             gotoCredits();
           }}
         >
           <Text style={[styles.bigBtnTxt, { color: '#c9a0ff' }]}>ROLL CREDITS ★</Text>
-        </TouchableOpacity>
+        </Pressable>
       )}
-      <TouchableOpacity
-        style={styles.bigBtn}
+      <Pressable
+        style={({ pressed }) => [styles.bigBtn, pressed && { opacity: 0.75, transform: [{ scale: 0.97 }] }]}
         onPress={() => {
           play('ui_confirm');
           if (victory || sim) gotoHq();
@@ -265,7 +265,7 @@ export function EndScreen({ victory }: { victory: boolean }) {
         }}
       >
         <Text style={styles.bigBtnTxt}>{victory || sim ? 'RETURN TO HQ ▸' : 'RETRY ▸'}</Text>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 }
@@ -281,9 +281,9 @@ export function RouteScreen() {
       <Text style={styles.briefSub}>— the Void Empress has fallen; the approach to the Steel Throne forks —</Text>
       <View style={{ flexDirection: 'row', gap: 14, marginTop: 14 }}>
         {(['a', 'b'] as const).map((r) => (
-          <TouchableOpacity
+          <Pressable
             key={r}
-            style={[styles.routeCard, { borderColor: r === 'a' ? '#ff9d5c' : '#9fd8ff' }]}
+            style={({ pressed }) => [styles.routeCard, { borderColor: r === 'a' ? '#ff9d5c' : '#9fd8ff' }, pressed && { opacity: 0.8, transform: [{ scale: 0.97 }] }]}
             onPress={() => {
               play('ui_confirm');
               chooseRoute(r);
@@ -293,7 +293,7 @@ export function RouteScreen() {
             <Text style={styles.routeTag}>{ROUTE_INFO[r].tagline}</Text>
             <Text style={styles.routeDesc}>{ROUTE_INFO[r].desc}</Text>
             <Text style={[styles.bigBtnTxt, { fontSize: 13, marginTop: 10 }]}>TAKE THIS PATH ▸</Text>
-          </TouchableOpacity>
+          </Pressable>
         ))}
       </View>
       <Text style={{ color: '#667', fontSize: 10, marginTop: 12, letterSpacing: 1 }}>The choice is permanent for this campaign cycle — it reshapes Chapters 16–18.</Text>
