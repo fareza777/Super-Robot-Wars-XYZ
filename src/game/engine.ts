@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -857,6 +857,8 @@ interface AiPlan {
   mapWeapon?: WeaponDef;
   /** kamikaze — detonate the reactor beside the nearest player */
   detonate?: boolean;
+  /** defensive standby — hold fire for the first player to enter the weapon arc */
+  standby?: boolean;
 }
 
 /** For each enemy unit pick: best tile in range that can attack the weakest-hit player unit; else move toward nearest player. */
@@ -930,7 +932,7 @@ export function planEnemyActions(state: GameState): AiPlan[] {
           const hc = hitChance(e, p, w, map, rallyBonus(units, e) + formationBonus(units, e) - jammerPenalty(units, e));
           const dmg = damageOf(e, p, w, map, false);
           // convoy priority: protect-mission NPCs are the AI's preferred prey
-          const score = dmg * (hc / 100) + (p.hp - dmg <= 0 ? 5000 : 0) + (p.escort ? 800 : 0) + w.power * 0.01;
+          const score = dmg * (hc / 100) + (p.hp - dmg <= 0 ? 5000 : 0) + (p.escort ? 800 : 0) + (partBonus(p, 'aggro') > 0 ? 900 : 0) + w.power * 0.01;
           if (!best || score > best.score) best = { pos: tile, target: p, weapon: w, score };
         }
       }
@@ -968,7 +970,8 @@ export function planEnemyActions(state: GameState): AiPlan[] {
       const anchor = guarding ? bp! : nearest.pos;
       const target = moveTiles.slice().sort((a, b) => dist(a, anchor) - dist(b, anchor))[0] ?? e.pos;
       claimed.add(key(target));
-      plans.push({ unit: e, moveTo: target });
+      // defensive standby — can't reach a target, so hold fire for whatever wanders in
+      plans.push({ unit: e, moveTo: target, standby: !e.def.boss && usableWeapons(e).some((w) => !w.mapRange) });
     }
   }
   // armed npc allies (militia) fight back on the enemy phase — same scoring, aimed at hostiles

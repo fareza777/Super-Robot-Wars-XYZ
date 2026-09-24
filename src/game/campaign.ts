@@ -60,6 +60,7 @@ export const PARTS: Record<string, PartDef> = {
   cryoRounds: { id: 'cryoRounds', name: 'Cryo Rounds', desc: 'Hits have a 30% chance to SLOW the target', price: 1500, statusSlow: true },
   thrustVector: { id: 'thrustVector', name: 'Thrust Vector', desc: '+1 movement', price: 1800, move: 1 },
   firewall: { id: 'firewall', name: 'Firewall Suite', desc: 'Immune to enemy status effects', price: 2000, statusProof: true },
+  decoyBeacon: { id: 'decoyBeacon', name: 'Decoy Beacon', desc: 'Enemies prefer targeting this unit — aggro magnet', price: 1600, aggro: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -97,6 +98,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'plunderer', name: 'Plunderer', desc: '+15% capture salvage per point' },
   { id: 'bodyguard', name: 'Bodyguard', desc: 'Cover intercepts take 10% less damage per point' },
   { id: 'opportunist', name: 'Opportunist', desc: '+7% damage per point vs targets with status effects' },
+  { id: 'warcry', name: 'War Cry', desc: 'Your kills grant allies within 2 tiles +2 Will per point' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1077,6 +1079,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_acecorps', name: 'ACE CORPS', desc: 'Three pilots reach ACE rank — 25+ career kills each', rewardCr: 1300 },
   { id: 'h_vet', name: 'VETERAN CORPS', desc: 'Five pilots reach ACE rank — 25+ career kills each', rewardCr: 1500 },
   { id: 'h_fullhouse', name: 'FULL HOUSE', desc: 'Deploy all seven squad frames on one sortie', rewardCr: 900 },
+  { id: 'h_drone', name: 'DRONE HUNTER', desc: 'Shoot down 3 Spark Drones before they detonate', rewardCr: 700 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1139,6 +1142,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return kills.filter((p) => (p.kills ?? 0) >= 25).length >= 5;
     case 'h_fullhouse':
       return (s.units ?? []).filter((u) => u.side === 'player' && !u.npc).length >= 7;
+    case 'h_drone':
+      return (s.killsByDef?.sparkDrone ?? 0) >= 3;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

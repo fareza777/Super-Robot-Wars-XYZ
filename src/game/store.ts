@@ -395,7 +395,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
       u.level = prog.level;
       u.exp = prog.exp;
       u.pp = prog.pp ?? 0;
-      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, ...(prog.skills ?? {}) };
+      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, ...(prog.skills ?? {}) };
       if ((prog.kills ?? 0) >= ACE_KILLS) u.will = 130; // ace pilots start hot
       if ((prog.kills ?? 0) >= ACE_MASTER_KILLS) u.aceMastery = true;
       // career-kill milestones: extra spirits the pilot learned along the war
@@ -978,7 +978,7 @@ export const useGame = create<Store>((set, get) => ({
     const s = get();
     const prog = s.pilotProg[defId];
     if (!prog || (prog.pp ?? 0) < 1) return;
-    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, ...(prog.skills ?? {}) };
+    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, ...(prog.skills ?? {}) };
     if (skills[statId] >= MAX_PILOT_SKILL) return;
     skills[statId] += 1;
     const pilotProg = { ...s.pilotProg, [defId]: { ...prog, pp: (prog.pp ?? 0) - 1, skills } };
@@ -1408,6 +1408,7 @@ export const useGame = create<Store>((set, get) => ({
     set({ units: units2, walk: walking, pendingMove: sel.acted ? null : p, preMovePos: sel.pos, pendingMovedFlag: !same(sel.pos, p), menuForUid: sel.acted ? null : sel.uid, moveTiles: new Map(), selectedUid: sel.acted ? null : sel.uid, inventory, crates, salvageQueue, rescuedPods, tileInfo: null, log: willBoostUid ? push(s.log, '🛟 POD RECOVERED — the pilot ejected safely and is back aboard') : s.log });
     if (crateIdx >= 0) drainSalvage(set, get, walking ? path.length * 320 + 400 : 600);
     detonateMineAt(set, get, sel.uid, p, walking ? path.length * 320 + 300 : 350);
+    enemyOverwatchAt(set, get, sel.uid, p, walking ? path.length * 320 + 420 : 500);
     if (walking) scheduleWalkClear(set, get, sel.uid, path.length);
     // seize objective: landing on the beacon wins the mission on the spot
     if (s.missionCh.objectiveType === 'seize' && sel.side === 'player' && checkEnd(units, s.missionCh, s.turn) === 'victory') {
@@ -1514,6 +1515,11 @@ export const useGame = create<Store>((set, get) => ({
         inventory = { ...inventory, [lucky.drop]: (inventory[lucky.drop] ?? 0) + 1 };
         log = push(log, `Salvaged ${ITEMS[lucky.drop].name} — Lucky's blessing`);
         salvageQueue = [...salvageQueue, ITEMS[lucky.drop].name];
+      }
+      if (killCount > 0 && (attAfter.skills?.warcry ?? 0) > 0) {
+        const boost = 2 * (attAfter.skills?.warcry ?? 0);
+        state.units = state.units.map((u) => (u.alive && u.side === 'player' && !u.npc && u.uid !== att.uid && dist(u.pos, attAfter.pos) <= 2 ? { ...u, will: Math.min(150, (u.will ?? 100) + boost) } : u));
+        log = push(log, `\u{1F4E3} WAR CRY — the kill steels nearby allies +${boost} Will`);
       }
       log = applyOverdrive(state.units, att.uid, killCount, log);
       const common = {
@@ -2355,6 +2361,33 @@ function detonateMineAt(set: SetFn, get: Get, uid: string, p: Pos, delayMs: numb
   else go();
 }
 
+// enemy standby units snap a shot at the first player unit that enters their arc
+function enemyOverwatchAt(set: SetFn, get: Get, uid: string, p: Pos, delayMs: number) {
+  const go = () => {
+    const cur = get();
+    const target = cur.units.find((x) => x.uid === uid);
+    if (!target?.alive || target.side !== 'player' || !same(target.pos, p) || target.vanishUntilEndOfEnemyPhase) return;
+    const inArc = (u: UnitState) => (w: WeaponDef) => !w.mapRange && dist(u.pos, p) >= w.rangeMin && dist(u.pos, p) <= rangeMaxOf(u, w);
+    const ow = cur.units.find((u) => u.alive && u.side === 'enemy' && u.overwatch === true && usableWeapons(u).some(inArc(u)));
+    if (!ow) return;
+    const w = usableWeapons(ow).filter(inArc(ow)).sort((a, b) => b.power - a.power)[0];
+    const { state, result } = applyAttack({ map: cur.map, units: cur.units, turn: cur.turn, blizzard: cur.blizzard }, ow.uid, target.uid, w.id, modsFor(cur.bonds, cur.units), 'evade');
+    const wi = state.units.findIndex((u) => u.uid === ow.uid);
+    if (wi >= 0) state.units[wi] = { ...state.units[wi], overwatch: false };
+    const log2 = push(cur.log, `\u25CF AMBUSH — ${ow.def.name} fires ${w.name} at ${target.def.name}${result.hit ? ` for ${result.damage}${result.destroyed ? ' — DESTROYED' : ''}` : ' — missed'}`);
+    set({ units: state.units, log: log2, notice: `\u25CF AMBUSH — ${ow.def.name}` });
+    setTimeout(() => set({ notice: null }), 1900);
+    if (result.destroyed) {
+      const end = checkEnd(get().units, get().missionCh, get().turn);
+      if (end === 'victory') applyVictory(set, get);
+      else if (end) set({ phase: end });
+    }
+    void persistBattle(get());
+  };
+  if (delayMs > 0) setTimeout(go, delayMs);
+  else go();
+}
+
 function applyVictory(set: SetFn, get: Get) {
   const s = get();
   if (s.missionCh.sim) {
@@ -2605,6 +2638,7 @@ async function runEnemyPhase(set: SetFn, get: Get) {
       await sleep(path && path.length > 1 ? 160 + path.length * 190 : 200);
       set({ walk: null });
       detonateMineAt(set, get, plan.unit.uid, plan.moveTo, 0);
+      if (plan.standby) set((st) => ({ units: st.units.map((u) => (u.uid === plan.unit.uid ? { ...u, overwatch: true, acted: true } : u)), log: push(st.log, `\u25CF ${get().units.find((x) => x.uid === plan.unit.uid)?.def.name ?? 'Hostile'} digs in — overwatch arc armed`) }));
       // loot carrier reaching the east edge slips away with the cargo
       const mover = get().units.find((u) => u.uid === plan.unit.uid);
       if (mover?.def.carrier && mover.pos.x >= get().map.cols - 1) {
