@@ -28,6 +28,7 @@ function buffNames(u: UnitState): string[] {
   if (u.glacialNext) names.push('GLACIAL');
   if (u.soulburnNext) names.push('SOULBURN');
   if (u.flusterNext) names.push('FLUSTER');
+  if (u.huntNext) names.push('HUNT');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');

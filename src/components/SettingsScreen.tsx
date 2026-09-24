@@ -115,7 +115,7 @@ export function SettingsScreen() {
 
         <Row label="SAVE DATA" sub="Erase campaign progress (settings kept)">
           <Pressable
-            style={styles.danger}
+            style={({ pressed }) => [styles.danger, pressed && { opacity: 0.7, transform: [{ scale: 0.96 }] }]}
             onPress={() => {
               play('ui_back');
               void s.resetSave();
@@ -126,7 +126,8 @@ export function SettingsScreen() {
         </Row>
       </View>
 
-      <Pressable style={styles.back} onPress={() => useGame.setState({ phase: 'home' })}>
+      <Pressable style={({ pressed }) => [styles.back, pressed && { opacity: 0.7 }]}
+  onPress={() => useGame.setState({ phase: 'home' })}>
         <Text style={styles.backTxt}>◂ BACK</Text>
       </Pressable>
     </Animated.View>

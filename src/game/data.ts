@@ -59,6 +59,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   relay: { id: 'relay', name: 'Relay', cost: 35, desc: 'Reactor tether — the most-drained ally within 3 tiles gains +30 EN' },
   soulburn: { id: 'soulburn', name: 'Soulburn', cost: 50, desc: 'Burn your own hull — costs 10% HP; your next hit deals +50% damage' },
   fluster: { id: 'fluster', name: 'Fluster', cost: 40, desc: 'Rattle their aim — your next landed hit also suppresses the target (-20 hit)' },
+  hunt: { id: 'hunt', name: 'Hunt', cost: 45, desc: 'Wounded prey — your next hit deals +30% damage to targets below half HP' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

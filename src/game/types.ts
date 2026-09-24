@@ -57,7 +57,7 @@ export interface StatusFx {
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy' | 'hymn' | 'emp' | 'phalanx' | 'deadshot' | 'frenzy' | 'breach' | 'relentless' | 'reboot' | 'sanctuary' | 'awaken' | 'charity' | 'siphon' | 'intimidate' | 'scan' | 'empower' | 'marksman' | 'ward' | 'warsong' | 'execute' | 'shatter' | 'glacial' | 'relay' | 'soulburn' | 'fluster';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy' | 'hymn' | 'emp' | 'phalanx' | 'deadshot' | 'frenzy' | 'breach' | 'relentless' | 'reboot' | 'sanctuary' | 'awaken' | 'charity' | 'siphon' | 'intimidate' | 'scan' | 'empower' | 'marksman' | 'ward' | 'warsong' | 'execute' | 'shatter' | 'glacial' | 'relay' | 'soulburn' | 'fluster' | 'hunt';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -192,6 +192,7 @@ export interface UnitState {
   glacialNext?: boolean;
   soulburnNext?: boolean;
   flusterNext?: boolean;
+  huntNext?: boolean;
   /** elite enemy: tougher stats, more EXP/credits on kill */
   elite?: boolean;
   /** NPC ally (side 'player') — uncontrollable, must be protected on protect missions */
@@ -253,7 +254,7 @@ export interface UnitState {
   overkillDealt?: number;
 }
 
-export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer' | 'bodyguard' | 'opportunist' | 'warcry' | 'pointBlank' | 'bloodlust' | 'reaver' | 'bulwark' | 'duelist' | 'juggernaut' | 'giantSlayer' | 'loneWolf' | 'overwhelm' | 'outgunned' | 'tankbuster' | 'coordinator' | 'sentinel' | 'gambit' | 'warcaster' | 'underdog' | 'skirmisher';
+export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer' | 'bodyguard' | 'opportunist' | 'warcry' | 'pointBlank' | 'bloodlust' | 'reaver' | 'bulwark' | 'duelist' | 'juggernaut' | 'giantSlayer' | 'loneWolf' | 'overwhelm' | 'outgunned' | 'tankbuster' | 'coordinator' | 'sentinel' | 'gambit' | 'warcaster' | 'underdog' | 'skirmisher' | 'engineer';
 export type PilotSkills = Record<PilotSkillId, number>;
 
 /** SRW-style enhancement parts equippable on a mecha. */
@@ -292,6 +293,7 @@ export interface PartDef {
   beamDmg?: number;
   funnelDmg?: number;
   missileDmg?: number;
+  gunDmg?: number;
   /** command aura: allies within 2 tiles gain this much hit */
   auraHit?: number;
   /** sacrificial skin — the first fatal hit each battle leaves the frame at 1 HP */
