@@ -98,6 +98,7 @@ export const PARTS: Record<string, PartDef> = {
   sunderRounds: { id: 'sunderRounds', name: 'Sunder Rounds', desc: 'Landed hits have a 20% chance to crack armor (break)', price: 1600, statusBreak: true },
   tracerRounds: { id: 'tracerRounds', name: 'Tracer Rounds', desc: 'Landed hits have a 30% chance to paint the target (mark)', price: 1500, statusMark: true },
   staticRounds: { id: 'staticRounds', name: 'Static Rounds', desc: 'Landed hits have a 15% chance to overload systems (stun)', price: 1900, statusStun: true },
+  phaseCoat: { id: 'phaseCoat', name: 'Phase Coat', desc: 'Dispersive armor — incoming beam damage reduced by 25%', price: 1800, beamGuard: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -166,6 +167,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'gunsmith', name: 'Gunsmith', desc: '+5% damage per point with gun weapons' },
   { id: 'luminance', name: 'Luminance', desc: '+5% damage per point with beam weapons' },
   { id: 'swarmer', name: 'Swarmer', desc: '+5% damage per point with funnel weapons' },
+  { id: 'phantomstep', name: 'Phantom Step', desc: '+4 evade per point' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1186,6 +1188,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_cataclysm', name: 'CATACLYSM', desc: 'Deal 12000+ damage in a single strike', rewardCr: 2000 },
   { id: 'h_consistent', name: 'CONSISTENT', desc: 'Earn rank A or better on 10 missions', rewardCr: 1200 },
   { id: 'h_grim', name: 'GRIM HARVEST', desc: 'Reach 150 total career kills across the squad', rewardCr: 2500 },
+  { id: 'h_eternal', name: 'ETERNAL PILGRIM', desc: 'Reach New Game+3', rewardCr: 3000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1320,6 +1323,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'A' || r === 'S').length >= 10;
     case 'h_grim':
       return Object.values(s.killsByDef ?? {}).reduce((a, b) => a + b, 0) >= 150;
+    case 'h_eternal':
+      return s.ngPlus >= 3;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

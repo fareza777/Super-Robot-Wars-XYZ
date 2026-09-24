@@ -42,7 +42,7 @@ export function MissionSelect() {
               </View>
             </Pressable>
           )}
-          <Pressable style={({ pressed }) => [styles.mainCard, done && { opacity: 0.55 }, pressed && !done && { opacity: 0.7, transform: [{ scale: 0.985 }] }]} onPress={done ? undefined : s.gotoBriefing} disabled={done}>
+          <Pressable style={({ pressed }) => [styles.mainCard, { borderLeftWidth: 5, borderLeftColor: THEME_ACCENT[ch.theme] ?? '#9fd8ff' }, done && { opacity: 0.55 }, pressed && !done && { opacity: 0.7, transform: [{ scale: 0.985 }] }]} onPress={done ? undefined : s.gotoBriefing} disabled={done}>
             <LinearGradient colors={['rgba(20,40,24,0.95)', 'rgba(8,14,24,0.95)']} style={StyleSheet.absoluteFill} />
             <Text style={styles.mainCh}>{done ? 'CAMPAIGN COMPLETE' : `CHAPTER ${ch.id}`}</Text>
             <Text style={styles.mainName}>{ch.name.toUpperCase()}</Text>
