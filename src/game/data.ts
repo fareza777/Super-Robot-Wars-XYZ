@@ -97,6 +97,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   standfirm: { id: 'standfirm', name: 'Stand Firm', cost: 35, desc: 'Last bastion — this frame refuses the next fatal hit this phase (left at 1 HP)' },
   plunderedge: { id: 'plunderedge', name: 'Plunder Edge', cost: 45, desc: 'Scavenger blade — your next hit strips salvage worth 8% of the damage dealt' },
   firelink: { id: 'firelink', name: 'Firelink', cost: 45, desc: 'Targeting uplink — allies within 3 tiles gain +1 weapon range until the end of the enemy phase' },
+  dreadverse: { id: 'dreadverse', name: 'Dread Verse', cost: 45, desc: 'Chorus of ruin — enemies within 3 tiles lose 15 Will' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

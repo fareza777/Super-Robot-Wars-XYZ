@@ -60,6 +60,7 @@ function buffNames(u: UnitState): string[] {
   if (u.standFirmUntilEndOfEnemyPhase) names.push('STAND FIRM');
   if (u.plunderNext) names.push('PLUNDER EDGE');
   if (u.firelinkUntilEndOfEnemyPhase) names.push('FIRELINK');
+  if (u.dreadedUntilEndOfEnemyPhase) names.push('DREADED');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
@@ -504,8 +505,13 @@ export function SidePanel() {
                     {u.npc ? '🛡 ' : ''}
                     {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>
                   </Text>
-                  <View style={styles.rosterBarTrack}>
-                    <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.hp / u.def.maxHp > 0.5 ? '#4dff7a' : u.hp / u.def.maxHp > 0.25 ? '#ffd34d' : '#ff8a5a' }]} />
+                  <View style={{ flex: 1 }}>
+                    <View style={styles.rosterBarTrack}>
+                      <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.hp / u.def.maxHp > 0.5 ? '#4dff7a' : u.hp / u.def.maxHp > 0.25 ? '#ffd34d' : '#ff8a5a' }]} />
+                    </View>
+                    <View style={[styles.rosterBarTrack, { marginTop: 2 }]}>
+                      <View style={[styles.rosterBarFill, { width: `${Math.min(100, (u.en / (u.def.maxEn || 1)) * 100)}%`, backgroundColor: '#35c9ff', height: 2 }]} />
+                    </View>
                   </View>
                   <Text style={styles.rosterHp}>{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
                 </View>

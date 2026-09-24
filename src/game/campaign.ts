@@ -123,6 +123,7 @@ export const PARTS: Record<string, PartDef> = {
   revengeFeed: { id: 'revengeFeed', name: 'Revenge Feed', desc: 'Vengeance loop — taking a hit feeds the pilot +4 SP', price: 1600, spOnHurt: true },
   lastReserve: { id: 'lastReserve', name: 'Last Reserve', desc: 'Emergency cells — weapon EN costs drop 40% while hull is below 50%', price: 1700, rageEn: true },
   warStandart: { id: 'warStandart', name: 'War Standart', desc: 'Offensive banner — allies within 2 tiles deal +8% damage', price: 2000, auraDmg: true },
+  aegisHull: { id: 'aegisHull', name: 'Aegis Hull', desc: 'Blast curtain — this frame cannot suffer critical hits', price: 2000, critGuard: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -216,6 +217,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'fortsoul', name: 'Fortress Soul', desc: '-5% damage taken per point while on defensive terrain' },
   { id: 'hexsurge', name: 'Hex Surge', desc: '+5% damage per point for each debuff on the target (cap 3)' },
   { id: 'coldsteel', name: 'Cold Steel', desc: '+5% damage per point while this frame is untouched (full hull)' },
+  { id: 'capacitor', name: 'Capacitor', desc: '+4% damage per point per 25 EN remaining (cap +16%)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -258,7 +260,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1261,12 +1263,14 @@ export const HONORS: HonorDef[] = [
   { id: 'h_summit', name: 'SUMMIT', desc: 'Win a mission on a mountain map', rewardCr: 800 },
   { id: 'h_frostbound', name: 'FROSTBOUND', desc: 'Win a mission on an ice map', rewardCr: 800 },
   { id: 'h_company', name: 'FULL COMPANY', desc: 'Every pilot earns 25+ career kills', rewardCr: 3000 },
+  { id: 'h_scrapking', name: 'SCRAP KING', desc: 'Earn 30,000 salvage credits', rewardCr: 1800 },
 ];
 
 /** Whether an honor's condition is currently met. */
 export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; inventory?: Record<string, number>; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; turn?: number;
 missionCh?: { theme?: string; fog?: boolean };
 usedResupply?: boolean;
+salvageCr?: number;
 kills?: number;
 units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; side: string; hp?: number; wounded?: boolean; npc?: boolean }[]; transformed?: boolean; usedSupport?: boolean; altKill?: boolean; decoyHit?: boolean; iFieldKill?: boolean; mirrorWon?: boolean; arcKill?: boolean; blastKill?: boolean; lostAlly?: boolean; snipeKill?: boolean; rescuedPods?: string[]; bossRush?: boolean; chainCount?: number }): boolean {
   const kills = Object.values(s.pilotProg);
@@ -1445,6 +1449,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.missionCh?.theme === 'ice';
     case 'h_company':
       return Object.values(s.pilotProg ?? {}).length >= 7 && Object.values(s.pilotProg ?? {}).every((p) => (p.kills ?? 0) >= 25);
+    case 'h_scrapking':
+      return (s.salvageCr ?? 0) >= 30000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
