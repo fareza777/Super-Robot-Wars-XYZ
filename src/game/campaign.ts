@@ -216,6 +216,7 @@ export const PARTS: Record<string, PartDef> = {
   vulcanChamber: { id: 'vulcanChamber', name: 'Vulcan Chamber', desc: 'High-pressure bore — gun weapons +15% damage and +8% critical chance', price: 2400, gunDmg: 15, crit: 8 },
   zephyrLoom: { id: 'zephyrLoom', name: 'Zephyr Loom', desc: 'Aerowoven frame — +12 mobility and +6 evade', price: 2400, mobility: 12, evade: 6 },
   photonVeins: { id: 'photonVeins', name: 'Photon Veins', desc: 'Luminous conduits — +15 EN regen and +5% hull regen per turn', price: 2500, enRegen: 15, hpRegen: 5 },
+  rayLens: { id: 'rayLens', name: 'Raylens Array', desc: 'Photon magnifier — beam weapons +15% damage and +8% critical chance', price: 2500, beamDmg: 15, crit: 8 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -404,6 +405,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'dominant', name: 'Dominant', desc: '+5% damage per point vs targets carrying a smaller arsenal' },
   { id: 'crossfire', name: 'Crossfire', desc: '+5% damage per point vs targets covered by 2+ other allies' },
   { id: 'reaping', name: 'Reaping', desc: '+6% damage per point vs targets below 25% hull' },
+  { id: 'luminarch', name: 'Luminarch', desc: '+5% damage per point with beam weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1544,6 +1546,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_sage', name: 'SAGE', desc: 'Earn MASTERY ★ on 70 missions', rewardCr: 100000 },
   { id: 'h_dreamteam', name: 'DREAM TEAM', desc: 'Every pilot reaches 150 career kills', rewardCr: 100000 },
   { id: 'h_genocider', name: 'GENOCIDER', desc: '7500 total career kills across the squad', rewardCr: 100000 },
+  { id: 'h_paragon', name: 'PARAGON', desc: 'Reach NG+15', rewardCr: 100000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1921,6 +1924,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
     }
     case 'h_genocider':
       return totalKills >= 7500;
+    case 'h_paragon':
+      return s.ngPlus >= 15;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
