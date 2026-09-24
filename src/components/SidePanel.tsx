@@ -64,6 +64,7 @@ function buffNames(u: UnitState): string[] {
   if (u.sanctumUntilEndOfEnemyPhase) names.push('SANCTUM');
   if (u.knockNext) names.push('TEMPEST EDGE');
   if (u.oathUntilEndOfEnemyPhase) names.push('IRON OATH');
+  if (u.dirgeHealUntilEndOfEnemyPhase) names.push('DIRGE MIST');
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
@@ -537,6 +538,7 @@ export function SidePanel() {
                       <Text style={[styles.rosterName, { color: '#ffb0a0' }]} numberOfLines={1}>
                         {u.def.boss || u.elite ? '★ ' : ''}
                         {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>
+                        {(u.statuses?.length ?? 0) > 0 ? <Text style={{ color: '#ff9d7a' }}> ⌛{u.statuses!.length}</Text> : null}
                       </Text>
                       <View style={[styles.rosterBarTrack, { backgroundColor: '#2a1216' }]}>
                         <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.hp / u.def.maxHp > 0.5 ? '#ff5a5a' : u.hp / u.def.maxHp > 0.25 ? '#ff9d4d' : '#c92a2a' }]} />

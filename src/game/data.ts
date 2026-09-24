@@ -103,6 +103,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   ironoath: { id: 'ironoath', name: 'Iron Oath', cost: 45, desc: 'Unbreakable vow — +600 armor and enemies prioritize this frame until the end of the enemy phase' },
   lacerate: { id: 'lacerate', name: 'Lacerate', cost: 40, desc: 'Rending blow — your next hit also cracks the target armor (break)' },
   staticchoir: { id: 'staticchoir', name: 'Static Choir', cost: 45, desc: 'Static verse — enemies within 4 tiles are suppressed (−20 hit)' },
+  dirgemist: { id: 'dirgemist', name: 'Dirge Mist', cost: 45, desc: 'Mourning veil — allies within 3 tiles restore 10% hull on each kill until the end of the enemy phase' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

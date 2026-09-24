@@ -129,6 +129,7 @@ export const PARTS: Record<string, PartDef> = {
   coreTap: { id: 'coreTap', name: 'Core Tap', desc: 'Pilot conduit — spirit costs reduced 10%', price: 1800, spSaver: true },
   boneCollector: { id: 'boneCollector', name: 'Bone Collector', desc: 'Scavenged clips — kills restock +1 ammo to the weapon used', price: 1700, ammoScalp: true },
   swarmAmp: { id: 'swarmAmp', name: 'Swarm Amp', desc: 'Cluster amplifier — +10% damage vs a foe with 2+ allies adjacent', price: 1600, clusterAmp: true },
+  witchLoom: { id: 'witchLoom', name: 'Witch Loom', desc: 'Spirit weft — each kill grants +3 SP', price: 1600, thrallWeave: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -228,6 +229,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'gritguard', name: 'Grit Guard', desc: '−8% incoming damage per point while hull is below 50%' },
   { id: 'savant', name: 'Savant', desc: '+1 SP regen per point each turn' },
   { id: 'shieldpierce', name: 'Shield Pierce', desc: '+7% damage per point vs frames carrying an I-Field or barrier' },
+  { id: 'pureshot', name: 'Pure Shot', desc: '+6% damage per point vs targets free of debuffs' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -270,7 +272,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1279,6 +1281,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_apexstrike', name: 'APEX STRIKE', desc: 'Land a single hit of 30,000+ damage', rewardCr: 3000 },
   { id: 'h_cartographer', name: 'CARTOGRAPHER', desc: 'Clear 15 side missions', rewardCr: 2600 },
   { id: 'h_marksman', name: 'ROYAL MARKSMAN', desc: 'Earn S rank on 22 missions', rewardCr: 3000 },
+  { id: 'h_longwar', name: 'ATTRITION', desc: 'Win a battle that lasts 15+ turns', rewardCr: 1600 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1476,6 +1479,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.sideCleared ?? []).length >= 15;
     case 'h_marksman':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 22;
+    case 'h_longwar':
+      return (s.turn ?? 0) >= 15;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
