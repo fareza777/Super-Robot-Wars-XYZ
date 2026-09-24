@@ -53,6 +53,7 @@ function buffNames(u: UnitState): string[] {
   if (u.goreNext) names.push('GORELUST');
   if (u.rampageNext) names.push('RAMPAGE');
   if (u.drawfireUntilEndOfEnemyPhase) names.push('DRAWFIRE');
+  if (u.hemoNext) names.push('HEMORRHAGE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
@@ -400,7 +401,7 @@ export function SidePanel() {
                         </View>
                         <View style={styles.tgtHitBox}>
                           <Text style={[styles.tgtHit, { color: '#ffd34d' }]}>{hitChance(unit, e, s.pendingWeapon!, s.map)}%</Text>
-                          <Text style={styles.tgtDmg}>{e.hp - damageOf(unit, e, s.pendingWeapon!, s.map, false) <= 0 ? 'DESTROY' : `~${damageOf(unit, e, s.pendingWeapon!, s.map, false)}`}</Text>
+                          <Text style={[styles.tgtDmg, e.hp - damageOf(unit, e, s.pendingWeapon!, s.map, false) <= 0 && { color: '#ff6b6b' }]}>{e.hp - damageOf(unit, e, s.pendingWeapon!, s.map, false) <= 0 ? 'DESTROY' : `~${damageOf(unit, e, s.pendingWeapon!, s.map, false)}`}</Text>
                         </View>
                       </View>
                     ))}
@@ -445,7 +446,7 @@ export function SidePanel() {
                         </View>
                         <View style={styles.tgtHitBox}>
                           <Text style={[styles.tgtHit, hc >= 80 ? { color: '#4dff7a' } : hc >= 55 ? { color: '#ffd34d' } : { color: '#ff8a5a' }]}>{hc}%</Text>
-                          <Text style={styles.tgtDmg}>{kill ? 'DESTROY' : `~${dmg}`}</Text>
+                          <Text style={[styles.tgtDmg, kill && { color: '#ff6b6b' }]}>{kill ? 'DESTROY' : `~${dmg}`}</Text>
                         </View>
                       </Pressable>
                     );

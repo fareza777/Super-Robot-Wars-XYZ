@@ -115,6 +115,7 @@ export const PARTS: Record<string, PartDef> = {
   jammerSkin: { id: 'jammerSkin', name: 'Jammer Skin', desc: 'ECM coating — attackers that hit this frame have a 25% chance of a suppress glitch (-20 hit)', price: 1700, jammerSkin: true },
   survivalRig: { id: 'survivalRig', name: 'Survival Rig', desc: 'Emergency nanoloom — regenerates +8% hull per turn while below 40% HP', price: 1600, lowHpRegen: true },
   flakShield: { id: 'flakShield', name: 'Flak Shield', desc: 'Point-defense lattice — +400 armor against attacks from 5+ tiles away', price: 1700, sniperGuard: true },
+  sealedHull: { id: 'sealedHull', name: 'Sealed Hull', desc: 'Hazard plating — immune to terrain damage (lava, void, corrosive fields)', price: 1400, terraProof: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -200,6 +201,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'arsenalmind', name: 'Arsenal Mind', desc: '+3% damage per point for each part equipped on this frame' },
   { id: 'titanbreaker', name: 'Titanbreaker', desc: '+6% damage per point vs slow siege frames (move range 4 or less)' },
   { id: 'truesight', name: 'Truesight', desc: '+5% damage per point while AIM focus is active — rewards the patient shot' },
+  { id: 'backliner', name: 'Backliner', desc: '+6% damage per point while no enemy stands adjacent — clean shooting lanes' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -238,7 +240,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1237,6 +1239,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_bloodbath', name: 'BLOODBATH', desc: 'Destroy 18 enemies in a single battle', rewardCr: 1500 },
   { id: 'h_paragon', name: 'PARAGON', desc: 'Earn battle rank S in 18 missions', rewardCr: 2500 },
   { id: 'h_apex', name: 'APEX PILOT', desc: 'Score 15000+ in the VR Simulator', rewardCr: 4000 },
+  { id: 'h_perfectionist', name: 'PERFECTIONIST', desc: 'Earn MASTERY ★ in 25 missions', rewardCr: 3500 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1405,6 +1408,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 18;
     case 'h_apex':
       return (s.simBest ?? 0) >= 15000;
+    case 'h_perfectionist':
+      return (s.masteryDone ?? []).length >= 25;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

@@ -89,6 +89,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   litany: { id: 'litany', name: 'Litany', cost: 55, desc: 'Mending chorus — allies within 3 tiles recover 15% hull and shed all debuffs' },
   rampage: { id: 'rampage', name: 'Rampage', cost: 45, desc: 'Killing momentum — your next hit deals +8% damage per kill this battle (cap +40%)' },
   drawfire: { id: 'drawfire', name: 'Drawfire', cost: 35, desc: 'Beacon stance — enemies prioritize this frame until the end of the enemy phase' },
+  hemorrhage: { id: 'hemorrhage', name: 'Hemorrhage', cost: 50, desc: 'Rending strike — your next hit burns AND paints the target' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
