@@ -51,6 +51,19 @@ export const MECH_ART: Record<string, number> = {
   vossDrake: require('../assets/art/mech2_vossdrake.jpg'),
   arklander: require('../assets/art/mech2_bulwark.jpg'),
   arkmilitia: require('../assets/art/mech2_warden.jpg'),
+  medic: require('../assets/art/mech2_medic.jpg'),
+  ballista: require('../assets/art/mech2_ballista.jpg'),
+  bastion: require('../assets/art/mech2_bastion.jpg'),
+  blackguard: require('../assets/art/mech2_blackguard.jpg'),
+  cargoMule: require('../assets/art/mech2_cargomule.jpg'),
+  centurion: require('../assets/art/mech2_centurion.jpg'),
+  dragoon: require('../assets/art/mech2_dragoon.jpg'),
+  hellhound: require('../assets/art/mech2_hellhound.jpg'),
+  scorcher: require('../assets/art/mech2_scorcher.jpg'),
+  sparkDrone: require('../assets/art/mech2_sparkdrone.jpg'),
+  voidChanter: require('../assets/art/mech2_voidchanter.jpg'),
+  vossAlly: require('../assets/art/mech2_vossally.jpg'),
+  stormcaller: require('../assets/art/mech2_stormcaller.jpg'),
 };
 
 // Keyed by terrain id — generated top-down map tiles

@@ -468,7 +468,7 @@ function CodexRow({ id, ally }: { id: string; ally: boolean }) {
   const tally = killsByDef[id] ?? 0;
   return (
     <View style={styles.codexRow}>
-      <ExpoImage cachePolicy="memory" source={MECH_ART[id]} style={styles.codexThumb} contentFit="cover" contentPosition="top center" />
+      <ExpoImage cachePolicy="memory" source={MECH_ART[id]} style={[styles.codexThumb, { borderColor: d.accent }]} contentFit="cover" contentPosition="top center" />
       <View style={{ flex: 1 }}>
         <Text style={styles.shopName}>
           {d.name} <Text style={{ color: d.accent }}>· {d.title}</Text>
@@ -602,7 +602,7 @@ const styles = StyleSheet.create({
   bondFaces: { flexDirection: 'row', alignItems: 'center' },
   bondFace: { width: 40, height: 40, borderRadius: 20, borderWidth: 1.5, borderColor: '#3a4160' },
   bondHeart: { color: '#ff9fd0', fontSize: 13, fontWeight: '900', marginHorizontal: 4 },
-  codexRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#1c2440' },
+  codexRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, paddingHorizontal: 8, marginBottom: 4, borderRadius: 10, backgroundColor: 'rgba(18,22,40,0.55)', borderBottomWidth: 0 },
   codexThumb: { width: 58, height: 58, borderRadius: 8, borderWidth: 1, borderColor: '#3a4160' },
   codexWep: { color: '#c8b060', fontSize: 10, marginTop: 3 },
   codexSpirit: { color: '#b09ae8', fontSize: 10, marginTop: 2 },
