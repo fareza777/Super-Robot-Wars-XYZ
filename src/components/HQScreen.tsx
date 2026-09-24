@@ -141,7 +141,7 @@ export function HQScreen() {
           </ScrollView>
           <View style={styles.wsTabs}>
             {(['frame', 'weap', 'parts', 'pilots'] as const).map((t) => (
-              <Pressable key={t} style={[styles.wsTab, wsTab === t && styles.wsTabOn]} onPress={() => setWsTab(t)}>
+              <Pressable key={t} style={({ pressed }) => [styles.wsTab, wsTab === t && styles.wsTabOn, pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] }]} onPress={() => setWsTab(t)}>
                 <Text style={[styles.wsTabTxt, wsTab === t && { color: '#6fe0ff' }]}>{t === 'frame' ? 'FRAME' : t === 'weap' ? 'WEAPONS' : t === 'parts' ? 'PARTS' : 'PILOT'}</Text>
               </Pressable>
             ))}
@@ -585,7 +585,7 @@ const styles = StyleSheet.create({
   lvlSeg: { width: 18, height: 6, borderRadius: 2, backgroundColor: '#1c2440' },
   wsTabs: { flexDirection: 'row', gap: 8, marginBottom: 8 },
   wsTab: { flex: 1, borderWidth: 1, borderColor: '#3a4160', borderRadius: 7, paddingVertical: 6, alignItems: 'center', backgroundColor: '#0a0e1e' },
-  wsTabOn: { borderColor: '#6fe0ff', backgroundColor: '#10202e' },
+  wsTabOn: { borderColor: '#6fe0ff', backgroundColor: '#10202e', borderBottomWidth: 2.5, borderBottomColor: '#6fe0ff' },
   wsTabTxt: { color: '#8fa0c8', fontWeight: '900', fontSize: 10.5, letterSpacing: 1.5 },
   backBtn: { alignSelf: 'flex-start', borderWidth: 1, borderColor: '#3a4160', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 7, marginTop: 8 },
   backTxt: { color: '#9fd0ff', fontWeight: '800', fontSize: 12, letterSpacing: 1 },

@@ -77,6 +77,7 @@ export const PARTS: Record<string, PartDef> = {
   siegeRounds: { id: 'siegeRounds', name: 'Siege Rounds', desc: '+15% damage vs boss & elite frames', price: 1600, bossDmg: 15 },
   counterweight: { id: 'counterweight', name: 'Counterweight Gyro', desc: '+20% counter-attack damage', price: 1500, counterDmg: 20 },
   telescopic: { id: 'telescopic', name: 'Telescopic Array', desc: '+1 max range for non-melee weapons', price: 1700, range: 1 },
+  linkedFire: { id: 'linkedFire', name: 'Linked Fire Control', desc: 'Coordinated-fire allies contribute +8% more damage each', price: 1800, coFire: 8 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -124,6 +125,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'giantSlayer', name: 'Giant Slayer', desc: '+6% damage per point against bosses and elite frames' },
   { id: 'loneWolf', name: 'Lone Wolf', desc: '+6% damage per point when no ally is within 2 tiles' },
   { id: 'overwhelm', name: 'Overwhelm', desc: '+5% damage per point vs enemies that have not acted' },
+  { id: 'outgunned', name: 'Outgunned', desc: '+6% damage per point while your side is outnumbered' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1125,6 +1127,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_officer', name: 'OFFICER DOWN', desc: 'Destroy 2 Centurion officer frames', rewardCr: 700 },
   { id: 'h_blackguard', name: 'DUSK BREAKER', desc: 'Destroy 3 Blackguard veteran frames', rewardCr: 800 },
   { id: 'h_dragoon', name: 'HUNTER KILLER', desc: 'Destroy 3 Dragoon Cavalry frames', rewardCr: 700 },
+  { id: 'h_scorcher', name: 'ASH MAKER', desc: 'Destroy 3 Scorcher frames', rewardCr: 700 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1221,6 +1224,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.killsByDef?.blackguard ?? 0) >= 3;
     case 'h_dragoon':
       return (s.killsByDef?.dragoon ?? 0) >= 3;
+    case 'h_scorcher':
+      return (s.killsByDef?.scorcher ?? 0) >= 3;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

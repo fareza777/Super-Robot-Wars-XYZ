@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -208,7 +208,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (dist(att.pos, def.pos) <= 2) dmg = Math.round(dmg * (1 + 0.06 * (att.skills?.pointBlank ?? 0)));
   if (units) {
     const assists = units.filter((u) => u.alive && u.side === att.side && u.uid !== att.uid && u.uid !== def.uid && !u.acted && dist(u.pos, def.pos) <= 2).length;
-    dmg = Math.round(dmg * (1 + 0.12 * Math.min(2, assists)));
+    dmg = Math.round(dmg * (1 + (0.12 + partBonus(att, 'coFire') / 100) * Math.min(2, assists)));
   }
   if (w.kind === 'melee') dmg = Math.round(dmg * (1 + partBonus(att, 'meleeDmg') / 100));
   if ((att.kills ?? 0) >= 3) dmg = Math.round(dmg * (1 + 0.05 * (att.skills?.bloodlust ?? 0)));
@@ -232,6 +232,11 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (att.empowerForNextAttack) dmg = Math.round(dmg * 1.4);
   if ((att.skills?.loneWolf ?? 0) > 0 && !(units ?? []).some((x) => x !== att && x.alive && x.side === att.side && dist(x.pos, att.pos) <= 2)) dmg = Math.round(dmg * (1 + 0.06 * att.skills.loneWolf));
   if ((att.skills?.overwhelm ?? 0) > 0 && !def.acted) dmg = Math.round(dmg * (1 + 0.05 * att.skills.overwhelm));
+  if ((att.skills?.outgunned ?? 0) > 0 && units) {
+    const mine = units.filter((x) => x.alive && x.side === att.side).length;
+    const theirs = units.filter((x) => x.alive && x.side !== att.side).length;
+    if (mine < theirs) dmg = Math.round(dmg * (1 + 0.06 * att.skills.outgunned));
+  }
   if (trait === 'crimson_fury' && att.hp < att.def.maxHp / 2) dmg = Math.round(dmg * 1.1);
   if (trait === 'sovereign') dmg = Math.round(dmg * 1.08);
   // damage-type resistance — beam coats, phase armor, disperser fields
@@ -452,6 +457,13 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
       result.miracle = true;
       def.miracleArmed = false;
       def.hp = 10;
+    }
+    // Ward spirit — the aegis-bound ally refuses a fatal hit, left at 1 HP (consumed)
+    if (result.destroyed && def.wardenArmed) {
+      result.destroyed = false;
+      result.miracle = true;
+      def.wardenArmed = false;
+      def.hp = 1;
     }
     // Ablative plating — sacrificial skin eats the first fatal hit, frame left at 1 HP
     if (result.destroyed && partBonus(def, 'ablative') > 0 && !def.ablativeUsed) {
@@ -860,6 +872,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break; // war blessing — the blessed ally is chosen by the store pass
     case 'marksman':
       break; // squad fire control — the store flags every ally
+    case 'ward':
+      break; // aegis prayer — the warded ally is chosen by the store pass
     // 'rouse', 'disrupt' and 'trust' affect neighbouring units — applied in store.castSpirit
   }
 }
