@@ -102,6 +102,7 @@ function buffNames(u: UnitState): string[] {
   if (u.triumphUntilEndOfEnemyPhase) names.push('TRIUMPH VERSE');
   if (u.fortressUntilEndOfEnemyPhase) names.push('FORTRESS VERSE');
   if (u.vigilUntilEndOfEnemyPhase) names.push('VIGIL VERSE');
+  if (u.sentinelUntilEndOfEnemyPhase) names.push('SENTINEL VERSE');
   if (u.scopeUntilEndOfEnemyPhase) names.push('SCOPE VERSE');
   if ((u.doomTurns ?? 0) > 0) names.push(`DOOM ${u.doomTurns}`);
   if (u.ghostNext) names.push('GHOST VERSE');
@@ -557,7 +558,7 @@ export function SidePanel() {
                 <View key={u.uid} style={styles.rosterRow}>
                   <Text style={[styles.rosterName, u.acted && styles.rosterActed]} numberOfLines={1}>
                     {u.npc ? '🛡 ' : ''}{u.dmgDealt === topDealt && topDealt > 0 ? '◆ ' : ''}
-                    {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>{u.acted ? <Text style={{ color: '#4dff7a' }}> ✓</Text> : null}
+                    {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>{s.units.some((o) => o.alive && o.side === u.side && o.uid !== u.uid && dist(o.pos, u.pos) <= 1) ? <Text style={{ color: '#8af0ff' }}> ⚭</Text> : null}{u.acted ? <Text style={{ color: '#4dff7a' }}> ✓</Text> : null}
                   </Text>
                   <View style={{ flex: 1 }}>
                     <View style={styles.rosterBarTrack}>

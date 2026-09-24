@@ -180,6 +180,7 @@ export const PARTS: Record<string, PartDef> = {
   mirrorScale: { id: 'mirrorScale', name: 'Mirror Scale', desc: 'Reflexive plating — reflects 20% of hit damage back at the attacker', price: 1800, reflect: 20 },
   choirRelic: { id: 'choirRelic', name: 'Choir Relic', desc: 'Anthem core — pilot regenerates +3 SP every turn', price: 1800, spRegen: 3 },
   warlordSigil: { id: 'warlordSigil', name: 'Warlord Sigil', desc: 'Command crest — adjacent allies deal +12% damage', price: 1900, auraDmg: 12 },
+  judgeRig: { id: 'judgeRig', name: 'Judge Rig', desc: 'Arbiter servos — counter-attacks deal +25% damage', price: 1900, counterDmg: 25 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -330,6 +331,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'wither', name: 'Wither', desc: '+6% damage per point vs burning targets' },
   { id: 'grandstand', name: 'Grandstand', desc: '+5% damage per point while at least 3 allies are alive' },
   { id: 'vanguard', name: 'Vanguard', desc: '+6% damage per point on the unit\'s first attack each battle' },
+  { id: 'phalanx', name: 'Phalanx', desc: '+4% damage per point per adjacent ally (max 3)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1432,6 +1434,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_unmaker', name: 'UNMAKER', desc: 'Earn MASTERY ★ on 60 missions', rewardCr: 40000 },
   { id: 'h_overgod', name: 'OVERGOD', desc: 'Reach NG+9 or beyond', rewardCr: 42000 },
   { id: 'h_peacemaker', name: 'PEACEMAKER', desc: 'Clear 30 side missions', rewardCr: 44000 },
+  { id: 'h_warmonger', name: 'WARMONGER', desc: '1500 total career kills across the squad', rewardCr: 46000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1731,6 +1734,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.ngPlus ?? 0) >= 9;
     case 'h_peacemaker':
       return (s.sideCleared?.length ?? 0) >= 30;
+    case 'h_warmonger':
+      return totalKills >= 1500;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
