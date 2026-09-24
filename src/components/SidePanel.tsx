@@ -108,6 +108,7 @@ function buffNames(u: UnitState): string[] {
   if (u.hollowNext) names.push('HOLLOW EDGE');
   if (u.repulseUntilEndOfEnemyPhase) names.push('REPULSE VERSE');
   if (u.silencedUntilEndOfEnemyPhase) names.push('SILENCE VERSE');
+  if (u.weakenUntilEndOfEnemyPhase) names.push('FEAR VERSE');
   if (u.palisadeUntilEndOfEnemyPhase) names.push('PALISADE VERSE');
   // magnumverse is instant — no chip
   if (u.rended) names.push('RENDED');
@@ -159,7 +160,7 @@ function buffNames(u: UnitState): string[] {
 }
 
 function debuffCount(u: UnitState): number {
-  return (u.statuses?.length ?? 0) + (u.doomTurns ? 1 : 0) + (u.sirenTurns ? 1 : 0) + (u.exposed ? 1 : 0) + (u.rended ? 1 : 0) + (u.sundered ? 1 : 0) + (u.crippled ? 1 : 0);
+  return (u.statuses?.length ?? 0) + (u.doomTurns ? 1 : 0) + (u.sirenTurns ? 1 : 0) + (u.exposed ? 1 : 0) + (u.rended ? 1 : 0) + (u.sundered ? 1 : 0) + (u.crippled ? 1 : 0) + (u.silencedUntilEndOfEnemyPhase ? 1 : 0) + (u.cursedUntilEndOfEnemyPhase ? 1 : 0) + (u.weakenUntilEndOfEnemyPhase ? 1 : 0);
 }
 
 function Bar({ label, val, max, color }: { label: string; val: number; max: number; color: string }) {
@@ -340,7 +341,7 @@ export function SidePanel() {
             {buffNames(unit).length > 0 && (
               <View style={styles.buffRow}>
                 {buffNames(unit).map((n) => (
-                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
+                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
                 ))}
               </View>
             )}
@@ -690,7 +691,7 @@ export function SidePanel() {
             {buffNames(inspect).length > 0 && (
               <View style={styles.buffRow}>
                 {buffNames(inspect).map((n) => (
-                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
+                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
                 ))}
               </View>
             )}

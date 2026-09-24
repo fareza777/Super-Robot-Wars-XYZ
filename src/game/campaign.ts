@@ -210,6 +210,7 @@ export const PARTS: Record<string, PartDef> = {
   riposteLattice: { id: 'riposteLattice', name: 'Riposte Lattice', desc: 'Counterweave frame — counter-attacks +15% damage and reach +1 range', price: 2300, counterDmg: 15, counterRange: true },
   overdriveCore: { id: 'overdriveCore', name: 'Overdrive Core', desc: 'Turbine heart — +8% damage and +10 EN regen per turn', price: 2300, dmg: 8, enRegen: 10 },
   stormwallPlate: { id: 'stormwallPlate', name: 'Stormwall Plate', desc: 'Tempest laminate — +150 armor and +6 evade', price: 2300, armor: 150, evade: 6 },
+  dualfeedCell: { id: 'dualfeedCell', name: 'Dualfeed Cell', desc: 'Split-loader array — ammo and EN weapons +10% damage', price: 2300, ammoDmg: 10, enDmg: 10 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -392,6 +393,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'awestruck', name: 'Awestruck', desc: '+5% damage per point vs targets at 120+ Will' },
   { id: 'lifeline', name: 'Lifeline', desc: '+4% damage per point while any ally is below 50% hull' },
   { id: 'lowburn', name: 'Lowburn', desc: '+5% damage per point while own EN is below 40%' },
+  { id: 'bigbang', name: 'Big Bang', desc: '+5% damage per point when firing your strongest weapon' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1526,6 +1528,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_peacelord', name: 'PEACELORD', desc: 'Clear 50 side missions', rewardCr: 100000 },
   { id: 'h_centurion', name: 'CENTURION', desc: 'Fly 50 ranked missions', rewardCr: 100000 },
   { id: 'h_warehouse', name: 'WAREHOUSE', desc: 'Hold 80 items in inventory at once', rewardCr: 100000 },
+  { id: 'h_armorylord', name: 'ARMORY LORD', desc: 'Own 75 different parts', rewardCr: 100000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1889,6 +1892,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.keys(s.missionRank ?? {}).length >= 50;
     case 'h_warehouse':
       return Object.values(s.inventory ?? {}).reduce((n, c) => n + c, 0) >= 80;
+    case 'h_armorylord':
+      return (s.partsOwned ?? []).length >= 75;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
