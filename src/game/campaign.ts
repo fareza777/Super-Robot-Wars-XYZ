@@ -178,6 +178,7 @@ export const PARTS: Record<string, PartDef> = {
   gutsRipper: { id: 'gutsRipper', name: 'Guts Ripper', desc: 'Shredder maw — attacks ignore 20% of target armor', price: 1700, armorShred: 20 },
   reflexLoom: { id: 'reflexLoom', name: 'Reflex Loom', desc: 'Reflex weave — +15 evade on turns this frame moves', price: 1700, dancerWeave: 15 },
   mirrorScale: { id: 'mirrorScale', name: 'Mirror Scale', desc: 'Reflexive plating — reflects 20% of hit damage back at the attacker', price: 1800, reflect: 20 },
+  choirRelic: { id: 'choirRelic', name: 'Choir Relic', desc: 'Anthem core — pilot regenerates +3 SP every turn', price: 1800, spRegen: 3 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -326,6 +327,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'madmen', name: 'Madmen', desc: '+4% damage per point per debuff on this frame (max 2)' },
   { id: 'predator', name: 'Predator', desc: '+6% damage per point vs targets that have not acted' },
   { id: 'wither', name: 'Wither', desc: '+6% damage per point vs burning targets' },
+  { id: 'grandstand', name: 'Grandstand', desc: '+5% damage per point while at least 3 allies are alive' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1426,6 +1428,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_apocalypse', name: 'APOCALYPSE GOD', desc: 'Land a single blow of 200,000+ damage', rewardCr: 36000 },
   { id: 'h_exterminatus', name: 'EXTERMINATUS', desc: 'Land a single blow of 300,000+ damage', rewardCr: 38000 },
   { id: 'h_unmaker', name: 'UNMAKER', desc: 'Earn MASTERY ★ on 60 missions', rewardCr: 40000 },
+  { id: 'h_overgod', name: 'OVERGOD', desc: 'Reach NG+9 or beyond', rewardCr: 42000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1721,6 +1724,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.maxHitEver ?? 0) >= 300000;
     case 'h_unmaker':
       return (s.masteryDone?.length ?? 0) >= 60;
+    case 'h_overgod':
+      return (s.ngPlus ?? 0) >= 9;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

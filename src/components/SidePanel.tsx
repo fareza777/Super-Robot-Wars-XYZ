@@ -99,6 +99,8 @@ function buffNames(u: UnitState): string[] {
   if (u.goreUntilEndOfEnemyPhase) names.push('GORE VERSE');
   if (u.mirageUntilEndOfEnemyPhase) names.push('MIRAGE VERSE');
   if (u.triumphUntilEndOfEnemyPhase) names.push('TRIUMPH VERSE');
+  if (u.fortressUntilEndOfEnemyPhase) names.push('FORTRESS VERSE');
+  if (u.vigilUntilEndOfEnemyPhase) names.push('VIGIL VERSE');
   if (u.scopeUntilEndOfEnemyPhase) names.push('SCOPE VERSE');
   if ((u.doomTurns ?? 0) > 0) names.push(`DOOM ${u.doomTurns}`);
   if (u.ghostNext) names.push('GHOST VERSE');
@@ -177,7 +179,7 @@ export function SidePanel() {
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Pressable onPress={() => setShowRoster((v) => !v)} style={({ pressed }) => [{ flex: 1 }, pressed && { opacity: 0.7 }]}>
           <Text style={styles.counts}>
-            <Text style={{ color: '#8affc0' }}>Ally {alivePlayers(s).length}</Text> · <Text style={{ color: '#ff8a8a' }}>Enemy</Text> {s.missionCh.fog ? `${aliveEnemies(s).filter((e) => fogLit(s.units, e.pos)).length}/${aliveEnemies(s).length}` : aliveEnemies(s).length} · <Text style={{ color: '#ffd34d' }}>☠{s.kills}</Text>  · <Text style={{ color: '#9fd8ff' }}>T{s.turn}</Text> {showRoster ? '▲' : '▼'}
+            <Text style={{ color: '#8affc0' }}>Ally {alivePlayers(s).length}</Text> · <Text style={{ color: '#ff8a8a' }}>Enemy</Text> {s.missionCh.fog ? `${aliveEnemies(s).filter((e) => fogLit(s.units, e.pos)).length}/${aliveEnemies(s).length}` : aliveEnemies(s).length} · <Text style={{ color: '#ffd34d' }}>☠{s.kills}</Text>  · <Text style={{ color: '#9fd8ff' }}>T{s.turn}</Text> · <Text style={{ color: '#ffd34d' }}>¢{s.credits >= 1000 ? `${Math.floor(s.credits / 1000)}k` : s.credits}</Text> {showRoster ? '▲' : '▼'}
           </Text>
         </Pressable>
         <Pressable onPress={s.toggleDanger} style={({ pressed }) => [styles.dangerBtn, s.dangerZone && styles.dangerBtnOn, pressed && { opacity: 0.7 }]}>
