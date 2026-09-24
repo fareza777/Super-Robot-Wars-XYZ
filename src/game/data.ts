@@ -137,6 +137,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   vigorverse: { id: 'vigorverse', name: 'Vigor Verse', cost: 45, desc: 'Rally hymn — allies within 3 tiles instantly gain +10 Will' },
   savageedge: { id: 'savageedge', name: 'Savage Edge', cost: 45, desc: 'Brutal strike — the next hit deals +20% damage and suppresses the target (-20 hit)' },
   phantomverse: { id: 'phantomverse', name: 'Phantom Verse', cost: 50, desc: 'Ghost protocol — attacks by allies within 3 tiles cannot be countered until end of enemy phase' },
+  crimsonverse: { id: 'crimsonverse', name: 'Crimson Verse', cost: 50, desc: 'Blood pact — allies within 3 tiles recover 15% hull on each kill until end of enemy phase' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

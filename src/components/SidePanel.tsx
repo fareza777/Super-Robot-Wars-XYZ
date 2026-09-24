@@ -92,6 +92,7 @@ function buffNames(u: UnitState): string[] {
   if (u.ravageNext) names.push('RAVAGE VERSE');
   if (u.savageNext) names.push('SAVAGE EDGE');
   if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
+  if (u.crimsonUntilEndOfEnemyPhase) names.push('CRIMSON VERSE');
   if (u.ghostNext) names.push('GHOST VERSE');
   if (u.cursedUntilEndOfEnemyPhase) names.push('CURSE VERSE');
   if ((u.sirenTurns ?? 0) > 0) names.push(`SIREN VERSE ${u.sirenTurns}`);
@@ -151,6 +152,7 @@ export function SidePanel() {
   const inspect = s.inspectUid ? s.units.find((u) => u.uid === s.inspectUid) : undefined;
   const allActed = s.units.length > 0 && s.units.every((u) => u.side !== 'player' || !u.alive || u.acted || u.npc);
   const [showRoster, setShowRoster] = React.useState(false);
+  const topDealt = Math.max(0, ...s.units.filter((u) => u.side === 'player' && u.alive).map((u) => u.dmgDealt ?? 0));
   const objType = s.missionCh.objectiveType ?? 'rout';
   const unitOnBeacon = !!s.missionCh.seizePos && s.units.some((u) => u.side === 'player' && u.alive && u.pos.x === s.missionCh.seizePos!.x && u.pos.y === s.missionCh.seizePos!.y);
   const unitOnReach = !!s.missionCh.reachPos && s.units.some((u) => u.side === 'player' && u.alive && u.pos.x === s.missionCh.reachPos!.x && u.pos.y === s.missionCh.reachPos!.y);
@@ -543,7 +545,7 @@ export function SidePanel() {
               .map((u) => (
                 <View key={u.uid} style={styles.rosterRow}>
                   <Text style={[styles.rosterName, u.acted && styles.rosterActed]} numberOfLines={1}>
-                    {u.npc ? '🛡 ' : ''}
+                    {u.npc ? '🛡 ' : ''}{u.dmgDealt === topDealt && topDealt > 0 ? '◆ ' : ''}
                     {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>
                   </Text>
                   <View style={{ flex: 1 }}>
