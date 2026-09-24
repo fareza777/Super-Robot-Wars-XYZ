@@ -200,6 +200,7 @@ export const PARTS: Record<string, PartDef> = {
   bombardCache: { id: 'bombardCache', name: 'Bombard Cache', desc: 'Artillery stockpile — MAP/area weapons +15% damage and +1 ammo each turn', price: 2000, mapDmg: true, ammoRegen: true },
   harmonicCore: { id: 'harmonicCore', name: 'Harmonic Core', desc: 'Resonant conduit — spirit costs −10% and pilot regenerates +3 SP each turn', price: 2100, spSaver: true, spRegen: 3 },
   venomRounds: { id: 'venomRounds', name: 'Venom Rounds', desc: 'Toxic payload — landed hits can ignite (25%) and paint (25%) the target', price: 2100, statusBurn: true, statusMark: true },
+  bloodPlate: { id: 'bloodPlate', name: 'Blood Plate', desc: 'Crimson laminate — +100 armor and +10% damage while hull is below 50%', price: 2100, armor: 100, lowHpDmg: 10 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -372,6 +373,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'vitals', name: 'Vitals', desc: '+5% critical damage per point' },
   { id: 'highhand', name: 'Highhand', desc: '+5% damage per point vs lower-level frames' },
   { id: 'saboteur', name: 'Saboteur', desc: '+5% damage per point vs targets unable to counter' },
+  { id: 'barrierbane', name: 'Barrierbane', desc: '+6% damage per point vs barrier-protected frames' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1496,6 +1498,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_aeon', name: 'AEON', desc: 'Reach NG+12 or beyond', rewardCr: 86000 },
   { id: 'h_emperor', name: 'EMPEROR', desc: 'Destroy 20 boss frames across your career', rewardCr: 88000 },
   { id: 'h_magnate', name: 'MAGNATE', desc: 'Hold 500,000 credits at once', rewardCr: 90000 },
+  { id: 'h_paladin', name: 'PALADIN', desc: 'Clear 40 distinct missions', rewardCr: 92000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1839,6 +1842,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.entries(s.killsByDef ?? {}).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) >= 20;
     case 'h_magnate':
       return (s.credits ?? 0) >= 500000;
+    case 'h_paladin':
+      return Object.keys(s.missionRank ?? {}).length >= 40;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

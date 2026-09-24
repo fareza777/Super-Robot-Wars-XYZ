@@ -595,7 +595,7 @@ export function SidePanel() {
                   </View>
                   <Text style={[styles.rosterHp, u.hp / u.def.maxHp < 0.25 && { color: '#ff8a8a' }]}>{u.hp / u.def.maxHp < 0.25 ? '⚠' : ''}{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
                   {u.will !== 100 && <Text style={[styles.rosterHp, { color: u.will >= 130 ? '#ffd34d' : '#ff7a9d' }]}>W{u.will}</Text>}
-                  <Text style={[styles.rosterHp, { color: '#c9a0ff' }]}>✦{u.sp}</Text>
+                  <Text style={[styles.rosterHp, { color: u.sp < 30 ? '#ff9d7a' : '#c9a0ff' }]}>✦{u.sp}</Text>
                   {buffNames(u).length > 0 && <Text style={[styles.rosterHp, { color: '#8af0ff' }]}>✧{buffNames(u).length}</Text>}
                   {debuffCount(u) > 0 ? <Text style={[styles.rosterHp, { color: '#ff9d7a' }]}>⌛{debuffCount(u)}</Text> : null}
                   {u.crippled ? <Text style={[styles.rosterHp, { color: '#ff9d7a' }]}>⛓</Text> : null}
