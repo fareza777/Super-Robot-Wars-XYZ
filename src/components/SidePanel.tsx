@@ -612,6 +612,7 @@ export function SidePanel() {
                       <Text style={[styles.rosterHp, { color: '#8b94b8', width: 34 }]}>🛡{armorOf(u, s.map)}</Text>
                       <Text style={[styles.rosterHp, { color: '#7fd0b0', width: 30 }]}>≫{Math.round(evadeOf(u, s.map))}</Text>
                       <Text style={[styles.rosterHp, { color: '#9fd8ff', width: 26 }]}>⇄{moveRangeOf(u)}</Text>
+                      <Text style={[styles.rosterHp, { color: '#35c9ff', width: 30 }]}>⛽{u.en}</Text>
                     </View>
                   ),
                 )}
