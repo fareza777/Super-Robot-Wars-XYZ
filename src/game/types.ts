@@ -57,7 +57,7 @@ export interface StatusFx {
   turns: number; // remaining phase transitions it lasts through
 }
 
-export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy' | 'hymn' | 'emp' | 'phalanx' | 'deadshot' | 'frenzy' | 'breach' | 'relentless' | 'reboot' | 'sanctuary' | 'awaken' | 'charity' | 'siphon' | 'intimidate' | 'scan' | 'empower' | 'marksman' | 'ward' | 'warsong' | 'execute' | 'shatter' | 'glacial' | 'relay' | 'soulburn' | 'fluster' | 'hunt' | 'tracer' | 'strafe' | 'inspire' | 'pyre' | 'overrun' | 'exert' | 'veil' | 'cantata' | 'warhorn' | 'skyfall' | 'avenger' | 'reaper' | 'stalker' | 'interfere' | 'safeguard' | 'blade' | 'suppress' | 'carnage' | 'trueshot' | 'dischord' | 'absolution' | 'judge';
+export type SpiritId = 'focus' | 'strike' | 'valor' | 'grit' | 'accel' | 'guard' | 'flash' | 'snipe' | 'zeal' | 'rouse' | 'disrupt' | 'bless' | 'vigor' | 'roar' | 'fortune' | 'soul' | 'trust' | 'miracle' | 'lucky' | 'vanish' | 'overdrive' | 'mercy' | 'purge' | 'resolve' | 'sunder' | 'provoke' | 'cheer' | 'wish' | 'gravity' | 'guts' | 'expose' | 'decoy' | 'hymn' | 'emp' | 'phalanx' | 'deadshot' | 'frenzy' | 'breach' | 'relentless' | 'reboot' | 'sanctuary' | 'awaken' | 'charity' | 'siphon' | 'intimidate' | 'scan' | 'empower' | 'marksman' | 'ward' | 'warsong' | 'execute' | 'shatter' | 'glacial' | 'relay' | 'soulburn' | 'fluster' | 'hunt' | 'tracer' | 'strafe' | 'inspire' | 'pyre' | 'overrun' | 'exert' | 'veil' | 'cantata' | 'warhorn' | 'skyfall' | 'avenger' | 'reaper' | 'stalker' | 'interfere' | 'safeguard' | 'blade' | 'suppress' | 'carnage' | 'trueshot' | 'dischord' | 'absolution' | 'judge' | 'banner';
 
 export interface SpiritDef {
   id: SpiritId;
@@ -153,6 +153,7 @@ export interface UnitState {
   suppressDmgUntilEndOfEnemyPhase?: boolean;
   dischordUntilEndOfEnemyPhase?: boolean;
   absolveUntilEndOfEnemyPhase?: boolean;
+  bannerUntilEndOfEnemyPhase?: boolean;
   /** Deadshot — the next attack is a guaranteed critical */
   deadshotForNextAttack?: boolean;
   /** Frenzy — weapons cost no EN for the rest of this turn */
@@ -274,7 +275,7 @@ export interface UnitState {
   overkillDealt?: number;
 }
 
-export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer' | 'bodyguard' | 'opportunist' | 'warcry' | 'pointBlank' | 'bloodlust' | 'reaver' | 'bulwark' | 'duelist' | 'juggernaut' | 'giantSlayer' | 'loneWolf' | 'overwhelm' | 'outgunned' | 'tankbuster' | 'coordinator' | 'sentinel' | 'gambit' | 'warcaster' | 'underdog' | 'skirmisher' | 'engineer' | 'cohort' | 'entrench' | 'steadfast' | 'precision' | 'surge' | 'reflex' | 'outflank' | 'foeswarm' | 'cannonade' | 'gunsmith' | 'luminance' | 'swarmer' | 'phantomstep' | 'parry' | 'piercer' | 'heavycal' | 'anchor' | 'dreadnought' | 'resolute' | 'siegeadept' | 'cadence' | 'wingman';
+export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer' | 'bodyguard' | 'opportunist' | 'warcry' | 'pointBlank' | 'bloodlust' | 'reaver' | 'bulwark' | 'duelist' | 'juggernaut' | 'giantSlayer' | 'loneWolf' | 'overwhelm' | 'outgunned' | 'tankbuster' | 'coordinator' | 'sentinel' | 'gambit' | 'warcaster' | 'underdog' | 'skirmisher' | 'engineer' | 'cohort' | 'entrench' | 'steadfast' | 'precision' | 'surge' | 'reflex' | 'outflank' | 'foeswarm' | 'cannonade' | 'gunsmith' | 'luminance' | 'swarmer' | 'phantomstep' | 'parry' | 'piercer' | 'heavycal' | 'anchor' | 'dreadnought' | 'resolute' | 'siegeadept' | 'cadence' | 'wingman' | 'fullmag';
 export type PilotSkills = Record<PilotSkillId, number>;
 
 /** SRW-style enhancement parts equippable on a mecha. */
@@ -336,6 +337,7 @@ export interface PartDef {
   counterRange?: boolean;
   mapGuard?: boolean;
   killDmg?: boolean;
+  lowHpArmor?: boolean;
   /** command aura: allies within 2 tiles gain this much hit */
   auraHit?: number;
   /** sacrificial skin — the first fatal hit each battle leaves the frame at 1 HP */

@@ -108,6 +108,7 @@ export const PARTS: Record<string, PartDef> = {
   retaliationRig: { id: 'retaliationRig', name: 'Retaliation Rig', desc: 'Long-arm mount — your counter-attacks reach 1 tile further', price: 1900, counterRange: true },
   blastDeflector: { id: 'blastDeflector', name: 'Blast Deflector', desc: 'Chaff weave — damage from MAP/area weapons reduced by 30%', price: 1700, mapGuard: true },
   warTrophyCore: { id: 'warTrophyCore', name: 'War Trophy Core', desc: 'Predator furnace — +3% damage per kill this battle (up to 15%)', price: 2000, killDmg: true },
+  lastBastionPlate: { id: 'lastBastionPlate', name: 'Last Bastion Plate', desc: 'Reactive armor — +400 armor while hull is below 40%', price: 2100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -186,6 +187,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'siegeadept', name: 'Siege Adept', desc: '+5% damage per point against enemies dug into defensive terrain' },
   { id: 'cadence', name: 'Cadence', desc: '+4% damage per point per kill this battle (up to 3 kills)' },
   { id: 'wingman', name: 'Wingman', desc: '+5% damage per point while an ally is adjacent to the target' },
+  { id: 'fullmag', name: 'Full Mag', desc: '+6% damage per point when firing a weapon with a full clip' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1216,6 +1218,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_stockpile', name: 'STOCKPILE', desc: 'Hold 20 consumable items at once', rewardCr: 1800 },
   { id: 'h_triumvirate', name: 'TRIUMVIRATE', desc: 'Three pilots reach 25 career kills', rewardCr: 1600 },
   { id: 'h_grandmaster', name: 'GRANDMASTER', desc: 'Earn MASTERY ★ on 15 missions', rewardCr: 2500 },
+  { id: 'h_warpath', name: 'WARPATH', desc: 'Two hundred total career kills across the squad', rewardCr: 3000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1370,6 +1373,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.pilotProg ?? {}).filter((p) => (p.kills ?? 0) >= 25).length >= 3;
     case 'h_grandmaster':
       return (s.masteryDone ?? []).length >= 15;
+    case 'h_warpath':
+      return Object.values(s.pilotProg ?? {}).reduce((a, p) => a + (p.kills ?? 0), 0) >= 200;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

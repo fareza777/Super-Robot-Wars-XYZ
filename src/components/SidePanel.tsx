@@ -49,6 +49,7 @@ function buffNames(u: UnitState): string[] {
   if (u.dischordUntilEndOfEnemyPhase) names.push('DISCHORD');
   if (u.absolveUntilEndOfEnemyPhase) names.push('ABSOLUTION');
   if (u.judgeNext) names.push('JUDGEMENT');
+  if (u.bannerUntilEndOfEnemyPhase) names.push('BANNER');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');

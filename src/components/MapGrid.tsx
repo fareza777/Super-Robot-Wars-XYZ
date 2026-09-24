@@ -140,6 +140,9 @@ const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitSt
       <View style={[styles.hpBarBg, { width: chip * 0.9 }]}>
         <View style={[styles.hpBar, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.side === 'player' ? (u.hp / u.def.maxHp > 0.5 ? '#4dff7a' : u.hp / u.def.maxHp > 0.25 ? '#ffd34d' : '#ff8a5a') : (u.hp / u.def.maxHp > 0.5 ? '#ff5a5a' : u.hp / u.def.maxHp > 0.25 ? '#ff9d4d' : '#c92a2a') }]} />
       </View>
+      <View style={[styles.enBarBg, { width: chip * 0.9 }]}>
+        <View style={{ height: '100%', width: `${(u.en / u.def.maxEn) * 100}%`, backgroundColor: '#6fe0ff', borderRadius: 2 }} />
+      </View>
       <View style={[styles.lvTag, { borderColor: u.side === 'player' ? '#6db4ff' : '#ff6b6b' }]}>
         <Text style={styles.lvTxt}>Lv{u.level}</Text>
       </View>
@@ -428,6 +431,7 @@ const styles = StyleSheet.create({
   faceBadge: { position: 'absolute', bottom: 3, left: 2, width: '34%', aspectRatio: 1, borderRadius: 999, borderWidth: 1, borderColor: '#6db4ff', overflow: 'hidden', backgroundColor: '#0a0e1e' },
   hpBarBg: { position: 'absolute', bottom: 1, height: 5, backgroundColor: 'rgba(6,8,16,0.92)', borderRadius: 3, borderWidth: 1, borderColor: 'rgba(255,255,255,0.18)', overflow: 'hidden' },
   hpBar: { height: '100%', borderRadius: 2 },
+  enBarBg: { position: 'absolute', bottom: -4, height: 3, backgroundColor: 'rgba(6,8,16,0.85)', borderRadius: 2, overflow: 'hidden' },
   lvTag: {
     position: 'absolute',
     top: 1,
