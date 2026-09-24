@@ -212,6 +212,7 @@ export const PARTS: Record<string, PartDef> = {
   stormwallPlate: { id: 'stormwallPlate', name: 'Stormwall Plate', desc: 'Tempest laminate — +150 armor and +6 evade', price: 2300, armor: 150, evade: 6 },
   dualfeedCell: { id: 'dualfeedCell', name: 'Dualfeed Cell', desc: 'Split-loader array — ammo and EN weapons +10% damage', price: 2300, ammoDmg: 10, enDmg: 10 },
   gambitWeave: { id: 'gambitWeave', name: 'Gambit Weave', desc: 'Feint laminate — +8 evade and counter-attacks +15% damage', price: 2200, evade: 8, counterDmg: 15 },
+  radiantPlate: { id: 'radiantPlate', name: 'Radiant Plate', desc: 'Prism laminate — +100 armor and incoming beam damage reduced by 25%', price: 2300, armor: 100, beamGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -396,6 +397,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'lowburn', name: 'Lowburn', desc: '+5% damage per point while own EN is below 40%' },
   { id: 'bigbang', name: 'Big Bang', desc: '+5% damage per point when firing your strongest weapon' },
   { id: 'irongroove', name: 'Iron Groove', desc: '+5% damage per point while own hull is between 40-80%' },
+  { id: 'ashstalker', name: 'Ashstalker', desc: '+6% damage per point vs targets standing on hostile terrain (lava/void)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1532,6 +1534,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_warehouse', name: 'WAREHOUSE', desc: 'Hold 80 items in inventory at once', rewardCr: 100000 },
   { id: 'h_armorylord', name: 'ARMORY LORD', desc: 'Own 75 different parts', rewardCr: 100000 },
   { id: 'h_paradox', name: 'PARADOX', desc: 'Reach NG+12', rewardCr: 100000 },
+  { id: 'h_purgeking', name: 'PURGE KING', desc: '6000 total career kills across the squad', rewardCr: 100000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1899,6 +1902,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.partsOwned ?? []).length >= 75;
     case 'h_paradox':
       return s.ngPlus >= 12;
+    case 'h_purgeking':
+      return totalKills >= 6000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

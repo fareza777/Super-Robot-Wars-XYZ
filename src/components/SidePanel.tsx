@@ -109,6 +109,7 @@ function buffNames(u: UnitState): string[] {
   if (u.repulseUntilEndOfEnemyPhase) names.push('REPULSE VERSE');
   if (u.silencedUntilEndOfEnemyPhase) names.push('SILENCE VERSE');
   if (u.weakenUntilEndOfEnemyPhase) names.push('FEAR VERSE');
+  if (u.requiemUntilEndOfEnemyPhase) names.push('REQUIEM VERSE');
   if ((u.obscuredTurns ?? 0) > 0) names.push(`VEILBREAK VERSE ${u.obscuredTurns}`);
   if (u.palisadeUntilEndOfEnemyPhase) names.push('PALISADE VERSE');
   // magnumverse is instant — no chip
@@ -341,7 +342,7 @@ export function SidePanel() {
             )}
             {buffNames(unit).length > 0 && (
               <View style={styles.buffRow}>
-                {buffNames(unit).map((n) => (
+                {buffNames(unit).slice(0, 8).map((n) => (
                   <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','VEILBREAK VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
                 ))}
               </View>
@@ -691,7 +692,7 @@ export function SidePanel() {
             )}
             {buffNames(inspect).length > 0 && (
               <View style={styles.buffRow}>
-                {buffNames(inspect).map((n) => (
+                {buffNames(inspect).slice(0, 8).map((n) => (
                   <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','VEILBREAK VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
                 ))}
               </View>
