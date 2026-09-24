@@ -106,6 +106,7 @@ function buffNames(u: UnitState): string[] {
   if (u.maimNext) names.push('MAIM EDGE');
   if (u.repulseUntilEndOfEnemyPhase) names.push('REPULSE VERSE');
   if (u.silencedUntilEndOfEnemyPhase) names.push('SILENCE VERSE');
+  // magnumverse is instant — no chip
   if (u.rended) names.push('RENDED');
   if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
   if (u.crimsonUntilEndOfEnemyPhase) names.push('CRIMSON VERSE');
@@ -601,7 +602,7 @@ export function SidePanel() {
                   <Text style={[styles.rosterHp, u.hp / u.def.maxHp < 0.25 && { color: '#ff8a8a' }]}>{u.hp / u.def.maxHp < 0.25 ? '⚠' : ''}{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
                   {u.will !== 100 && <Text style={[styles.rosterHp, { color: u.will >= 130 ? '#ffd34d' : '#ff7a9d' }]}>W{u.will}</Text>}
                   <Text style={[styles.rosterHp, { color: u.sp < 30 ? '#ff9d7a' : '#c9a0ff' }]}>✦{u.sp}</Text>
-                  {buffNames(u).length > 0 && <Text style={[styles.rosterHp, { color: '#8af0ff' }]}>✧{buffNames(u).length}</Text>}
+                  {buffNames(u).length > 0 && <Text style={[styles.rosterHp, { color: buffNames(u).some((n) => n.includes('VERSE') || n.endsWith('EDGE')) ? '#c9a0ff' : '#8af0ff' }]}>✧{buffNames(u).length}</Text>}
                   {debuffCount(u) > 0 ? <Text style={[styles.rosterHp, { color: '#ff9d7a' }]}>⌛{debuffCount(u)}</Text> : null}
                   {u.crippled ? <Text style={[styles.rosterHp, { color: '#ff9d7a' }]}>⛓</Text> : null}
                   <Text style={[styles.rosterHp, { color: '#7fd0b0', width: 30 }]}>≫{Math.round(evadeOf(u, s.map))}</Text>

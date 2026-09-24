@@ -206,6 +206,7 @@ export const PARTS: Record<string, PartDef> = {
   furnaceRig: { id: 'furnaceRig', name: 'Furnace Rig', desc: 'Retribution lattice — melee attackers take 100 backlash and risk catching fire', price: 2200, shockCoil: true, blazeCoil: true },
   twinVeins: { id: 'twinVeins', name: 'Twin Veins', desc: 'Dual-cycle core — +12 EN regen and +4% hull regen per turn', price: 2100, enRegen: 12, hpRegen: 4 },
   prismAegis: { id: 'prismAegis', name: 'Prism Aegis', desc: 'Layered ward — +100 armor and a 600-point barrier', price: 2300, armor: 100, barrier: 600 },
+  swarmRack: { id: 'swarmRack', name: 'Swarm Rack', desc: 'Swarm launcher links — missile and funnel weapons +12% damage', price: 2200, missileDmg: 12, funnelDmg: 12 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -384,6 +385,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'opening', name: 'Opening', desc: '+6% damage per point vs targets above 70% hull' },
   { id: 'remembrance', name: 'Remembrance', desc: '+4% damage per point per fallen ally (max 3) — vengeance build' },
   { id: 'scrapper', name: 'Scrapper', desc: '+5% damage per point with weapons that cost no EN' },
+  { id: 'ballisteur', name: 'Ballisteur', desc: '+5% damage per point with ammo-fed weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1514,6 +1516,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_millennium', name: 'MILLENNIUM', desc: 'One pilot reaches 1000 career kills', rewardCr: 98000 },
   { id: 'h_butcherking', name: 'BUTCHER KING', desc: '5000 total career kills across the squad', rewardCr: 99000 },
   { id: 'h_vrapotheosis', name: 'VR APOTHEOSIS', desc: 'Score 50,000+ in the VR Simulator', rewardCr: 99000 },
+  { id: 'h_hoardlord', name: 'HOARDLORD', desc: 'Hold 500,000 credits at once', rewardCr: 100000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1869,6 +1872,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return totalKills >= 5000;
     case 'h_vrapotheosis':
       return (s.simBest ?? 0) >= 50000;
+    case 'h_hoardlord':
+      return s.credits >= 500000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
