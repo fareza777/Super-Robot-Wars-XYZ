@@ -79,6 +79,7 @@ export const PARTS: Record<string, PartDef> = {
   telescopic: { id: 'telescopic', name: 'Telescopic Array', desc: '+1 max range for non-melee weapons', price: 1700, range: 1 },
   linkedFire: { id: 'linkedFire', name: 'Linked Fire Control', desc: 'Coordinated-fire allies contribute +8% more damage each', price: 1800, coFire: 8 },
   mendField: { id: 'mendField', name: 'Mend Field Emitter', desc: 'Adjacent allies regenerate +3% HP per turn', price: 1900, auraHeal: 3 },
+  anchorPlate: { id: 'anchorPlate', name: 'Anchor Plating', desc: 'Frame cannot be knocked back', price: 1400, knockProof: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -128,6 +129,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'overwhelm', name: 'Overwhelm', desc: '+5% damage per point vs enemies that have not acted' },
   { id: 'outgunned', name: 'Outgunned', desc: '+6% damage per point while your side is outnumbered' },
   { id: 'tankbuster', name: 'Tankbuster', desc: '+6% damage per point vs frames with 1200+ armor' },
+  { id: 'coordinator', name: 'Coordinator', desc: '+5% damage per point while assisted by coordinated fire' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -166,7 +168,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1131,6 +1133,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_dragoon', name: 'HUNTER KILLER', desc: 'Destroy 3 Dragoon Cavalry frames', rewardCr: 700 },
   { id: 'h_scorcher', name: 'ASH MAKER', desc: 'Destroy 3 Scorcher frames', rewardCr: 700 },
   { id: 'h_chanter', name: 'SILENCE THE CHOIR', desc: 'Destroy 3 Void Chanter frames', rewardCr: 800 },
+  { id: 'h_elitesq', name: 'ELITE SQUADRON', desc: 'Six pilots reach 15 career kills each', rewardCr: 1200 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1231,6 +1234,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.killsByDef?.scorcher ?? 0) >= 3;
     case 'h_chanter':
       return (s.killsByDef?.voidChanter ?? 0) >= 3;
+    case 'h_elitesq':
+      return kills.filter((p) => (p.kills ?? 0) >= 15).length >= 6;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

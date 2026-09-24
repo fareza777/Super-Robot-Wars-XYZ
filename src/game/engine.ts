@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -209,6 +209,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (units) {
     const assists = units.filter((u) => u.alive && u.side === att.side && u.uid !== att.uid && u.uid !== def.uid && !u.acted && dist(u.pos, def.pos) <= 2).length;
     dmg = Math.round(dmg * (1 + (0.12 + partBonus(att, 'coFire') / 100) * Math.min(2, assists)));
+    if ((att.skills?.coordinator ?? 0) > 0 && assists > 0) dmg = Math.round(dmg * (1 + 0.05 * att.skills.coordinator));
   }
   if (w.kind === 'melee') dmg = Math.round(dmg * (1 + partBonus(att, 'meleeDmg') / 100));
   if ((att.kills ?? 0) >= 3) dmg = Math.round(dmg * (1 + 0.05 * (att.skills?.bloodlust ?? 0)));
@@ -452,6 +453,12 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   if (result.hit) {
     const hpBefore = def.hp;
     def.hp = Math.max(0, def.hp - result.damage);
+    // Execution spirit — a wounded grunt below 20% HP is finished outright
+    if (result.hit && att.executeNext && !result.destroyed && def.hp > 0 && def.hp <= def.def.maxHp * 0.2 && def.side === 'enemy' && !def.def.boss && !def.elite) {
+      def.hp = 0;
+      result.destroyed = true;
+      result.execute = true;
+    }
     att.dmgDealt = (att.dmgDealt ?? 0) + result.damage;
     // Miracle spirit — refuse a fatal hit, stand at 10 HP (consumed)
     if (result.destroyed && def.miracleArmed) {
@@ -500,7 +507,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   if (result.hit && def.alive && w.breaker && !result.graze) def.sundered = true;
   if (result.hit && def.alive && w.willDrain) def.will = Math.max(100, def.will - 5);
   // bash knockback — a landed hit hurls the survivor one tile away from the strike
-  if (result.hit && def.alive && !result.destroyed && w.knockback) {
+  if (result.hit && def.alive && !result.destroyed && w.knockback && partBonus(def, 'knockProof') === 0) {
     const kx = Math.sign(def.pos.x - att.pos.x);
     const ky = Math.sign(def.pos.y - att.pos.y);
     const opts =
@@ -607,6 +614,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   att.breachNextAttack = false;
   att.valorForNextAttack = false;
   att.empowerForNextAttack = false;
+  att.executeNext = false;
   att.gutsForNextAttack = false;
   att.snipeForNextAttack = false;
   att.soulForNextAttack = false;
@@ -654,6 +662,7 @@ export function applyMapAttack(state: GameState, attackerUid: string, targetTile
   att.breachNextAttack = false;
   att.valorForNextAttack = false;
   att.empowerForNextAttack = false;
+  att.executeNext = false;
   att.gutsForNextAttack = false;
 
   let hits = 0;
@@ -706,6 +715,7 @@ export function applyAllAttack(state: GameState, attackerUid: string, weaponId: 
   att.breachNextAttack = false;
   att.valorForNextAttack = false;
   att.empowerForNextAttack = false;
+  att.executeNext = false;
   att.gutsForNextAttack = false;
   att.soulForNextAttack = false;
   att.gutsForNextAttack = false;
@@ -878,6 +888,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break; // aegis prayer — the warded ally is chosen by the store pass
     case 'warsong':
       break; // anthem — the store flags every ally
+    case 'execute':
+      u.executeNext = true;
+      break;
     // 'rouse', 'disrupt' and 'trust' affect neighbouring units — applied in store.castSpirit
   }
 }

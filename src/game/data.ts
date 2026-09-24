@@ -53,6 +53,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   marksman: { id: 'marksman', name: 'Deadeye Call', cost: 45, desc: 'Squad fire control — every ally gains +15 crit until end of enemy phase' },
   ward: { id: 'ward', name: 'Ward', cost: 45, desc: 'Aegis prayer — the weakest ally within 3 tiles survives their next fatal hit at 1 HP' },
   warsong: { id: 'warsong', name: 'Warsong', cost: 55, desc: 'Anthem of the Ark — every ally gains +10% damage until end of enemy phase' },
+  execute: { id: 'execute', name: 'Execution', cost: 50, desc: 'Coup de grace — your next hit destroys any non-boss, non-elite foe at 20% HP or less' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

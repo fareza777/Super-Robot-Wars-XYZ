@@ -305,6 +305,7 @@ export function BattleScene() {
       {!battle.needsReaction && stage === 3 && battle.result.hit && battle.result.graze && !battle.result.destroyed && <Banner text="≈ GRAZE" color="#9fd8ff" pos="high" />}
       {!battle.needsReaction && stage === 5 && !!battle.result.counter?.hit && battle.result.counter.crit && !battle.result.counter.destroyed && <Banner text="⚡ CRITICAL ⚡" color="#ff8a5c" pos="high" />}
       {!battle.needsReaction && stage === 4 && battle.result.counterCut && <Banner text="⚔ COUNTER-CUT" color="#ff5a4a" pos="high" />}
+      {!battle.needsReaction && stage >= 3 && battle.result.execute && <Banner text="☠ EXECUTION" color="#ff5a5a" pos="high" />}
       {/* killing blow on a boss — the dramatic finish */}
       {!battle.needsReaction && stage >= 3 && battle.result.destroyed && def.def.boss && <Banner text="★ FINISH ★" color="#ffd34d" />}
 
@@ -634,7 +635,7 @@ function Banner({ text, color, pos }: { text: string; color: string; pos?: 'mid'
     Animated.spring(slide, { toValue: 0, useNativeDriver: true, friction: 7 }).start();
   }, []);
   return (
-    <Animated.View style={[styles.banner, pos === 'high' && { top: '24%' }, { borderColor: color, transform: [{ translateX: slide.interpolate({ inputRange: [-1, 0], outputRange: [-520, 0] }) }] }]}>
+    <Animated.View style={[styles.banner, pos === 'high' && { top: '24%' }, { borderColor: color, shadowColor: color, shadowOpacity: 0.55, shadowRadius: 14, elevation: 10, transform: [{ translateX: slide.interpolate({ inputRange: [-1, 0], outputRange: [-520, 0] }) }] }]}>
       <Text style={[styles.bannerTxt, { color }]}>{text}</Text>
     </Animated.View>
   );
