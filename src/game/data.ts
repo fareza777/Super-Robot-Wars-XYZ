@@ -176,6 +176,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   magnumverse: { id: 'magnumverse', name: 'Magnum Verse', cost: 45, desc: 'Resupply hymn — allies within 3 tiles instantly recover 1 ammo on every ammo weapon' },
   breaedge: { id: 'breaedge', name: 'Breach Edge', cost: 45, desc: 'Hull-cracking strike — next hit +15% damage and permanently sunders the target (-15 evade, -300 armor)' },
   palisadeverse: { id: 'palisadeverse', name: 'Palisade Verse', cost: 50, desc: 'Bulwark hymn — allies within 3 tiles take 10% less damage until end of enemy phase' },
+  hollowedge: { id: 'hollowedge', name: 'Hollow Edge', cost: 45, desc: 'Spirit-breaking strike — next hit +10% damage and drains 20 Will from the target' },
   ruinverse: { id: 'ruinverse', name: 'Ruin Verse', cost: 50, desc: 'Entropy wave — enemies within 3 tiles suffer armor break and decay 8% hull per turn for 2 turns' },
   anthemverse: { id: 'anthemverse', name: 'Anthem Verse', cost: 55, desc: 'Restoration hymn — allies within 3 tiles instantly recover 15% hull' },
   doomedge: { id: 'doomedge', name: 'Doom Edge', cost: 45, desc: 'Entropy strike — next hit deals +10% damage and dooms the target to decay 8% hull per turn for 3 turns' },

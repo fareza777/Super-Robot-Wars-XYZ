@@ -105,6 +105,7 @@ function buffNames(u: UnitState): string[] {
   if ((u.mendTurns ?? 0) > 0) names.push(`MEND VERSE ${u.mendTurns}`);
   if (u.maimNext) names.push('MAIM EDGE');
   if (u.breachNext) names.push('BREACH EDGE');
+  if (u.hollowNext) names.push('HOLLOW EDGE');
   if (u.repulseUntilEndOfEnemyPhase) names.push('REPULSE VERSE');
   if (u.silencedUntilEndOfEnemyPhase) names.push('SILENCE VERSE');
   if (u.palisadeUntilEndOfEnemyPhase) names.push('PALISADE VERSE');
@@ -667,7 +668,7 @@ export function SidePanel() {
             <Bar label="WILL" val={inspect.will} max={150} color="#ff7a9d" />
             <Bar label="SP" val={inspect.sp} max={inspect.def.pilot.maxSp} color="#c9a0ff" />
             <View style={styles.statRow}>
-              <Text style={styles.statTxt}>🛡 ARM {armorOf(inspect, s.map)}</Text>
+              <Text style={styles.statTxt}>🛡 ARM {armorOf(inspect, s.map)}{Math.max(inspect.def.barrier ?? 0, partBonus(inspect, 'barrier')) > 0 ? ` · ⛨${Math.max(inspect.def.barrier ?? 0, partBonus(inspect, 'barrier'))}` : ''}</Text>
               <Text style={styles.statTxt}>≫ EVA {Math.round(evadeOf(inspect, s.map))}</Text>
               <Text style={styles.statTxt}>▸ MOV {moveRangeOf(inspect)} {inspect.def.moveType === 'air' ? '✈' : '⬢'}</Text>
             </View>
