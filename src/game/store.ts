@@ -1063,6 +1063,14 @@ export const useGame = create<Store>((set, get) => ({
           }
           return x;
         }
+        case 'hymnAll': {
+          if (x.side === 'player' && x.alive) {
+            const c2 = { ...x, hymnUntilEndOfEnemyPhase: true };
+            if (x.uid === uid) { c2.moved = true; c2.acted = true; }
+            return c2;
+          }
+          return x;
+        }
         case 'healArea': {
           if (x.side === 'player' && x.alive && Math.abs(x.pos.x - u.pos.x) + Math.abs(x.pos.y - u.pos.y) <= 2) {
             const c2 = { ...x, hp: Math.min(x.def.maxHp + 8000, x.hp + Math.round(x.def.maxHp * item.amount / 100)) };
@@ -2015,17 +2023,18 @@ export const useGame = create<Store>((set, get) => ({
       return c;
     });
     // area spirits — rouse/disrupt affect neighbours within 2 tiles
-    if (sp === 'rouse' || sp === 'disrupt' || sp === 'sunder' || sp === 'provoke' || sp === 'expose') {
+    if (sp === 'rouse' || sp === 'disrupt' || sp === 'sunder' || sp === 'provoke' || sp === 'expose' || sp === 'intimidate') {
       const src = units.find((x) => x.uid === uid)!;
       for (const u2 of units) {
         if (u2.uid === uid || !u2.alive) continue;
         const d = Math.abs(u2.pos.x - src.pos.x) + Math.abs(u2.pos.y - src.pos.y);
-        if (d > (sp === 'sunder' || sp === 'provoke' || sp === 'expose' ? 3 : 2)) continue;
+        if (d > (sp === 'sunder' || sp === 'provoke' || sp === 'expose' || sp === 'intimidate' ? 3 : 2)) continue;
         if (sp === 'rouse' && u2.side === src.side) u2.will = Math.min(150, u2.will + 10);
         if (sp === 'disrupt' && u2.side !== src.side) u2.will = Math.max(100, u2.will - 10);
         if (sp === 'sunder' && u2.side !== src.side) u2.sundered = true;
         if (sp === 'expose' && u2.side === 'enemy') u2.exposed = true;
         if (sp === 'provoke' && u2.side !== src.side) u2.provokedTo = src.uid;
+        if (sp === 'intimidate' && u2.side !== src.side) u2.statuses = [...(u2.statuses ?? []).filter((f) => f.id !== 'supp'), { id: 'supp', turns: 2 }];
       }
     }
     // purge — cleanse self and adjacent allies of cripple + status debuffs

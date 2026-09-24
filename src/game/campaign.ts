@@ -9,7 +9,7 @@ export interface ItemDef {
   name: string;
   desc: string;
   price: number;
-  apply: 'hp' | 'en' | 'ammo' | 'sp' | 'valor' | 'willAll' | 'healArea' | 'purge' | 'barrage' | 'will' | 'mine' | 'smoke';
+  apply: 'hp' | 'en' | 'ammo' | 'sp' | 'valor' | 'willAll' | 'healArea' | 'purge' | 'barrage' | 'will' | 'mine' | 'smoke' | 'hymnAll';
   amount: number;
 }
 
@@ -22,6 +22,7 @@ export const ITEMS: Record<string, ItemDef> = {
   valorPill: { id: 'valorPill', name: 'Valor Pill', desc: 'Next attack damage x1.5', price: 600, apply: 'valor', amount: 0 },
   rallyBanner: { id: 'rallyBanner', name: 'Rally Banner', desc: '+10 Will to every ally', price: 900, apply: 'willAll', amount: 10 },
   repairDrone: { id: 'repairDrone', name: 'Repair Drone', desc: 'Heal 30% HP — unit + allies within 2 tiles', price: 750, apply: 'healArea', amount: 30 },
+  warDrums: { id: 'warDrums', name: 'War Drums', desc: 'Squad anthem — every ally +15 hit & +15 evade until end of enemy phase', price: 850, apply: 'hymnAll', amount: 15 },
   overclock: { id: 'overclock', name: 'Core Overclock', desc: '+15 Will to this unit', price: 550, apply: 'will', amount: 15 },
   lmCharge: { id: 'lmCharge', name: 'LM-Charge', desc: 'Plant a mine on a clear tile within 2 — heavy damage to anything that steps on it', price: 700, apply: 'mine', amount: 0 },
   ventKit: { id: 'ventKit', name: 'Emergency Vent', desc: 'Purge cripple and all status debuffs', price: 700, apply: 'purge', amount: 0 },
@@ -1106,6 +1107,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_simace', name: 'SIMULATOR ACE', desc: 'Score 3000+ in the VR Simulator', rewardCr: 1000 },
   { id: 'h_magma', name: 'MAGMA RUNNER', desc: 'Win a mission on a lava field', rewardCr: 700 },
   { id: 'h_mogul', name: 'GRAND TREASURY', desc: 'Hold 50,000 credits at once', rewardCr: 2500 },
+  { id: 'h_simvet', name: 'SIM VETERAN', desc: 'Score 6000+ in the VR Simulator', rewardCr: 1500 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1188,6 +1190,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.missionCh?.theme === 'lava';
     case 'h_mogul':
       return s.credits >= 50000;
+    case 'h_simvet':
+      return (s.simBest ?? 0) >= 6000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

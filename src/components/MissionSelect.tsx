@@ -42,7 +42,7 @@ export function MissionSelect() {
               </View>
             </Pressable>
           )}
-          <Pressable style={[styles.mainCard, done && { opacity: 0.55 }]} onPress={done ? undefined : s.gotoBriefing} disabled={done}>
+          <Pressable style={({ pressed }) => [styles.mainCard, done && { opacity: 0.55 }, pressed && !done && { opacity: 0.7, transform: [{ scale: 0.985 }] }]} onPress={done ? undefined : s.gotoBriefing} disabled={done}>
             <LinearGradient colors={['rgba(20,40,24,0.95)', 'rgba(8,14,24,0.95)']} style={StyleSheet.absoluteFill} />
             <Text style={styles.mainCh}>{done ? 'CAMPAIGN COMPLETE' : `CHAPTER ${ch.id}`}</Text>
             <Text style={styles.mainName}>{ch.name.toUpperCase()}</Text>
@@ -61,7 +61,7 @@ export function MissionSelect() {
           {(() => {
             const locked = s.chapter < 5;
             return (
-              <Pressable style={[styles.simCard, locked && { opacity: 0.45 }]} onPress={locked ? undefined : s.startSim} disabled={locked}>
+              <Pressable style={({ pressed }) => [styles.simCard, locked && { opacity: 0.45 }, pressed && !locked && { opacity: 0.7, transform: [{ scale: 0.985 }] }]} onPress={locked ? undefined : s.startSim} disabled={locked}>
                 <LinearGradient colors={['rgba(28,14,48,0.95)', 'rgba(10,10,30,0.95)']} style={StyleSheet.absoluteFill} />
                 <View style={styles.sideTop}>
                   <Text style={styles.simName}>VR SIMULATOR</Text>
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   cols: { position: 'absolute', top: 56, left: 18, right: 18, bottom: 30, flexDirection: 'row', gap: 14 },
   col: { flex: 1 },
   colTitle: { color: '#8fa0c8', fontWeight: '900', fontSize: 11, letterSpacing: 2.5, marginBottom: 8 },
-  mainCard: { borderRadius: 12, borderWidth: 2, borderColor: '#4dff7a', overflow: 'hidden', padding: 16, minHeight: 190 },
+  mainCard: { borderRadius: 14, borderWidth: 2, borderColor: '#4dff7a', overflow: 'hidden', padding: 16, minHeight: 190, shadowColor: '#4dff7a', shadowOpacity: 0.22, shadowRadius: 12, shadowOffset: { width: 0, height: 0 }, elevation: 6 },
   mainCh: { color: '#4dff7a', fontWeight: '900', fontSize: 12, letterSpacing: 2.5 },
   mainName: { color: '#fff', fontWeight: '900', fontSize: 19, letterSpacing: 1, marginTop: 6 },
   mainSub: { color: '#b8c8e8', fontSize: 11.5, marginTop: 4 },
