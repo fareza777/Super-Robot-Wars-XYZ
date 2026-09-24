@@ -51,6 +51,7 @@ function buffNames(u: UnitState): string[] {
   if (u.judgeNext) names.push('JUDGEMENT');
   if (u.bannerUntilEndOfEnemyPhase) names.push('BANNER');
   if (u.goreNext) names.push('GORELUST');
+  if (u.rampageNext) names.push('RAMPAGE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
@@ -297,7 +298,7 @@ export function SidePanel() {
               return (
                 <Btn
                   key={w.id}
-                  label={`⚔ ${w.name}${reason ? ` · ${reason}` : ''}`}
+                  label={`${w.kind === 'gun' ? '⌖' : w.kind === 'beam' ? '✦' : w.kind === 'missile' ? '▲' : w.kind === 'funnel' ? '◈' : '⚔'} ${w.name}${reason ? ` · ${reason}` : ''}`}
                   sub={stat}
                   accent={hitsAny && !disabled ? '#ff6b6b' : undefined}
                   disabled={disabled}

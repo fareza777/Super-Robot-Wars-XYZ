@@ -87,6 +87,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   armorrot: { id: 'armorrot', name: 'Armor Rot', cost: 50, desc: 'Corrosion cascade — enemies within 3 tiles are sundered (armor crumbling, -15 evade) for the rest of the battle' },
   winterverse: { id: 'winterverse', name: 'Winter Verse', cost: 45, desc: 'Frost choir — enemies within 3 tiles are slowed (-3 move, 2 turns)' },
   litany: { id: 'litany', name: 'Litany', cost: 55, desc: 'Mending chorus — allies within 3 tiles recover 15% hull and shed all debuffs' },
+  rampage: { id: 'rampage', name: 'Rampage', cost: 45, desc: 'Killing momentum — your next hit deals +8% damage per kill this battle (cap +40%)' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
@@ -168,7 +169,7 @@ export const WEAPONS = {
 const P = (p: PilotDef) => p;
 
 export const PILOTS = {
-  ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul', 'frenzy', 'soulburn', 'pyre', 'skyfall', 'blade', 'judge'], faceColor: '#ffb347', trait: 'ace_instinct' }),
+  ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul', 'frenzy', 'soulburn', 'pyre', 'skyfall', 'blade', 'judge', 'rampage'], faceColor: '#ffb347', trait: 'ace_instinct' }),
   mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse', 'fortune', 'trust', 'emp', 'deadshot', 'scan', 'marksman', 'shatter', 'tracer', 'veil', 'stalker', 'trueshot', 'armorrot'], faceColor: '#7ee7ff', trait: 'deadeye' }),
   gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor', 'sunder', 'provoke', 'phalanx', 'breach', 'charity', 'intimidate', 'warsong', 'fluster', 'overrun', 'avenger', 'suppress', 'banner'], faceColor: '#ff9d9d', trait: 'siege_breaker' }),
   orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless', 'lucky', 'mercy', 'purge', 'cheer', 'expose', 'decoy', 'hymn', 'sanctuary', 'empower', 'ward', 'relay', 'inspire', 'warhorn', 'safeguard', 'absolution', 'litany'], faceColor: '#b6ff9d', trait: 'field_medic' }),
