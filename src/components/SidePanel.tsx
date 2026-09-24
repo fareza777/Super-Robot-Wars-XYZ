@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS } from '../game/campaign';
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { bondMods } from '../game/bonds';
-import { bestCounterWeapon, critChance, damageOf, dist, findSupport, formationBonus, hasPincer, hitChance, key, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
+import { bestCounterWeapon, critChance, damageOf, dist, enCostOf, findSupport, formationBonus, hasPincer, hitChance, key, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, fogLit, useGame } from '../game/store';
 import { SpiritId, UnitState } from '../game/types';
 
@@ -307,7 +307,7 @@ export function SidePanel() {
                                 ? 'PARTNER ACTED'
                                 : 'PARTNER NOT ADJACENT'
                             : null;
-              const stat = `POW ${w.power} · R${w.rangeMin}-${w.rangeMax}${w.mapRange != null ? ` · AREA ${w.mapRange}` : ''}${w.willReq ? ` · W${w.willReq}` : ''}${w.ammo != null ? ` · ×${ammoLeft}` : ` · EN ${w.enCost}`}${w.critMod ? ` · CRIT+${w.critMod}` : ''}${w.pierce ? ' · ◆PIERCE' : ''}${w.drain ? ' · ✚DRAIN' : ''}${w.antiAir ? ' · ☄AA' : ''}${w.sniper ? ' · ⌖SNIPER' : ''}{w.breaker ? ' · ⛏BREAK' : ''}${w.chain ? ' · ⚡CHAIN' : ''}${w.knockback ? ' \u00B7 \U0001F4A5PUSH' : ''}`;
+              const stat = `POW ${w.power} · R${w.rangeMin}-${w.rangeMax}${w.mapRange != null ? ` · AREA ${w.mapRange}` : ''}${w.willReq ? ` · W${w.willReq}` : ''}${w.ammo != null ? ` · ×${ammoLeft}` : ` · EN ${enCostOf(unit, w)}`}${w.critMod ? ` · CRIT+${w.critMod}` : ''}${w.pierce ? ' · ◆PIERCE' : ''}${w.drain ? ' · ✚DRAIN' : ''}${w.antiAir ? ' · ☄AA' : ''}${w.sniper ? ' · ⌖SNIPER' : ''}{w.breaker ? ' · ⛏BREAK' : ''}${w.chain ? ' · ⚡CHAIN' : ''}${w.knockback ? ' \u00B7 \U0001F4A5PUSH' : ''}`;
               return (
                 <Btn
                   key={w.id}

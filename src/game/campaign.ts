@@ -128,6 +128,7 @@ export const PARTS: Record<string, PartDef> = {
   lastRounds: { id: 'lastRounds', name: 'Last Rounds', desc: 'Desperate load — ammo weapons deal +15% damage while at 2 ammo or less', price: 1600, lastAmmo: true },
   coreTap: { id: 'coreTap', name: 'Core Tap', desc: 'Pilot conduit — spirit costs reduced 10%', price: 1800, spSaver: true },
   boneCollector: { id: 'boneCollector', name: 'Bone Collector', desc: 'Scavenged clips — kills restock +1 ammo to the weapon used', price: 1700, ammoScalp: true },
+  swarmAmp: { id: 'swarmAmp', name: 'Swarm Amp', desc: 'Cluster amplifier — +10% damage vs a foe with 2+ allies adjacent', price: 1600, clusterAmp: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -226,6 +227,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'coolloop', name: 'Coolant Loop', desc: 'Weapon EN cost −6% per point (cap −30%)' },
   { id: 'gritguard', name: 'Grit Guard', desc: '−8% incoming damage per point while hull is below 50%' },
   { id: 'savant', name: 'Savant', desc: '+1 SP regen per point each turn' },
+  { id: 'shieldpierce', name: 'Shield Pierce', desc: '+7% damage per point vs frames carrying an I-Field or barrier' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1276,6 +1278,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_annihilation', name: 'ANNIHILATION', desc: 'Destroy 25 frames in a single battle', rewardCr: 2800 },
   { id: 'h_apexstrike', name: 'APEX STRIKE', desc: 'Land a single hit of 30,000+ damage', rewardCr: 3000 },
   { id: 'h_cartographer', name: 'CARTOGRAPHER', desc: 'Clear 15 side missions', rewardCr: 2600 },
+  { id: 'h_marksman', name: 'ROYAL MARKSMAN', desc: 'Earn S rank on 22 missions', rewardCr: 3000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1471,6 +1474,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.maxHitEver ?? 0) >= 30000;
     case 'h_cartographer':
       return (s.sideCleared ?? []).length >= 15;
+    case 'h_marksman':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 22;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
