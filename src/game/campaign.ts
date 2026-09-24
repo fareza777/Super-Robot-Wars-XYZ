@@ -137,6 +137,7 @@ export const PARTS: Record<string, PartDef> = {
   eagleEye: { id: 'eagleEye', name: 'Eagle Eye', desc: 'Recon optics — fog of war reveals +2 tiles further', price: 1500, eagleEye: true },
   haloScope: { id: 'haloScope', name: 'Halo Scope', desc: 'Ring reticle — +15 hit with weapons of range 6+', price: 1400, haloScope: true },
   apexRig: { id: 'apexRig', name: 'Apex Rig', desc: 'Resonant chamber — +10% damage for Will-requiring weapons', price: 1500, apexRig: true },
+  reactorShield: { id: 'reactorShield', name: 'Reactor Shield', desc: 'Power sink — +400 armor while EN is above 50%', price: 1700, reactorShield: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -244,6 +245,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'archer', name: 'Archer', desc: '+4% damage per point per tile of range beyond 3 (max 3 tiles)' },
   { id: 'stormeye', name: 'Stormeye', desc: '+5% damage per point while your Will exceeds the target' },
   { id: 'acehunter', name: 'Ace Hunter', desc: '+6% damage per point vs foes with 3+ battle kills' },
+  { id: 'ravager', name: 'Ravager', desc: '+5% damage per point vs targets on open ground (no terrain armor)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1303,6 +1305,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_frontiermaster', name: 'FRONTIER MASTER', desc: 'Clear 20 side missions', rewardCr: 3400 },
   { id: 'h_masterclass', name: 'MASTER CLASS', desc: 'Earn MASTERY ★ on 20 missions', rewardCr: 3600 },
   { id: 'h_apocalypse', name: 'APOCALYPSE', desc: 'Land a single hit of 50000+ damage', rewardCr: 6000 },
+  { id: 'h_strider', name: 'ETERNAL STRIDER', desc: 'Reach NG+4', rewardCr: 3500 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1516,6 +1519,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.masteryDone ?? []).length >= 20;
     case 'h_apocalypse':
       return (s.maxHitEver ?? 0) >= 50000;
+    case 'h_strider':
+      return (s.ngPlus ?? 0) >= 4;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
