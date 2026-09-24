@@ -91,6 +91,7 @@ function buffNames(u: UnitState): string[] {
   if (u.rampartUntilEndOfEnemyPhase) names.push('RAMPART VERSE');
   if (u.ravageNext) names.push('RAVAGE VERSE');
   if (u.savageNext) names.push('SAVAGE EDGE');
+  if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
   if (u.ghostNext) names.push('GHOST VERSE');
   if (u.cursedUntilEndOfEnemyPhase) names.push('CURSE VERSE');
   if ((u.sirenTurns ?? 0) > 0) names.push(`SIREN VERSE ${u.sirenTurns}`);
@@ -582,7 +583,7 @@ export function SidePanel() {
                       <View style={[styles.rosterBarTrack, { backgroundColor: '#2a1216' }]}>
                         <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.hp / u.def.maxHp > 0.5 ? '#ff5a5a' : u.hp / u.def.maxHp > 0.25 ? '#ff9d4d' : '#c92a2a' }]} />
                       </View>
-                      <Text style={styles.rosterHp}>{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
+                      <Text style={styles.rosterHp}>{u.hp / u.def.maxHp < 0.25 ? '⚠' : ''}{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
                     </View>
                   ),
                 )}

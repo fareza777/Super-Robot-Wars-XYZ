@@ -162,6 +162,7 @@ export const PARTS: Record<string, PartDef> = {
   gloomCoil: { id: 'gloomCoil', name: 'Gloom Coil', desc: 'Curse lattice — attackers that hit this frame risk 25% getting marked', price: 1700, gloomCoil: true },
   overtureCell: { id: 'overtureCell', name: 'Overture Cell', desc: 'Pre-battle anthem — +20 Will at the start of each battle', price: 1500, willStart: 2 },
   deadeyeLens: { id: 'deadeyeLens', name: 'Deadeye Lens', desc: 'Precision optics — +10 hit', price: 1600, accBoost: 10 },
+  siegeOptics: { id: 'siegeOptics', name: 'Siege Optics', desc: 'Long-focus array — +10% damage vs targets 4+ tiles away', price: 1600, rangeDmg: 10 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -294,6 +295,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'soulcut', name: 'Soulcut', desc: '+5% damage per point vs slowed or crippled targets' },
   { id: 'wardancer', name: 'Wardancer', desc: '+5% damage per point on turns this unit moved' },
   { id: 'butcher', name: 'Butcher', desc: '+6% damage per point vs targets at full hull' },
+  { id: 'punisher', name: 'Punisher', desc: '+6% damage per point vs targets that already acted' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1378,6 +1380,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_sovereign', name: 'SOVEREIGN', desc: 'Earn MASTERY star on 35 missions', rewardCr: 12000 },
   { id: 'h_deus', name: 'DEUS', desc: 'Reach NG+5 or beyond', rewardCr: 13000 },
   { id: 'h_eternalflame', name: 'ETERNAL FLAME', desc: 'Land a single blow of 100,000+ damage', rewardCr: 14000 },
+  { id: 'h_conqueror', name: 'CONQUEROR', desc: 'Earn S rank on 40 missions', rewardCr: 15000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1641,6 +1644,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.ngPlus ?? 0) >= 5;
     case 'h_eternalflame':
       return (s.maxHitEver ?? 0) >= 100000;
+    case 'h_conqueror':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 40;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
