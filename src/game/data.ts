@@ -79,6 +79,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   suppress: { id: 'suppress', name: 'Suppress Fire', cost: 45, desc: 'Covering barrage — enemies within 3 tiles deal -10% damage until end of enemy phase' },
   carnage: { id: 'carnage', name: 'Carnage', cost: 50, desc: 'Shockwave strike — your next hit splashes 30% damage to enemies adjacent to the target' },
   trueshot: { id: 'trueshot', name: 'True Shot', cost: 40, desc: 'Zero-deflection round — your next hit ignores Defend and Cover reductions' },
+  dischord: { id: 'dischord', name: 'Dischord', cost: 45, desc: 'Cacophony wave — enemies within 3 tiles lose 15 evade until the end of the enemy phase' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

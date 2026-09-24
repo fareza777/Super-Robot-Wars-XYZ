@@ -114,6 +114,15 @@ export function BriefingScreen() {
           </View>
           <BriefingMap ch={ch} />
         </View>
+        <Text style={{ color: '#ff9d9d', fontSize: 9, fontWeight: '700', letterSpacing: 0.5, marginTop: 4 }}>
+          {(() => {
+            const sp = genMap(ch).enemySpawns;
+            const by: Record<string, number> = {};
+            for (const e of sp) by[e.defId] = (by[e.defId] ?? 0) + 1;
+            const names = Object.entries(by).sort((x, y) => y[1] - x[1]).slice(0, 5).map(([id, n]) => `${ALL_UNITS[id]?.name ?? id} ×${n}`);
+            return `⚠ HOSTILES ${sp.length} — ${names.join(' · ')}`;
+          })()}
+        </Text>
         <Text style={styles.deployLbl}>DEPLOY SQUAD — tap to toggle ({deploySel.length}/{roster.length})</Text>
         <View style={styles.squadRow}>
           {roster.map((id) => {
