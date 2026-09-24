@@ -154,6 +154,7 @@ export const PARTS: Record<string, PartDef> = {
   blazePlate: { id: 'blazePlate', name: 'Blaze Plate', desc: 'Fireproof laminate — this frame takes no burn damage', price: 1600, blazePlate: true },
   frostPlate: { id: 'frostPlate', name: 'Frost Plate', desc: 'Thermal lattice — this frame cannot be slowed', price: 1600, frostPlate: true },
   voidPlate: { id: 'voidPlate', name: 'Void Plate', desc: 'Sensor dark — this frame cannot be painted or exposed', price: 1600, voidPlate: true },
+  witchPlate: { id: 'witchPlate', name: 'Witch Plate', desc: 'Hex ward — this frame cannot be suppressed', price: 1700, witchPlate: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -278,6 +279,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'harvester', name: 'Harvester', desc: '+4% damage per point per 10% hull the target has lost (cap +40%)' },
   { id: 'gridshock', name: 'Gridshock', desc: '+5% damage per point with energy (EN-cost) weapons' },
   { id: 'shockjock', name: 'Shockjock', desc: '+5% damage per point with status weapons' },
+  { id: 'biggame', name: 'Big Game', desc: '+6% damage per point vs frames with over 12000 max HP' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1354,6 +1356,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_duelking', name: 'DUEL KING', desc: 'One pilot reaches 150 career kills', rewardCr: 8000 },
   { id: 'h_immortal', name: 'IMMORTAL', desc: 'Win a battle lasting 30+ turns', rewardCr: 8500 },
   { id: 'h_colossus', name: 'COLOSSUS', desc: 'Land a single hit for 75000+ damage', rewardCr: 9000 },
+  { id: 'h_demigod', name: 'DEMIGOD', desc: 'Earn S rank on 35 missions', rewardCr: 10000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1601,6 +1604,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.turn ?? 0) >= 30;
     case 'h_colossus':
       return (s.maxHitEver ?? 0) >= 75000;
+    case 'h_demigod':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 35;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

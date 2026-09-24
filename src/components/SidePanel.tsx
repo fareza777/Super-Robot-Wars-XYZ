@@ -88,6 +88,7 @@ function buffNames(u: UnitState): string[] {
   if (u.furyverseNext) names.push('FURY VERSE');
   if (u.tracerAllyUntilEndOfEnemyPhase) names.push('TRACER VERSE');
   if ((u.sirenTurns ?? 0) > 0) names.push(`SIREN VERSE ${u.sirenTurns}`);
+  if ((u.clarionTurns ?? 0) > 0) names.push(`CLARION VERSE ${u.clarionTurns}`);
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
@@ -159,7 +160,7 @@ export function SidePanel() {
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Pressable onPress={() => setShowRoster((v) => !v)} style={({ pressed }) => [{ flex: 1 }, pressed && { opacity: 0.7 }]}>
           <Text style={styles.counts}>
-            Ally {alivePlayers(s).length} · Enemy {s.missionCh.fog ? `${aliveEnemies(s).filter((e) => fogLit(s.units, e.pos)).length}/${aliveEnemies(s).length}` : aliveEnemies(s).length} · ☠{s.kills}  {showRoster ? '▲' : '▼'}
+            <Text style={{ color: '#8affc0' }}>Ally {alivePlayers(s).length}</Text> · <Text style={{ color: '#ff8a8a' }}>Enemy</Text> {s.missionCh.fog ? `${aliveEnemies(s).filter((e) => fogLit(s.units, e.pos)).length}/${aliveEnemies(s).length}` : aliveEnemies(s).length} · ☠{s.kills}  {showRoster ? '▲' : '▼'}
           </Text>
         </Pressable>
         <Pressable onPress={s.toggleDanger} style={({ pressed }) => [styles.dangerBtn, s.dangerZone && styles.dangerBtnOn, pressed && { opacity: 0.7 }]}>
