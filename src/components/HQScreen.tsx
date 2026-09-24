@@ -110,11 +110,11 @@ export function HQScreen() {
                   <Text style={styles.shopDesc}>{it.desc}</Text>
                 </View>
                 {owned > 0 && (
-                  <Pressable style={[styles.buyBtn, { borderColor: '#c9945a' }]} onPress={() => s.sellItem(it.id)}>
+                  <Pressable style={({ pressed }) => [styles.buyBtn, { borderColor: '#c9945a' }, pressed && { opacity: 0.6, transform: [{ scale: 0.95 }] }]} onPress={() => s.sellItem(it.id)}>
                     <Text style={styles.buyTxt}>SELL +{Math.round(it.price * 0.5)}</Text>
                   </Pressable>
                 )}
-                <Pressable style={[styles.buyBtn, !afford && { opacity: 0.35 }]} onPress={() => s.buyItem(it.id)} disabled={!afford}>
+                <Pressable style={({ pressed }) => [styles.buyBtn, !afford && { opacity: 0.35 }, pressed && { opacity: 0.6, transform: [{ scale: 0.95 }] }]} onPress={() => s.buyItem(it.id)} disabled={!afford}>
                   <Text style={styles.buyTxt}>{it.price} CR</Text>
                 </Pressable>
               </View>
@@ -164,7 +164,7 @@ export function HQScreen() {
                       ))}
                     </View>
                   </View>
-                  <Pressable style={[styles.buyBtn, (!afford || maxed) && { opacity: 0.35 }]} onPress={() => s.upgradeStat(selUnit, stat.id)} disabled={!afford || maxed}>
+                  <Pressable style={({ pressed }) => [styles.buyBtn, (!afford || maxed) && { opacity: 0.35 }, pressed && { opacity: 0.6, transform: [{ scale: 0.95 }] }]} onPress={() => s.upgradeStat(selUnit, stat.id)} disabled={!afford || maxed}>
                     <Text style={styles.buyTxt}>{maxed ? 'MAX' : `${cost} CR`}</Text>
                   </Pressable>
                 </View>
@@ -177,7 +177,7 @@ export function HQScreen() {
                 {Array.from({ length: MAX_PART_SLOTS }).map((_, i) => {
                   const pid = (s.parts[selUnit] ?? [])[i];
                   return (
-                    <Pressable key={i} style={[styles.slotChip, pid ? { borderColor: '#ffd34d' } : null]} onPress={() => pid && s.equipPart(selUnit, pid)}>
+                    <Pressable key={i} style={({ pressed }) => [styles.slotChip, pid ? { borderColor: '#ffd34d' } : null, pressed && { opacity: 0.7 }]} onPress={() => pid && s.equipPart(selUnit, pid)}>
                       <Text style={styles.slotTxt} numberOfLines={1}>
                         {pid ? PARTS[pid].name : '— empty —'}
                       </Text>
@@ -198,11 +198,11 @@ export function HQScreen() {
                       <Text style={styles.shopDesc}>{p.desc}</Text>
                     </View>
                     {owned ? (
-                      <Pressable style={[styles.buyBtn, equipped && { borderColor: '#ffd34d' }]} onPress={() => s.equipPart(selUnit, p.id)}>
+                      <Pressable style={({ pressed }) => [styles.buyBtn, equipped && { borderColor: '#ffd34d' }, pressed && { opacity: 0.6, transform: [{ scale: 0.95 }] }]} onPress={() => s.equipPart(selUnit, p.id)}>
                         <Text style={styles.buyTxt}>{equipped ? 'REMOVE' : 'EQUIP'}</Text>
                       </Pressable>
                     ) : (
-                      <Pressable style={[styles.buyBtn, !afford && { opacity: 0.35 }]} onPress={() => s.buyPart(p.id)} disabled={!afford}>
+                      <Pressable style={({ pressed }) => [styles.buyBtn, !afford && { opacity: 0.35 }, pressed && { opacity: 0.6, transform: [{ scale: 0.95 }] }]} onPress={() => s.buyPart(p.id)} disabled={!afford}>
                         <Text style={styles.buyTxt}>{p.price} CR</Text>
                       </Pressable>
                     )}
