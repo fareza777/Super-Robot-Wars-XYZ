@@ -80,6 +80,7 @@ export const PARTS: Record<string, PartDef> = {
   linkedFire: { id: 'linkedFire', name: 'Linked Fire Control', desc: 'Coordinated-fire allies contribute +8% more damage each', price: 1800, coFire: 8 },
   mendField: { id: 'mendField', name: 'Mend Field Emitter', desc: 'Adjacent allies regenerate +3% HP per turn', price: 1900, auraHeal: 3 },
   anchorPlate: { id: 'anchorPlate', name: 'Anchor Plating', desc: 'Frame cannot be knocked back', price: 1400, knockProof: true },
+  energyCap: { id: 'energyCap', name: 'Energy Capacitor', desc: '+10% damage for EN weapons', price: 1600, enDmg: 10 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -130,6 +131,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'outgunned', name: 'Outgunned', desc: '+6% damage per point while your side is outnumbered' },
   { id: 'tankbuster', name: 'Tankbuster', desc: '+6% damage per point vs frames with 1200+ armor' },
   { id: 'coordinator', name: 'Coordinator', desc: '+5% damage per point while assisted by coordinated fire' },
+  { id: 'sentinel', name: 'Sentinel', desc: '+5% damage on counter-attacks per point' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1134,6 +1136,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_scorcher', name: 'ASH MAKER', desc: 'Destroy 3 Scorcher frames', rewardCr: 700 },
   { id: 'h_chanter', name: 'SILENCE THE CHOIR', desc: 'Destroy 3 Void Chanter frames', rewardCr: 800 },
   { id: 'h_elitesq', name: 'ELITE SQUADRON', desc: 'Six pilots reach 15 career kills each', rewardCr: 1200 },
+  { id: 'h_rivalry', name: 'RIVALRY', desc: 'Destroy the Drake Eclipse three times', rewardCr: 1000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1236,6 +1239,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.killsByDef?.voidChanter ?? 0) >= 3;
     case 'h_elitesq':
       return kills.filter((p) => (p.kills ?? 0) >= 15).length >= 6;
+    case 'h_rivalry':
+      return (s.killsByDef?.vossDrake ?? 0) >= 3;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

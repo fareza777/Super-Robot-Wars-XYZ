@@ -97,7 +97,8 @@ export function BriefingScreen() {
 
       <View style={styles.briefBox}>
         <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}>
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, borderLeftWidth: 3, borderLeftColor: '#ffd34d', paddingLeft: 10 }}>
+            <Text style={{ color: '#ffd34d', fontSize: 9, fontWeight: '800', letterSpacing: 2, marginBottom: 3 }}>MISSION OBJECTIVE</Text>
             <Text style={styles.briefTxt}>{ch.objective}</Text>
             {ch.mastery && (
               <Text style={{ color: '#ffd34d', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginTop: 2 }}>
