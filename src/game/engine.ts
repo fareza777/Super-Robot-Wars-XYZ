@@ -274,6 +274,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (def.crippled || def.wounded) dmg = Math.round(dmg * (1 + (att.skills?.bloodhound ?? 0) * 0.05));
   if (partBonus(def, 'orbShield') > 0 && dist(att.pos, def.pos) >= 3) dmg = Math.round(dmg * Math.max(0.3, 1 - partBonus(def, 'orbShield') / 100));
   if (def.fortressUntilEndOfEnemyPhase && dist(att.pos, def.pos) <= 1) dmg = Math.round(dmg * 0.8);
+  if (def.defianceUntilEndOfEnemyPhase && att.level > def.level) dmg = Math.round(dmg * 0.8);
   if (w.kind === 'melee' && def.skills?.parry) dmg = Math.round(dmg * (1 - def.skills.parry * 0.05));
   if (att.relentlessUntilEndOfEnemyPhase && def.hp < def.def.maxHp / 2) dmg = Math.round(dmg * 1.25);
   if (att.charged) dmg = Math.round(dmg * (1.5 + (partBonus(att, 'chargeBoost') > 0 ? 0.15 : 0)));
@@ -1499,6 +1500,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'doomedge':
       u.doomNext = true;
       break;
+    case 'defianceverse':
+      break;
     case 'cleanseverse':
       break;
     case 'mireverse':
@@ -1616,6 +1619,7 @@ export function clearTransientForOwnPhase(u: UnitState): void {
   u.salvoUntilEndOfEnemyPhase = false;
   u.shelterUntilEndOfEnemyPhase = false;
   u.juggernautUntilEndOfEnemyPhase = false;
+  u.defianceUntilEndOfEnemyPhase = false;
   u.dodges = 0;
 }
 

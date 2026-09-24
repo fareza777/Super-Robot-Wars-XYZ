@@ -2907,6 +2907,18 @@ export const useGame = create<Store>((set, get) => ({
       }
       anthemLog = `Anthem Verse — ${n} all${n === 1 ? 'y' : 'ies'} restored`;
     }
+    let defianceLog: string | null = null;
+    if (sp === 'defianceverse') {
+      const src = units.find((x) => x.uid === uid)!;
+      let n = 0;
+      for (const e of units) {
+        if (e.alive && e.side === src.side && dist(e.pos, src.pos) <= 3) {
+          e.defianceUntilEndOfEnemyPhase = true;
+          n++;
+        }
+      }
+      defianceLog = `Defiance Verse — ${n} all${n === 1 ? 'y' : 'ies'} defiant`;
+    }
     let suppressLog: string | null = null;
     if (sp === 'suppress') {
       const src = units.find((x) => x.uid === uid)!;
@@ -3136,7 +3148,7 @@ export const useGame = create<Store>((set, get) => ({
       units,
       spiritForUid: null,
       usedSupport: true,
-      log: trustLog || purgeLog || cheerLog || wishLog || gravityLog || decoyLog || hymnLog || empLog || phalanxLog || sanctLog || awakenLog || charityLog || siphonLog || empowerLog || marksmanLog || wardLog || warsongLog || relayLog || inspireLog || veilLog || cantataLog || warhornLog || interfereLog || safeguardLog || suppressLog || dischordLog || absolveLog || bannerLog || armorrotLog || winterverseLog || litanyLog || lockcascadeLog || wardmistLog || aegisLog || firelinkLog || dreadverseLog || sanctumLog || staticchoirLog || dirgemistLog || chorusLog || ariaLog || pinverseLog || tideverseLog || graceLog || mirrorwallLog || breachLog || ebbLog || renewalLog || valiantLog || exposeLog || darkLog || foresightLog || bastionLog || tracerLog || sirenLog || clarionLog || rampartLog || curseLog || vigorLog || phantomLog || crimsonLog || scopeLog || doomLog || flowLog || oathLog || goreLog || mirageLog || hexLog || triumphLog || fortressLog || bindLog || blightLog || vigilLog || sentinelLog || leechLog || terrorLog || salvoLog || shelterLog || cleanseLog || mireLog || choirLog || juggernautLog || voidLog || ruinLog || anthemLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), [trustLog, purgeLog, cheerLog, wishLog, gravityLog, decoyLog, hymnLog, empLog, phalanxLog, sanctLog, awakenLog, charityLog, siphonLog, empowerLog, marksmanLog, wardLog, warsongLog, relayLog, inspireLog, veilLog, cantataLog, warhornLog, interfereLog, safeguardLog, suppressLog, dischordLog, absolveLog, bannerLog, armorrotLog, winterverseLog, litanyLog, lockcascadeLog, wardmistLog, aegisLog, firelinkLog, dreadverseLog, sanctumLog, staticchoirLog, dirgemistLog, chorusLog, ariaLog, pinverseLog, tideverseLog, graceLog, mirrorwallLog, breachLog, ebbLog, renewalLog, valiantLog, exposeLog, darkLog, foresightLog, bastionLog, tracerLog, sirenLog, clarionLog, rampartLog, curseLog, vigorLog, phantomLog, crimsonLog, scopeLog, doomLog, flowLog, oathLog, goreLog, mirageLog, hexLog, triumphLog, fortressLog, bindLog, blightLog, vigilLog, sentinelLog, leechLog, terrorLog, salvoLog, shelterLog, cleanseLog, mireLog, choirLog, juggernautLog, voidLog, ruinLog, anthemLog].filter(Boolean).join(' · ')) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
+      log: trustLog || purgeLog || cheerLog || wishLog || gravityLog || decoyLog || hymnLog || empLog || phalanxLog || sanctLog || awakenLog || charityLog || siphonLog || empowerLog || marksmanLog || wardLog || warsongLog || relayLog || inspireLog || veilLog || cantataLog || warhornLog || interfereLog || safeguardLog || suppressLog || dischordLog || absolveLog || bannerLog || armorrotLog || winterverseLog || litanyLog || lockcascadeLog || wardmistLog || aegisLog || firelinkLog || dreadverseLog || sanctumLog || staticchoirLog || dirgemistLog || chorusLog || ariaLog || pinverseLog || tideverseLog || graceLog || mirrorwallLog || breachLog || ebbLog || renewalLog || valiantLog || exposeLog || darkLog || foresightLog || bastionLog || tracerLog || sirenLog || clarionLog || rampartLog || curseLog || vigorLog || phantomLog || crimsonLog || scopeLog || doomLog || flowLog || oathLog || goreLog || mirageLog || hexLog || triumphLog || fortressLog || bindLog || blightLog || vigilLog || sentinelLog || leechLog || terrorLog || salvoLog || shelterLog || cleanseLog || mireLog || choirLog || juggernautLog || voidLog || ruinLog || anthemLog || defianceLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), [trustLog, purgeLog, cheerLog, wishLog, gravityLog, decoyLog, hymnLog, empLog, phalanxLog, sanctLog, awakenLog, charityLog, siphonLog, empowerLog, marksmanLog, wardLog, warsongLog, relayLog, inspireLog, veilLog, cantataLog, warhornLog, interfereLog, safeguardLog, suppressLog, dischordLog, absolveLog, bannerLog, armorrotLog, winterverseLog, litanyLog, lockcascadeLog, wardmistLog, aegisLog, firelinkLog, dreadverseLog, sanctumLog, staticchoirLog, dirgemistLog, chorusLog, ariaLog, pinverseLog, tideverseLog, graceLog, mirrorwallLog, breachLog, ebbLog, renewalLog, valiantLog, exposeLog, darkLog, foresightLog, bastionLog, tracerLog, sirenLog, clarionLog, rampartLog, curseLog, vigorLog, phantomLog, crimsonLog, scopeLog, doomLog, flowLog, oathLog, goreLog, mirageLog, hexLog, triumphLog, fortressLog, bindLog, blightLog, vigilLog, sentinelLog, leechLog, terrorLog, salvoLog, shelterLog, cleanseLog, mireLog, choirLog, juggernautLog, voidLog, ruinLog, anthemLog, defianceLog].filter(Boolean).join(' · ')) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
       moveTiles: s.menuForUid ? new Map() : tiles,
     });
   },

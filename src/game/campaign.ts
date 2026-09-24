@@ -196,6 +196,7 @@ export const PARTS: Record<string, PartDef> = {
   hexRounds: { id: 'hexRounds', name: 'Hex Rounds', desc: 'Cursed ammunition — hits may mark (30%) and slow (30%) the target', price: 1800, statusMark: true, statusSlow: true },
   prismField: { id: 'prismField', name: 'Prism Field', desc: 'Refractive barrier — cuts incoming damage below 1500 to 20%', price: 2200, barrier: 1500 },
   reaperLattice: { id: 'reaperLattice', name: 'Reaper Lattice', desc: 'Executioner frame — ignores 15% armor and counters +15% damage', price: 1900, armorShred: 15, counterDmg: 15 },
+  monolith: { id: 'monolith', name: 'Monolith', desc: 'Fortress monolith — +150 armor and 8% less damage taken', price: 2000, armor: 150, dmgTaken: -8 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -1485,6 +1486,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_hoarder', name: 'HOARDER', desc: 'Hold 60 items in the inventory at once', rewardCr: 78000 },
   { id: 'h_veterano', name: 'VETERANO', desc: 'Clear 30 distinct missions', rewardCr: 80000 },
   { id: 'h_regicide', name: 'REGICIDE', desc: 'Destroy 15 boss frames across your career', rewardCr: 82000 },
+  { id: 'h_aceofgods', name: 'ACE OF GODS', desc: 'One pilot reaches 1000 career kills', rewardCr: 84000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1820,6 +1822,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.keys(s.missionRank ?? {}).length >= 30;
     case 'h_regicide':
       return Object.entries(s.killsByDef ?? {}).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) >= 15;
+    case 'h_aceofgods':
+      return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 1000);
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

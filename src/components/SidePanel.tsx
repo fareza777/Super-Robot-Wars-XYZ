@@ -114,6 +114,7 @@ function buffNames(u: UnitState): string[] {
   if (u.salvoUntilEndOfEnemyPhase) names.push('SALVO VERSE');
   if (u.shelterUntilEndOfEnemyPhase) names.push('SHELTER VERSE');
   if (u.juggernautUntilEndOfEnemyPhase) names.push('JUGGERNAUT VERSE');
+  if (u.defianceUntilEndOfEnemyPhase) names.push('DEFIANCE VERSE');
   if (u.scopeUntilEndOfEnemyPhase) names.push('SCOPE VERSE');
   if ((u.doomTurns ?? 0) > 0) names.push(`DOOM ${u.doomTurns}`);
   if (u.ghostNext) names.push('GHOST VERSE');
@@ -327,7 +328,7 @@ export function SidePanel() {
             {buffNames(unit).length > 0 && (
               <View style={styles.buffRow}>
                 {buffNames(unit).map((n) => (
-                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED'].includes(n) || n.startsWith('DOOM') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
+                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED'].includes(n) || n.startsWith('DOOM') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
                 ))}
               </View>
             )}
@@ -671,7 +672,7 @@ export function SidePanel() {
             {buffNames(inspect).length > 0 && (
               <View style={styles.buffRow}>
                 {buffNames(inspect).map((n) => (
-                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED'].includes(n) || n.startsWith('DOOM') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
+                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED'].includes(n) || n.startsWith('DOOM') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
                 ))}
               </View>
             )}
