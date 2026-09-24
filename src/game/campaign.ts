@@ -130,6 +130,7 @@ export const PARTS: Record<string, PartDef> = {
   boneCollector: { id: 'boneCollector', name: 'Bone Collector', desc: 'Scavenged clips — kills restock +1 ammo to the weapon used', price: 1700, ammoScalp: true },
   swarmAmp: { id: 'swarmAmp', name: 'Swarm Amp', desc: 'Cluster amplifier — +10% damage vs a foe with 2+ allies adjacent', price: 1600, clusterAmp: true },
   witchLoom: { id: 'witchLoom', name: 'Witch Loom', desc: 'Spirit weft — each kill grants +3 SP', price: 1600, thrallWeave: true },
+  farSight: { id: 'farSight', name: 'Far Sight', desc: 'Long-range optics — +10% damage at range 5+', price: 1500, longsight: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -230,6 +231,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'savant', name: 'Savant', desc: '+1 SP regen per point each turn' },
   { id: 'shieldpierce', name: 'Shield Pierce', desc: '+7% damage per point vs frames carrying an I-Field or barrier' },
   { id: 'pureshot', name: 'Pure Shot', desc: '+6% damage per point vs targets free of debuffs' },
+  { id: 'finisher', name: 'Finisher', desc: '+7% damage per point vs targets below 30% HP' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1282,6 +1284,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_cartographer', name: 'CARTOGRAPHER', desc: 'Clear 15 side missions', rewardCr: 2600 },
   { id: 'h_marksman', name: 'ROYAL MARKSMAN', desc: 'Earn S rank on 22 missions', rewardCr: 3000 },
   { id: 'h_longwar', name: 'ATTRITION', desc: 'Win a battle that lasts 15+ turns', rewardCr: 1600 },
+  { id: 'h_simdeity', name: 'SIM DEITY', desc: 'Score 20000+ in the VR Simulator', rewardCr: 4500 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1481,6 +1484,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 22;
     case 'h_longwar':
       return (s.turn ?? 0) >= 15;
+    case 'h_simdeity':
+      return (s.simBest ?? 0) >= 20000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
