@@ -35,6 +35,7 @@ function buffNames(u: UnitState): string[] {
   if (u.overrunNext) names.push('OVERRUN');
   if (u.exertNext) names.push('EXERT');
   if (u.veilUntilEndOfEnemyPhase) names.push('VEIL');
+  if (u.counterBuffUntilEndOfEnemyPhase) names.push('WARHORN');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');
@@ -530,6 +531,11 @@ export function SidePanel() {
             {inspect.def.pilot.trait && (
               <Text style={styles.traitLine} numberOfLines={1}>
                 ◆ {TRAITS[inspect.def.pilot.trait].name} — {TRAITS[inspect.def.pilot.trait].desc}
+              </Text>
+            )}
+            {(inspect.statuses?.length ?? 0) > 0 && (
+              <Text style={[styles.traitLine, { color: '#ff9d7a' }]} numberOfLines={1}>
+                ⌛ DEBUFFS: {inspect.statuses!.map((fx) => `${fx.id}(${fx.turns})`).join(' ')}
               </Text>
             )}
             {buffNames(inspect).length > 0 && (

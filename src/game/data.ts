@@ -68,6 +68,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   exert: { id: 'exert', name: 'Exert', cost: 40, desc: 'Push the reactor — your next attack gains +20 hit and +15% damage (costs 10 EN)' },
   veil: { id: 'veil', name: 'Veil', cost: 45, desc: 'Sensor mist — allies within 3 tiles gain +20 evade until end of enemy phase' },
   cantata: { id: 'cantata', name: 'Cantata', cost: 40, desc: 'Chorus of resolve — allies within 3 tiles recover +10 SP' },
+  warhorn: { id: 'warhorn', name: 'Warhorn', cost: 40, desc: 'Battle horn — allies within 3 tiles deal +10% counter damage until end of enemy phase' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
@@ -152,7 +153,7 @@ export const PILOTS = {
   ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul', 'frenzy', 'soulburn', 'pyre'], faceColor: '#ffb347', trait: 'ace_instinct' }),
   mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse', 'fortune', 'trust', 'emp', 'deadshot', 'scan', 'marksman', 'shatter', 'tracer', 'veil'], faceColor: '#7ee7ff', trait: 'deadeye' }),
   gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor', 'sunder', 'provoke', 'phalanx', 'breach', 'charity', 'intimidate', 'warsong', 'fluster', 'overrun'], faceColor: '#ff9d9d', trait: 'siege_breaker' }),
-  orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless', 'lucky', 'mercy', 'purge', 'cheer', 'expose', 'decoy', 'hymn', 'sanctuary', 'empower', 'ward', 'relay', 'inspire'], faceColor: '#b6ff9d', trait: 'field_medic' }),
+  orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless', 'lucky', 'mercy', 'purge', 'cheer', 'expose', 'decoy', 'hymn', 'sanctuary', 'empower', 'ward', 'relay', 'inspire', 'warhorn'], faceColor: '#b6ff9d', trait: 'field_medic' }),
   karg: P({ name: 'Col. Karg Draven', callsign: 'BOSS', melee: 75, ranged: 75, defense: 70, evade: 65, maxSp: 70, spirits: ['valor', 'strike'], faceColor: '#d0a0ff', lastWords: 'Rex is scrap... the Empire builds another. Always.', killQuip: 'Another Aegis relic for the pyre.' }),
   grunt: P({ name: 'Soldier', callsign: 'GR', melee: 56, ranged: 56, defense: 52, evade: 52, maxSp: 30, spirits: [], faceColor: '#bbbbbb' }),
   centurion: P({ name: 'Centurion', callsign: 'CT', melee: 64, ranged: 66, defense: 60, evade: 58, maxSp: 40, spirits: ['grit'], faceColor: '#e0c0ff', trait: 'rally', lastWords: 'The line... holds without me.', killQuip: 'Forward! For the Empire.' }),
