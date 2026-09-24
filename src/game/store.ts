@@ -206,6 +206,8 @@ interface Store {
   pendingWeapon: WeaponDef | null;
   /** MAP weapon aim point — first tap marks the blast, second tap (or FIRE) commits */
   mapAim: Pos | null;
+  /** pending mine placement — unit id that will seed the charge */
+  mineDropUid: string | null;
   menuForUid: string | null;
   spiritForUid: string | null;
   battle: BattleAnim | null;
@@ -297,6 +299,7 @@ interface Store {
   chooseWeapon: (w: WeaponDef) => void;
   chooseTarget: (uid: string) => void;
   chooseMapTile: (p: Pos) => void;
+  plantMine: (p: Pos) => void;
   setReaction: (r: Reaction) => void;
   waitUnit: () => void;
   overwatchUnit: () => void;
@@ -403,6 +406,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
       if (earned.length) u.bonusSpirits = earned;
     }
     u.parts = (parts[s.defId] ?? []).slice(0, MAX_PART_SLOTS);
+    u.will = Math.min(150, u.will + 10 * partBonus(u, 'willStart'));
     u.wounded = woundedIds.includes(s.defId);
     const ap = partBonus(u, 'ammoPct');
     if (ap) for (const k of Object.keys(u.ammo)) u.ammo[k] = Math.ceil(u.ammo[k] * (1 + ap / 100));
@@ -622,6 +626,7 @@ export const useGame = create<Store>((set, get) => ({
   attackTiles: new Set(),
   pendingWeapon: null,
   mapAim: null,
+  mineDropUid: null,
   menuForUid: null,
   spiritForUid: null,
   battle: null,
@@ -1019,6 +1024,26 @@ export const useGame = create<Store>((set, get) => ({
       set({ units: s.units.map((x) => (x.uid === uid ? { ...x, moved: true, acted: true } : x)), inventory, usedSupport: true, menuForUid: uid, pendingMove: u.pos, pendingWeapon: w, attackTiles: tiles, mapAim: null, log: push(s.log, `${u.def.name} designates coordinates — pick a tile for the Ark Barrage`) });
       return;
     }
+    if (item.apply === 'mine') {
+      // seed a charge on a clear tile within 2 — any unit that lands there detonates it
+      const tiles = new Set<string>();
+      for (let dy = -2; dy <= 2; dy++)
+        for (let dx = -2; dx <= 2; dx++) {
+          const d = Math.abs(dx) + Math.abs(dy);
+          const p2 = { x: u.pos.x + dx, y: u.pos.y + dy };
+          if (d === 0 || d > 2) continue;
+          if (p2.x < 0 || p2.x >= s.map.cols || p2.y < 0 || p2.y >= s.map.rows) continue;
+          if (unitAt(s.units, p2) || (s.map.mines ?? []).some((m) => same(m, p2))) continue;
+          tiles.add(key(p2));
+        }
+      if (!tiles.size) {
+        set({ log: push(s.log, 'No clear tile nearby to seed the charge') });
+        return;
+      }
+      const inventory = { ...s.inventory, [itemId]: (s.inventory[itemId] ?? 0) - 1 };
+      set({ inventory, mineDropUid: uid, attackTiles: tiles, mapAim: null, log: push(s.log, `${u.def.name} arms an LM-Charge — pick a tile to seed`) });
+      return;
+    }
     const units = s.units.map((x) => {
       if (x.uid !== uid) return x;
       const c = { ...x, ammo: { ...x.ammo } };
@@ -1144,6 +1169,7 @@ export const useGame = create<Store>((set, get) => ({
       attackTiles: new Set(),
       pendingWeapon: null,
       mapAim: null,
+  mineDropUid: null,
       menuForUid: null,
       spiritForUid: null,
       battle: null,
@@ -1266,6 +1292,7 @@ export const useGame = create<Store>((set, get) => ({
       attackTiles: new Set(),
       pendingWeapon: null,
       mapAim: null,
+  mineDropUid: null,
       menuForUid: null,
       spiritForUid: null,
       battle: null,
@@ -1295,6 +1322,17 @@ export const useGame = create<Store>((set, get) => ({
       return;
     }
     if (s.phase !== 'player' || s.battle || s.enemyBusy) return;
+
+    // mine seeding mode — first tap marks, second tap on the same tile plants
+    if (s.mineDropUid) {
+      if (s.attackTiles.has(key(p))) {
+        if (s.mapAim && same(s.mapAim, p)) get().plantMine(p);
+        else set({ mapAim: p });
+      } else if (s.mapAim) {
+        set({ mapAim: null });
+      }
+      return;
+    }
 
     // target selection mode
     if (s.pendingWeapon && s.pendingMove) {
@@ -1435,6 +1473,7 @@ export const useGame = create<Store>((set, get) => ({
       attackTiles: new Set(),
       pendingWeapon: null,
       mapAim: null,
+  mineDropUid: null,
       menuForUid: null,
       spiritForUid: null,
       inspectUid: null,
@@ -1535,6 +1574,7 @@ export const useGame = create<Store>((set, get) => ({
         killsByDef: tallyKills(s.killsByDef, dead),
         pendingWeapon: null,
         mapAim: null,
+  mineDropUid: null,
         attackTiles: new Set<string>(),
         menuForUid: null,
         pendingMove: null,
@@ -1677,6 +1717,7 @@ export const useGame = create<Store>((set, get) => ({
       salvageCr: s.salvageCr + chainBonus + carrierCr + overkillCr + lucky.cr,
       pendingWeapon: null,
       mapAim: null,
+  mineDropUid: null,
       attackTiles: new Set<string>(),
       menuForUid: null,
       pendingMove: null,
@@ -1708,6 +1749,27 @@ export const useGame = create<Store>((set, get) => ({
       },
       phase: 'battle',
     });
+  },
+
+  plantMine: (p) => {
+    const s = get();
+    const uid = s.mineDropUid;
+    if (!uid || !s.attackTiles.has(key(p))) return;
+    const u = s.units.find((x) => x.uid === uid);
+    if (!u || u.acted) return;
+    const mines = [...(s.map.mines ?? []), { x: p.x, y: p.y }];
+    set({
+      map: { ...s.map, mines },
+      units: s.units.map((x) => (x.uid === uid ? { ...x, moved: true, acted: true } : x)),
+      mineDropUid: null,
+      mapAim: null,
+      attackTiles: new Set<string>(),
+      menuForUid: null,
+      pendingMove: null,
+      selectedUid: null,
+      log: push(s.log, `\u{1F4A3} ${u.def.name} seeds an LM-Charge — armed and waiting`),
+    });
+    void persistBattle(get());
   },
 
   chooseMapTile: (p) => {
@@ -1789,6 +1851,7 @@ export const useGame = create<Store>((set, get) => ({
       salvageCr: s.salvageCr + mapChainBonus + overkillCr + lucky.cr,
       pendingWeapon: null,
       mapAim: null,
+  mineDropUid: null,
       attackTiles: new Set<string>(),
       menuForUid: null,
       pendingMove: null,

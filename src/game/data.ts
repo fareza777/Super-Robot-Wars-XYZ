@@ -133,6 +133,7 @@ export const PILOTS = {
   orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless', 'lucky', 'mercy', 'purge', 'cheer', 'expose', 'decoy', 'hymn', 'sanctuary'], faceColor: '#b6ff9d', trait: 'field_medic' }),
   karg: P({ name: 'Col. Karg Draven', callsign: 'BOSS', melee: 75, ranged: 75, defense: 70, evade: 65, maxSp: 70, spirits: ['valor', 'strike'], faceColor: '#d0a0ff', lastWords: 'Rex is scrap... the Empire builds another. Always.', killQuip: 'Another Aegis relic for the pyre.' }),
   grunt: P({ name: 'Soldier', callsign: 'GR', melee: 56, ranged: 56, defense: 52, evade: 52, maxSp: 30, spirits: [], faceColor: '#bbbbbb' }),
+  centurion: P({ name: 'Centurion', callsign: 'CT', melee: 64, ranged: 66, defense: 60, evade: 58, maxSp: 40, spirits: ['grit'], faceColor: '#e0c0ff', trait: 'rally', lastWords: 'The line... holds without me.', killQuip: 'Forward! For the Empire.' }),
   civ: P({ name: 'Convoy Crew', callsign: 'CVY', melee: 40, ranged: 40, defense: 40, evade: 40, maxSp: 0, spirits: [], faceColor: '#c8b090' }),
   militia: P({ name: 'Ark Militia', callsign: 'DEF', melee: 55, ranged: 60, defense: 58, evade: 55, maxSp: 0, spirits: [], faceColor: '#8fb8dd', trait: 'rally' }),
 };

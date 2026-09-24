@@ -276,6 +276,8 @@ export interface PartDef {
   statusSlow?: boolean;
   /** firewall suite — immune to enemy status effects */
   statusProof?: boolean;
+  /** ignition coil — start each battle with extra Will */
+  willStart?: boolean;
   /** decoy beacon — broadcast signature; enemies prefer this target */
   aggro?: boolean;
   /** cloaking field — enemies cannot target this unit beyond 3 tiles */

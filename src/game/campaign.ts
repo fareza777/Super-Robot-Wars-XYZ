@@ -9,7 +9,7 @@ export interface ItemDef {
   name: string;
   desc: string;
   price: number;
-  apply: 'hp' | 'en' | 'ammo' | 'sp' | 'valor' | 'willAll' | 'healArea' | 'purge' | 'barrage' | 'will';
+  apply: 'hp' | 'en' | 'ammo' | 'sp' | 'valor' | 'willAll' | 'healArea' | 'purge' | 'barrage' | 'will' | 'mine';
   amount: number;
 }
 
@@ -23,6 +23,7 @@ export const ITEMS: Record<string, ItemDef> = {
   rallyBanner: { id: 'rallyBanner', name: 'Rally Banner', desc: '+10 Will to every ally', price: 900, apply: 'willAll', amount: 10 },
   repairDrone: { id: 'repairDrone', name: 'Repair Drone', desc: 'Heal 30% HP — unit + allies within 2 tiles', price: 750, apply: 'healArea', amount: 30 },
   overclock: { id: 'overclock', name: 'Core Overclock', desc: '+15 Will to this unit', price: 550, apply: 'will', amount: 15 },
+  lmCharge: { id: 'lmCharge', name: 'LM-Charge', desc: 'Plant a mine on a clear tile within 2 — heavy damage to anything that steps on it', price: 700, apply: 'mine', amount: 0 },
   ventKit: { id: 'ventKit', name: 'Emergency Vent', desc: 'Purge cripple and all status debuffs', price: 700, apply: 'purge', amount: 0 },
   arkBarrage: { id: 'arkBarrage', name: 'Ark Barrage', desc: 'Call a shipboard strike — radius-2 blast on any tile within 2-8', price: 1200, apply: 'barrage', amount: 0 },
 };
@@ -61,6 +62,7 @@ export const PARTS: Record<string, PartDef> = {
   thrustVector: { id: 'thrustVector', name: 'Thrust Vector', desc: '+1 movement', price: 1800, move: 1 },
   firewall: { id: 'firewall', name: 'Firewall Suite', desc: 'Immune to enemy status effects', price: 2000, statusProof: true },
   decoyBeacon: { id: 'decoyBeacon', name: 'Decoy Beacon', desc: 'Enemies prefer targeting this unit — aggro magnet', price: 1600, aggro: true },
+  ignitionCoil: { id: 'ignitionCoil', name: 'Ignition Coil', desc: '+10 Will at the start of each battle', price: 1400, willStart: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -177,6 +179,7 @@ export const CAMPAIGN_UNITS: Record<string, UnitDef> = {
   // act-3 anchored defender — rooted in place, still swings hard
   bastion: U({ id: 'bastion', name: 'Bastion Anchor', title: 'Rooted Defender', color: '#5a4a42', accent: '#ffd8a8', maxHp: 5600, maxEn: 80, armor: 1900, mobility: 80, moveRange: 3, moveType: 'land', weapons: [WEAPONS.siegeCrusher, WEAPONS.vulcan], pilot: PILOTS.grunt, holdPos: true }),
   sparkDrone: U({ id: 'sparkDrone', name: 'Spark Drone', title: 'Kamikaze Frame', color: '#3a2a2a', accent: '#ff5a3a', maxHp: 2600, maxEn: 60, armor: 500, mobility: 150, moveRange: 7, moveType: 'air', weapons: [WEAPONS.vulcan], pilot: PILOTS.grunt, kamikaze: true }),
+  centurion: U({ id: 'centurion', name: 'Centurion', title: 'Imperial Officer', color: '#4a3a5a', accent: '#e0c0ff', maxHp: 4800, maxEn: 110, armor: 1050, mobility: 112, moveRange: 5, moveType: 'land', weapons: [WEAPONS.railgun, WEAPONS.gatling, WEAPONS.missilePods], pilot: PILOTS.centurion }),
   voidChanter: U({ id: 'voidChanter', name: 'Void Chanter', title: 'Hex Adept', color: '#3a1a4a', accent: '#c080ff', maxHp: 4600, maxEn: 130, armor: 500, mobility: 140, moveRange: 5, moveType: 'air', weapons: [WEAPONS.hexBolt, WEAPONS.nullChord], pilot: PILOTS.grunt }),
   blackguard: U({ id: 'blackguard', name: 'Blackguard', title: 'Veteran Elite', color: '#1a1a22', accent: '#ff5040', maxHp: 7400, maxEn: 120, armor: 1050, mobility: 118, moveRange: 5, moveType: 'land', weapons: [WEAPONS.vulcan, WEAPONS.havocMortar, WEAPONS.hexBolt], pilot: PILOTS.grunt }),
   dragoon: U({ id: 'dragoon', name: 'Dragoon Cavalry', title: 'Mounted Gunner', color: '#4a3a1a', accent: '#ffd080', maxHp: 5200, maxEn: 110, armor: 700, mobility: 130, moveRange: 6, moveType: 'land', weapons: [WEAPONS.gatling, WEAPONS.stasisRay], pilot: PILOTS.grunt }),
@@ -831,7 +834,7 @@ export function enemyComp(ch: ChapterDef): string[] {
   const heavy = ch.act === 1 ? 'zoldaTank' : 'nightmare';
   const fast = ch.act === 3 ? 'cataphract' : 'lancer';
   const ghost = ch.act === 3 ? 'phantom' : 'vexia';
-  for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : (i % 11 === 9 && ch.act >= 2) ? 'medic' : (i % 13 === 11 && ch.act === 3) ? 'ballista' : (i % 11 === 10 && ch.act === 3) ? 'bastion' : (i % 12 === 8 && ch.act >= 2) ? 'voidChanter' : (i % 10 === 5 && ch.act === 3) ? 'blackguard' : (i % 13 === 4 && ch.act >= 2) ? 'dragoon' : (i % 15 === 12 && ch.act >= 2) ? 'sparkDrone' : i % 7 === 6 ? ghost : fill);
+  for (let i = 0; i < ch.count; i++) comp.push(i % 5 === 4 ? fast : i % 3 === 2 ? alt : i % 4 === 3 ? heavy : (i % 11 === 9 && ch.act >= 2) ? 'medic' : (i % 13 === 11 && ch.act === 3) ? 'ballista' : (i % 11 === 10 && ch.act === 3) ? 'bastion' : (i % 12 === 8 && ch.act >= 2) ? 'voidChanter' : (i % 10 === 5 && ch.act === 3) ? 'blackguard' : (i % 13 === 4 && ch.act >= 2) ? 'dragoon' : (i % 15 === 12 && ch.act >= 2) ? 'sparkDrone' : (i % 17 === 14 && ch.act >= 2) ? 'centurion' : i % 7 === 6 ? ghost : fill);
   if (ch.boss) comp.push(ch.boss);
   // Cpt. Vossen ambushes the squad on these chapters — a recurring ace duelist
   if ([6, 13, 19, 26].includes(ch.id)) comp.push('vossDrake');
@@ -1080,6 +1083,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_vet', name: 'VETERAN CORPS', desc: 'Five pilots reach ACE rank — 25+ career kills each', rewardCr: 1500 },
   { id: 'h_fullhouse', name: 'FULL HOUSE', desc: 'Deploy all seven squad frames on one sortie', rewardCr: 900 },
   { id: 'h_drone', name: 'DRONE HUNTER', desc: 'Shoot down 3 Spark Drones before they detonate', rewardCr: 700 },
+  { id: 'h_duo', name: 'DYNAMIC DUO', desc: 'Two pilots each reach 30 career kills', rewardCr: 800 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1144,6 +1148,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.units ?? []).filter((u) => u.side === 'player' && !u.npc).length >= 7;
     case 'h_drone':
       return (s.killsByDef?.sparkDrone ?? 0) >= 3;
+    case 'h_duo':
+      return kills.filter((p) => (p.kills ?? 0) >= 30).length >= 2;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
