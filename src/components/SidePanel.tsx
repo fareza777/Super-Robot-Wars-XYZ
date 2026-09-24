@@ -115,6 +115,7 @@ function buffNames(u: UnitState): string[] {
   if (u.steadfastUntilEndOfEnemyPhase) names.push('STEADFAST VERSE');
   if (u.nullifiedUntilEndOfEnemyPhase) names.push('NULL VERSE');
   if (u.tetherUntilEndOfEnemyPhase) names.push('TETHER VERSE');
+  if (u.seraphUntilEndOfEnemyPhase) names.push('SERAPH VERSE');
   if ((u.obscuredTurns ?? 0) > 0) names.push(`VEILBREAK VERSE ${u.obscuredTurns}`);
   if (u.palisadeUntilEndOfEnemyPhase) names.push('PALISADE VERSE');
   // magnumverse is instant — no chip
@@ -494,7 +495,7 @@ export function SidePanel() {
                             {e.def.name} {e.def.boss ? (e.phase2 ? 'Ω★' : '★') : ''}
                           </Text>
                           <Text style={styles.tgtHp}>
-                            HP {e.hp}/{e.def.maxHp} · WILL {e.will} · EN {e.en}
+                            HP {e.hp}/{e.def.maxHp} · ARM {armorOf(e, s.map)} · W {e.will} · EN {e.en}
                           </Text>
                         </View>
                         <View style={styles.tgtHitBox}>
@@ -536,7 +537,7 @@ export function SidePanel() {
                             {e.def.name} {e.def.boss ? (e.phase2 ? 'Ω★' : '★') : ''}{kill ? ' ☠' : ''}
                           </Text>
                           <Text style={styles.tgtHp}>
-                            HP {e.hp}/{e.def.maxHp} · WILL {e.will} · EN {e.en}
+                            HP {e.hp}/{e.def.maxHp} · ARM {armorOf(e, s.map)} · W {e.will} · EN {e.en}
                           </Text>
                           {/* SRW damage preview — green = HP remaining after the hit */}
                           <View style={styles.tgtBar}>
