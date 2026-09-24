@@ -61,6 +61,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   fluster: { id: 'fluster', name: 'Fluster', cost: 40, desc: 'Rattle their aim — your next landed hit also suppresses the target (-20 hit)' },
   hunt: { id: 'hunt', name: 'Hunt', cost: 45, desc: 'Wounded prey — your next hit deals +30% damage to targets below half HP' },
   tracer: { id: 'tracer', name: 'Tracer', cost: 40, desc: 'Designate the target — your next landed hit also marks it (+25 hit, +15% dmg taken)' },
+  strafe: { id: 'strafe', name: 'Strafe', cost: 45, desc: 'Air superiority — your next hit deals +35% damage to a ground-frame target' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

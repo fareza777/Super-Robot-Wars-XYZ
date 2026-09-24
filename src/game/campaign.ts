@@ -87,6 +87,7 @@ export const PARTS: Record<string, PartDef> = {
   missileBay: { id: 'missileBay', name: 'Missile Bay', desc: '+10% damage for missile weapons', price: 1600, missileDmg: 10 },
   gunBarrel: { id: 'gunBarrel', name: 'Gun Barrel', desc: '+10% damage for gun weapons', price: 1600, gunDmg: 10 },
   ammoSynth: { id: 'ammoSynth', name: 'Ammo Synthesizer', desc: 'Fabricate +1 ammo for every weapon each turn', price: 1500, ammoRegen: true },
+  analysisCore: { id: 'analysisCore', name: 'Analysis Core', desc: '+12% damage against marked or exposed targets', price: 1700, markDmg: 12 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -144,6 +145,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'skirmisher', name: 'Skirmisher', desc: '+5% damage per point when attacking after moving' },
   { id: 'engineer', name: 'Engineer', desc: 'REPAIR restores +10% more HP per point' },
   { id: 'cohort', name: 'Cohort', desc: '+4% damage per point while an ally is within 2 tiles' },
+  { id: 'entrench', name: 'Entrench', desc: '+5% damage per point while standing on defensive terrain' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -186,7 +188,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1155,6 +1157,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_ironmarch', name: 'IRON MARCH', desc: 'Win a mission on a fortress field', rewardCr: 700 },
   { id: 'h_lunar', name: 'LUNAR', desc: 'Win a mission on the lunar surface', rewardCr: 700 },
   { id: 'h_delver', name: 'RUIN DELVER', desc: 'Win a mission in the ancient ruins', rewardCr: 700 },
+  { id: 'h_hearts', name: 'HEARTSTRINGS', desc: 'Witness 18 mess hall bond events', rewardCr: 1200 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1271,6 +1274,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.missionCh?.theme === 'moon';
     case 'h_delver':
       return s.missionCh?.theme === 'ruins';
+    case 'h_hearts':
+      return s.bondSeen.length >= 18;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

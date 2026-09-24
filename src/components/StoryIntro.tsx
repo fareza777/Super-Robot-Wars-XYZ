@@ -72,7 +72,7 @@ export function StoryIntro() {
           <View key={i} style={[styles.dot, i === idx && styles.dotOn]} />
         ))}
       </View>
-      <Pressable style={styles.skip} onPress={() => finish()} hitSlop={14}>
+      <Pressable style={({ pressed }) => [styles.skip, pressed && { opacity: 0.6 }]} onPress={() => finish()} hitSlop={14}>
         <Text style={styles.skipTxt}>SKIP ▸▸</Text>
       </Pressable>
     </Pressable>
@@ -88,6 +88,6 @@ const styles = StyleSheet.create({
   dots: { position: 'absolute', bottom: 34, alignSelf: 'center', flexDirection: 'row', gap: 7 },
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.28)' },
   dotOn: { backgroundColor: '#ffd34d' },
-  skip: { position: 'absolute', top: 20, right: 24, padding: 8 },
+  skip: { position: 'absolute', top: 20, right: 24, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.35)', backgroundColor: 'rgba(8,12,24,0.6)' },
   skipTxt: { color: 'rgba(255,255,255,0.75)', fontWeight: '800', letterSpacing: 2, fontSize: 13 },
 });
