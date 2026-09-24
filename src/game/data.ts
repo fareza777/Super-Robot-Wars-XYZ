@@ -184,6 +184,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   steadfastverse: { id: 'steadfastverse', name: 'Steadfast Verse', cost: 50, desc: 'Ironclad hymn — allies within 3 tiles cannot be critically hit until end of enemy phase' },
   maraudedge: { id: 'maraudedge', name: 'Maraud Edge', cost: 45, desc: 'Siphon strike — next hit +15% damage and drains 15 EN from the target' },
   nullverse: { id: 'nullverse', name: 'Null Verse', cost: 50, desc: 'Static blanket — enemies within 3 tiles cannot land critical hits until end of enemy phase' },
+  tetherverse: { id: 'tetherverse', name: 'Tether Verse', cost: 50, desc: 'Grav-choke — enemies within 3 tiles suffer -1 movement until end of enemy phase' },
   ruinverse: { id: 'ruinverse', name: 'Ruin Verse', cost: 50, desc: 'Entropy wave — enemies within 3 tiles suffer armor break and decay 8% hull per turn for 2 turns' },
   anthemverse: { id: 'anthemverse', name: 'Anthem Verse', cost: 55, desc: 'Restoration hymn — allies within 3 tiles instantly recover 15% hull' },
   doomedge: { id: 'doomedge', name: 'Doom Edge', cost: 45, desc: 'Entropy strike — next hit deals +10% damage and dooms the target to decay 8% hull per turn for 3 turns' },
