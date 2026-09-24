@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -214,6 +214,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if ((att.kills ?? 0) >= 3) dmg = Math.round(dmg * (1 + 0.05 * (att.skills?.bloodlust ?? 0)));
   if (def.hp >= def.def.maxHp) dmg = Math.round(dmg * (1 + 0.05 * (att.skills?.reaver ?? 0)));
   if ((att.skills?.duelist ?? 0) > 0 && !(units ?? []).some((x) => x.uid !== def.uid && x.side === def.side && x.alive && Math.abs(x.pos.x - def.pos.x) + Math.abs(x.pos.y - def.pos.y) <= 2)) dmg = Math.round(dmg * (1 + 0.06 * att.skills.duelist));
+  if ((att.skills?.juggernaut ?? 0) > 0 && !att.moved) dmg = Math.round(dmg * (1 + 0.04 * att.skills.juggernaut));
   if (att.enraged) dmg = Math.round(dmg * 1.15);
   if (!att.hasAttacked && (att.skills?.initiative ?? 0) > 0) dmg = Math.round(dmg * (1 + 0.1 * att.skills.initiative));
   if (def.guardUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.5);
@@ -232,6 +233,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   const res = def.def.resists?.[w.kind] ?? 0;
   if (res > 0) dmg = Math.round(dmg * (1 - res));
   if ((w.antiAir || partBonus(att, 'antiAir')) && def.def.moveType === 'air') dmg = Math.round(dmg * 1.25);
+  if (w.ammo != null && partBonus(att, 'ammoDmg')) dmg = Math.round(dmg * (1 + partBonus(att, 'ammoDmg') / 100));
   if (w.sniper && dist(att.pos, def.pos) >= 4) dmg = Math.round(dmg * 1.15);
   dmg = Math.round(dmg * dmgMult * willDmgMult(att));
   // i-field barrier — weak hits are swallowed by the field (SRW barrier mechanic)

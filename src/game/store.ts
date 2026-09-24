@@ -399,7 +399,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
       u.level = prog.level;
       u.exp = prog.exp;
       u.pp = prog.pp ?? 0;
-      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, ...(prog.skills ?? {}) };
+      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, ...(prog.skills ?? {}) };
       if ((prog.kills ?? 0) >= ACE_KILLS) u.will = 130; // ace pilots start hot
       if ((prog.kills ?? 0) >= ACE_MASTER_KILLS) u.aceMastery = true;
       // career-kill milestones: extra spirits the pilot learned along the war
@@ -984,7 +984,7 @@ export const useGame = create<Store>((set, get) => ({
     const s = get();
     const prog = s.pilotProg[defId];
     if (!prog || (prog.pp ?? 0) < 1) return;
-    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, ...(prog.skills ?? {}) };
+    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, ...(prog.skills ?? {}) };
     if (skills[statId] >= MAX_PILOT_SKILL) return;
     skills[statId] += 1;
     const pilotProg = { ...s.pilotProg, [defId]: { ...prog, pp: (prog.pp ?? 0) - 1, skills } };
@@ -2023,16 +2023,17 @@ export const useGame = create<Store>((set, get) => ({
       return c;
     });
     // area spirits — rouse/disrupt affect neighbours within 2 tiles
-    if (sp === 'rouse' || sp === 'disrupt' || sp === 'sunder' || sp === 'provoke' || sp === 'expose' || sp === 'intimidate') {
+    if (sp === 'rouse' || sp === 'disrupt' || sp === 'sunder' || sp === 'provoke' || sp === 'expose' || sp === 'intimidate' || sp === 'scan') {
       const src = units.find((x) => x.uid === uid)!;
       for (const u2 of units) {
         if (u2.uid === uid || !u2.alive) continue;
         const d = Math.abs(u2.pos.x - src.pos.x) + Math.abs(u2.pos.y - src.pos.y);
-        if (d > (sp === 'sunder' || sp === 'provoke' || sp === 'expose' || sp === 'intimidate' ? 3 : 2)) continue;
+        if (d > (sp === 'scan' ? 5 : sp === 'sunder' || sp === 'provoke' || sp === 'expose' || sp === 'intimidate' ? 3 : 2)) continue;
         if (sp === 'rouse' && u2.side === src.side) u2.will = Math.min(150, u2.will + 10);
         if (sp === 'disrupt' && u2.side !== src.side) u2.will = Math.max(100, u2.will - 10);
         if (sp === 'sunder' && u2.side !== src.side) u2.sundered = true;
         if (sp === 'expose' && u2.side === 'enemy') u2.exposed = true;
+        if (sp === 'scan' && u2.side === 'enemy') u2.exposed = true;
         if (sp === 'provoke' && u2.side !== src.side) u2.provokedTo = src.uid;
         if (sp === 'intimidate' && u2.side !== src.side) u2.statuses = [...(u2.statuses ?? []).filter((f) => f.id !== 'supp'), { id: 'supp', turns: 2 }];
       }

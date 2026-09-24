@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   squadFace: { width: 56, height: 56, borderRadius: 10, borderWidth: 1, borderColor: '#3a4160' },
   squadName: { color: '#ffd34d', fontSize: 11, fontWeight: '800', marginTop: 4 },
   squadUnit: { color: '#9fb0d0', fontSize: 9, marginTop: 1 },
-  resultsBox: { backgroundColor: 'rgba(14,17,28,0.88)', borderWidth: 1, borderColor: '#ffd34d', borderRadius: 12, padding: 12, marginTop: 12, minWidth: 340 },
+  resultsBox: { backgroundColor: 'rgba(14,17,28,0.92)', borderWidth: 1.5, borderColor: '#ffd34d', borderRadius: 14, padding: 16, marginTop: 12, minWidth: 340, shadowColor: '#ffd34d', shadowOpacity: 0.18, shadowRadius: 14, shadowOffset: { width: 0, height: 0 }, elevation: 7 },
   resultsRow: { color: '#e6ecff', fontSize: 12.5, fontWeight: '800', letterSpacing: 1.5, marginTop: 4 },
   rankRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 },
   rankLbl: { color: '#9fb0d0', fontSize: 12, fontWeight: '800', letterSpacing: 2 },

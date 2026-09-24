@@ -58,7 +58,7 @@ function Bar({ label, val, max, color }: { label: string; val: number; max: numb
 
 function Btn({ label, sub, onPress, disabled, accent }: { label: string; sub?: string; onPress: () => void; disabled?: boolean; accent?: string }) {
   return (
-    <TouchableOpacity onPress={onPress} disabled={disabled} style={[styles.btn, disabled && styles.btnOff, accent ? { borderColor: accent } : null]}>
+    <TouchableOpacity onPress={onPress} disabled={disabled} activeOpacity={0.72} style={[styles.btn, disabled && styles.btnOff, accent ? { borderColor: accent, borderLeftWidth: 4 } : null]}>
       <Text style={[styles.btnText, disabled && styles.btnTextOff]}>{label}</Text>
       {!!sub && <Text style={styles.btnSub}>{sub}</Text>}
     </TouchableOpacity>
