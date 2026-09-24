@@ -304,6 +304,7 @@ export function BattleScene() {
       {!battle.needsReaction && stage === 3 && battle.result.hit && battle.result.crit && !battle.result.destroyed && <Banner text="⚡ CRITICAL ⚡" color="#ffd34d" pos="high" />}
       {!battle.needsReaction && stage === 3 && battle.result.hit && battle.result.graze && !battle.result.destroyed && <Banner text="≈ GRAZE" color="#9fd8ff" pos="high" />}
       {!battle.needsReaction && stage === 5 && !!battle.result.counter?.hit && battle.result.counter.crit && !battle.result.counter.destroyed && <Banner text="⚡ CRITICAL ⚡" color="#ff8a5c" pos="high" />}
+      {!battle.needsReaction && stage === 4 && battle.result.counterCut && <Banner text="⚔ COUNTER-CUT" color="#ff5a4a" pos="high" />}
       {/* killing blow on a boss — the dramatic finish */}
       {!battle.needsReaction && stage >= 3 && battle.result.destroyed && def.def.boss && <Banner text="★ FINISH ★" color="#ffd34d" />}
 
