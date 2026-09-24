@@ -87,6 +87,7 @@ function buffNames(u: UnitState): string[] {
   if (u.heavensverseNext) names.push('HEAVEN VERSE');
   if (u.furyverseNext) names.push('FURY VERSE');
   if (u.tracerAllyUntilEndOfEnemyPhase) names.push('TRACER VERSE');
+  if (u.levinedgeNext) names.push('LEVIN EDGE');
   if ((u.sirenTurns ?? 0) > 0) names.push(`SIREN VERSE ${u.sirenTurns}`);
   if ((u.clarionTurns ?? 0) > 0) names.push(`CLARION VERSE ${u.clarionTurns}`);
   if (u.lacerateNext) names.push('LACERATE');
@@ -551,6 +552,7 @@ export function SidePanel() {
                   {u.will !== 100 && <Text style={[styles.rosterHp, { color: '#ff7a9d' }]}>W{u.will}</Text>}
                   <Text style={[styles.rosterHp, { color: '#c9a0ff' }]}>✦{u.sp}</Text>
                   <Text style={[styles.rosterHp, { color: '#ffd34d' }]}>{u.kills}K</Text>
+                  {(u.parts?.length ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#7ac7ff' }]}>◈{u.parts.length}</Text>}
                 </View>
               ))}
             <Text style={[styles.menuTitle, { color: '#ff6b6b' }]}>HOSTILES</Text>
