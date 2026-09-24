@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS } from '../game/campaign';
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { bondMods } from '../game/bonds';
-import { bestCounterWeapon, critChance, damageOf, dist, enCostOf, findSupport, formationBonus, hasPincer, hitChance, key, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
+import { armorOf, bestCounterWeapon, critChance, damageOf, dist, enCostOf, findSupport, formationBonus, hasPincer, hitChance, key, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, fogLit, useGame } from '../game/store';
 import { SpiritId, UnitState } from '../game/types';
 
@@ -78,6 +78,7 @@ function buffNames(u: UnitState): string[] {
   if (u.breachAtkUntilEndOfEnemyPhase) names.push('BREACH VERSE');
   if (u.ebbUntilEndOfEnemyPhase) names.push('TIDE EBB');
   if ((u.renewalTurns ?? 0) > 0) names.push('RENEWAL VERSE');
+  if (u.quakeedgeNext) names.push('QUAKE EDGE');
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
@@ -584,7 +585,7 @@ export function SidePanel() {
             <Bar label="WILL" val={inspect.will} max={150} color="#ff7a9d" />
             <Bar label="SP" val={inspect.sp} max={inspect.def.pilot.maxSp} color="#c9a0ff" />
             <View style={styles.statRow}>
-              <Text style={styles.statTxt}>🛡 ARM {inspect.def.armor}</Text>
+              <Text style={styles.statTxt}>🛡 ARM {armorOf(inspect, s.map)}</Text>
               <Text style={styles.statTxt}>≫ MOB {inspect.def.mobility}</Text>
               <Text style={styles.statTxt}>▸ MOV {inspect.def.moveRange} {inspect.def.moveType === 'air' ? '✈' : '⬢'}</Text>
             </View>

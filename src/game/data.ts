@@ -117,6 +117,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   breachverse: { id: 'breachverse', name: 'Breach Verse', cost: 45, desc: 'Fire-control chorus — attacks by allies within 3 tiles pierce 25% of target armor until the end of the enemy phase' },
   tideebb: { id: 'tideebb', name: 'Tide Ebb', cost: 45, desc: 'Ebb of the deep — enemies within 3 tiles lose 1 movement until the end of the enemy phase' },
   renewalverse: { id: 'renewalverse', name: 'Renewal Verse', cost: 50, desc: 'Sustaining hymn — allies within 3 tiles regenerate +10 EN each turn for 2 turns' },
+  quakeedge: { id: 'quakeedge', name: 'Quake Edge', cost: 45, desc: 'Seismic blade — the next landed hit slows the target and every foe adjacent to it' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
@@ -198,7 +199,7 @@ export const WEAPONS = {
 const P = (p: PilotDef) => p;
 
 export const PILOTS = {
-  ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul', 'frenzy', 'soulburn', 'pyre', 'skyfall', 'blade', 'judge', 'rampage', 'voidedge', 'tempestedge', 'hellfire', 'sunderstorm'], faceColor: '#ffb347', trait: 'ace_instinct' }),
+  ray: P({ name: 'Ray Ardent', callsign: 'X-1', melee: 68, ranged: 74, defense: 60, evade: 72, maxSp: 60, spirits: ['strike', 'valor', 'focus', 'accel', 'zeal', 'roar', 'soul', 'frenzy', 'soulburn', 'pyre', 'skyfall', 'blade', 'judge', 'rampage', 'voidedge', 'tempestedge', 'hellfire', 'sunderstorm', 'quakeedge'], faceColor: '#ffb347', trait: 'ace_instinct' }),
   mira: P({ name: 'Mira Solen', callsign: 'X-2', melee: 55, ranged: 80, defense: 55, evade: 78, maxSp: 55, spirits: ['focus', 'strike', 'accel', 'snipe', 'rouse', 'fortune', 'trust', 'emp', 'deadshot', 'scan', 'marksman', 'shatter', 'tracer', 'veil', 'stalker', 'trueshot', 'armorrot', 'lockcascade', 'firelink', 'staticchoir', 'pinverse', 'breachverse'], faceColor: '#7ee7ff', trait: 'deadeye' }),
   gara: P({ name: 'Gara Dune', callsign: 'Y-1', melee: 78, ranged: 60, defense: 74, evade: 58, maxSp: 50, spirits: ['grit', 'valor', 'guard', 'vigor', 'sunder', 'provoke', 'phalanx', 'breach', 'charity', 'intimidate', 'warsong', 'fluster', 'overrun', 'avenger', 'suppress', 'banner', 'drawfire', 'standfirm', 'ironoath', 'bulwarkaria', 'mirrorwall'], faceColor: '#ff9d9d', trait: 'siege_breaker' }),
   orin: P({ name: 'Orin Vale', callsign: 'Z-1', melee: 62, ranged: 70, defense: 66, evade: 66, maxSp: 65, spirits: ['guard', 'focus', 'valor', 'flash', 'disrupt', 'bless', 'lucky', 'mercy', 'purge', 'cheer', 'expose', 'decoy', 'hymn', 'sanctuary', 'empower', 'ward', 'relay', 'inspire', 'warhorn', 'safeguard', 'absolution', 'litany', 'aegis', 'sanctumhymn', 'miraclechorus', 'gracehymn', 'renewalverse'], faceColor: '#b6ff9d', trait: 'field_medic' }),
