@@ -99,6 +99,7 @@ function buffNames(u: UnitState): string[] {
   if (u.snareNext) names.push('SNARE EDGE');
   if (u.overNext) names.push('OVEREDGE');
   if (u.arcNext) names.push('ARC EDGE');
+  if (u.splatterNext) names.push('SPLATTER EDGE');
   if (u.rended) names.push('RENDED');
   if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
   if (u.crimsonUntilEndOfEnemyPhase) names.push('CRIMSON VERSE');
@@ -583,6 +584,7 @@ export function SidePanel() {
                   {buffNames(u).length > 0 && <Text style={[styles.rosterHp, { color: '#8af0ff' }]}>✧{buffNames(u).length}</Text>}
                   {(u.statuses?.length ?? 0) > 0 ? <Text style={[styles.rosterHp, { color: '#ff9d7a' }]}>⌛{u.statuses!.length}</Text> : null}
                   {u.crippled ? <Text style={[styles.rosterHp, { color: '#ff9d7a' }]}>⛓</Text> : null}
+                  <Text style={[styles.rosterHp, { color: '#7fd0b0', width: 30 }]}>≫{Math.round(evadeOf(u, s.map))}</Text>
                   <Text style={[styles.rosterHp, { color: '#9fd8ff' }]}>⇄{moveRangeOf(u)}</Text>
                   <Text style={[styles.rosterHp, { color: '#ffd34d' }]}>{u.kills}K</Text>
                   {(u.parts?.length ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#7ac7ff' }]}>◈{u.parts.length}</Text>}

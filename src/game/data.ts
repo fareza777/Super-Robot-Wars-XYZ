@@ -164,6 +164,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   choirverse: { id: 'choirverse', name: 'Choir Verse', cost: 50, desc: 'Resonant hymn — allies within 3 tiles instantly recover +10 SP' },
   arcedge: { id: 'arcedge', name: 'Arc Edge', cost: 45, desc: 'Chain-lightning strike — next hit deals +10% damage and arcs 30% of it to every enemy adjacent to the target' },
   juggernautverse: { id: 'juggernautverse', name: 'Juggernaut Verse', cost: 50, desc: 'Siege hymn — allies within 3 tiles deal +15% damage with melee weapons until end of enemy phase' },
+  splatteredge: { id: 'splatteredge', name: 'Splatter Edge', cost: 45, desc: 'Overkill eruption — if the next hit kills, excess damage erupts onto every enemy adjacent to the kill' },
   vigilverse: { id: 'vigilverse', name: 'Vigil Verse', cost: 50, desc: 'Watchful hymn — allies within 3 tiles counter at +15% damage until end of enemy phase' },
   mortaledge: { id: 'mortaledge', name: 'Mortal Edge', cost: 50, desc: 'Execution focus — the next attack that lands is a guaranteed critical' },
   sentinelverse: { id: 'sentinelverse', name: 'Sentinel Verse', cost: 50, desc: 'Guardian hymn — allies within 3 tiles intercept attacks aimed at their adjacent allies until end of enemy phase' },
