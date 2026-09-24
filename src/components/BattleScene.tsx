@@ -1054,7 +1054,7 @@ function ReactionBar({ attacker, defender, weapon, coverUid }: { attacker: UnitS
 
   const W = Math.min(cover ? 760 : 620, width * 0.86);
   const Btn2 = ({ label, sub, color, onPress }: { label: string; sub: string; color: string; onPress: () => void }) => (
-    <Pressable onPress={onPress} style={{ flex: 1, borderWidth: 1.5, borderColor: color, borderRadius: 10, backgroundColor: 'rgba(10,14,30,0.9)', paddingVertical: 9, alignItems: 'center' }}>
+    <Pressable onPress={onPress} style={({ pressed }) => ({ flex: 1, borderWidth: 1.5, borderColor: color, borderRadius: 10, backgroundColor: pressed ? 'rgba(28,34,60,0.95)' : 'rgba(10,14,30,0.9)', paddingVertical: 10, alignItems: 'center', borderLeftWidth: 4, opacity: pressed ? 0.75 : 1, transform: [{ scale: pressed ? 0.96 : 1 }] })}>
       <Text style={{ color, fontSize: 15, fontWeight: '900', letterSpacing: 2 }}>{label}</Text>
       <Text style={{ color: '#9fb0d0', fontSize: 9.5, marginTop: 3 }} numberOfLines={1}>
         {sub}

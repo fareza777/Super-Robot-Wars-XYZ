@@ -399,7 +399,7 @@ function buildMission(ch: ChapterDef, pilotProg: Store['pilotProg'], upgrades: U
       u.level = prog.level;
       u.exp = prog.exp;
       u.pp = prog.pp ?? 0;
-      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, ...(prog.skills ?? {}) };
+      u.skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, ...(prog.skills ?? {}) };
       if ((prog.kills ?? 0) >= ACE_KILLS) u.will = 130; // ace pilots start hot
       if ((prog.kills ?? 0) >= ACE_MASTER_KILLS) u.aceMastery = true;
       // career-kill milestones: extra spirits the pilot learned along the war
@@ -984,7 +984,7 @@ export const useGame = create<Store>((set, get) => ({
     const s = get();
     const prog = s.pilotProg[defId];
     if (!prog || (prog.pp ?? 0) < 1) return;
-    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, ...(prog.skills ?? {}) };
+    const skills = { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, ...(prog.skills ?? {}) };
     if (skills[statId] >= MAX_PILOT_SKILL) return;
     skills[statId] += 1;
     const pilotProg = { ...s.pilotProg, [defId]: { ...prog, pp: (prog.pp ?? 0) - 1, skills } };
@@ -1992,6 +1992,10 @@ export const useGame = create<Store>((set, get) => ({
       set({ spiritForUid: null, log: push(s.log, 'Awaken: no spent ally within 3 tiles') });
       return;
     }
+    if (sp === 'empower' && !s.units.some((u) => u.alive && u.uid !== uid && u.side === 'player' && dist(u.pos, target.pos) <= 3)) {
+      set({ spiritForUid: null, log: push(s.log, 'Empower: no ally within 3 tiles') });
+      return;
+    }
     if (sp === 'charity' && (target.hp < target.def.maxHp * 0.3 || !s.units.some((u) => u.alive && u.side === 'player' && u.uid !== uid && dist(u.pos, target.pos) <= 2 && u.hp < u.def.maxHp))) {
       set({ spiritForUid: null, log: push(s.log, 'Charity: hull too weak or no wounded ally within 2 tiles') });
       return;
@@ -2208,13 +2212,23 @@ export const useGame = create<Store>((set, get) => ({
         siphonLog = `\u262F SIPHON — ${foe.def.name} drained, ${c.def.name} burns brighter`;
       }
     }
+    // empower — war blessing: the hardest hitter nearby gains +40% damage on their next attack
+    let empowerLog: string | null = null;
+    if (sp === 'empower') {
+      const c = units.find((x) => x.uid === uid)!;
+      const cand = units.filter((u2) => u2.alive && u2.side === 'player' && u2.uid !== uid && dist(u2.pos, c.pos) <= 3).sort((x, y) => (y.def.pilot.melee + y.def.pilot.ranged) - (x.def.pilot.melee + x.def.pilot.ranged))[0];
+      if (cand) {
+        cand.empowerForNextAttack = true;
+        empowerLog = `\u2694 EMPOWER — ${cand.def.name} bristles with warlight`;
+      }
+    }
     const u = units.find((x) => x.uid === uid)!;
     const tiles = movementRange(s.map, units, u);
     set({
       units,
       spiritForUid: null,
       usedSupport: true,
-      log: trustLog || purgeLog || cheerLog || wishLog || gravityLog || decoyLog || hymnLog || empLog || phalanxLog || sanctLog || awakenLog || charityLog || siphonLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), [trustLog, purgeLog, cheerLog, wishLog, gravityLog, decoyLog, hymnLog, empLog, phalanxLog, sanctLog, awakenLog, charityLog, siphonLog].filter(Boolean).join(' · ')) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
+      log: trustLog || purgeLog || cheerLog || wishLog || gravityLog || decoyLog || hymnLog || empLog || phalanxLog || sanctLog || awakenLog || charityLog || siphonLog || empowerLog ? push(push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`), [trustLog, purgeLog, cheerLog, wishLog, gravityLog, decoyLog, hymnLog, empLog, phalanxLog, sanctLog, awakenLog, charityLog, siphonLog, empowerLog].filter(Boolean).join(' · ')) : push(s.log, `${u.def.name} uses ${SPIRITS[sp].name}`),
       moveTiles: s.menuForUid ? new Map() : tiles,
     });
   },
