@@ -95,6 +95,7 @@ function buffNames(u: UnitState): string[] {
   if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
   if (u.crimsonUntilEndOfEnemyPhase) names.push('CRIMSON VERSE');
   if (u.goreUntilEndOfEnemyPhase) names.push('GORE VERSE');
+  if (u.mirageUntilEndOfEnemyPhase) names.push('MIRAGE VERSE');
   if (u.scopeUntilEndOfEnemyPhase) names.push('SCOPE VERSE');
   if ((u.doomTurns ?? 0) > 0) names.push(`DOOM ${u.doomTurns}`);
   if (u.ghostNext) names.push('GHOST VERSE');
@@ -496,7 +497,7 @@ export function SidePanel() {
                           <Text style={styles.tgtCnt} numberOfLines={1}>
                             {cw ? `↩ CNT ~${cDmg} (${cHc}%)` : '↩ no counter in range'} · CRIT {critChance(unit, e)}%{fb > 0 ? ` · ▣FORM +${fb}` : ''}{pin ? ' · ⇄PIN +10%' : ''}
                             {(e.def.resists?.[s.pendingWeapon!.kind] ?? 0) > 0 ? ` · 🛡RES −${Math.round((e.def.resists![s.pendingWeapon!.kind] ?? 0) * 100)}%` : ''}
-                            {findSupport(s.units, unit.uid, e) ? ' · ⇒SUP' : ''}
+                            {` · ⇢${dist(unit.pos, e.pos)}t`}{findSupport(s.units, unit.uid, e) ? ' · ⇒SUP' : ''}
                           </Text>
                         </View>
                         <View style={styles.tgtHitBox}>

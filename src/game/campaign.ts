@@ -170,6 +170,7 @@ export const PARTS: Record<string, PartDef> = {
   trainingManual: { id: 'trainingManual', name: 'Training Manual', desc: 'AIM drills — AIM focus grants +25 hit instead of +15', price: 1500, aimBoost: 10 },
   glassReactor: { id: 'glassReactor', name: 'Glass Reactor', desc: 'Overclocked core — +15% damage but -100 armor', price: 1700, dmg: 15, armor: -100 },
   warDrum: { id: 'warDrum', name: 'War Drum', desc: 'Kill chant — +3 Will per kill (soul-fed reactor)' , price: 1600, willOnKill: 3 },
+  hunterScope: { id: 'hunterScope', name: 'Hunter Scope', desc: 'Marking optics — +10 hit and +10% damage vs marked or exposed targets', price: 1800, accBoost: 10, markDmg: 10 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -310,6 +311,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'ironwill', name: 'Ironwill', desc: '+4% damage per point per 10 Will above 100' },
   { id: 'vigilant', name: 'Vigilant', desc: '+5% damage per point vs targets that moved this turn' },
   { id: 'bloodfrenzy', name: 'Bloodfrenzy', desc: '+4% damage per point per enemy adjacent to the target (max 3)' },
+  { id: 'spectral', name: 'Spectral', desc: '+5% damage per point vs targets that have not moved this turn' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1402,6 +1404,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_godhand', name: 'GODHAND', desc: 'Land a single blow of 150,000+ damage', rewardCr: 20000 },
   { id: 'h_apexgod', name: 'APEX GOD', desc: 'Reach NG+7 or beyond', rewardCr: 22000 },
   { id: 'h_omegatitan', name: 'OMEGA TITAN', desc: 'Earn S rank on 50 missions', rewardCr: 24000 },
+  { id: 'h_apexphantom', name: 'APEX PHANTOM', desc: 'One pilot reaches 500 career kills', rewardCr: 26000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1681,6 +1684,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.ngPlus ?? 0) >= 7;
     case 'h_omegatitan':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 50;
+    case 'h_apexphantom':
+      return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 500);
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
