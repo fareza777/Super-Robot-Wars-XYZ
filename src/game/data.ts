@@ -139,6 +139,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   phantomverse: { id: 'phantomverse', name: 'Phantom Verse', cost: 50, desc: 'Ghost protocol — attacks by allies within 3 tiles cannot be countered until end of enemy phase' },
   crimsonverse: { id: 'crimsonverse', name: 'Crimson Verse', cost: 50, desc: 'Blood pact — allies within 3 tiles recover 15% hull on each kill until end of enemy phase' },
   scopeverse: { id: 'scopeverse', name: 'Scope Verse', cost: 45, desc: 'Targeting hymn — allies within 3 tiles +15 hit vs marked or exposed targets until end of enemy phase' },
+  doomverse: { id: 'doomverse', name: 'Doom Verse', cost: 50, desc: 'Entropy chant — enemies within 3 tiles decay 8% hull per turn for 2 turns' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
