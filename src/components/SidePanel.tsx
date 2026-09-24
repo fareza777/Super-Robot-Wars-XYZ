@@ -308,7 +308,7 @@ export function SidePanel() {
             {buffNames(unit).length > 0 && (
               <View style={styles.buffRow}>
                 {buffNames(unit).map((n) => (
-                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK'].includes(n) || n.startsWith('DOOM') ? '#ff9d7a' : '#8af0ff' }]}>✦ {n}</Text>
+                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK'].includes(n) || n.startsWith('DOOM') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : '#8af0ff' }]}>✦ {n}</Text>
                 ))}
               </View>
             )}
@@ -643,7 +643,7 @@ export function SidePanel() {
             {buffNames(inspect).length > 0 && (
               <View style={styles.buffRow}>
                 {buffNames(inspect).map((n) => (
-                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK'].includes(n) || n.startsWith('DOOM') ? '#ff9d7a' : '#8af0ff' }]}>✦ {n}</Text>
+                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK'].includes(n) || n.startsWith('DOOM') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : '#8af0ff' }]}>✦ {n}</Text>
                 ))}
               </View>
             )}
