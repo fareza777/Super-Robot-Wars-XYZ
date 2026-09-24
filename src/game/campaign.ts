@@ -169,6 +169,7 @@ export const PARTS: Record<string, PartDef> = {
   focusLens: { id: 'focusLens', name: 'Focus Lens', desc: 'Kill-matrix optics — +8% critical chance', price: 1600, crit: 8 },
   trainingManual: { id: 'trainingManual', name: 'Training Manual', desc: 'AIM drills — AIM focus grants +25 hit instead of +15', price: 1500, aimBoost: 10 },
   glassReactor: { id: 'glassReactor', name: 'Glass Reactor', desc: 'Overclocked core — +15% damage but -100 armor', price: 1700, dmg: 15, armor: -100 },
+  warDrum: { id: 'warDrum', name: 'War Drum', desc: 'Kill chant — +3 Will per kill (soul-fed reactor)' , price: 1600, willOnKill: 3 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -308,6 +309,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'highvolt', name: 'Highvolt', desc: '+5% damage per point while EN at or above 50%' },
   { id: 'ironwill', name: 'Ironwill', desc: '+4% damage per point per 10 Will above 100' },
   { id: 'vigilant', name: 'Vigilant', desc: '+5% damage per point vs targets that moved this turn' },
+  { id: 'bloodfrenzy', name: 'Bloodfrenzy', desc: '+4% damage per point per enemy adjacent to the target (max 3)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -346,7 +348,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse', 'goreverse'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1399,6 +1401,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_eternum', name: 'ETERNUM', desc: 'One pilot reaches 400 career kills', rewardCr: 19000 },
   { id: 'h_godhand', name: 'GODHAND', desc: 'Land a single blow of 150,000+ damage', rewardCr: 20000 },
   { id: 'h_apexgod', name: 'APEX GOD', desc: 'Reach NG+7 or beyond', rewardCr: 22000 },
+  { id: 'h_omegatitan', name: 'OMEGA TITAN', desc: 'Earn S rank on 50 missions', rewardCr: 24000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1676,6 +1679,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.maxHitEver ?? 0) >= 150000;
     case 'h_apexgod':
       return (s.ngPlus ?? 0) >= 7;
+    case 'h_omegatitan':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 50;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

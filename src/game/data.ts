@@ -143,6 +143,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   flowverse: { id: 'flowverse', name: 'Flow Verse', cost: 45, desc: 'Surge hymn — allies within 3 tiles instantly recover +20 EN' },
   truthedge: { id: 'truthedge', name: 'Truth Edge', cost: 50, desc: 'Decisive strike — the next hit cannot graze; near-misses become full hits at +20% damage' },
   oathverse: { id: 'oathverse', name: 'Oath Verse', cost: 55, desc: 'Shared vow — allies within 3 tiles gain +600 armor until end of enemy phase' },
+  goreverse: { id: 'goreverse', name: 'Gore Verse', cost: 45, desc: 'Berserk aura — allies within 3 tiles deal +12% damage while hull is below 50%, until end of enemy phase' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

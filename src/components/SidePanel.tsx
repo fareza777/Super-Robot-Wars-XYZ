@@ -94,6 +94,7 @@ function buffNames(u: UnitState): string[] {
   if (u.truthedgeNext) names.push('TRUTH EDGE');
   if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
   if (u.crimsonUntilEndOfEnemyPhase) names.push('CRIMSON VERSE');
+  if (u.goreUntilEndOfEnemyPhase) names.push('GORE VERSE');
   if (u.scopeUntilEndOfEnemyPhase) names.push('SCOPE VERSE');
   if ((u.doomTurns ?? 0) > 0) names.push(`DOOM ${u.doomTurns}`);
   if (u.ghostNext) names.push('GHOST VERSE');
@@ -172,7 +173,7 @@ export function SidePanel() {
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Pressable onPress={() => setShowRoster((v) => !v)} style={({ pressed }) => [{ flex: 1 }, pressed && { opacity: 0.7 }]}>
           <Text style={styles.counts}>
-            <Text style={{ color: '#8affc0' }}>Ally {alivePlayers(s).length}</Text> · <Text style={{ color: '#ff8a8a' }}>Enemy</Text> {s.missionCh.fog ? `${aliveEnemies(s).filter((e) => fogLit(s.units, e.pos)).length}/${aliveEnemies(s).length}` : aliveEnemies(s).length} · <Text style={{ color: '#ffd34d' }}>☠{s.kills}</Text>  {showRoster ? '▲' : '▼'}
+            <Text style={{ color: '#8affc0' }}>Ally {alivePlayers(s).length}</Text> · <Text style={{ color: '#ff8a8a' }}>Enemy</Text> {s.missionCh.fog ? `${aliveEnemies(s).filter((e) => fogLit(s.units, e.pos)).length}/${aliveEnemies(s).length}` : aliveEnemies(s).length} · <Text style={{ color: '#ffd34d' }}>☠{s.kills}</Text>  · <Text style={{ color: '#9fd8ff' }}>T{s.turn}</Text> {showRoster ? '▲' : '▼'}
           </Text>
         </Pressable>
         <Pressable onPress={s.toggleDanger} style={({ pressed }) => [styles.dangerBtn, s.dangerZone && styles.dangerBtnOn, pressed && { opacity: 0.7 }]}>
