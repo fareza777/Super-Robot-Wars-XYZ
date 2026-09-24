@@ -135,6 +135,7 @@ export const PARTS: Record<string, PartDef> = {
   pointMauler: { id: 'pointMauler', name: 'Point Mauler', desc: 'Close-quarters chamber — +15% damage at point-blank range', price: 1600, pointMauler: true },
   omenScope: { id: 'omenScope', name: 'Omen Scope', desc: 'Ω-reader — +15% damage vs bosses in phase two', price: 1800, omenScope: true },
   eagleEye: { id: 'eagleEye', name: 'Eagle Eye', desc: 'Recon optics — fog of war reveals +2 tiles further', price: 1500, eagleEye: true },
+  haloScope: { id: 'haloScope', name: 'Halo Scope', desc: 'Ring reticle — +15 hit with weapons of range 6+', price: 1400, haloScope: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -240,6 +241,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'sureshot', name: 'Sure Shot', desc: '+6% damage per point on shots at 85%+ hit' },
   { id: 'wildfire', name: 'Wildfire', desc: '+3% damage per point per burning enemy (max 3) — feeds the blaze' },
   { id: 'archer', name: 'Archer', desc: '+4% damage per point per tile of range beyond 3 (max 3 tiles)' },
+  { id: 'stormeye', name: 'Stormeye', desc: '+5% damage per point while your Will exceeds the target' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -282,7 +284,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1297,6 +1299,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_partsbaron', name: 'PARTS BARON', desc: 'Own 20 different equipment parts', rewardCr: 2200 },
   { id: 'h_platinum', name: 'PLATINUM', desc: 'Earn A rank or better on 20 missions', rewardCr: 3500 },
   { id: 'h_frontiermaster', name: 'FRONTIER MASTER', desc: 'Clear 20 side missions', rewardCr: 3400 },
+  { id: 'h_masterclass', name: 'MASTER CLASS', desc: 'Earn MASTERY ★ on 20 missions', rewardCr: 3600 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1506,6 +1509,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S' || r === 'A').length >= 20;
     case 'h_frontiermaster':
       return (s.sideCleared ?? []).length >= 20;
+    case 'h_masterclass':
+      return (s.masteryDone ?? []).length >= 20;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

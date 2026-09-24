@@ -109,6 +109,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   bulwarkaria: { id: 'bulwarkaria', name: 'Bulwark Aria', cost: 45, desc: 'Anchoring hymn — allies within 3 tiles cannot be knocked back until the end of the enemy phase' },
   thrillkill: { id: 'thrillkill', name: 'Thrill Kill', cost: 40, desc: 'Predator rush — your next hit grants +15 Will if it kills' },
   pinverse: { id: 'pinverse', name: 'Pin Verse', cost: 45, desc: 'Binding chorus — hits landed by allies within 3 tiles also slow the target until the end of the enemy phase' },
+  tideverse: { id: 'tideverse', name: 'Tide Verse', cost: 50, desc: 'Surging refrain — allies within 3 tiles gain +1 movement until the end of the enemy phase' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
