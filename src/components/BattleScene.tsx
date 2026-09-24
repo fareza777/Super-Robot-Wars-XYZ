@@ -1066,7 +1066,7 @@ function ReactionBar({ attacker, defender, weapon, coverUid }: { attacker: UnitS
     <View style={{ position: 'absolute', bottom: '6%', left: (width - W) / 2, width: W, zIndex: 90 }}>
       <View style={{ borderWidth: 1.5, borderColor: '#ffd34d', borderRadius: 12, backgroundColor: 'rgba(8,10,24,0.92)', padding: 10 }}>
         <Text style={{ color: '#ffd34d', fontSize: 12, fontWeight: '900', letterSpacing: 2, textAlign: 'center' }}>
-          INCOMING — {weapon.name} · {inHc}% · ~{inDmg} DMG
+          ⚠ INCOMING — {weapon.name} · {inHc}% · ~{inDmg} DMG
         </Text>
         <Text style={{ color: '#8fa1c7', fontSize: 10, textAlign: 'center', marginTop: 2 }}>How should {defNow.def.pilot.name} answer?</Text>
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>

@@ -55,6 +55,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   warsong: { id: 'warsong', name: 'Warsong', cost: 55, desc: 'Anthem of the Ark — every ally gains +10% damage until end of enemy phase' },
   execute: { id: 'execute', name: 'Execution', cost: 50, desc: 'Coup de grace — your next hit destroys any non-boss, non-elite foe at 20% HP or less' },
   shatter: { id: 'shatter', name: 'Shatter', cost: 45, desc: 'Armor breaker — your next hit treats enemy armor as 50% before damage' },
+  glacial: { id: 'glacial', name: 'Glacial', cost: 40, desc: 'Cryo strike — your next landed hit also inflicts Slow on the target' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

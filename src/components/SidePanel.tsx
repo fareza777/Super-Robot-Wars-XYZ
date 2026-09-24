@@ -25,6 +25,7 @@ function buffNames(u: UnitState): string[] {
   if (u.warsongUntilEndOfEnemyPhase) names.push('WARSONG');
   if (u.executeNext) names.push('EXEC');
   if (u.shatterNext) names.push('SHATTER');
+  if (u.glacialNext) names.push('GLACIAL');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');
