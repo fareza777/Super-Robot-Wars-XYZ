@@ -158,6 +158,7 @@ export const PARTS: Record<string, PartDef> = {
   octaneCell: { id: 'octaneCell', name: 'Octane Cell', desc: 'Hot ammunition — +15% ammo weapon damage, -100 armor', price: 1700, ammoDmg: 15, ventArmor: true },
   orbShield: { id: 'orbShield', name: 'Orb Shield', desc: 'Deflector field — -15% damage from attacks at range 3+', price: 1700, orbShield: 15 },
   vendettaRig: { id: 'vendettaRig', name: 'Vendetta Rig', desc: 'Retaliation targeting — counter-attacks deal +15% damage', price: 1600, counterDmg: 15 },
+  dancerWeave: { id: 'dancerWeave', name: 'Dancer Weave', desc: 'Momentum frame — +10 evade on turns this unit moved', price: 1700, dancerWeave: 1 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -286,6 +287,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'razor', name: 'Razor', desc: '+5% damage per point with pierce weapons' },
   { id: 'retribution', name: 'Retribution', desc: '+6% counter damage per point when hull below half' },
   { id: 'bloodhound', name: 'Bloodhound', desc: '+5% damage per point vs crippled or wounded targets' },
+  { id: 'headhunter', name: 'Headhunter', desc: '+6% damage per point vs boss and elite frames' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1366,6 +1368,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_valhalla', name: 'VALHALLA', desc: 'Reach NG+2 or beyond', rewardCr: 12000 },
   { id: 'h_wareternal', name: 'WAR ETERNAL', desc: 'Score 750 total career kills across the squad', rewardCr: 9000 },
   { id: 'h_harbinger', name: 'HARBINGER', desc: 'One pilot reaches 200 career kills', rewardCr: 8000 },
+  { id: 'h_requiem', name: 'REQUIEM', desc: 'Score 1000 total career kills across the squad', rewardCr: 11000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1621,6 +1624,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return totalKills >= 750;
     case 'h_harbinger':
       return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 200);
+    case 'h_requiem':
+      return totalKills >= 1000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

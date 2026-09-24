@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS } from '../game/campaign';
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { bondMods } from '../game/bonds';
-import { armorOf, bestCounterWeapon, moveRangeOf, critChance, damageOf, dist, enCostOf, findSupport, formationBonus, hasPincer, hitChance, key, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
+import { armorOf, bestCounterWeapon, moveRangeOf, evadeOf, critChance, damageOf, dist, enCostOf, findSupport, formationBonus, hasPincer, hitChance, key, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, fogLit, useGame } from '../game/store';
 import { SpiritId, UnitState } from '../game/types';
 
@@ -90,6 +90,7 @@ function buffNames(u: UnitState): string[] {
   if (u.levinedgeNext) names.push('LEVIN EDGE');
   if (u.rampartUntilEndOfEnemyPhase) names.push('RAMPART VERSE');
   if (u.ravageNext) names.push('RAVAGE VERSE');
+  if (u.ghostNext) names.push('GHOST VERSE');
   if ((u.sirenTurns ?? 0) > 0) names.push(`SIREN VERSE ${u.sirenTurns}`);
   if ((u.clarionTurns ?? 0) > 0) names.push(`CLARION VERSE ${u.clarionTurns}`);
   if (u.lacerateNext) names.push('LACERATE');
@@ -606,7 +607,7 @@ export function SidePanel() {
             <Bar label="SP" val={inspect.sp} max={inspect.def.pilot.maxSp} color="#c9a0ff" />
             <View style={styles.statRow}>
               <Text style={styles.statTxt}>🛡 ARM {armorOf(inspect, s.map)}</Text>
-              <Text style={styles.statTxt}>≫ MOB {inspect.def.mobility}</Text>
+              <Text style={styles.statTxt}>≫ EVA {Math.round(evadeOf(inspect, s.map))}</Text>
               <Text style={styles.statTxt}>▸ MOV {moveRangeOf(inspect)} {inspect.def.moveType === 'air' ? '✈' : '⬢'}</Text>
             </View>
             {(() => { const ti = TERRAIN_INFO[terrainAt(s.map, inspect.pos)]; return ti && (ti.def !== 0 || ti.eva !== 0) ? <Text style={{ color: '#8fa1c7', fontSize: 10.5, marginTop: 3 }}>{ti.glyph} {ti.name}: {ti.def !== 0 ? `${ti.def > 0 ? '+' : ''}${ti.def} ARM` : ''}{ti.def !== 0 && ti.eva !== 0 ? ' · ' : ''}{ti.eva !== 0 ? `${ti.eva > 0 ? '+' : ''}${ti.eva} EVA` : ''}</Text> : null; })()}
