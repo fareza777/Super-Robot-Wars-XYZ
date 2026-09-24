@@ -56,6 +56,7 @@ function buffNames(u: UnitState): string[] {
   if (u.statusproofUntilEndOfEnemyPhase) names.push('WARD MIST');
   if (u.aegisUntilEndOfEnemyPhase) names.push('AEGIS');
   if (u.hemoNext) names.push('HEMORRHAGE');
+  if (u.voidedgeNext) names.push('VOID EDGE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
