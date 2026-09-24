@@ -41,6 +41,7 @@ function buffNames(u: UnitState): string[] {
   if (u.veilUntilEndOfEnemyPhase) names.push('VEIL');
   if (u.counterBuffUntilEndOfEnemyPhase) names.push('WARHORN');
   if (u.counterSealUntilEndOfEnemyPhase) names.push('NO-COUNTER');
+  if (u.guardAuraUntilEndOfEnemyPhase) names.push('SAFEGUARD');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');
@@ -218,6 +219,11 @@ export function SidePanel() {
             <Bar label="WILL" val={unit.will} max={150} color="#ff7a9d" />
             <Bar label="EXP" val={unit.exp} max={100} color="#c9a0ff" />
             <Text style={styles.killsLine}>KILLS {unit.kills} · WILL {unit.will > 100 ? `+${unit.will - 100}% spirit` : 'calm'}</Text>
+            {unit.will > 100 && (
+              <View style={styles.willBar}>
+                <View style={[styles.willFill, { width: `${Math.min(100, ((unit.will - 100) / 60) * 100)}%` }]} />
+              </View>
+            )}
             {!!unit.parts?.length && (
               <Text style={styles.killsLine} numberOfLines={1}>
                 PARTS {unit.parts.map((p) => PARTS[p]?.name ?? p).join(' + ')}
@@ -665,6 +671,8 @@ const styles = StyleSheet.create({
   crateHint: { color: '#ffd34d', fontSize: 8.5, marginTop: 4, fontWeight: '700' },
   rosterBox: { marginTop: 7, backgroundColor: '#0c0e16', borderRadius: 6, padding: 6 },
   traitLine: { color: '#b8a0ff', fontSize: 9, marginTop: 3 },
+  willBar: { height: 4, borderRadius: 2, backgroundColor: '#20263a', marginTop: 4, overflow: 'hidden' },
+  willFill: { height: 4, borderRadius: 2, backgroundColor: '#ffb347' },
   buffRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4 },
   buffChip: { color: '#7de0ff', fontSize: 8, fontWeight: '800', letterSpacing: 1, borderWidth: 1, borderColor: 'rgba(125,224,255,0.4)', backgroundColor: 'rgba(125,224,255,0.08)', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
   rosterRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },

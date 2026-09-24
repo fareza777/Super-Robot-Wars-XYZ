@@ -100,6 +100,7 @@ export const PARTS: Record<string, PartDef> = {
   staticRounds: { id: 'staticRounds', name: 'Static Rounds', desc: 'Landed hits have a 15% chance to overload systems (stun)', price: 1900, statusStun: true },
   phaseCoat: { id: 'phaseCoat', name: 'Phase Coat', desc: 'Dispersive armor — incoming beam damage reduced by 25%', price: 1800, beamGuard: true },
   kineticWeave: { id: 'kineticWeave', name: 'Kinetic Weave', desc: 'Shock-dampening frame — incoming melee damage reduced by 25%', price: 1800, meleeGuard: true },
+  flakCoat: { id: 'flakCoat', name: 'Flak Coat', desc: 'Ablative plating — incoming missile damage reduced by 25%', price: 1800, missileGuard: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -170,6 +171,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'swarmer', name: 'Swarmer', desc: '+5% damage per point with funnel weapons' },
   { id: 'phantomstep', name: 'Phantom Step', desc: '+4 evade per point' },
   { id: 'parry', name: 'Parry', desc: '-5% melee damage taken per point' },
+  { id: 'piercer', name: 'Piercer', desc: 'Attacks ignore +4% of target armor per point' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1192,6 +1194,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_grim', name: 'GRIM HARVEST', desc: 'Reach 150 total career kills across the squad', rewardCr: 2500 },
   { id: 'h_eternal', name: 'ETERNAL PILGRIM', desc: 'Reach New Game+3', rewardCr: 3000 },
   { id: 'h_omega', name: 'OMEGA PURGE', desc: 'Destroy 14+ enemy frames in a single battle', rewardCr: 1800 },
+  { id: 'h_centurion', name: 'CENTURION', desc: 'One pilot reaches 100 career kills', rewardCr: 4000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1330,6 +1333,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.ngPlus >= 3;
     case 'h_omega':
       return (s.kills ?? 0) >= 14;
+    case 'h_centurion':
+      return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 100);
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

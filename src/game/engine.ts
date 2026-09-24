@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus' | 'beamDmg' | 'funnelDmg' | 'missileDmg' | 'gunDmg' | 'ammoRegen' | 'markDmg' | 'spRegen' | 'lowHpDmg' | 'aimBoost' | 'shieldBreak' | 'pinDmg' | 'jamProof' | 'statusBurn' | 'statusBreak' | 'statusMark' | 'statusStun' | 'beamGuard' | 'meleeGuard'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus' | 'beamDmg' | 'funnelDmg' | 'missileDmg' | 'gunDmg' | 'ammoRegen' | 'markDmg' | 'spRegen' | 'lowHpDmg' | 'aimBoost' | 'shieldBreak' | 'pinDmg' | 'jamProof' | 'statusBurn' | 'statusBreak' | 'statusMark' | 'statusStun' | 'beamGuard' | 'meleeGuard' | 'missileGuard'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -191,6 +191,7 @@ export function hitChance(att: UnitState, def: UnitState, w: WeaponDef, map: Map
 export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapDef, crit: boolean, dmgMult = 1, units?: UnitState[]): number {
   let armor = att.breachNextAttack ? 0 : armorOf(def, map);
   if (att.shatterNext) armor = Math.round(armor * 0.5);
+  if (att.skills?.piercer) armor = Math.round(armor * (1 - att.skills.piercer * 0.04));
   const raw = w.power + statFor(att, w) * 10 - (w.pierce ? Math.round(armor * 0.65) : armor);
   let dmg = Math.max(120, Math.round(raw));
   if (crit) dmg = Math.round(dmg * (1.3 + (att.skills?.precision ?? 0) * 0.05));
@@ -201,6 +202,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (def.statuses?.some((fx) => fx.id === 'mark')) dmg = Math.round(dmg * 1.15);
   if (def.exposed || def.statuses?.some((fx) => fx.id === 'mark')) dmg = Math.round(dmg * (1 + partBonus(att, 'markDmg') / 100));
   if (def.skills?.steadfast) dmg = Math.round(dmg * (1 - def.skills.steadfast * 0.06));
+  if (def.guardAuraUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.9);
   if (w.kind === 'melee' && def.skills?.parry) dmg = Math.round(dmg * (1 - def.skills.parry * 0.05));
   if (att.relentlessUntilEndOfEnemyPhase && def.hp < def.def.maxHp / 2) dmg = Math.round(dmg * 1.25);
   if (att.charged) dmg = Math.round(dmg * 1.5);
@@ -282,6 +284,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (res > 0) dmg = Math.round(dmg * (1 - res));
   if (w.kind === 'beam' && partBonus(def, 'beamGuard') > 0) dmg = Math.round(dmg * 0.75);
   if (w.kind === 'melee' && partBonus(def, 'meleeGuard') > 0) dmg = Math.round(dmg * 0.75);
+  if (w.kind === 'missile' && partBonus(def, 'missileGuard') > 0) dmg = Math.round(dmg * 0.75);
   if ((w.antiAir || partBonus(att, 'antiAir')) && def.def.moveType === 'air') dmg = Math.round(dmg * 1.25);
   if (w.ammo != null && partBonus(att, 'ammoDmg')) dmg = Math.round(dmg * (1 + partBonus(att, 'ammoDmg') / 100));
   if (w.sniper && dist(att.pos, def.pos) >= 4) dmg = Math.round(dmg * 1.15);
@@ -1047,6 +1050,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break;
     case 'interfere':
       break;
+    case 'safeguard':
+      break;
     // 'rouse', 'disrupt' and 'trust' affect neighbouring units — applied in store.castSpirit
   }
 }
@@ -1065,6 +1070,7 @@ export function clearTransientForOwnPhase(u: UnitState): void {
   u.veilUntilEndOfEnemyPhase = false;
   u.counterBuffUntilEndOfEnemyPhase = false;
   u.counterSealUntilEndOfEnemyPhase = false;
+  u.guardAuraUntilEndOfEnemyPhase = false;
   u.marksmanUntilEndOfEnemyPhase = false;
   u.warsongUntilEndOfEnemyPhase = false;
   u.frenzyThisTurn = false;
