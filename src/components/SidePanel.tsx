@@ -261,7 +261,7 @@ export function SidePanel() {
         {/* weapon pick while menu open — hidden while the spirit submenu is up */}
         {s.menuForUid && !s.pendingWeapon && !spiritUnit && unit && (
           <View style={styles.menu}>
-            <Text style={styles.menuTitle}>ACTION</Text>
+            <Text style={styles.menuTitle}>ACTION · {unit.def.name}</Text>
             {unit.def.weapons.map((w) => {
               const ammoLeft = w.ammo != null ? unit.ammo[w.id] ?? 0 : null;
               const noEn = unit.en < w.enCost;

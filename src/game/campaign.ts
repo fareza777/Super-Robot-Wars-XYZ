@@ -116,6 +116,7 @@ export const PARTS: Record<string, PartDef> = {
   survivalRig: { id: 'survivalRig', name: 'Survival Rig', desc: 'Emergency nanoloom — regenerates +8% hull per turn while below 40% HP', price: 1600, lowHpRegen: true },
   flakShield: { id: 'flakShield', name: 'Flak Shield', desc: 'Point-defense lattice — +400 armor against attacks from 5+ tiles away', price: 1700, sniperGuard: true },
   sealedHull: { id: 'sealedHull', name: 'Sealed Hull', desc: 'Hazard plating — immune to terrain damage (lava, void, corrosive fields)', price: 1400, terraProof: true },
+  defuseKit: { id: 'defuseKit', name: 'Defuse Kit', desc: 'Mine sweeper rig — this frame steps through minefields without detonating them', price: 1500, defuseKit: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -202,6 +203,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'titanbreaker', name: 'Titanbreaker', desc: '+6% damage per point vs slow siege frames (move range 4 or less)' },
   { id: 'truesight', name: 'Truesight', desc: '+5% damage per point while AIM focus is active — rewards the patient shot' },
   { id: 'backliner', name: 'Backliner', desc: '+6% damage per point while no enemy stands adjacent — clean shooting lanes' },
+  { id: 'bombard', name: 'Bombard', desc: '+5% damage per point with MAP/area weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1240,6 +1242,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_paragon', name: 'PARAGON', desc: 'Earn battle rank S in 18 missions', rewardCr: 2500 },
   { id: 'h_apex', name: 'APEX PILOT', desc: 'Score 15000+ in the VR Simulator', rewardCr: 4000 },
   { id: 'h_perfectionist', name: 'PERFECTIONIST', desc: 'Earn MASTERY ★ in 25 missions', rewardCr: 3500 },
+  { id: 'h_frontier', name: 'FRONTIER SWEEP', desc: 'Clear 8 side missions', rewardCr: 2200 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1410,6 +1413,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.simBest ?? 0) >= 15000;
     case 'h_perfectionist':
       return (s.masteryDone ?? []).length >= 25;
+    case 'h_frontier':
+      return (s.sideCleared ?? []).length >= 8;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
