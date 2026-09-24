@@ -111,6 +111,7 @@ function buffNames(u: UnitState): string[] {
   if (u.siphonUntilEndOfEnemyPhase) names.push('SIPHON VERSE');
   if (u.salvoUntilEndOfEnemyPhase) names.push('SALVO VERSE');
   if (u.shelterUntilEndOfEnemyPhase) names.push('SHELTER VERSE');
+  if (u.juggernautUntilEndOfEnemyPhase) names.push('JUGGERNAUT VERSE');
   if (u.scopeUntilEndOfEnemyPhase) names.push('SCOPE VERSE');
   if ((u.doomTurns ?? 0) > 0) names.push(`DOOM ${u.doomTurns}`);
   if (u.ghostNext) names.push('GHOST VERSE');
@@ -565,7 +566,7 @@ export function SidePanel() {
               .map((u) => (
                 <View key={u.uid} style={styles.rosterRow}>
                   <Text style={[styles.rosterName, u.acted && styles.rosterActed]} numberOfLines={1}>
-                    {u.npc ? '🛡 ' : ''}{u.dmgDealt === topDealt && topDealt > 0 ? '◆ ' : ''}
+                    {u.npc ? '🛡 ' : ''}{u.dmgDealt === topDealt && topDealt > 0 ? '◆ ' : ''}{u.def.moveType === 'air' ? '✈ ' : '⬢ '}
                     {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>{u.attacksMade ? <Text style={{ color: '#8b94b8' }}> ⚔{u.attacksMade}</Text> : null}{s.units.some((o) => o.alive && o.side === u.side && o.uid !== u.uid && dist(o.pos, u.pos) <= 1) ? <Text style={{ color: '#8af0ff' }}> ⚭</Text> : null}{u.acted ? <Text style={{ color: '#4dff7a' }}> ✓</Text> : null}
                   </Text>
                   <View style={{ flex: 1 }}>
@@ -601,7 +602,7 @@ export function SidePanel() {
                   ) : (
                     <View key={u.uid} style={styles.rosterRow}>
                       <Text style={[styles.rosterName, { color: '#ffb0a0' }]} numberOfLines={1}>
-                        {u.def.boss || u.elite ? '★ ' : ''}{u.phase2 ? 'Ω ' : ''}
+                        {u.def.boss || u.elite ? '★ ' : ''}{u.phase2 ? 'Ω ' : ''}{u.def.moveType === 'air' ? '✈ ' : '⬢ '}
                         {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>
                         {(u.statuses?.length ?? 0) > 0 ? <Text style={{ color: '#ff9d7a' }}> ⌛{u.statuses!.length}</Text> : null}
                         {u.crippled ? <Text style={{ color: '#ff9d7a' }}> ⛓</Text> : null}

@@ -190,6 +190,7 @@ export const PARTS: Record<string, PartDef> = {
   mirageWeave: { id: 'mirageWeave', name: 'Mirage Weave', desc: 'Phase-shift coating — +15 evade', price: 1900, evade: 15 },
   nullOptics: { id: 'nullOptics', name: 'Null Optics', desc: 'Void-sight matrix — +12 hit and +10% critical chance', price: 1900, accBoost: 12, crit: 10 },
   throneRelic: { id: 'throneRelic', name: 'Throne Relic', desc: 'Sovereign core — pilot regenerates +5 SP each turn', price: 2000, spRegen: 5 },
+  reactorMk2: { id: 'reactorMk2', name: 'Reactor MK-II', desc: 'Second-stage core — +20 EN regenerated each turn', price: 2000, enRegen: 20 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -353,6 +354,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'polluter', name: 'Polluter', desc: '+4% damage per point against targets carrying any status effect' },
   { id: 'finale', name: 'Finale', desc: '+8% damage per point when the target is the last hostile standing' },
   { id: 'sunderborn', name: 'Sunderborn', desc: '+6% damage per point against targets with sundered or rended armor' },
+  { id: 'landslide', name: 'Landslide', desc: '+5% damage per point against land-type frames' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1467,6 +1469,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_tycoon', name: 'TYCOON', desc: 'Hold 250,000 credits at once', rewardCr: 66000 },
   { id: 'h_cosmic', name: 'COSMIC', desc: 'Land a single blow of 1,000,000+ damage', rewardCr: 68000 },
   { id: 'h_vrgod', name: 'VR GOD', desc: 'Score 40,000+ in the VR Simulator', rewardCr: 70000 },
+  { id: 'h_warmachine', name: 'WARMACHINE', desc: '3000 total career kills across the squad', rewardCr: 72000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1790,6 +1793,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.maxHitEver ?? 0) >= 1000000;
     case 'h_vrgod':
       return (s.simBest ?? 0) >= 40000;
+    case 'h_warmachine':
+      return totalKills >= 3000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
