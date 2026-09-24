@@ -64,6 +64,7 @@ function buffNames(u: UnitState): string[] {
   if (u.sanctumUntilEndOfEnemyPhase) names.push('SANCTUM');
   if (u.knockNext) names.push('TEMPEST EDGE');
   if (u.oathUntilEndOfEnemyPhase) names.push('IRON OATH');
+  if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
@@ -598,6 +599,7 @@ export function SidePanel() {
                   .join(' · ')}
               </Text>
             )}
+            <Text style={[styles.menuTitle, { color: '#8fa1c7' }]}>ARMAMENT</Text>
             {inspect.def.weapons.map((w) => (
               <Text key={w.id} style={[styles.weapLine, w.ammo != null && (inspect.ammo[w.id] ?? 0) <= 0 && { color: '#ff8a8a' }]} numberOfLines={1}>
                 {w.kind === 'melee' ? '⚔' : w.kind === 'gun' ? '⌖' : w.kind === 'beam' ? '✦' : w.kind === 'missile' ? '▲' : '◈'} {w.name} · POW {w.power} · R{w.rangeMin}-{w.rangeMax}

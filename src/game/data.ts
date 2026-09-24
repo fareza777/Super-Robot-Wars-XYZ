@@ -101,6 +101,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   sanctumhymn: { id: 'sanctumhymn', name: 'Sanctum Hymn', cost: 50, desc: 'Aegis chorus — allies within 3 tiles gain +400 armor until the end of the enemy phase' },
   tempestedge: { id: 'tempestedge', name: 'Tempest Edge', cost: 45, desc: 'Gale strike — your next hit hurls the target 1 tile backward' },
   ironoath: { id: 'ironoath', name: 'Iron Oath', cost: 45, desc: 'Unbreakable vow — +600 armor and enemies prioritize this frame until the end of the enemy phase' },
+  lacerate: { id: 'lacerate', name: 'Lacerate', cost: 40, desc: 'Rending blow — your next hit also cracks the target armor (break)' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
