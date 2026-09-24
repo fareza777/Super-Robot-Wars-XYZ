@@ -48,6 +48,7 @@ function buffNames(u: UnitState): string[] {
   if (u.trueShotNext) names.push('TRUE SHOT');
   if (u.dischordUntilEndOfEnemyPhase) names.push('DISCHORD');
   if (u.absolveUntilEndOfEnemyPhase) names.push('ABSOLUTION');
+  if (u.judgeNext) names.push('JUDGEMENT');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');
@@ -491,7 +492,7 @@ export function SidePanel() {
                     {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>
                   </Text>
                   <View style={styles.rosterBarTrack}>
-                    <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%` }]} />
+                    <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.hp / u.def.maxHp > 0.5 ? '#4dff7a' : u.hp / u.def.maxHp > 0.25 ? '#ffd34d' : '#ff8a5a' }]} />
                   </View>
                   <Text style={styles.rosterHp}>{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
                 </View>
@@ -514,7 +515,7 @@ export function SidePanel() {
                         {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>
                       </Text>
                       <View style={[styles.rosterBarTrack, { backgroundColor: '#2a1216' }]}>
-                        <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: '#ff5a5a' }]} />
+                        <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.hp / u.def.maxHp > 0.5 ? '#ff5a5a' : u.hp / u.def.maxHp > 0.25 ? '#ff9d4d' : '#c92a2a' }]} />
                       </View>
                       <Text style={styles.rosterHp}>{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
                     </View>
