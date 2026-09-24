@@ -202,6 +202,7 @@ export const PARTS: Record<string, PartDef> = {
   venomRounds: { id: 'venomRounds', name: 'Venom Rounds', desc: 'Toxic payload — landed hits can ignite (25%) and paint (25%) the target', price: 2100, statusBurn: true, statusMark: true },
   bloodPlate: { id: 'bloodPlate', name: 'Blood Plate', desc: 'Crimson laminate — +100 armor and +10% damage while hull is below 50%', price: 2100, armor: 100, lowHpDmg: 10 },
   triadCell: { id: 'triadCell', name: 'Triad Cell', desc: 'Tri-core array — beam and gun weapons +10% damage', price: 2100, beamDmg: 10, gunDmg: 10 },
+  wardenPlate: { id: 'wardenPlate', name: 'Warden Plate', desc: 'Sentinel laminate — incoming melee and missile damage reduced by 25%', price: 2100, meleeGuard: true, missileGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -376,6 +377,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'saboteur', name: 'Saboteur', desc: '+5% damage per point vs targets unable to counter' },
   { id: 'barrierbane', name: 'Barrierbane', desc: '+6% damage per point vs barrier-protected frames' },
   { id: 'huntsman', name: 'Huntsman', desc: '+5% damage per point vs targets at 30-70% hull' },
+  { id: 'guardbreaker', name: 'Guardbreaker', desc: '+6% damage per point vs targets under defensive stances (grit/guard/oath/fortress/defiance/bastion)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1502,6 +1504,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_magnate', name: 'MAGNATE', desc: 'Hold 500,000 credits at once', rewardCr: 90000 },
   { id: 'h_paladin', name: 'PALADIN', desc: 'Clear 40 distinct missions', rewardCr: 92000 },
   { id: 'h_warpaint', name: 'WARPAINT', desc: '4000 total career kills across the squad', rewardCr: 94000 },
+  { id: 'h_liberator', name: 'LIBERATOR', desc: 'Clear 40 side missions', rewardCr: 96000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1849,6 +1852,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.keys(s.missionRank ?? {}).length >= 40;
     case 'h_warpaint':
       return totalKills >= 4000;
+    case 'h_liberator':
+      return s.sideCleared.length >= 40;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

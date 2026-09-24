@@ -102,6 +102,7 @@ function buffNames(u: UnitState): string[] {
   if (u.splatterNext) names.push('SPLATTER EDGE');
   if (u.doomNext) names.push('DOOM EDGE');
   if (u.flareNext) names.push('FLARE EDGE');
+  if ((u.mendTurns ?? 0) > 0) names.push(`MEND VERSE ${u.mendTurns}`);
   if (u.rended) names.push('RENDED');
   if (u.phantomUntilEndOfEnemyPhase) names.push('PHANTOM VERSE');
   if (u.crimsonUntilEndOfEnemyPhase) names.push('CRIMSON VERSE');
@@ -634,7 +635,7 @@ export function SidePanel() {
                       <Text style={[styles.rosterHp, { color: '#7fd0b0', width: 30 }]}>≫{Math.round(evadeOf(u, s.map))}</Text>
                       <Text style={[styles.rosterHp, { color: '#9fd8ff', width: 26 }]}>⇄{moveRangeOf(u)}</Text>
                       {(u.doomTurns ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#ff9d7a', width: 24 }]}>☠{u.doomTurns}</Text>}
-                      <Text style={[styles.rosterHp, { color: '#35c9ff', width: 30 }]}>⛽{u.en}</Text>
+                      <Text style={[styles.rosterHp, { color: u.en < u.def.maxEn * 0.25 ? '#ff9d7a' : '#35c9ff', width: 30 }]}>⛽{u.en}</Text>
                     </View>
                   ),
                 )}
