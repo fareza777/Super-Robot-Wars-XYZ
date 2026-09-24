@@ -52,7 +52,7 @@ export function MissionSelect() {
             {ch.mastery && (
               <Text style={styles.masteryLine}>{s.masteryDone.includes(ch.id) ? '★' : '☆'} MASTERY: {ch.mastery.desc}{s.masteryDone.includes(ch.id) ? ' ✓' : ''}</Text>
             )}
-            {s.missionRank[ch.id] && <Text style={styles.rankTag}>RANK {s.missionRank[ch.id]}</Text>}
+            {s.missionRank[ch.id] && <Text style={[styles.rankTag, { color: RANK_ACCENT[s.missionRank[ch.id]] ?? '#c8d4f0', borderColor: RANK_ACCENT[s.missionRank[ch.id]] ?? '#c8d4f0' }]}>RANK {s.missionRank[ch.id]}</Text>}
             <View style={styles.mainDeploy}>
               <Text style={styles.mainDeployTxt}>{done ? 'ALL CLEAR' : 'DEPLOY ▸'}</Text>
             </View>
@@ -98,7 +98,7 @@ export function MissionSelect() {
                   <View style={{ flex: 1 }}>
                     <View style={styles.sideTop}>
                       <Text style={styles.sideName}>{m.name.toUpperCase()}</Text>
-                      {rank && <Text style={styles.rankTag}>RANK {rank}</Text>}
+                      {rank && <Text style={[styles.rankTag, { color: RANK_ACCENT[rank] ?? '#c8d4f0', borderColor: RANK_ACCENT[rank] ?? '#c8d4f0' }]}>RANK {rank}</Text>}
                       {m.repeatable && <Text style={styles.repTag}>⟳ REPLAYABLE</Text>}
                       {cleared && <Text style={styles.clearedTag}>CLEARED</Text>}
                       {locked && <Text style={styles.lockTag}>CLEAR CH.{m.unlockCh}</Text>}
@@ -124,6 +124,8 @@ export function MissionSelect() {
     </View>
   );
 }
+
+const RANK_ACCENT: Record<string, string> = { S: '#ffd34d', A: '#8affc0', B: '#9fd8ff', C: '#c8d4f0' };
 
 const THEME_ACCENT: Record<string, string> = {
   void: '#b48aff', desert: '#e8c06a', fortress: '#8fb0d8', moon: '#c8d0e0', ruins: '#7ad88a',

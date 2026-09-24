@@ -71,6 +71,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   warhorn: { id: 'warhorn', name: 'Warhorn', cost: 40, desc: 'Battle horn — allies within 3 tiles deal +10% counter damage until end of enemy phase' },
   skyfall: { id: 'skyfall', name: 'Skyfall', cost: 45, desc: 'Anti-air dive — your next hit deals +35% damage to an airborne frame' },
   avenger: { id: 'avenger', name: 'Avenger', cost: 45, desc: 'Vengeful stance — your next counter-attack deals +50% damage' },
+  reaper: { id: 'reaper', name: 'Reaper', cost: 50, desc: 'Dirge of the fallen — your next hit deals +10% damage per squad frame destroyed this battle' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

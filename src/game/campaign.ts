@@ -97,6 +97,7 @@ export const PARTS: Record<string, PartDef> = {
   incendiaryRounds: { id: 'incendiaryRounds', name: 'Incendiary Rounds', desc: 'Landed hits have a 25% chance to ignite the target (burn)', price: 1600, statusBurn: true },
   sunderRounds: { id: 'sunderRounds', name: 'Sunder Rounds', desc: 'Landed hits have a 20% chance to crack armor (break)', price: 1600, statusBreak: true },
   tracerRounds: { id: 'tracerRounds', name: 'Tracer Rounds', desc: 'Landed hits have a 30% chance to paint the target (mark)', price: 1500, statusMark: true },
+  staticRounds: { id: 'staticRounds', name: 'Static Rounds', desc: 'Landed hits have a 15% chance to overload systems (stun)', price: 1900, statusStun: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -164,6 +165,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'cannonade', name: 'Cannonade', desc: '+5% damage per point with missile weapons' },
   { id: 'gunsmith', name: 'Gunsmith', desc: '+5% damage per point with gun weapons' },
   { id: 'luminance', name: 'Luminance', desc: '+5% damage per point with beam weapons' },
+  { id: 'swarmer', name: 'Swarmer', desc: '+5% damage per point with funnel weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -202,7 +204,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1183,6 +1185,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_scholar', name: 'MASTERY SCHOLAR', desc: 'Earn MASTERY ★ on 8 missions', rewardCr: 1500 },
   { id: 'h_cataclysm', name: 'CATACLYSM', desc: 'Deal 12000+ damage in a single strike', rewardCr: 2000 },
   { id: 'h_consistent', name: 'CONSISTENT', desc: 'Earn rank A or better on 10 missions', rewardCr: 1200 },
+  { id: 'h_grim', name: 'GRIM HARVEST', desc: 'Reach 150 total career kills across the squad', rewardCr: 2500 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1315,6 +1318,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.maxHitEver ?? 0) >= 12000;
     case 'h_consistent':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'A' || r === 'S').length >= 10;
+    case 'h_grim':
+      return Object.values(s.killsByDef ?? {}).reduce((a, b) => a + b, 0) >= 150;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

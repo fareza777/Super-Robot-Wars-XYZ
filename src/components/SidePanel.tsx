@@ -36,6 +36,7 @@ function buffNames(u: UnitState): string[] {
   if (u.exertNext) names.push('EXERT');
   if (u.skyfallNext) names.push('SKYFALL');
   if (u.avengerNext) names.push('AVENGER');
+  if (u.reaperNext) names.push('REAPER');
   if (u.veilUntilEndOfEnemyPhase) names.push('VEIL');
   if (u.counterBuffUntilEndOfEnemyPhase) names.push('WARHORN');
   if (u.snipeForNextAttack) names.push('SNIPE');
