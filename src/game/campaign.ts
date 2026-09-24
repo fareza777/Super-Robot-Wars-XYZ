@@ -173,6 +173,7 @@ export const PARTS: Record<string, PartDef> = {
   hunterScope: { id: 'hunterScope', name: 'Hunter Scope', desc: 'Marking optics — +10 hit and +10% damage vs marked or exposed targets', price: 1800, accBoost: 10, markDmg: 10 },
   maliceCoil: { id: 'maliceCoil', name: 'Malice Coil', desc: 'Hex emitter — landed hits have a 30% chance to mark the target', price: 1600, statusMark: true },
   benedictionSeal: { id: 'benedictionSeal', name: 'Benediction Seal', desc: 'Hymn conduits — allies within 2 tiles regen +3% hull per turn', price: 1700, auraHeal: 3 },
+  horizonLens: { id: 'horizonLens', name: 'Horizon Lens', desc: 'Horizon array — +12% damage vs targets 4+ tiles away', price: 1800, rangeDmg: 12 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -316,6 +317,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'spectral', name: 'Spectral', desc: '+5% damage per point vs targets that have not moved this turn' },
   { id: 'hexblade', name: 'Hexblade', desc: '+5% damage per point vs suppressed targets' },
   { id: 'graceful', name: 'Graceful', desc: '+5% damage per point after dodging at least once this phase' },
+  { id: 'flakmaster', name: 'Flakmaster', desc: '+6% damage per point vs air frames' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1411,6 +1413,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_apexphantom', name: 'APEX PHANTOM', desc: 'One pilot reaches 500 career kills', rewardCr: 26000 },
   { id: 'h_voidregent', name: 'VOID REGENT', desc: 'Earn MASTERY ★ on 45 missions', rewardCr: 28000 },
   { id: 'h_seraphim', name: 'SERAPHIM', desc: 'Reach NG+8 or beyond', rewardCr: 30000 },
+  { id: 'h_godslayer', name: 'GODSLAYER', desc: 'Earn S rank on 60 missions', rewardCr: 32000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1696,6 +1699,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.masteryDone?.length ?? 0) >= 45;
     case 'h_seraphim':
       return (s.ngPlus ?? 0) >= 8;
+    case 'h_godslayer':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 60;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
