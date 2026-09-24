@@ -166,6 +166,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   juggernautverse: { id: 'juggernautverse', name: 'Juggernaut Verse', cost: 50, desc: 'Siege hymn — allies within 3 tiles deal +15% damage with melee weapons until end of enemy phase' },
   splatteredge: { id: 'splatteredge', name: 'Splatter Edge', cost: 45, desc: 'Overkill eruption — if the next hit kills, excess damage erupts onto every enemy adjacent to the kill' },
   voidverse: { id: 'voidverse', name: 'Void Verse', cost: 50, desc: 'Dispel wave — enemies within 3 tiles lose every phase buff and buffing aura' },
+  ruinverse: { id: 'ruinverse', name: 'Ruin Verse', cost: 50, desc: 'Entropy wave — enemies within 3 tiles suffer armor break and decay 8% hull per turn for 2 turns' },
   vigilverse: { id: 'vigilverse', name: 'Vigil Verse', cost: 50, desc: 'Watchful hymn — allies within 3 tiles counter at +15% damage until end of enemy phase' },
   mortaledge: { id: 'mortaledge', name: 'Mortal Edge', cost: 50, desc: 'Execution focus — the next attack that lands is a guaranteed critical' },
   sentinelverse: { id: 'sentinelverse', name: 'Sentinel Verse', cost: 50, desc: 'Guardian hymn — allies within 3 tiles intercept attacks aimed at their adjacent allies until end of enemy phase' },
