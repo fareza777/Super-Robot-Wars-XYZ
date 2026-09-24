@@ -67,6 +67,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   overrun: { id: 'overrun', name: 'Overrun', cost: 45, desc: 'Shock assault — your next attack cannot be countered' },
   exert: { id: 'exert', name: 'Exert', cost: 40, desc: 'Push the reactor — your next attack gains +20 hit and +15% damage (costs 10 EN)' },
   veil: { id: 'veil', name: 'Veil', cost: 45, desc: 'Sensor mist — allies within 3 tiles gain +20 evade until end of enemy phase' },
+  cantata: { id: 'cantata', name: 'Cantata', cost: 40, desc: 'Chorus of resolve — allies within 3 tiles recover +10 SP' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

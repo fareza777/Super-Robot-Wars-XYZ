@@ -574,11 +574,14 @@ export function SidePanel() {
           <View style={styles.logBox}>
             <Text style={styles.logHead}>BATTLE LOG</Text>
             <ScrollView nestedScrollEnabled>
-              {s.log.map((l, i) => (
-                <Text key={i} style={[styles.logLine, i === 0 && styles.logLineHot]}>
-                  {l}
-                </Text>
-              ))}
+              {s.log.map((l, i) => {
+                const c = /^[☠✖💀]/.test(l) ? '#ff8a8a' : /^[✚♪💞]/.test(l) ? '#8affc0' : /^[⚔▣🛡⇄📡]/.test(l) ? '#9fd8ff' : /^[★✦🏅♛◆]/.test(l) ? '#ffd34d' : undefined;
+                return (
+                  <Text key={i} style={[styles.logLine, i === 0 && styles.logLineHot, c ? { color: c } : null]}>
+                    {l}
+                  </Text>
+                );
+              })}
             </ScrollView>
           </View>
         )}

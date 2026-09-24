@@ -93,6 +93,7 @@ export const PARTS: Record<string, PartDef> = {
   aimEnhancer: { id: 'aimEnhancer', name: 'Aim Enhancer', desc: 'The AIM action grants +12 extra hit', price: 1300, aimBoost: 12 },
   breachCharge: { id: 'breachCharge', name: 'Breach Charge', desc: '+15% damage against barrier-protected frames', price: 1600, shieldBreak: 15 },
   pinBreaker: { id: 'pinBreaker', name: 'Pin Breaker', desc: '+12% damage against enemies pinned between two allies', price: 1700, pinDmg: 12 },
+  eccmSuite: { id: 'eccmSuite', name: 'ECCM Suite', desc: 'Targeting suite immune to enemy ECM jammer fields', price: 1500, jamProof: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -156,6 +157,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'surge', name: 'Surge', desc: '+4% damage per point while reactor EN is above 75%' },
   { id: 'reflex', name: 'Reflex', desc: 'Take 5% less counter-attack damage per point' },
   { id: 'outflank', name: 'Outflank', desc: '+6% damage per point against targets that cannot counter' },
+  { id: 'foeswarm', name: 'Foeswarm', desc: '+3% damage per point for each enemy within 2 tiles' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -198,7 +200,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1171,6 +1173,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_returner', name: 'SECOND TOUR', desc: 'Reach New Game++ (NG+2)', rewardCr: 2000 },
   { id: 'h_reaper', name: 'REAPER COMPANY', desc: 'Log 100 total career kills across the squad', rewardCr: 1800 },
   { id: 'h_records', name: 'ACE RECORDS', desc: 'Earn S rank on 7 missions', rewardCr: 1400 },
+  { id: 'h_simlord', name: 'SIM LORD', desc: 'Score 9000+ in the VR Simulator', rewardCr: 2000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1295,6 +1298,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.killsByDef ?? {}).reduce((a, b) => a + b, 0) >= 100;
     case 'h_records':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 7;
+    case 'h_simlord':
+      return (s.simBest ?? 0) >= 9000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
