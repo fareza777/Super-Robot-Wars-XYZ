@@ -186,6 +186,7 @@ export const PARTS: Record<string, PartDef> = {
   sabotRounds: { id: 'sabotRounds', name: 'Sabot Rounds', desc: 'Demolition load — landed hits have a 25% chance to crack the target\'s armor (break)', price: 1800, statusBreak: true },
   gyroStabilizer: { id: 'gyroStabilizer', name: 'Gyro Stabilizer', desc: 'Inertial rig — +1 movement and +8 evade', price: 1900, move: 1, evade: 8 },
   blitzVerniers: { id: 'blitzVerniers', name: 'Blitz Verniers', desc: 'Assault thrusters — +1 movement and +10 EN regen each turn', price: 1900, move: 1, enRegen: 10 },
+  oracleLens: { id: 'oracleLens', name: 'Oracle Lens', desc: 'Predictive array — +15 hit', price: 1900, accBoost: 15 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -345,6 +346,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'bloodtrance', name: 'Bloodtrance', desc: '+4% damage per point for each enemy adjacent to this frame (up to 3)' },
   { id: 'snipersoul', name: 'Snipersoul', desc: '+6% damage per point with sniper-tagged weapons' },
   { id: 'aegisshield', name: 'Aegis Shield', desc: '+4% damage per point while standing on defensive terrain' },
+  { id: 'stunlock', name: 'Stunlock', desc: '+6% damage per point against stunned targets' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1455,6 +1457,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_pantheon', name: 'PANTHEON', desc: '2000 total career kills across the squad', rewardCr: 58000 },
   { id: 'h_omniscient', name: 'OMNISCIENT', desc: 'Reach NG+11 or beyond', rewardCr: 60000 },
   { id: 'h_warlord', name: 'WARLORD', desc: 'One pilot reaches 750 career kills', rewardCr: 62000 },
+  { id: 'h_arsenal', name: 'ARSENAL', desc: 'Own 60 different parts', rewardCr: 64000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1770,6 +1773,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.ngPlus ?? 0) >= 11;
     case 'h_warlord':
       return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 750);
+    case 'h_arsenal':
+      return (s.partsOwned ?? []).length >= 60;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
