@@ -160,6 +160,11 @@ export function SidePanel() {
           <Text style={[styles.dangerTxt, s.dangerZone && { color: '#ff8080' }]}>⚠ DANGER</Text>
         </Pressable>
       </View>
+      {objType === 'rout' && (
+        <View style={styles.objCard}>
+          <Text style={styles.objTxt}>⚔ ROUT ALL HOSTILES · {s.units.filter((u) => u.side === 'enemy' && u.alive).length} LEFT</Text>
+        </View>
+      )}
       {objType === 'protect' && npcU && (
         <View style={styles.objCard}>
           <Text style={styles.objTxt}>🛡 PROTECT CONVOY · T{s.turn}/{s.missionCh.protectTurns ?? 8}</Text>

@@ -121,6 +121,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   valiantverse: { id: 'valiantverse', name: 'Valiant Verse', cost: 45, desc: 'Underdog anthem — allies within 3 tiles gain +12% damage while outnumbered until the end of the enemy phase' },
   rageverse: { id: 'rageverse', name: 'Rage Verse', cost: 40, desc: 'Berserker hymn — the next attack hits harder the lower this frame hull is (up to +40%)' },
   exposeverse: { id: 'exposeverse', name: 'Expose Verse', cost: 50, desc: 'Sensor reveal — enemies within 3 tiles are exposed (+20 hit taken, +25% damage) until struck' },
+  darkverse: { id: 'darkverse', name: 'Dark Verse', cost: 45, desc: 'Reactor drain — enemies within 3 tiles lose 15 EN instantly' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

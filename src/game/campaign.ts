@@ -147,6 +147,7 @@ export const PARTS: Record<string, PartDef> = {
   landVernier: { id: 'landVernier', name: 'Land Verniers', desc: 'Traction array — ground frames gain +1 movement', price: 1500, landVernier: 1 },
   lastStandCore: { id: 'lastStandCore', name: 'Last Stand Core', desc: 'Final bulwark — +500 armor while hull is below 25%', price: 1800, lastStandCore: true },
   siegePlate: { id: 'siegePlate', name: 'Siege Plate', desc: 'Anchored armor — +300 armor while this frame has not moved this turn', price: 1700, siegePlate: true },
+  shockCoil: { id: 'shockCoil', name: 'Shock Coil', desc: 'Thornweb — melee attackers take 100 backlash damage', price: 1700, shockCoil: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -264,6 +265,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'chainblade', name: 'Chainblade', desc: '+6% damage per point with chain-arc weapons' },
   { id: 'exploiter', name: 'Exploiter', desc: '+5% damage per point vs targets already dodging this phase' },
   { id: 'viper', name: 'Viper', desc: '+6% damage per point vs slowed targets' },
+  { id: 'disruptor', name: 'Disruptor', desc: '+5% damage per point vs targets below 50% EN' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -306,7 +308,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1333,6 +1335,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_dominator', name: 'DOMINATOR', desc: 'Earn A rank or better on 25 missions', rewardCr: 3800 },
   { id: 'h_ranger', name: 'RANGER', desc: 'Clear 25 side missions', rewardCr: 4200 },
   { id: 'h_elitecorps', name: 'ELITE CORPS', desc: 'Six pilots reach 40 career kills', rewardCr: 5000 },
+  { id: 'h_transcendent', name: 'TRANSCENDENT', desc: 'Earn MASTERY ★ in 30 missions', rewardCr: 5500 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1566,6 +1569,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.sideCleared ?? []).length >= 25;
     case 'h_elitecorps':
       return Object.values(s.pilotProg ?? {}).filter((p) => (p.kills ?? 0) >= 40).length >= 6;
+    case 'h_transcendent':
+      return s.masteryDone.length >= 30;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
