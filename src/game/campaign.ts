@@ -120,6 +120,7 @@ export const PARTS: Record<string, PartDef> = {
   bulwarkPlate: { id: 'bulwarkPlate', name: 'Bulwark Plate', desc: 'Terrain-locked armor — +400 armor while standing on defensive ground', price: 1500, fortArmor: true },
   soulLantern: { id: 'soulLantern', name: 'Soul Lantern', desc: 'Spirit-fed reactor — +5 Will for every kill this frame lands', price: 1600, willOnKill: true },
   linkageGear: { id: 'linkageGear', name: 'Linkage Gear', desc: 'Squad uplink — support-fire contribution raised to 70% damage', price: 1700, supportDmg: true },
+  revengeFeed: { id: 'revengeFeed', name: 'Revenge Feed', desc: 'Vengeance loop — taking a hit feeds the pilot +4 SP', price: 1600, spOnHurt: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -210,6 +211,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'ruinbreaker', name: 'Ruin Breaker', desc: '+7% damage per point vs frames with crumbling armor (sundered or broken)' },
   { id: 'artillerist', name: 'Artillerist', desc: '+5% damage per point vs targets 4 or more tiles away' },
   { id: 'paintburst', name: 'Paintburst', desc: '+7% damage per point vs painted targets (marked or exposed)' },
+  { id: 'fortsoul', name: 'Fortress Soul', desc: '-5% damage taken per point while on defensive terrain' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1252,6 +1254,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_hoarder', name: 'HOARDER', desc: 'Stockpile 40 consumable items', rewardCr: 2000 },
   { id: 'h_tide', name: 'TIDEBREAKER', desc: 'Win a mission on the open sea', rewardCr: 800 },
   { id: 'h_ashwalker', name: 'ASH WALKER', desc: 'Win a mission on a volcano map', rewardCr: 800 },
+  { id: 'h_summit', name: 'SUMMIT', desc: 'Win a mission on a mountain map', rewardCr: 800 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1430,6 +1433,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.missionCh?.theme === 'sea';
     case 'h_ashwalker':
       return s.missionCh?.theme === 'volcano';
+    case 'h_summit':
+      return s.missionCh?.theme === 'mountain';
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

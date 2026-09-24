@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS } from '../game/campaign';
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { bondMods } from '../game/bonds';
-import { bestCounterWeapon, critChance, damageOf, dist, formationBonus, hasPincer, hitChance, key, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
+import { bestCounterWeapon, critChance, damageOf, dist, findSupport, formationBonus, hasPincer, hitChance, key, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
 import { aliveEnemies, alivePlayers, fogLit, useGame } from '../game/store';
 import { SpiritId, UnitState } from '../game/types';
 
@@ -57,6 +57,7 @@ function buffNames(u: UnitState): string[] {
   if (u.aegisUntilEndOfEnemyPhase) names.push('AEGIS');
   if (u.hemoNext) names.push('HEMORRHAGE');
   if (u.voidedgeNext) names.push('VOID EDGE');
+  if (u.standFirmUntilEndOfEnemyPhase) names.push('STAND FIRM');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
@@ -445,6 +446,7 @@ export function SidePanel() {
                           <Text style={styles.tgtCnt} numberOfLines={1}>
                             {cw ? `↩ CNT ~${cDmg} (${cHc}%)` : '↩ no counter in range'} · CRIT {critChance(unit, e)}%{fb > 0 ? ` · ▣FORM +${fb}` : ''}{pin ? ' · ⇄PIN +10%' : ''}
                             {(e.def.resists?.[s.pendingWeapon!.kind] ?? 0) > 0 ? ` · 🛡RES −${Math.round((e.def.resists![s.pendingWeapon!.kind] ?? 0) * 100)}%` : ''}
+                            {findSupport(s.units, unit.uid, e) ? ' · ⇒SUP' : ''}
                           </Text>
                         </View>
                         <View style={styles.tgtHitBox}>
