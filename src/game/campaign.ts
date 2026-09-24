@@ -112,6 +112,7 @@ export const PARTS: Record<string, PartDef> = {
   overchargeCell: { id: 'overchargeCell', name: 'Overcharge Cell', desc: 'Volatile reactor — CHARGE grants an additional +15% damage', price: 1700, chargeBoost: true },
   groundPounder: { id: 'groundPounder', name: 'Ground Pounder', desc: 'Seismic array — your attacks ignore terrain armor bonuses', price: 1800, terrainArmor: true },
   warheadCache: { id: 'warheadCache', name: 'Warhead Cache', desc: 'Deep magazines — MAP/area weapons deal +15% damage', price: 1700, mapDmg: true },
+  jammerSkin: { id: 'jammerSkin', name: 'Jammer Skin', desc: 'ECM coating — attackers that hit this frame have a 25% chance of a suppress glitch (-20 hit)', price: 1700, jammerSkin: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -194,6 +195,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'dirgesong', name: 'Dirge Song', desc: '+8% damage per point while a squad frame lies fallen this battle' },
   { id: 'burnout', name: 'Burnout', desc: '+6% damage per point while EN is at 25% or lower' },
   { id: 'divebomb', name: 'Divebomb', desc: '+6% damage per point when an air frame strikes a ground target' },
+  { id: 'arsenalmind', name: 'Arsenal Mind', desc: '+3% damage per point for each part equipped on this frame' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1228,6 +1230,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_devastator', name: 'DEVASTATOR', desc: 'Land a single hit of 20000 damage', rewardCr: 2000 },
   { id: 'h_twinaces', name: 'TWIN ACES', desc: 'Two pilots reach 50 career kills', rewardCr: 2200 },
   { id: 'h_tycoon', name: 'TYCOON', desc: 'Hold 200000 credits', rewardCr: 4000 },
+  { id: 'h_bloodbath', name: 'BLOODBATH', desc: 'Destroy 18 enemies in a single battle', rewardCr: 1500 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1390,6 +1393,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.pilotProg ?? {}).filter((p) => (p.kills ?? 0) >= 50).length >= 2;
     case 'h_tycoon':
       return s.credits >= 200000;
+    case 'h_bloodbath':
+      return (s.kills ?? 0) >= 18;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
