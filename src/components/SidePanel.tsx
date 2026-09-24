@@ -62,6 +62,7 @@ function buffNames(u: UnitState): string[] {
   if (u.firelinkUntilEndOfEnemyPhase) names.push('FIRELINK');
   if (u.dreadedUntilEndOfEnemyPhase) names.push('DREADED');
   if (u.sanctumUntilEndOfEnemyPhase) names.push('SANCTUM');
+  if (u.knockNext) names.push('TEMPEST EDGE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
@@ -562,9 +563,9 @@ export function SidePanel() {
             <Bar label="EN" val={inspect.en} max={inspect.def.maxEn} color="#4db4ff" />
             <Bar label="WILL" val={inspect.will} max={150} color="#ff7a9d" />
             <View style={styles.statRow}>
-              <Text style={styles.statTxt}>ARM {inspect.def.armor}</Text>
-              <Text style={styles.statTxt}>MOB {inspect.def.mobility}</Text>
-              <Text style={styles.statTxt}>MOV {inspect.def.moveRange}</Text>
+              <Text style={styles.statTxt}>🛡 ARM {inspect.def.armor}</Text>
+              <Text style={styles.statTxt}>≫ MOB {inspect.def.mobility}</Text>
+              <Text style={styles.statTxt}>▸ MOV {inspect.def.moveRange}</Text>
             </View>
             {inspect.def.pilot.trait && (
               <Text style={styles.traitLine} numberOfLines={1}>

@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0, truesight: 0, backliner: 0, bombard: 0, ruinbreaker: 0, artillerist: 0, paintburst: 0, fortsoul: 0, hexsurge: 0, coldsteel: 0, capacitor: 0, ironbound: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0, truesight: 0, backliner: 0, bombard: 0, ruinbreaker: 0, artillerist: 0, paintburst: 0, fortsoul: 0, hexsurge: 0, coldsteel: 0, capacitor: 0, ironbound: 0, coolloop: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus' | 'beamDmg' | 'funnelDmg' | 'missileDmg' | 'gunDmg' | 'ammoRegen' | 'markDmg' | 'spRegen' | 'lowHpDmg' | 'aimBoost' | 'shieldBreak' | 'pinDmg' | 'jamProof' | 'statusBurn' | 'statusBreak' | 'statusMark' | 'statusStun' | 'beamGuard' | 'meleeGuard' | 'missileGuard' | 'regenPlate' | 'drainCoil' | 'gunGuard' | 'funnelGuard' | 'counterRange' | 'mapGuard' | 'killDmg' | 'lowHpArmor' | 'chargeBoost' | 'terrainArmor' | 'mapDmg' | 'jammerSkin' | 'lowHpRegen' | 'sniperGuard' | 'terraProof' | 'fortArmor' | 'willOnKill' | 'supportDmg' | 'spOnHurt' | 'rageEn' | 'auraDmg' | 'critGuard' | 'enOnKill'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg' | 'chaff' | 'enSaver' | 'antiAir' | 'ammoDmg' | 'bossDmg' | 'counterDmg' | 'range' | 'coFire' | 'auraHeal' | 'knockProof' | 'enDmg' | 'knockPlus' | 'beamDmg' | 'funnelDmg' | 'missileDmg' | 'gunDmg' | 'ammoRegen' | 'markDmg' | 'spRegen' | 'lowHpDmg' | 'aimBoost' | 'shieldBreak' | 'pinDmg' | 'jamProof' | 'statusBurn' | 'statusBreak' | 'statusMark' | 'statusStun' | 'beamGuard' | 'meleeGuard' | 'missileGuard' | 'regenPlate' | 'drainCoil' | 'gunGuard' | 'funnelGuard' | 'counterRange' | 'mapGuard' | 'killDmg' | 'lowHpArmor' | 'chargeBoost' | 'terrainArmor' | 'mapDmg' | 'jammerSkin' | 'lowHpRegen' | 'sniperGuard' | 'terraProof' | 'fortArmor' | 'willOnKill' | 'supportDmg' | 'spOnHurt' | 'rageEn' | 'auraDmg' | 'critGuard' | 'enOnKill' | 'lastAmmo'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -105,7 +105,8 @@ export function enCostOf(u: UnitState, w: WeaponDef): number {
   const r = u.skills?.esave ?? 0;
   const p = partBonus(u, 'enSaver');
   const rage = u.hp < u.def.maxHp * 0.5 && partBonus(u, 'rageEn') > 0 ? 0.6 : 1;
-  const mult = (1 - 0.04 * r) * (1 - p / 100) * rage;
+  const cool = 1 - Math.min((u.skills?.coolloop ?? 0) * 0.06, 0.3);
+  const mult = (1 - 0.04 * r) * (1 - p / 100) * rage * cool;
   return mult < 1 ? Math.max(1, Math.round(w.enCost * mult)) : w.enCost;
 }
 
@@ -323,6 +324,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (w.mapRange != null && partBonus(att, 'mapDmg') > 0) dmg = Math.round(dmg * 1.15);
   if ((w.antiAir || partBonus(att, 'antiAir')) && def.def.moveType === 'air') dmg = Math.round(dmg * 1.25);
   if (w.ammo != null && partBonus(att, 'ammoDmg')) dmg = Math.round(dmg * (1 + partBonus(att, 'ammoDmg') / 100));
+  if (w.ammo != null && (att.ammo[w.id] ?? w.ammo) <= 2 && partBonus(att, 'lastAmmo') > 0) dmg = Math.round(dmg * 1.15);
   if (w.sniper && dist(att.pos, def.pos) >= 4) dmg = Math.round(dmg * 1.15);
   dmg = Math.round(dmg * dmgMult * willDmgMult(att));
   // i-field barrier — weak hits are swallowed by the field (SRW barrier mechanic)
@@ -612,7 +614,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   if (result.hit && def.alive && w.breaker && !result.graze) def.sundered = true;
   if (result.hit && def.alive && w.willDrain) def.will = Math.max(100, def.will - 5);
   // bash knockback — a landed hit hurls the survivor one tile away from the strike
-  if (result.hit && def.alive && !result.destroyed && w.knockback && partBonus(def, 'knockProof') === 0) {
+  if (result.hit && def.alive && !result.destroyed && (w.knockback || att.knockNext) && partBonus(def, 'knockProof') === 0) {
     for (let ki = 0; ki < (partBonus(att, 'knockPlus') > 0 ? 2 : 1); ki++) {
     const kx = Math.sign(def.pos.x - att.pos.x);
     const ky = Math.sign(def.pos.y - att.pos.y);
@@ -743,7 +745,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   att.bladeNext = false;
   att.trueShotNext = false;
   att.judgeNext = false;
-  att.goreNext = false; att.rampageNext = false; att.hemoNext = false; att.voidedgeNext = false; att.plunderNext = false;
+  att.goreNext = false; att.rampageNext = false; att.hemoNext = false; att.voidedgeNext = false; att.plunderNext = false; att.knockNext = false;
   att.gutsForNextAttack = false;
   att.snipeForNextAttack = false;
   att.soulForNextAttack = false;
@@ -809,7 +811,7 @@ export function applyMapAttack(state: GameState, attackerUid: string, targetTile
   att.bladeNext = false;
   att.trueShotNext = false;
   att.judgeNext = false;
-  att.goreNext = false; att.rampageNext = false; att.hemoNext = false; att.voidedgeNext = false; att.plunderNext = false;
+  att.goreNext = false; att.rampageNext = false; att.hemoNext = false; att.voidedgeNext = false; att.plunderNext = false; att.knockNext = false;
   att.gutsForNextAttack = false;
 
   let hits = 0;
@@ -881,7 +883,7 @@ export function applyAllAttack(state: GameState, attackerUid: string, weaponId: 
   att.bladeNext = false;
   att.trueShotNext = false;
   att.judgeNext = false;
-  att.goreNext = false; att.rampageNext = false; att.hemoNext = false; att.voidedgeNext = false; att.plunderNext = false;
+  att.goreNext = false; att.rampageNext = false; att.hemoNext = false; att.voidedgeNext = false; att.plunderNext = false; att.knockNext = false;
   att.gutsForNextAttack = false;
   att.soulForNextAttack = false;
   att.gutsForNextAttack = false;
@@ -1176,6 +1178,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'dreadverse':
       break;
     case 'sanctumhymn':
+      break;
+    case 'tempestedge':
+      u.knockNext = true;
       break;
     // 'rouse', 'disrupt' and 'trust' affect neighbouring units — applied in store.castSpirit
   }
