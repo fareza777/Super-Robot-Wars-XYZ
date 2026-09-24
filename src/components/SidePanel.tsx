@@ -107,6 +107,7 @@ function buffNames(u: UnitState): string[] {
   if (u.breachNext) names.push('BREACH EDGE');
   if (u.hollowNext) names.push('HOLLOW EDGE');
   if (u.cinderNext) names.push('CINDER EDGE');
+  if (u.maraudNext) names.push('MARAUD EDGE');
   if (u.repulseUntilEndOfEnemyPhase) names.push('REPULSE VERSE');
   if (u.silencedUntilEndOfEnemyPhase) names.push('SILENCE VERSE');
   if (u.weakenUntilEndOfEnemyPhase) names.push('FEAR VERSE');
@@ -541,7 +542,7 @@ export function SidePanel() {
                             <View style={[styles.tgtBarFill, { width: `${(Math.max(0, e.hp - dmg) / e.def.maxHp) * 100}%`, backgroundColor: '#4dff7a' }]} />
                           </View>
                           <Text style={styles.tgtCnt} numberOfLines={1}>
-                            {cw ? `↩ CNT ~${cDmg} (${cHc}% · ⚡${critChance(e, unit, cw)}%)` : '↩ no counter in range'} · CRIT {critChance(unit, e)}%{fb > 0 ? ` · ▣FORM +${fb}` : ''}{pin ? ` · ⇄PIN +${10 + partBonus(unit, 'pinDmg')}%` : ''}
+                            {cw ? `↩ CNT ~${cDmg} (${cHc}% · ⚡${critChance(e, unit, cw)}%)` : '↩ SAFE — no counter'} · CRIT {critChance(unit, e)}%{fb > 0 ? ` · ▣FORM +${fb}` : ''}{pin ? ` · ⇄PIN +${10 + partBonus(unit, 'pinDmg')}%` : ''}
                             {(e.def.resists?.[s.pendingWeapon!.kind] ?? 0) > 0 ? ` · 🛡RES −${Math.round((e.def.resists![s.pendingWeapon!.kind] ?? 0) * 100)}%` : ''}
                             {` · ⇢${dist(s.pendingMove ?? unit.pos, e.pos)}t`}{findSupport(s.units, unit.uid, e) ? ' · ⇒SUP' : ''}
                           </Text>

@@ -215,6 +215,7 @@ export const PARTS: Record<string, PartDef> = {
   radiantPlate: { id: 'radiantPlate', name: 'Radiant Plate', desc: 'Prism laminate — +100 armor and incoming beam damage reduced by 25%', price: 2300, armor: 100, beamGuard: true },
   vulcanChamber: { id: 'vulcanChamber', name: 'Vulcan Chamber', desc: 'High-pressure bore — gun weapons +15% damage and +8% critical chance', price: 2400, gunDmg: 15, crit: 8 },
   zephyrLoom: { id: 'zephyrLoom', name: 'Zephyr Loom', desc: 'Aerowoven frame — +12 mobility and +6 evade', price: 2400, mobility: 12, evade: 6 },
+  photonVeins: { id: 'photonVeins', name: 'Photon Veins', desc: 'Luminous conduits — +15 EN regen and +5% hull regen per turn', price: 2500, enRegen: 15, hpRegen: 5 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -402,6 +403,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'ashstalker', name: 'Ashstalker', desc: '+6% damage per point vs targets standing on hostile terrain (lava/void)' },
   { id: 'dominant', name: 'Dominant', desc: '+5% damage per point vs targets carrying a smaller arsenal' },
   { id: 'crossfire', name: 'Crossfire', desc: '+5% damage per point vs targets covered by 2+ other allies' },
+  { id: 'reaping', name: 'Reaping', desc: '+6% damage per point vs targets below 25% hull' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -440,7 +442,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse', 'goreverse', 'culledge', 'rendedge', 'overedge', 'splatteredge', 'havocverse', 'maimedge', 'hollowedge'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse', 'goreverse', 'culledge', 'rendedge', 'overedge', 'splatteredge', 'havocverse', 'maimedge', 'hollowedge', 'maraudedge'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1541,6 +1543,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_purgeking', name: 'PURGE KING', desc: '6000 total career kills across the squad', rewardCr: 100000 },
   { id: 'h_sage', name: 'SAGE', desc: 'Earn MASTERY ★ on 70 missions', rewardCr: 100000 },
   { id: 'h_dreamteam', name: 'DREAM TEAM', desc: 'Every pilot reaches 150 career kills', rewardCr: 100000 },
+  { id: 'h_genocider', name: 'GENOCIDER', desc: '7500 total career kills across the squad', rewardCr: 100000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1916,6 +1919,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       const ps = Object.values(s.pilotProg);
       return ps.length >= 4 && ps.every((p) => (p.kills ?? 0) >= 150);
     }
+    case 'h_genocider':
+      return totalKills >= 7500;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
