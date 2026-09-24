@@ -69,6 +69,7 @@ function buffNames(u: UnitState): string[] {
   if (u.hellfireNext) names.push('HELLFIRE');
   if (u.anchoredUntilEndOfEnemyPhase) names.push('BULWARK ARIA');
   if (u.thrillNext) names.push('THRILL KILL');
+  if (u.pinverseUntilEndOfEnemyPhase) names.push('PIN VERSE');
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
@@ -530,7 +531,7 @@ export function SidePanel() {
             <Text style={[styles.menuTitle, { color: '#ff6b6b' }]}>HOSTILES</Text>
             <ScrollView style={{ maxHeight: 92 }} nestedScrollEnabled>
               {s.units
-                .filter((u) => u.side === 'enemy' && u.alive)
+                .filter((u) => u.side === 'enemy' && u.alive && (!s.missionCh.fog || fogLit(s.units, u.pos)))
                 .map((u) =>
                   s.missionCh.fog && !fogLit(s.units, u.pos) ? (
                     <View key={u.uid} style={styles.rosterRow}>

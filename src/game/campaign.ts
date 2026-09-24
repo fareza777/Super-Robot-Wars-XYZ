@@ -134,6 +134,7 @@ export const PARTS: Record<string, PartDef> = {
   surveyRig: { id: 'surveyRig', name: 'Survey Rig', desc: 'Ambush optics — +12% damage vs targets that have not acted', price: 1500, surveyRig: true },
   pointMauler: { id: 'pointMauler', name: 'Point Mauler', desc: 'Close-quarters chamber — +15% damage at point-blank range', price: 1600, pointMauler: true },
   omenScope: { id: 'omenScope', name: 'Omen Scope', desc: 'Ω-reader — +15% damage vs bosses in phase two', price: 1800, omenScope: true },
+  eagleEye: { id: 'eagleEye', name: 'Eagle Eye', desc: 'Recon optics — fog of war reveals +2 tiles further', price: 1500, eagleEye: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -238,6 +239,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'aerobat', name: 'Aerobat', desc: '+5% damage per point while your mobility beats the target' },
   { id: 'sureshot', name: 'Sure Shot', desc: '+6% damage per point on shots at 85%+ hit' },
   { id: 'wildfire', name: 'Wildfire', desc: '+3% damage per point per burning enemy (max 3) — feeds the blaze' },
+  { id: 'archer', name: 'Archer', desc: '+4% damage per point per tile of range beyond 3 (max 3 tiles)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1294,6 +1296,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_graveyard', name: 'GRAVEMAKER', desc: 'Reach 300 total career kills across the squad', rewardCr: 4500 },
   { id: 'h_partsbaron', name: 'PARTS BARON', desc: 'Own 20 different equipment parts', rewardCr: 2200 },
   { id: 'h_platinum', name: 'PLATINUM', desc: 'Earn A rank or better on 20 missions', rewardCr: 3500 },
+  { id: 'h_frontiermaster', name: 'FRONTIER MASTER', desc: 'Clear 20 side missions', rewardCr: 3400 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1501,6 +1504,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.partsOwned ?? []).length >= 20;
     case 'h_platinum':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S' || r === 'A').length >= 20;
+    case 'h_frontiermaster':
+      return (s.sideCleared ?? []).length >= 20;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
