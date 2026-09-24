@@ -117,6 +117,7 @@ export const PARTS: Record<string, PartDef> = {
   flakShield: { id: 'flakShield', name: 'Flak Shield', desc: 'Point-defense lattice — +400 armor against attacks from 5+ tiles away', price: 1700, sniperGuard: true },
   sealedHull: { id: 'sealedHull', name: 'Sealed Hull', desc: 'Hazard plating — immune to terrain damage (lava, void, corrosive fields)', price: 1400, terraProof: true },
   defuseKit: { id: 'defuseKit', name: 'Defuse Kit', desc: 'Mine sweeper rig — this frame steps through minefields without detonating them', price: 1500, defuseKit: true },
+  bulwarkPlate: { id: 'bulwarkPlate', name: 'Bulwark Plate', desc: 'Terrain-locked armor — +400 armor while standing on defensive ground', price: 1500, fortArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -204,6 +205,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'truesight', name: 'Truesight', desc: '+5% damage per point while AIM focus is active — rewards the patient shot' },
   { id: 'backliner', name: 'Backliner', desc: '+6% damage per point while no enemy stands adjacent — clean shooting lanes' },
   { id: 'bombard', name: 'Bombard', desc: '+5% damage per point with MAP/area weapons' },
+  { id: 'ruinbreaker', name: 'Ruin Breaker', desc: '+7% damage per point vs frames with crumbling armor (sundered or broken)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -246,7 +248,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1243,6 +1245,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_apex', name: 'APEX PILOT', desc: 'Score 15000+ in the VR Simulator', rewardCr: 4000 },
   { id: 'h_perfectionist', name: 'PERFECTIONIST', desc: 'Earn MASTERY ★ in 25 missions', rewardCr: 3500 },
   { id: 'h_frontier', name: 'FRONTIER SWEEP', desc: 'Clear 8 side missions', rewardCr: 2200 },
+  { id: 'h_hoarder', name: 'HOARDER', desc: 'Stockpile 40 consumable items', rewardCr: 2000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1415,6 +1418,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.masteryDone ?? []).length >= 25;
     case 'h_frontier':
       return (s.sideCleared ?? []).length >= 8;
+    case 'h_hoarder':
+      return Object.values(s.inventory ?? {}).reduce((a, b) => a + b, 0) >= 40;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

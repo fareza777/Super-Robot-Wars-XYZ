@@ -53,6 +53,7 @@ function buffNames(u: UnitState): string[] {
   if (u.goreNext) names.push('GORELUST');
   if (u.rampageNext) names.push('RAMPAGE');
   if (u.drawfireUntilEndOfEnemyPhase) names.push('DRAWFIRE');
+  if (u.statusproofUntilEndOfEnemyPhase) names.push('WARD MIST');
   if (u.hemoNext) names.push('HEMORRHAGE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
@@ -605,7 +606,7 @@ export function SidePanel() {
             <Text style={styles.logHead}>BATTLE LOG</Text>
             <ScrollView nestedScrollEnabled>
               {s.log.map((l, i) => {
-                const c = /^[☠✖💀]/.test(l) ? '#ff8a8a' : /^[✚♪💞]/.test(l) ? '#8affc0' : /^[⚔▣🛡⇄📡]/.test(l) ? '#9fd8ff' : /^[★✦🏅♛◆]/.test(l) ? '#ffd34d' : undefined;
+                const c = /^[☠✖💀💥]/.test(l) ? '#ff8a8a' : /^[✚♪💞]/.test(l) ? '#8affc0' : /^[⚔▣🛡⇄📡⚡☄⛓]/.test(l) ? '#9fd8ff' : /^[★✦🏅♛◆]/.test(l) ? '#ffd34d' : undefined;
                 return (
                   <Text key={i} style={[styles.logLine, i === 0 && styles.logLineHot, c ? { color: c } : null]}>
                     {l}

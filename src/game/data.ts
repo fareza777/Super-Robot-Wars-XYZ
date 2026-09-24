@@ -91,6 +91,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   drawfire: { id: 'drawfire', name: 'Drawfire', cost: 35, desc: 'Beacon stance — enemies prioritize this frame until the end of the enemy phase' },
   hemorrhage: { id: 'hemorrhage', name: 'Hemorrhage', cost: 50, desc: 'Rending strike — your next hit burns AND paints the target' },
   lockcascade: { id: 'lockcascade', name: 'Lock Cascade', cost: 50, desc: 'Sensor cascade — every enemy within 4 tiles is painted (takes +20 hit, +25% damage on the next hit)' },
+  wardmist: { id: 'wardmist', name: 'Ward Mist', cost: 45, desc: 'Veil of the verse — allies within 3 tiles are immune to enemy status until the end of the enemy phase' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
