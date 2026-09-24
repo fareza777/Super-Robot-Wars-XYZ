@@ -176,7 +176,7 @@ export const PARTS: Record<string, PartDef> = {
   horizonLens: { id: 'horizonLens', name: 'Horizon Lens', desc: 'Horizon array — +12% damage vs targets 4+ tiles away', price: 1800, rangeDmg: 12 },
   citadelPlate: { id: 'citadelPlate', name: 'Citadel Plate', desc: 'Fortress shell — +100 armor, plus +400 more on defensive terrain', price: 1900, armor: 100, fortArmor: true },
   gutsRipper: { id: 'gutsRipper', name: 'Guts Ripper', desc: 'Shredder maw — attacks ignore 20% of target armor', price: 1700, armorShred: 20 },
-  reflexLoom: { id: 'reflexLoom', name: 'Reflex Loom', desc: 'Reflex weave — +15 evade on turns this frame moves', price: 1700, dancerWeave: 15 },
+  reflexLoom: { id: 'reflexLoom', name: 'Reflex Loom', desc: 'Reflex weave — +15 evade on turns this frame moves', price: 1700, dancerWeave: 1.5 },
   mirrorScale: { id: 'mirrorScale', name: 'Mirror Scale', desc: 'Reflexive plating — reflects 20% of hit damage back at the attacker', price: 1800, reflect: 20 },
   choirRelic: { id: 'choirRelic', name: 'Choir Relic', desc: 'Anthem core — pilot regenerates +3 SP every turn', price: 1800, spRegen: 3 },
   warlordSigil: { id: 'warlordSigil', name: 'Warlord Sigil', desc: 'Command crest — adjacent allies deal +12% damage', price: 1900, auraDmg: 12 },
@@ -185,6 +185,7 @@ export const PARTS: Record<string, PartDef> = {
   conductorSeal: { id: 'conductorSeal', name: 'Conductor Seal', desc: 'Choir amplifier — pilot regenerates +4 SP every turn', price: 1900, spRegen: 4 },
   sabotRounds: { id: 'sabotRounds', name: 'Sabot Rounds', desc: 'Demolition load — landed hits have a 25% chance to crack the target\'s armor (break)', price: 1800, statusBreak: true },
   gyroStabilizer: { id: 'gyroStabilizer', name: 'Gyro Stabilizer', desc: 'Inertial rig — +1 movement and +8 evade', price: 1900, move: 1, evade: 8 },
+  hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -340,6 +341,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'isolator', name: 'Isolator', desc: '+6% damage per point vs targets with no adjacent ally' },
   { id: 'scourge', name: 'Scourge', desc: '+5% damage per point vs targets suffering 2+ statuses' },
   { id: 'bombardier', name: 'Bombardier', desc: '+5% damage per point with MAP/area weapons' },
+  { id: 'snipersoul', name: 'Snipersoul', desc: '+6% damage per point with sniper-tagged weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1447,6 +1449,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_immaculate', name: 'IMMACULATE', desc: 'Earn S rank on 75 missions', rewardCr: 52000 },
   { id: 'h_divine', name: 'DIVINE', desc: 'Reach NG+10 or beyond', rewardCr: 54000 },
   { id: 'h_infinite', name: 'INFINITE', desc: 'Earn MASTERY ★ on 75 missions', rewardCr: 56000 },
+  { id: 'h_pantheon', name: 'PANTHEON', desc: '2000 total career kills across the squad', rewardCr: 58000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1756,6 +1759,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.ngPlus ?? 0) >= 10;
     case 'h_infinite':
       return (s.masteryDone?.length ?? 0) >= 75;
+    case 'h_pantheon':
+      return totalKills >= 2000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
