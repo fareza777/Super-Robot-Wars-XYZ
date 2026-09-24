@@ -166,6 +166,7 @@ export const PARTS: Record<string, PartDef> = {
   shredGauge: { id: 'shredGauge', name: 'Shred Gauge', desc: 'Armor-piercing oscillator — attacks ignore 15% of target armor', price: 1700, armorShred: 15 },
   riposteRig: { id: 'riposteRig', name: 'Riposte Rig', desc: 'Counter servos — counter-attacks deal +10% damage', price: 1500, counterDmg: 10 },
   menderNode: { id: 'menderNode', name: 'Mender Node', desc: 'Nanite halo — allies within 2 tiles regen +4% hull per turn', price: 1700, auraHeal: 4 },
+  focusLens: { id: 'focusLens', name: 'Focus Lens', desc: 'Kill-matrix optics — +8% critical chance', price: 1600, crit: 8 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -302,6 +303,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'wrathborn', name: 'Wrathborn', desc: '+6% damage per point while hull at or below 40%' },
   { id: 'tracker', name: 'Tracker', desc: '+6% damage per point vs marked or exposed targets' },
   { id: 'carver', name: 'Carver', desc: '+5% damage per point vs frames with 110+ mobility' },
+  { id: 'highvolt', name: 'Highvolt', desc: '+5% damage per point while EN at or above 50%' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1390,6 +1392,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_singularity', name: 'SINGULARITY', desc: 'Earn MASTERY star on 40 missions', rewardCr: 16000 },
   { id: 'h_obsidian', name: 'OBSIDIAN', desc: 'Reach NG+6 or beyond', rewardCr: 17000 },
   { id: 'h_mythic', name: 'MYTHIC', desc: 'One pilot reaches 300 career kills', rewardCr: 18000 },
+  { id: 'h_eternum', name: 'ETERNUM', desc: 'One pilot reaches 400 career kills', rewardCr: 19000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1661,6 +1664,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.ngPlus ?? 0) >= 6;
     case 'h_mythic':
       return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 300);
+    case 'h_eternum':
+      return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 400);
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
