@@ -116,6 +116,7 @@ function buffNames(u: UnitState): string[] {
   if (u.juggernautUntilEndOfEnemyPhase) names.push('JUGGERNAUT VERSE');
   if (u.defianceUntilEndOfEnemyPhase) names.push('DEFIANCE VERSE');
   if (u.havocUntilEndOfEnemyPhase) names.push('HAVOC VERSE');
+  if (u.swiftUntilEndOfEnemyPhase) names.push('SWIFT VERSE');
   if (u.scopeUntilEndOfEnemyPhase) names.push('SCOPE VERSE');
   if ((u.doomTurns ?? 0) > 0) names.push(`DOOM ${u.doomTurns}`);
   if (u.ghostNext) names.push('GHOST VERSE');
@@ -613,7 +614,7 @@ export function SidePanel() {
                       <Text style={[styles.rosterName, { color: '#ffb0a0' }]} numberOfLines={1}>
                         {u.def.boss || u.elite ? '★ ' : ''}{u.phase2 ? 'Ω ' : ''}{u.def.moveType === 'air' ? '✈ ' : '⬢ '}
                         {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>
-                        {(u.statuses?.length ?? 0) > 0 ? <Text style={{ color: '#ff9d7a' }}> ⌛{u.statuses!.length}</Text> : null}
+                        {debuffCount(u) > 0 ? <Text style={{ color: '#ff9d7a' }}> ⌛{debuffCount(u)}</Text> : null}
                         {u.crippled ? <Text style={{ color: '#ff9d7a' }}> ⛓</Text> : null}
                       </Text>
                       <View style={[styles.rosterBarTrack, { backgroundColor: '#2a1216' }]}>

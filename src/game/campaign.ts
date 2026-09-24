@@ -198,6 +198,7 @@ export const PARTS: Record<string, PartDef> = {
   reaperLattice: { id: 'reaperLattice', name: 'Reaper Lattice', desc: 'Executioner frame — ignores 15% armor and counters +15% damage', price: 1900, armorShred: 15, counterDmg: 15 },
   monolith: { id: 'monolith', name: 'Monolith', desc: 'Fortress monolith — +150 armor and 8% less damage taken', price: 2000, armor: 150, dmgTaken: -8 },
   bombardCache: { id: 'bombardCache', name: 'Bombard Cache', desc: 'Artillery stockpile — MAP/area weapons +15% damage and +1 ammo each turn', price: 2000, mapDmg: true, ammoRegen: true },
+  harmonicCore: { id: 'harmonicCore', name: 'Harmonic Core', desc: 'Resonant conduit — spirit costs −10% and pilot regenerates +3 SP each turn', price: 2100, spSaver: true, spRegen: 3 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -368,6 +369,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'godsbreaker', name: 'Godsbreaker', desc: '+5% damage per point against phase-2 bosses' },
   { id: 'momentum', name: 'Momentum', desc: '+4% damage per point per attack already made this battle (cap 3)' },
   { id: 'vitals', name: 'Vitals', desc: '+5% critical damage per point' },
+  { id: 'highhand', name: 'Highhand', desc: '+5% damage per point vs lower-level frames' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1490,6 +1492,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_regicide', name: 'REGICIDE', desc: 'Destroy 15 boss frames across your career', rewardCr: 82000 },
   { id: 'h_aceofgods', name: 'ACE OF GODS', desc: 'One pilot reaches 1000 career kills', rewardCr: 84000 },
   { id: 'h_aeon', name: 'AEON', desc: 'Reach NG+12 or beyond', rewardCr: 86000 },
+  { id: 'h_emperor', name: 'EMPEROR', desc: 'Destroy 20 boss frames across your career', rewardCr: 88000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1829,6 +1832,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 1000);
     case 'h_aeon':
       return (s.ngPlus ?? 0) >= 12;
+    case 'h_emperor':
+      return Object.entries(s.killsByDef ?? {}).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) >= 20;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
