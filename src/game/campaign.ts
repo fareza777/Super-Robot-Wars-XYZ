@@ -148,6 +148,7 @@ export const PARTS: Record<string, PartDef> = {
   lastStandCore: { id: 'lastStandCore', name: 'Last Stand Core', desc: 'Final bulwark — +500 armor while hull is below 25%', price: 1800, lastStandCore: true },
   siegePlate: { id: 'siegePlate', name: 'Siege Plate', desc: 'Anchored armor — +300 armor while this frame has not moved this turn', price: 1700, siegePlate: true },
   shockCoil: { id: 'shockCoil', name: 'Shock Coil', desc: 'Thornweb — melee attackers take 100 backlash damage', price: 1700, shockCoil: true },
+  blazeCoil: { id: 'blazeCoil', name: 'Blaze Coil', desc: 'Incendiary lattice — attackers have a 25% chance to catch fire', price: 1800, blazeCoil: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -266,6 +267,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'exploiter', name: 'Exploiter', desc: '+5% damage per point vs targets already dodging this phase' },
   { id: 'viper', name: 'Viper', desc: '+6% damage per point vs slowed targets' },
   { id: 'disruptor', name: 'Disruptor', desc: '+5% damage per point vs targets below 50% EN' },
+  { id: 'myrmidon', name: 'Myrmidon', desc: '+5% damage per point when attacking without moving' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1336,6 +1338,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_ranger', name: 'RANGER', desc: 'Clear 25 side missions', rewardCr: 4200 },
   { id: 'h_elitecorps', name: 'ELITE CORPS', desc: 'Six pilots reach 40 career kills', rewardCr: 5000 },
   { id: 'h_transcendent', name: 'TRANSCENDENT', desc: 'Earn MASTERY ★ in 30 missions', rewardCr: 5500 },
+  { id: 'h_overlordvr', name: 'OVERLORD', desc: 'Score 30000+ in the VR Simulator', rewardCr: 6000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1571,6 +1574,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.pilotProg ?? {}).filter((p) => (p.kills ?? 0) >= 40).length >= 6;
     case 'h_transcendent':
       return s.masteryDone.length >= 30;
+    case 'h_overlordvr':
+      return (s.simBest ?? 0) >= 30000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

@@ -139,7 +139,7 @@ export function BriefingScreen() {
                 <Text style={[styles.squadName, !on && { color: '#667' }]}>{d.pilot.callsign} · Lv{prog?.level ?? d.level ?? 1}</Text>
                 <Text style={styles.squadUnit} numberOfLines={1}>{d.name}</Text>
                 <Text style={{ color: '#6b7694', fontSize: 8 }} numberOfLines={1}>MOV {d.moveRange} · ARMX{d.weapons.length} · RNG {Math.min(...d.weapons.map((w) => w.rangeMin))}-{Math.max(...d.weapons.map((w) => w.rangeMax))}</Text>
-                {d.pilot.trait && <Text style={{ color: '#9fd0ff', fontSize: 8, fontWeight: '700', letterSpacing: 0.5 }} numberOfLines={1}>◆ {TRAITS[d.pilot.trait].name}</Text>}
+                {d.pilot.trait && <Text style={{ color: d.pilot.faceColor ?? '#9fd0ff', fontSize: 8, fontWeight: '700', letterSpacing: 0.5 }} numberOfLines={1}>◆ {TRAITS[d.pilot.trait].name}</Text>}
                 <Text style={{ color: '#ffd34d', fontSize: 8, fontWeight: '700' }}>{prog?.kills ?? 0} career kills</Text>
                 {woundedPilots.includes(id) && <Text style={{ color: '#ff9d9d', fontSize: 9, fontWeight: '800', letterSpacing: 1 }}>🩹 WOUNDED</Text>}
                 <Text style={styles.deployMark}>{on ? '▣ IN' : '▢ OUT'}</Text>
