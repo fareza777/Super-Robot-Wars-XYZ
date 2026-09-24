@@ -44,6 +44,7 @@ function buffNames(u: UnitState): string[] {
   if (u.guardAuraUntilEndOfEnemyPhase) names.push('SAFEGUARD');
   if (u.suppressDmgUntilEndOfEnemyPhase) names.push('SUPPRESSED');
   if (u.bladeNext) names.push('BLADE');
+  if (u.carnageNext) names.push('CARNAGE');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');
@@ -106,7 +107,7 @@ export function SidePanel() {
   return (
     <View style={styles.panel}>
       <View style={styles.topBar}>
-        <Text style={styles.phaseTxt}>{s.phase === 'enemy' ? 'ENEMY PHASE' : 'PLAYER PHASE'}</Text>
+        <Text style={[styles.phaseTxt, { color: s.phase === 'enemy' ? '#ff8a8a' : '#8affc0' }]}>{s.phase === 'enemy' ? 'ENEMY PHASE' : 'PLAYER PHASE'}</Text>
         <Text style={styles.turnChip}>T{s.turn}</Text>
       </View>
       {s.blizzard ? <Text style={styles.blizzChip}>{s.missionCh.theme === 'desert' ? '🏜 SANDSTORM — ground units -15% hit' : s.missionCh.theme === 'ruins' ? '🌫 ASH STORM — ground units -15% hit' : '❄ BLIZZARD — ground units -15% hit'}</Text> : null}

@@ -77,6 +77,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   safeguard: { id: 'safeguard', name: 'Safeguard', cost: 40, desc: 'Defensive perimeter — allies within 3 tiles take -10% damage until end of enemy phase' },
   blade: { id: 'blade', name: 'Bladestorm', cost: 45, desc: 'Blade dance — your next melee hit deals +40% damage' },
   suppress: { id: 'suppress', name: 'Suppress Fire', cost: 45, desc: 'Covering barrage — enemies within 3 tiles deal -10% damage until end of enemy phase' },
+  carnage: { id: 'carnage', name: 'Carnage', cost: 50, desc: 'Shockwave strike — your next hit splashes 30% damage to enemies adjacent to the target' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

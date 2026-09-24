@@ -103,6 +103,7 @@ export const PARTS: Record<string, PartDef> = {
   flakCoat: { id: 'flakCoat', name: 'Flak Coat', desc: 'Ablative plating — incoming missile damage reduced by 25%', price: 1800, missileGuard: true },
   regenPlate: { id: 'regenPlate', name: 'Regen Plate', desc: 'Nanoweave armor — each landed hit regenerates 5% max HP', price: 2000, regenPlate: true },
   vampCoil: { id: 'vampCoil', name: 'Vampiric Coil', desc: 'Energy siphon — attacks restore 10% of damage dealt as HP', price: 1900, drainCoil: true },
+  bulwarkShell: { id: 'bulwarkShell', name: 'Bulwark Shell', desc: 'Ballistic weave — incoming gun damage reduced by 25%', price: 1800, gunGuard: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -176,6 +177,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'piercer', name: 'Piercer', desc: 'Attacks ignore +4% of target armor per point' },
   { id: 'heavycal', name: 'Heavy Caliber', desc: '+5% damage per point with ammunition weapons' },
   { id: 'anchor', name: 'Anchor', desc: '-5% damage taken per point while this frame did not move' },
+  { id: 'dreadnought', name: 'Dreadnought', desc: '+4% damage per point against lower-level frames' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -214,7 +216,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1201,6 +1203,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_centurion', name: 'CENTURION', desc: 'One pilot reaches 100 career kills', rewardCr: 4000 },
   { id: 'h_warchest', name: 'WAR CHEST', desc: 'Hold 100,000 credits', rewardCr: 3000 },
   { id: 'h_forge', name: 'ELITE FORGE', desc: 'Four pilots reach 35 career kills', rewardCr: 2200 },
+  { id: 'h_legend', name: 'LEGEND', desc: 'Earn S rank on 12 missions', rewardCr: 2500 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1345,6 +1348,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.credits >= 100000;
     case 'h_forge':
       return Object.values(s.pilotProg ?? {}).filter((p) => (p.kills ?? 0) >= 35).length >= 4;
+    case 'h_legend':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 12;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
