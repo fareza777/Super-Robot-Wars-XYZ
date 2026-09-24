@@ -117,6 +117,7 @@ function buffNames(u: UnitState): string[] {
   if (u.defianceUntilEndOfEnemyPhase) names.push('DEFIANCE VERSE');
   if (u.havocUntilEndOfEnemyPhase) names.push('HAVOC VERSE');
   if (u.swiftUntilEndOfEnemyPhase) names.push('SWIFT VERSE');
+  if (u.shroudUntilEndOfEnemyPhase) names.push('SHROUD VERSE');
   if (u.scopeUntilEndOfEnemyPhase) names.push('SCOPE VERSE');
   if ((u.doomTurns ?? 0) > 0) names.push(`DOOM ${u.doomTurns}`);
   if (u.ghostNext) names.push('GHOST VERSE');
@@ -495,6 +496,12 @@ export function SidePanel() {
                 <Text style={styles.hint}>Pick a target — or tap one on the map</Text>
                 {s.units
                   .filter((e) => e.alive && e.side === 'enemy' && s.attackTiles.has(key(e.pos)))
+                  .slice()
+                  .sort((a, b) => {
+                    const ka = a.hp - damageOf(unit, a, s.pendingWeapon!, s.map, false) <= 0 ? 0 : 1;
+                    const kb = b.hp - damageOf(unit, b, s.pendingWeapon!, s.map, false) <= 0 ? 0 : 1;
+                    return ka - kb || a.hp - b.hp;
+                  })
                   .map((e) => {
                     const bm = bondMods(s.bonds, s.units, unit);
                     const fb = formationBonus(s.units, unit);
