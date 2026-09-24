@@ -109,6 +109,7 @@ function buffNames(u: UnitState): string[] {
   if (u.repulseUntilEndOfEnemyPhase) names.push('REPULSE VERSE');
   if (u.silencedUntilEndOfEnemyPhase) names.push('SILENCE VERSE');
   if (u.weakenUntilEndOfEnemyPhase) names.push('FEAR VERSE');
+  if ((u.obscuredTurns ?? 0) > 0) names.push(`VEILBREAK VERSE ${u.obscuredTurns}`);
   if (u.palisadeUntilEndOfEnemyPhase) names.push('PALISADE VERSE');
   // magnumverse is instant — no chip
   if (u.rended) names.push('RENDED');
@@ -210,7 +211,7 @@ export function SidePanel() {
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Pressable onPress={() => setShowRoster((v) => !v)} style={({ pressed }) => [{ flex: 1 }, pressed && { opacity: 0.7 }]}>
           <Text style={styles.counts}>
-            <Text style={{ color: '#8affc0' }}>Ally {alivePlayers(s).length}</Text> · <Text style={{ color: '#ff8a8a' }}>Enemy</Text> {s.missionCh.fog ? `${aliveEnemies(s).filter((e) => fogLit(s.units, e.pos)).length}/${aliveEnemies(s).length}` : aliveEnemies(s).length} · <Text style={{ color: '#ffd34d' }}>☠{s.kills}</Text>  · <Text style={{ color: '#9fd8ff' }}>T{s.turn}</Text> · <Text style={{ color: '#ffd34d' }}>¢{s.credits >= 1000 ? `${Math.floor(s.credits / 1000)}k` : s.credits}</Text> · <Text style={{ color: '#8af0ff' }}>⛽{Math.round(s.units.filter((x) => x.alive && x.side === 'player').reduce((a, x) => a + x.en, 0) / Math.max(1, s.units.filter((x) => x.alive && x.side === 'player').length))}</Text> {showRoster ? '▲' : '▼'}
+            <Text style={{ color: '#8affc0' }}>Ally {alivePlayers(s).length}</Text> · <Text style={{ color: '#ff8a8a' }}>Enemy</Text> {s.missionCh.fog ? `${aliveEnemies(s).filter((e) => fogLit(s.units, e.pos)).length}/${aliveEnemies(s).length}` : aliveEnemies(s).length} · <Text style={{ color: '#ffd34d' }}>☠{s.kills}</Text>  · <Text style={{ color: '#9fd8ff' }}>T{s.turn}</Text> · <Text style={{ color: '#ffd34d' }}>¢{s.credits >= 1000 ? `${Math.floor(s.credits / 1000)}k` : s.credits}</Text> · <Text style={{ color: '#c9a0ff' }}>✦{s.units.filter((x) => x.alive && x.side === 'player').reduce((a, x) => a + x.sp, 0)}</Text> · <Text style={{ color: '#8af0ff' }}>⛽{Math.round(s.units.filter((x) => x.alive && x.side === 'player').reduce((a, x) => a + x.en, 0) / Math.max(1, s.units.filter((x) => x.alive && x.side === 'player').length))}</Text> {showRoster ? '▲' : '▼'}
           </Text>
         </Pressable>
         <Pressable onPress={s.toggleDanger} style={({ pressed }) => [styles.dangerBtn, s.dangerZone && styles.dangerBtnOn, pressed && { opacity: 0.7 }]}>
@@ -341,7 +342,7 @@ export function SidePanel() {
             {buffNames(unit).length > 0 && (
               <View style={styles.buffRow}>
                 {buffNames(unit).map((n) => (
-                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
+                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','VEILBREAK VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
                 ))}
               </View>
             )}
@@ -691,7 +692,7 @@ export function SidePanel() {
             {buffNames(inspect).length > 0 && (
               <View style={styles.buffRow}>
                 {buffNames(inspect).map((n) => (
-                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
+                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','VEILBREAK VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
                 ))}
               </View>
             )}

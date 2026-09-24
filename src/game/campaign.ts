@@ -211,6 +211,7 @@ export const PARTS: Record<string, PartDef> = {
   overdriveCore: { id: 'overdriveCore', name: 'Overdrive Core', desc: 'Turbine heart — +8% damage and +10 EN regen per turn', price: 2300, dmg: 8, enRegen: 10 },
   stormwallPlate: { id: 'stormwallPlate', name: 'Stormwall Plate', desc: 'Tempest laminate — +150 armor and +6 evade', price: 2300, armor: 150, evade: 6 },
   dualfeedCell: { id: 'dualfeedCell', name: 'Dualfeed Cell', desc: 'Split-loader array — ammo and EN weapons +10% damage', price: 2300, ammoDmg: 10, enDmg: 10 },
+  gambitWeave: { id: 'gambitWeave', name: 'Gambit Weave', desc: 'Feint laminate — +8 evade and counter-attacks +15% damage', price: 2200, evade: 8, counterDmg: 15 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -394,6 +395,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'lifeline', name: 'Lifeline', desc: '+4% damage per point while any ally is below 50% hull' },
   { id: 'lowburn', name: 'Lowburn', desc: '+5% damage per point while own EN is below 40%' },
   { id: 'bigbang', name: 'Big Bang', desc: '+5% damage per point when firing your strongest weapon' },
+  { id: 'irongroove', name: 'Iron Groove', desc: '+5% damage per point while own hull is between 40-80%' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -436,7 +438,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse', 'terrorverse', 'mireverse', 'ruinverse', 'shroudverse', 'silenceverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse', 'terrorverse', 'mireverse', 'ruinverse', 'shroudverse', 'silenceverse', 'veilbreakverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1529,6 +1531,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_centurion', name: 'CENTURION', desc: 'Fly 50 ranked missions', rewardCr: 100000 },
   { id: 'h_warehouse', name: 'WAREHOUSE', desc: 'Hold 80 items in inventory at once', rewardCr: 100000 },
   { id: 'h_armorylord', name: 'ARMORY LORD', desc: 'Own 75 different parts', rewardCr: 100000 },
+  { id: 'h_paradox', name: 'PARADOX', desc: 'Reach NG+12', rewardCr: 100000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1894,6 +1897,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.inventory ?? {}).reduce((n, c) => n + c, 0) >= 80;
     case 'h_armorylord':
       return (s.partsOwned ?? []).length >= 75;
+    case 'h_paradox':
+      return s.ngPlus >= 12;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
