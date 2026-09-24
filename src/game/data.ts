@@ -85,6 +85,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   banner: { id: 'banner', name: 'Banner', cost: 55, desc: 'Rally standard — allies within 3 tiles gain +10 hit and +20% counter damage until the end of the enemy phase' },
   gorelust: { id: 'gorelust', name: 'Gorelust', cost: 40, desc: 'Blood siphon — your next hit restores your hull by 25% of the damage dealt' },
   armorrot: { id: 'armorrot', name: 'Armor Rot', cost: 50, desc: 'Corrosion cascade — enemies within 3 tiles are sundered (armor crumbling, -15 evade) for the rest of the battle' },
+  winterverse: { id: 'winterverse', name: 'Winter Verse', cost: 45, desc: 'Frost choir — enemies within 3 tiles are slowed (-3 move, 2 turns)' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------

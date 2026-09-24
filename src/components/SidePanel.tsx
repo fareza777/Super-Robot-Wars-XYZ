@@ -346,7 +346,7 @@ export function SidePanel() {
             {unit.def.pilot.spirits.length + (unit.bonusSpirits?.length ?? 0) > 0 && <Btn label="✦ SPIRIT COMMANDS" sub={`SP ${unit.sp}`} onPress={() => s.openSpirits(unit.uid)} accent="#c9a0ff" />}
             {Object.values(ITEMS).some((it) => (s.inventory[it.id] ?? 0) > 0) && (
               <>
-                <Text style={styles.menuTitle}>ITEMS</Text>
+                <Text style={[styles.menuTitle, { color: '#6fe0ff' }]}>ITEMS</Text>
                 {Object.values(ITEMS).map((it) => {
                   const n = s.inventory[it.id] ?? 0;
                   return <Btn key={it.id} label={`▣ ${it.name} ×${n}`} sub={it.desc} disabled={n <= 0} onPress={() => s.useItem(unit.uid, it.id)} accent="#7ee0a0" />;
@@ -456,7 +456,7 @@ export function SidePanel() {
 
         {spiritUnit && (
           <View style={styles.menu}>
-            <Text style={styles.menuTitle}>SPIRIT · SP {spiritUnit.sp}</Text>
+            <Text style={[styles.menuTitle, { color: '#c9a0ff' }]}>SPIRIT · SP {spiritUnit.sp}</Text>
             {[...new Set([...spiritUnit.def.pilot.spirits, ...(spiritUnit.bonusSpirits ?? [])])].map((id: SpiritId) => {
               const sp = SPIRITS[id];
               const milestone = !(spiritUnit.def.pilot.spirits as SpiritId[]).includes(id);
