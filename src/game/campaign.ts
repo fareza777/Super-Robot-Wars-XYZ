@@ -110,6 +110,7 @@ export const PARTS: Record<string, PartDef> = {
   warTrophyCore: { id: 'warTrophyCore', name: 'War Trophy Core', desc: 'Predator furnace — +3% damage per kill this battle (up to 15%)', price: 2000, killDmg: true },
   lastBastionPlate: { id: 'lastBastionPlate', name: 'Last Bastion Plate', desc: 'Reactive armor — +400 armor while hull is below 40%', price: 2100, lowHpArmor: true },
   overchargeCell: { id: 'overchargeCell', name: 'Overcharge Cell', desc: 'Volatile reactor — CHARGE grants an additional +15% damage', price: 1700, chargeBoost: true },
+  groundPounder: { id: 'groundPounder', name: 'Ground Pounder', desc: 'Seismic array — your attacks ignore terrain armor bonuses', price: 1800, terrainArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -190,6 +191,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'wingman', name: 'Wingman', desc: '+5% damage per point while an ally is adjacent to the target' },
   { id: 'fullmag', name: 'Full Mag', desc: '+6% damage per point when firing a weapon with a full clip' },
   { id: 'dirgesong', name: 'Dirge Song', desc: '+8% damage per point while a squad frame lies fallen this battle' },
+  { id: 'burnout', name: 'Burnout', desc: '+6% damage per point while EN is at 25% or lower' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1222,6 +1224,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_grandmaster', name: 'GRANDMASTER', desc: 'Earn MASTERY ★ on 15 missions', rewardCr: 2500 },
   { id: 'h_warpath', name: 'WARPATH', desc: 'Two hundred total career kills across the squad', rewardCr: 3000 },
   { id: 'h_devastator', name: 'DEVASTATOR', desc: 'Land a single hit of 20000 damage', rewardCr: 2000 },
+  { id: 'h_twinaces', name: 'TWIN ACES', desc: 'Two pilots reach 50 career kills', rewardCr: 2200 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1380,6 +1383,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.pilotProg ?? {}).reduce((a, p) => a + (p.kills ?? 0), 0) >= 200;
     case 'h_devastator':
       return (s.maxHitEver ?? 0) >= 20000;
+    case 'h_twinaces':
+      return Object.values(s.pilotProg ?? {}).filter((p) => (p.kills ?? 0) >= 50).length >= 2;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

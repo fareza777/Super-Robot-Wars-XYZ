@@ -51,6 +51,7 @@ function buffNames(u: UnitState): string[] {
   if (u.judgeNext) names.push('JUDGEMENT');
   if (u.bannerUntilEndOfEnemyPhase) names.push('BANNER');
   if (u.goreNext) names.push('GORELUST');
+  if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
   if (u.deadshotForNextAttack) names.push('\u2620DEADSHOT');
   if (u.frenzyThisTurn) names.push('\U0001F525FRENZY');
@@ -484,7 +485,7 @@ export function SidePanel() {
         {/* squad roster — toggle from the counts row */}
         {showRoster && !s.menuForUid && !s.pendingWeapon && !s.spiritForUid && !inspect && (
           <View style={styles.rosterBox}>
-            <Text style={styles.menuTitle}>SQUAD</Text>
+            <Text style={[styles.menuTitle, { color: '#4dff7a' }]}>SQUAD</Text>
             {s.units
               .filter((u) => u.side === 'player' && u.alive)
               .map((u) => (
@@ -499,7 +500,7 @@ export function SidePanel() {
                   <Text style={styles.rosterHp}>{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
                 </View>
               ))}
-            <Text style={styles.menuTitle}>HOSTILES</Text>
+            <Text style={[styles.menuTitle, { color: '#ff6b6b' }]}>HOSTILES</Text>
             <ScrollView style={{ maxHeight: 92 }} nestedScrollEnabled>
               {s.units
                 .filter((u) => u.side === 'enemy' && u.alive)
