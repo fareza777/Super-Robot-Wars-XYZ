@@ -76,6 +76,7 @@ function buffNames(u: UnitState): string[] {
   if (u.mirrorwallUntilEndOfEnemyPhase) names.push('MIRROR WALL');
   if (u.ravenousNext) names.push('RAVENOUS');
   if (u.breachAtkUntilEndOfEnemyPhase) names.push('BREACH VERSE');
+  if (u.ebbUntilEndOfEnemyPhase) names.push('TIDE EBB');
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
   if (u.snipeForNextAttack) names.push('SNIPE');
@@ -530,6 +531,7 @@ export function SidePanel() {
                     </View>
                   </View>
                   <Text style={styles.rosterHp}>{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
+                  {u.will !== 100 && <Text style={[styles.rosterHp, { color: '#ff7a9d' }]}>W{u.will}</Text>}
                   <Text style={[styles.rosterHp, { color: '#c9a0ff' }]}>✦{u.sp}</Text>
                   <Text style={[styles.rosterHp, { color: '#ffd34d' }]}>{u.kills}K</Text>
                 </View>

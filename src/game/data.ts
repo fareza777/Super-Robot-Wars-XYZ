@@ -115,6 +115,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   mirrorwall: { id: 'mirrorwall', name: 'Mirror Wall', cost: 50, desc: 'Reflective anthem — allies within 3 tiles bounce 10% of damage taken back to the attacker until the end of the enemy phase' },
   ravenous: { id: 'ravenous', name: 'Ravenous', cost: 45, desc: 'Blood hunt — the next landed hit restores hull equal to 15% of damage and siphons 15 EN from the target' },
   breachverse: { id: 'breachverse', name: 'Breach Verse', cost: 45, desc: 'Fire-control chorus — attacks by allies within 3 tiles pierce 25% of target armor until the end of the enemy phase' },
+  tideebb: { id: 'tideebb', name: 'Tide Ebb', cost: 45, desc: 'Ebb of the deep — enemies within 3 tiles lose 1 movement until the end of the enemy phase' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
