@@ -151,6 +151,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   fortressverse: { id: 'fortressverse', name: 'Fortress Verse', cost: 50, desc: 'Bastion aura — allies within 3 tiles take -20% damage from melee attacks until end of enemy phase' },
   culledge: { id: 'culledge', name: 'Cull Edge', cost: 45, desc: 'Executioner strike — the next hit deals +30% damage vs targets below 40% hull' },
   bindverse: { id: 'bindverse', name: 'Bind Verse', cost: 50, desc: 'Snare web — enemies within 3 tiles are slowed and marked' },
+  blightverse: { id: 'blightverse', name: 'Blight Verse', cost: 50, desc: 'Corrosion wave — enemies within 3 tiles burn and suffer cracked armor' },
 };
 
 // ---------- Pilot traits (passives, resolved in the combat engine) ----------
