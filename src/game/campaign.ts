@@ -182,6 +182,7 @@ export const PARTS: Record<string, PartDef> = {
   warlordSigil: { id: 'warlordSigil', name: 'Warlord Sigil', desc: 'Command crest — adjacent allies deal +12% damage', price: 1900, auraDmg: 12 },
   judgeRig: { id: 'judgeRig', name: 'Judge Rig', desc: 'Arbiter servos — counter-attacks deal +25% damage', price: 1900, counterDmg: 25 },
   titanRipper: { id: 'titanRipper', name: 'Titan Ripper', desc: 'Colossus shredder — attacks ignore 25% of target armor', price: 1900, armorShred: 25 },
+  conductorSeal: { id: 'conductorSeal', name: 'Conductor Seal', desc: 'Choir amplifier — pilot regenerates +4 SP every turn', price: 1900, spRegen: 4 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -334,6 +335,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'vanguard', name: 'Vanguard', desc: '+6% damage per point on the unit\'s first attack each battle' },
   { id: 'phalanx', name: 'Phalanx', desc: '+4% damage per point per adjacent ally (max 3)' },
   { id: 'polymath', name: 'Polymath', desc: '+4% damage per point per weapon carried beyond the second' },
+  { id: 'isolator', name: 'Isolator', desc: '+6% damage per point vs targets with no adjacent ally' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1438,6 +1440,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_peacemaker', name: 'PEACEMAKER', desc: 'Clear 30 side missions', rewardCr: 44000 },
   { id: 'h_warmonger', name: 'WARMONGER', desc: '1500 total career kills across the squad', rewardCr: 46000 },
   { id: 'h_ragnarok', name: 'RAGNAROK', desc: 'Land a single hit of 500,000+ damage', rewardCr: 50000 },
+  { id: 'h_immaculate', name: 'IMMACULATE', desc: 'Earn S rank on 75 missions', rewardCr: 52000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1741,6 +1744,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return totalKills >= 1500;
     case 'h_ragnarok':
       return (s.maxHitEver ?? 0) >= 500000;
+    case 'h_immaculate':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 75;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
