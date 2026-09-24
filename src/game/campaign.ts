@@ -144,6 +144,7 @@ export const PARTS: Record<string, PartDef> = {
   reactorVent: { id: 'reactorVent', name: 'Reactor Vent', desc: 'Overclocked core — +15 EN regen per turn but -100 armor', price: 1500, ventEn: 15, ventArmor: true },
   ramPlate: { id: 'ramPlate', name: 'Ram Plate', desc: 'Battering prow — +15% damage for knockback weapons', price: 1600, ramPlate: 15 },
   pulseVernier: { id: 'pulseVernier', name: 'Pulse Verniers', desc: 'Afterburner banks — +2 movement while EN is above 75%', price: 1700, pulseVernier: 2 },
+  landVernier: { id: 'landVernier', name: 'Land Verniers', desc: 'Traction array — ground frames gain +1 movement', price: 1500, landVernier: 1 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -258,6 +259,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'wildswing', name: 'Wild Swing', desc: '+8% damage per point on attacks below 60% hit' },
   { id: 'zenith', name: 'Zenith', desc: '+6% damage per point while Will is at its peak (150)' },
   { id: 'closecombat', name: 'Close Combat', desc: '+5% damage per point when attacking at 2 tiles or closer' },
+  { id: 'chainblade', name: 'Chainblade', desc: '+6% damage per point with chain-arc weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1324,6 +1326,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_quartermaster', name: 'QUARTERMASTER', desc: 'Own 35 different parts', rewardCr: 3200 },
   { id: 'h_vrsaint', name: 'VR SAINT', desc: 'Score 25000+ in the VR Simulator', rewardCr: 5000 },
   { id: 'h_warlegion', name: 'WAR LEGION', desc: '400 total career kills across the squad', rewardCr: 4500 },
+  { id: 'h_dominator', name: 'DOMINATOR', desc: 'Earn A rank or better on 25 missions', rewardCr: 3800 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1551,6 +1554,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.simBest ?? 0) >= 25000;
     case 'h_warlegion':
       return totalKills >= 400;
+    case 'h_dominator':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S' || r === 'A').length >= 25;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

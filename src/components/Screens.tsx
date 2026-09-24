@@ -125,7 +125,7 @@ export function BriefingScreen() {
           })()}
         </Text>
         <Text style={{ color: '#9fe8a9', fontSize: 9, fontWeight: '700', letterSpacing: 0.5, marginTop: 3 }}>
-          {`▸ ALLIES ${roster.length} — ${roster.map((id) => ALL_UNITS[id]?.name ?? id).join(' · ')}`}
+          {`▸ ALLIES ${roster.length} · ΣLV ${roster.reduce((n, id) => n + (pilotProg[id]?.level ?? ALL_UNITS[id]?.level ?? 1), 0)} — ${roster.map((id) => ALL_UNITS[id]?.name ?? id).join(' · ')}`}
         </Text>
         <Text style={styles.deployLbl}>DEPLOY SQUAD — tap to toggle ({deploySel.length}/{roster.length})</Text>
         <View style={styles.squadRow}>
