@@ -9,7 +9,7 @@ export interface ItemDef {
   name: string;
   desc: string;
   price: number;
-  apply: 'hp' | 'en' | 'ammo' | 'sp' | 'valor' | 'willAll' | 'healArea' | 'purge' | 'barrage' | 'will' | 'mine';
+  apply: 'hp' | 'en' | 'ammo' | 'sp' | 'valor' | 'willAll' | 'healArea' | 'purge' | 'barrage' | 'will' | 'mine' | 'smoke';
   amount: number;
 }
 
@@ -25,6 +25,7 @@ export const ITEMS: Record<string, ItemDef> = {
   overclock: { id: 'overclock', name: 'Core Overclock', desc: '+15 Will to this unit', price: 550, apply: 'will', amount: 15 },
   lmCharge: { id: 'lmCharge', name: 'LM-Charge', desc: 'Plant a mine on a clear tile within 2 — heavy damage to anything that steps on it', price: 700, apply: 'mine', amount: 0 },
   ventKit: { id: 'ventKit', name: 'Emergency Vent', desc: 'Purge cripple and all status debuffs', price: 700, apply: 'purge', amount: 0 },
+  smokeScreen: { id: 'smokeScreen', name: 'Smoke Screen', desc: 'Untargetable until the end of the enemy phase', price: 600, apply: 'smoke', amount: 0 },
   arkBarrage: { id: 'arkBarrage', name: 'Ark Barrage', desc: 'Call a shipboard strike — radius-2 blast on any tile within 2-8', price: 1200, apply: 'barrage', amount: 0 },
 };
 
@@ -64,6 +65,8 @@ export const PARTS: Record<string, PartDef> = {
   decoyBeacon: { id: 'decoyBeacon', name: 'Decoy Beacon', desc: 'Enemies prefer targeting this unit — aggro magnet', price: 1600, aggro: true },
   ignitionCoil: { id: 'ignitionCoil', name: 'Ignition Coil', desc: '+10 Will at the start of each battle', price: 1400, willStart: true },
   reactiveArmor: { id: 'reactiveArmor', name: 'Reactive Armor', desc: 'Reflects 15% of hit damage back at the attacker', price: 1900, reflect: 15 },
+  relayMatrix: { id: 'relayMatrix', name: 'Relay Matrix', desc: 'Allies within 2 tiles recover +6 EN/turn', price: 1800, auraEn: true },
+  raptorClaw: { id: 'raptorClaw', name: 'Raptor Claw', desc: '+15% melee weapon damage', price: 1700, meleeDmg: 15 },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
   escapePod: { id: 'escapePod', name: 'Escape Pod', desc: 'Pilot ejects on destruction — no WOUNDED penalty next sortie', price: 1200 },
   driveCore: { id: 'driveCore', name: 'Drive Core', desc: '+25% EXP gained', price: 1300, xp: 25 },
@@ -103,6 +106,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'opportunist', name: 'Opportunist', desc: '+7% damage per point vs targets with status effects' },
   { id: 'warcry', name: 'War Cry', desc: 'Your kills grant allies within 2 tiles +2 Will per point' },
   { id: 'pointBlank', name: 'Point Blank', desc: '+6% damage per point attacking from 2 tiles or closer' },
+  { id: 'bloodlust', name: 'Bloodlust', desc: '+5% damage per point after this unit\'s 3rd kill of the battle' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1090,6 +1094,8 @@ export const HONORS: HonorDef[] = [
   { id: 'h_duo', name: 'DYNAMIC DUO', desc: 'Two pilots each reach 30 career kills', rewardCr: 800 },
   { id: 'h_campaign', name: 'CAMPAIGNER', desc: 'Earn a battle rank on 8 missions', rewardCr: 1000 },
   { id: 'h_biggame', name: 'BIG GAME', desc: 'Destroy 5 ace or boss frames in total', rewardCr: 1200 },
+  { id: 'h_aceofaces', name: 'ACE OF ACES', desc: 'Earn an S battle rank on 3 missions', rewardCr: 1500 },
+  { id: 'h_fortress', name: 'FORTRESS BREAKER', desc: 'Destroy 3 siege frames (Ballista or Bastion)', rewardCr: 900 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1160,6 +1166,10 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.keys(s.missionRank ?? {}).length >= 8;
     case 'h_biggame':
       return Object.entries(s.killsByDef ?? {}).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) >= 5;
+    case 'h_aceofaces':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 3;
+    case 'h_fortress':
+      return ((s.killsByDef ?? {}).ballista ?? 0) + ((s.killsByDef ?? {}).bastion ?? 0) >= 3;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

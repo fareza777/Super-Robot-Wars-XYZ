@@ -28,14 +28,14 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
 }
 
 /** Sum a stat bonus across the unit's equipped enhancement parts. */
-export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect'): number {
+export function partBonus(u: UnitState, stat: 'armor' | 'mobility' | 'move' | 'hit' | 'dmg' | 'hp' | 'en' | 'evade' | 'crit' | 'enRegen' | 'hpRegen' | 'xp' | 'dmgTaken' | 'ammoPct' | 'barrier' | 'auraHit' | 'stealthField' | 'ablative' | 'statusSlow' | 'statusProof' | 'aggro' | 'willStart' | 'reflect' | 'auraEn' | 'meleeDmg'): number {
   let n = 0;
   for (const p of u.parts) {
     const v = PARTS[p]?.[stat];
@@ -208,6 +208,8 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
     const assists = units.filter((u) => u.alive && u.side === att.side && u.uid !== att.uid && u.uid !== def.uid && !u.acted && dist(u.pos, def.pos) <= 2).length;
     dmg = Math.round(dmg * (1 + 0.12 * Math.min(2, assists)));
   }
+  if (w.kind === 'melee') dmg = Math.round(dmg * (1 + partBonus(att, 'meleeDmg') / 100));
+  if ((att.kills ?? 0) >= 3) dmg = Math.round(dmg * (1 + 0.05 * (att.skills?.bloodlust ?? 0)));
   if (att.enraged) dmg = Math.round(dmg * 1.15);
   if (!att.hasAttacked && (att.skills?.initiative ?? 0) > 0) dmg = Math.round(dmg * (1 + 0.1 * att.skills.initiative));
   if (def.guardUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.5);
@@ -1160,9 +1162,10 @@ function timedOut(obj: EndObjective | null | undefined, turn?: number): boolean 
 }
 
 /** Start-of-own-phase recovery: base EN regen + terrain effects (heal on base/city, burn on lava). */
-export function phaseRecovery(u: UnitState, map: MapDef): { hpGain: number; enGain: number; hpLoss: number } {
+export function phaseRecovery(u: UnitState, map: MapDef, units?: UnitState[]): { hpGain: number; enGain: number; hpLoss: number } {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
-  const enGain = Math.min(u.def.maxEn - u.en, 5 + (t.enRegen ?? 0) + partBonus(u, 'enRegen'));
+  const aura = units ? units.filter((a) => a.alive && a.side === u.side && a.uid !== u.uid && partBonus(a, 'auraEn') > 0 && dist(a.pos, u.pos) <= 2).length * 6 : 0;
+  const enGain = Math.min(u.def.maxEn - u.en, 5 + (t.enRegen ?? 0) + partBonus(u, 'enRegen') + aura);
   const hpGain = Math.min(u.def.maxHp - u.hp, Math.round(u.def.maxHp * (t.hpRegen ?? 0)) + Math.round(u.def.maxHp * (partBonus(u, 'hpRegen') / 100)) + Math.round(u.def.maxHp * 0.01 * (u.skills?.regen ?? 0)));
   const hpLoss = Math.min(u.hp - 1, Math.round(u.def.maxHp * (t.hpDmg ?? 0))); // terrain can't kill — leaves 1 HP
   u.en += enGain;

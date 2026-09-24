@@ -424,10 +424,10 @@ const styles = StyleSheet.create({
   spiritTag: { position: 'absolute', bottom: 3, right: 2, color: '#9fe8ff', fontSize: 8, fontWeight: '800', textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
   statusTag: { position: 'absolute', bottom: 3, left: 2, color: '#ffb44d', fontSize: 9, fontWeight: '800', textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
   unitWrap: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
-  chip: { borderRadius: 6, overflow: 'hidden', borderWidth: 1.5, backgroundColor: '#0a0e1e' },
+  chip: { borderRadius: 8, overflow: 'hidden', borderWidth: 1.5, backgroundColor: '#0a0e1e', shadowColor: '#000', shadowOpacity: 0.55, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, elevation: 4 },
   faceBadge: { position: 'absolute', bottom: 3, left: 2, width: '34%', aspectRatio: 1, borderRadius: 999, borderWidth: 1, borderColor: '#6db4ff', overflow: 'hidden', backgroundColor: '#0a0e1e' },
-  hpBarBg: { position: 'absolute', bottom: 0, height: 3, backgroundColor: '#111', borderRadius: 1 },
-  hpBar: { height: 3, borderRadius: 1 },
+  hpBarBg: { position: 'absolute', bottom: 1, height: 5, backgroundColor: 'rgba(6,8,16,0.92)', borderRadius: 3, borderWidth: 1, borderColor: 'rgba(255,255,255,0.18)', overflow: 'hidden' },
+  hpBar: { height: '100%', borderRadius: 2 },
   lvTag: {
     position: 'absolute',
     top: 1,

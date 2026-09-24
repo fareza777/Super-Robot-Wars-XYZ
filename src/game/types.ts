@@ -243,7 +243,7 @@ export interface UnitState {
   overkillDealt?: number;
 }
 
-export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer' | 'bodyguard' | 'opportunist' | 'warcry' | 'pointBlank';
+export type PilotSkillId = 'hit' | 'evade' | 'dmg' | 'def' | 'countercut' | 'esave' | 'hitrun' | 'crit' | 'scavenger' | 'regen' | 'riposte' | 'lastStand' | 'assassin' | 'brawler' | 'initiative' | 'gunner' | 'plunderer' | 'bodyguard' | 'opportunist' | 'warcry' | 'pointBlank' | 'bloodlust';
 export type PilotSkills = Record<PilotSkillId, number>;
 
 /** SRW-style enhancement parts equippable on a mecha. */
@@ -280,6 +280,10 @@ export interface PartDef {
   willStart?: boolean;
   /** reactive armor — reflects this % of hit damage back at the attacker */
   reflect?: number;
+  /** relay matrix — same-side units within 2 tiles recover +6 EN/turn */
+  auraEn?: boolean;
+  /** melee weapon damage bonus % */
+  meleeDmg?: number;
   /** decoy beacon — broadcast signature; enemies prefer this target */
   aggro?: boolean;
   /** cloaking field — enemies cannot target this unit beyond 3 tiles */
