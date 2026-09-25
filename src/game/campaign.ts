@@ -269,6 +269,7 @@ export const PARTS: Record<string, PartDef> = {
   longeyeCell: { id: 'longeyeCell', name: 'Long Eye Cell', desc: 'Deadeye reticle — +10 hit & counter-attacks +12% damage', price: 3200, hit: 10, counterDmg: 12 },
   strideCell: { id: 'strideCell', name: 'Stride Cell', desc: 'Vector stride — +8 mobility & +8 hit', price: 3200, mobility: 8, hit: 8 },
   gyroCell: { id: 'gyroCell', name: 'Gyro Cell', desc: 'Stabilizer gyro — +8 evade & immune to knockback/drag', price: 3200, evade: 8, knockProof: true },
+  mirageCell: { id: 'mirageCell', name: 'Mirage Cell', desc: 'Ghost-light weave — +8 evade & a 400-point barrier', price: 3200, evade: 8, barrier: 400 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -514,6 +515,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'wallborn', name: 'Wallborn', desc: 'Rampart stance — +5% damage per point while your barrier is active' },
   { id: 'stifleborn', name: 'Stifleborn', desc: '+6% damage per point vs targets with a choked reactor (Stifle)' },
   { id: 'poxborn', name: 'Poxborn', desc: '+6% damage per point vs corroding targets (Pox)' },
+  { id: 'plagueborn', name: 'Plagueborn', desc: '+4% damage per point vs targets suffering 3+ debuffs' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -556,7 +558,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse', 'terrorverse', 'mireverse', 'ruinverse', 'shroudverse', 'silenceverse', 'veilbreakverse', 'tetherverse', 'stifleverse', 'despairverse', 'frailverse', 'tangleverse', 'huskverse', 'festerverse', 'lureverse', 'maimverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse', 'terrorverse', 'mireverse', 'ruinverse', 'shroudverse', 'silenceverse', 'veilbreakverse', 'tetherverse', 'stifleverse', 'despairverse', 'frailverse', 'tangleverse', 'huskverse', 'festerverse', 'lureverse', 'maimverse', 'shatterverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1690,6 +1692,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_extinction', name: 'EXTINCTION', desc: 'Destroy 20,000 frames across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
   { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
+  { id: 'h_centurion4', name: 'CENTURION IV', desc: 'Fly 90 ranked missions', rewardCr: 100000 },
   { id: 'h_pinnacle2', name: 'PINNACLE II', desc: 'Earn S rank on 90 missions', rewardCr: 100000 },
   { id: 'h_peacelord2', name: 'PEACELORD II', desc: 'Clean 60 side missions', rewardCr: 100000 },
   { id: 'h_chain2', name: 'CHAINLORD', desc: 'Score a 6-kill chain in a single turn', rewardCr: 100000 },
@@ -2097,6 +2100,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.bondSeen.length >= 20;
     case 'h_centurion3':
       return Object.keys(s.missionRank ?? {}).length >= 75;
+    case 'h_centurion4':
+      return Object.keys(s.missionRank ?? {}).length >= 90;
     case 'h_pinnacle2':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 90;
     case 'h_peacelord2':

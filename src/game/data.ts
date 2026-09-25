@@ -233,6 +233,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   bulwarkverse: { id: 'bulwarkverse', name: 'Bulwark Verse', cost: 50, desc: 'Rampart hymn — allies within 3 tiles take 20% less damage from melee attackers until end of enemy phase' },
   stifleedge: { id: 'stifleedge', name: 'Stifle Edge', cost: 45, desc: 'Reactor spike — next hit +10% damage and chokes the target reactor (no EN regen for 2 turns)' },
   poxverse: { id: 'poxverse', name: 'Pox Verse', cost: 50, desc: 'Necrosis chant — enemies within 3 tiles corrode for 5% max hull each turn for 2 turns' },
+  shatterverse: { id: 'shatterverse', name: 'Shatter Verse', cost: 55, desc: 'Null-field wave — barriers of enemies within 3 tiles collapse until end of enemy phase' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },
