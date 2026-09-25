@@ -230,6 +230,7 @@ export const PARTS: Record<string, PartDef> = {
   bullheadRam: { id: 'bullheadRam', name: 'Bullhead Ram', desc: 'Impact prow — knockback attacks shove one extra tile and +100 armor', price: 2900, armor: 100, knockPlus: true },
   taserRounds: { id: 'taserRounds', name: 'Taser Rounds', desc: 'Arc load — hits can stun (15%) and +8 hit', price: 2900, statusStun: true, hit: 8 },
   nullLattice: { id: 'nullLattice', name: 'Null Lattice', desc: 'Anti-blast weave — incoming MAP damage cut 30% and +100 armor', price: 2900, mapGuard: true, armor: 100 },
+  novaCore: { id: 'novaCore', name: 'Nova Core', desc: 'Overload conduits — EN weapons +15% damage and cost 15% less EN', price: 3000, enDmg: 15, enSaver: 15 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -432,6 +433,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'entropist', name: 'Entropist', desc: '+6% damage per point vs targets suffering countdown decay (doom, rust, stifle, veilbreak, siren)' },
   { id: 'suffocator', name: 'Suffocator', desc: '+6% damage per point vs targets below 40% EN' },
   { id: 'seaborn', name: 'Seaborn', desc: '+5% damage per point vs targets standing on water' },
+  { id: 'perforator', name: 'Perforator', desc: 'Attacks ignore 10% more of target armor per point' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1585,6 +1587,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_exterminus', name: 'EXTERMINUS', desc: 'Destroy 15000 foes across the squad career', rewardCr: 100000 },
   { id: 'h_godhunter3', name: 'GODHUNTER III', desc: 'Destroy 40 bosses across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
+  { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
   { id: 'h_immortal2', name: 'IMMORTAL II', desc: 'Reach MASTERY ★ on 80 missions', rewardCr: 100000 },
 ];
 
@@ -1967,6 +1970,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 40;
     case 'h_soulbound':
       return s.bondSeen.length >= 20;
+    case 'h_centurion3':
+      return Object.keys(s.missionRank ?? {}).length >= 75;
     case 'h_genocider':
       return totalKills >= 7500;
     case 'h_paragon2':
