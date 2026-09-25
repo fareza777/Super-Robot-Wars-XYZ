@@ -301,6 +301,7 @@ export const PARTS: Record<string, PartDef> = {
   ammoCell: { id: 'ammoCell', name: 'Ammo Cell', desc: 'Loader-reactor hybrid — regen 1 ammo & +10 EN regen per turn', price: 3400, ammoRegen: true, enRegen: 10 },
   tempoPlate: { id: 'tempoPlate', name: 'Tempo Plate', desc: 'Cadence laminate — +8 mobility & +8% crit', price: 3400, mobility: 8, crit: 8 },
   saintPlate: { id: 'saintPlate', name: 'Saint Plate', desc: 'Choir laminate — +3 SP regen & +8% hull regen per turn', price: 3400, spRegen: 3, hpRegen: 8 },
+  magpiePlate: { id: 'magpiePlate', name: 'Magpie Plate', desc: 'Scavenger laminate — +8 evade & regenerate 1 ammo per turn', price: 3400, evade: 8, ammoRegen: true },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -579,6 +580,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'hexfoe', name: 'Hexfoe', desc: '+6% damage per point vs frames carrying status weapons' },
   { id: 'wingfoe', name: 'Wingfoe', desc: '+6% damage per point vs frames carrying anti-air weapons' },
   { id: 'skirmfoe', name: 'Skirmfoe', desc: '+6% damage per point vs frames carrying hit-and-run weapons' },
+  { id: 'willfoe', name: 'Willfoe', desc: '+6% damage per point vs frames carrying will-locked weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1771,6 +1773,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_nemesis4', name: 'NEMESIS IV', desc: 'Destroy 250 frames of a single type', rewardCr: 100000 },
   { id: 'h_pinnacle6', name: 'PINNACLE VI', desc: 'Score rank S on 130 missions', rewardCr: 100000 },
   { id: 'h_stockpile5', name: 'STOCKPILE V', desc: 'Hold 175 items in the inventory at once', rewardCr: 100000 },
+  { id: 'h_stockpile6', name: 'STOCKPILE VI', desc: 'Hold 200 items in the inventory at once', rewardCr: 100000 },
   { id: 'h_chainlord5', name: 'CHAINLORD V', desc: 'Score a 14-kill chain in a single turn', rewardCr: 100000 },
   { id: 'h_armory6', name: 'ARMORY LORD V', desc: 'Own 125 different parts', rewardCr: 100000 },
   { id: 'h_dreamteam4', name: 'DREAM TEAM IV', desc: 'All pilots reach 650 career kills each', rewardCr: 100000 },
@@ -2238,6 +2241,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.inventory ?? {}).reduce((n, c) => n + c, 0) >= 150;
     case 'h_stockpile5':
       return Object.values(s.inventory ?? {}).reduce((n, c) => n + c, 0) >= 175;
+    case 'h_stockpile6':
+      return Object.values(s.inventory ?? {}).reduce((n, c) => n + c, 0) >= 200;
     case 'h_armory4':
       return (s.partsOwned ?? []).length >= 95;
     case 'h_armory5':
