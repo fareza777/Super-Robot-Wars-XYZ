@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS, PILOT_STATS } from '../game/campaign';
 
-const ALLY_AOE = new Set(['anthemverse','bastionverse','breachverse','choirverse','clarionverse','cleanseverse','crimsonverse','damperverse','defianceverse','flowverse','foresightverse','fortressverse','freeflowverse','goreverse','juggernautverse','lanceverse','leechverse','magnumverse','mendverse','mirageverse','oathverse','palisadeverse','phantomverse','pinverse','rampartverse','renewalverse','repulseverse','requiemverse','salvoverse','scopeverse','scorchverse','sentinelverse','seraphverse','shelterverse','siphonverse','steadfastverse','surgeverse','swiftverse','thornverse','tideverse','tracerverse','triumphverse','undyingverse','valiantverse','vaultverse','vigilverse','vigorverse','wallverse','wardenverse','wardverse','miraclechorus','sanctumhymn','gracehymn','dirgemist','wardmist','bulwarkaria','warhorn','cantata','fableverse','sustainverse','revelverse','bulwarkverse','anchorverse','beamverse']);
+const ALLY_AOE = new Set(['anthemverse','bastionverse','breachverse','choirverse','clarionverse','cleanseverse','crimsonverse','damperverse','defianceverse','flowverse','foresightverse','fortressverse','freeflowverse','goreverse','juggernautverse','lanceverse','leechverse','magnumverse','mendverse','mirageverse','oathverse','palisadeverse','phantomverse','pinverse','rampartverse','renewalverse','repulseverse','requiemverse','salvoverse','scopeverse','scorchverse','sentinelverse','seraphverse','shelterverse','siphonverse','steadfastverse','surgeverse','swiftverse','thornverse','tideverse','tracerverse','triumphverse','undyingverse','valiantverse','vaultverse','vigilverse','vigorverse','wallverse','wardenverse','wardverse','miraclechorus','sanctumhymn','gracehymn','dirgemist','wardmist','bulwarkaria','warhorn','cantata','fableverse','sustainverse','revelverse','bulwarkverse','anchorverse','beamverse','warlordverse']);
 const ENEMY_AOE = new Set(['armorrot','bindverse','blightverse','curseverse','darkverse','festerverse','despairverse','doomverse','dreadverse','exposeverse','fearverse','feebleverse','frailverse','gloomverse','hexverse','huskverse','jamverse','lockcascade','mireverse','nullverse','rotverse','ruinverse','rustverse','shroudverse','silenceverse','sirenverse','stifleverse','surtaxverse','tangleverse','terrorverse','tetherverse','tideebb','veilbreakverse','voidverse','winterverse','staticchoir','chokerverse','lureverse','rootverse','maimverse','poxverse','shatterverse','riftverse','glitchverse']);
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { BOND_EVENTS, bondLevel, bondMods } from '../game/bonds';
@@ -192,6 +192,7 @@ function buffNames(u: UnitState): string[] {
   if (u.bulwarkUntilEndOfEnemyPhase) names.push('BULWARK VERSE');
   if (u.beamverseUntilEndOfEnemyPhase) names.push('BEAM VERSE');
   if (u.glitchUntilEndOfEnemyPhase) names.push('GLITCH VERSE');
+  if (u.warlordUntilEndOfEnemyPhase) names.push('WARLORD VERSE');
   if (u.stifleedgeNext) names.push('STIFLE EDGE');
   if (u.poxedgeNext) names.push('POX EDGE');
   if (u.frailedgeNext) names.push('FRAIL EDGE');
@@ -624,14 +625,27 @@ export function SidePanel() {
         {spiritUnit && (
           <View style={styles.menu}>
             <Text style={[styles.menuTitle, { color: '#c9a0ff' }]}>SPIRIT · SP {spiritUnit.sp}</Text>
-            {[...new Set([...spiritUnit.def.pilot.spirits, ...(spiritUnit.bonusSpirits ?? [])])].map((id: SpiritId) => {
-              const sp = SPIRITS[id];
-              const milestone = !(spiritUnit.def.pilot.spirits as SpiritId[]).includes(id);
-              const nTgt = ALLY_AOE.has(id) || ENEMY_AOE.has(id) ? s.units.filter((x) => x.alive && x.side === (ALLY_AOE.has(id) ? 'player' : 'enemy') && dist(x.pos, spiritUnit.pos) <= 3).length : -1;
-              return (
-                <Btn key={id} label={`✦ ${sp.name} · ${spiritCost(spiritUnit, id)} SP${nTgt >= 0 ? ` · ⌀${nTgt}${nTgt === 0 ? ' — EMPTY' : ''}` : ''}${milestone ? ' · ★MILESTONE' : ''}`} sub={sp.desc} disabled={spiritUnit.sp < spiritCost(spiritUnit, id)} onPress={() => s.castSpirit(spiritUnit.uid, id)} accent={milestone ? '#ffd34d' : '#c9a0ff'} />
-              );
-            })}
+            {(() => {
+              const ids = [...new Set([...spiritUnit.def.pilot.spirits, ...(spiritUnit.bonusSpirits ?? [])])] as SpiritId[];
+              const groups: [string, SpiritId[]][] = [
+                ['— SELF & EDGES —', ids.filter((id) => !ALLY_AOE.has(id) && !ENEMY_AOE.has(id))],
+                ['— ALLY HYMNS ⌀3 —', ids.filter((id) => ALLY_AOE.has(id))],
+                ['— ENEMY VERSES ⌀3 —', ids.filter((id) => ENEMY_AOE.has(id))],
+              ];
+              return groups.map(([title, gids]) => gids.length === 0 ? null : (
+                <View key={title}>
+                  <Text style={[styles.menuTitle, { color: '#6b7694', fontSize: 9, marginTop: 2 }]}>{title}</Text>
+                  {gids.map((id: SpiritId) => {
+                    const sp = SPIRITS[id];
+                    const milestone = !(spiritUnit.def.pilot.spirits as SpiritId[]).includes(id);
+                    const nTgt = ALLY_AOE.has(id) || ENEMY_AOE.has(id) ? s.units.filter((x) => x.alive && x.side === (ALLY_AOE.has(id) ? 'player' : 'enemy') && dist(x.pos, spiritUnit.pos) <= 3).length : -1;
+                    return (
+                      <Btn key={id} label={`✦ ${sp.name} · ${spiritCost(spiritUnit, id)} SP${nTgt >= 0 ? ` · ⌀${nTgt}${nTgt === 0 ? ' — EMPTY' : ''}` : ''}${milestone ? ' · ★MILESTONE' : ''}`} sub={sp.desc} disabled={spiritUnit.sp < spiritCost(spiritUnit, id)} onPress={() => s.castSpirit(spiritUnit.uid, id)} accent={milestone ? '#ffd34d' : '#c9a0ff'} />
+                    );
+                  })}
+                </View>
+              ));
+            })()}
             <Btn label="BACK" onPress={() => useGame.setState({ spiritForUid: null })} accent="#666" />
           </View>
         )}
