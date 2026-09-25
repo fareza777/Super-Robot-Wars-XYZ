@@ -198,6 +198,7 @@ function buffNames(u: UnitState): string[] {
   if (u.funnelUntilEndOfEnemyPhase) names.push('FUNNEL VERSE');
   if (u.glitchedgeNext) names.push('GLITCH EDGE');
   if (u.sealedgeNext) names.push('SEAL EDGE');
+  if (u.shrededgeNext) names.push('SHRED EDGE');
   if (u.mapSealUntilEndOfEnemyPhase) names.push('SEAL VERSE');
   if (u.resistSealUntilEndOfEnemyPhase) names.push('ZERO VERSE');
   if (u.baneUntilEndOfEnemyPhase) names.push('BANE VERSE');
@@ -732,7 +733,7 @@ export function SidePanel() {
                         {debuffCount(u) > 0 ? <Text style={{ color: '#ff9d7a' }}> ⌛{debuffCount(u)}</Text> : null}{u.def.weapons.some((w) => w.kind === 'beam') ? <Text style={{ color: '#8af0ff' }}> ⌁</Text> : null}
                         {buffNames(u).length > 0 ? <Text style={{ color: '#d8a5ff' }}> ✧{buffNames(u).length}</Text> : null}
                         {u.crippled ? <Text style={{ color: '#ff9d7a' }}> ⛓</Text> : null}
-                        {u.def.weapons.some((w) => w.mapRange != null) ? <Text style={{ color: '#ff9d4d' }}> ◉</Text> : null}
+                        {u.def.weapons.some((w) => w.mapRange != null) ? <Text style={{ color: '#ff9d4d' }}> ◉</Text> : null}{u.def.weapons.some((w) => w.sniper) ? <Text style={{ color: '#9fd8ff' }}> ⌖</Text> : null}
                         {s.units.some((p) => p.side === 'player' && p.alive && dist(u.pos, p.pos) <= moveRangeOf(u) + Math.max(0, ...u.def.weapons.map((w) => w.rangeMax))) ? <Text style={{ color: '#ff6a6a' }}> ⚠</Text> : null}{usableWeapons(u).length === 0 ? <Text style={{ color: '#ff6a6a' }}> ⊘</Text> : null}{u.provokedTo ? <Text style={{ color: '#ffd34d' }}> 🎯</Text> : null}{u.anchoredUntilEndOfEnemyPhase || partBonus(u, 'knockProof') > 0 ? <Text style={{ color: '#8af0ff' }}> ⚓</Text> : null}{(u.doomTurns ?? 0) > 0 ? <Text style={{ color: '#ff6a6a' }}> ☠</Text> : null}
                       </Text>
                       <View style={[styles.rosterBarTrack, { backgroundColor: '#2a1216' }]}>

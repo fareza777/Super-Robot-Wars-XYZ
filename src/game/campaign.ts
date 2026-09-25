@@ -288,6 +288,7 @@ export const PARTS: Record<string, PartDef> = {
   wardGauge: { id: 'wardGauge', name: 'Ward Gauge', desc: 'Aegis optics — +8% crit & 400 barrier', price: 3300, crit: 8, barrier: 400 },
   keepPlate: { id: 'keepPlate', name: 'Keep Plate', desc: 'Citadel laminate — +1200 max HP & 400 barrier', price: 3300, hp: 1200, barrier: 400 },
   marchGauge: { id: 'marchGauge', name: 'March Gauge', desc: 'Vector-loader optics — +8 mobility & regen 1 ammo per turn', price: 3300, mobility: 8, ammoRegen: true },
+  surgeGauge: { id: 'surgeGauge', name: 'Surge Gauge', desc: 'Overfeed optics — +8% crit & +10 EN regen per turn', price: 3400, crit: 8, enRegen: 10 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -553,6 +554,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'willborn', name: 'Willborn', desc: '+6% damage per point vs targets at 120+ will' },
   { id: 'baseborn', name: 'Baseborn', desc: '+5% damage per point vs targets standing on a base tile' },
   { id: 'roadborn', name: 'Roadborn', desc: '+5% damage per point vs targets standing on a road' },
+  { id: 'sniperfoe', name: 'Sniperfoe', desc: '+6% damage per point vs frames carrying sniper weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1739,6 +1741,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_godhunter12', name: 'GODHUNTER XII', desc: 'Destroy 300 bosses across your career', rewardCr: 100000 },
   { id: 'h_tally3', name: 'TALLYMASTER III', desc: 'Earn 15,000+ salvage credits in a single mission', rewardCr: 100000 },
   { id: 'h_peacelord5', name: 'PEACELORD V', desc: 'Clear 120 side missions', rewardCr: 100000 },
+  { id: 'h_omnicide4', name: 'OMNICIDE IV', desc: 'Destroy 35 different enemy frame types', rewardCr: 100000 },
   { id: 'h_extinction', name: 'EXTINCTION', desc: 'Destroy 20,000 frames across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
   { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
@@ -2255,6 +2258,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.keys(s.killsByDef ?? {}).length >= 25;
     case 'h_omnicide3':
       return Object.keys(s.killsByDef ?? {}).length >= 30;
+    case 'h_omnicide4':
+      return Object.keys(s.killsByDef ?? {}).length >= 35;
     case 'h_nemesis2':
       return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 150;
     case 'h_nemesis3':
