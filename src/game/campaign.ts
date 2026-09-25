@@ -522,6 +522,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'anchorborn', name: 'Anchorborn', desc: '+5% damage per point while anchored (Anchor Verse / Brace Plate)' },
   { id: 'doomborn', name: 'Doomborn', desc: '+6% damage per point vs doomed targets (Doom countdown)' },
   { id: 'frailborn', name: 'Frailborn', desc: '+6% damage per point vs brittle targets (Frail)' },
+  { id: 'rotborn', name: 'Rotborn', desc: '+6% damage per point vs corroding targets (Rot)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -560,7 +561,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse', 'goreverse', 'culledge', 'rendedge', 'overedge', 'splatteredge', 'havocverse', 'maimedge', 'hollowedge', 'maraudedge', 'vampedge', 'twinedge', 'phantomedge', 'dragedge', 'rustedge', 'crushedge', 'matadoredge', 'stifleedge'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse', 'goreverse', 'culledge', 'rendedge', 'overedge', 'splatteredge', 'havocverse', 'maimedge', 'hollowedge', 'maraudedge', 'vampedge', 'twinedge', 'phantomedge', 'dragedge', 'rustedge', 'crushedge', 'matadoredge', 'stifleedge', 'frailedge'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1694,6 +1695,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_pinnacle4', name: 'PINNACLE IV', desc: 'Score rank S on 110 missions', rewardCr: 100000 },
   { id: 'h_peacelord4', name: 'PEACELORD IV', desc: 'Clear 100 side missions', rewardCr: 100000 },
   { id: 'h_apexlegion3', name: 'APEX LEGION III', desc: 'All pilots reach 750 career kills each', rewardCr: 100000 },
+  { id: 'h_apexlegion4', name: 'APEX LEGION IV', desc: 'All pilots reach 1000 career kills each', rewardCr: 100000 },
   { id: 'h_godhunter8', name: 'GODHUNTER VIII', desc: 'Destroy 150 bosses across your career', rewardCr: 100000 },
   { id: 'h_godhunter9', name: 'GODHUNTER IX', desc: 'Destroy 175 bosses across your career', rewardCr: 100000 },
   { id: 'h_extinction', name: 'EXTINCTION', desc: 'Destroy 20,000 frames across your career', rewardCr: 100000 },
@@ -2159,6 +2161,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.sideCleared ?? []).length >= 100;
     case 'h_apexlegion3':
       return kills.length > 0 && kills.every((p) => (p.kills ?? 0) >= 750);
+    case 'h_apexlegion4':
+      return kills.length > 0 && kills.every((p) => (p.kills ?? 0) >= 1000);
     case 'h_godhunter8':
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 150;
     case 'h_godhunter9':

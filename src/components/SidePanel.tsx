@@ -192,6 +192,7 @@ function buffNames(u: UnitState): string[] {
   if (u.bulwarkUntilEndOfEnemyPhase) names.push('BULWARK VERSE');
   if (u.stifleedgeNext) names.push('STIFLE EDGE');
   if (u.poxedgeNext) names.push('POX EDGE');
+  if (u.frailedgeNext) names.push('FRAIL EDGE');
   if (u.rootedUntilEndOfEnemyPhase) names.push('ROOT VERSE');
   if ((u.gloomTurns ?? 0) > 0) names.push(`GLOOM ${u.gloomTurns}`);
   if ((u.poxTurns ?? 0) > 0) names.push(`POX ${u.poxTurns}`);
@@ -674,6 +675,7 @@ export function SidePanel() {
                   {debuffCount(u) > 0 ? <Text style={[styles.rosterHp, { color: '#ff9d7a' }]}>⌛{debuffCount(u)}</Text> : null}
                   {u.crippled ? <Text style={[styles.rosterHp, { color: '#ff9d7a' }]}>⛓</Text> : null}
                   <Text style={[styles.rosterHp, { color: u.en < u.def.maxEn * 0.25 ? '#ff9d7a' : '#35c9ff', width: 30 }]}>⛽{u.en}</Text>
+                  <Text style={[styles.rosterHp, { color: '#8b94b8', width: 34 }]}>🛡{armorOf(u, s.map)}{(u.sieveUntilEndOfEnemyPhase ? 0 : Math.max(u.def.barrier ?? 0, partBonus(u, 'barrier'), u.wallUntilEndOfEnemyPhase ? 500 : 0)) > 0 ? '⛨' : ''}</Text>
                   <Text style={[styles.rosterHp, { color: '#7fd0b0', width: 30 }]}>≫{Math.round(evadeOf(u, s.map))}</Text>
                   <Text style={[styles.rosterHp, { color: '#9fd8ff' }]}>⇄{moveRangeOf(u)}</Text>
                   <Text style={[styles.rosterHp, { color: '#ffd34d' }]}>{u.kills >= 50 ? '★' : ''}{u.kills}K</Text>

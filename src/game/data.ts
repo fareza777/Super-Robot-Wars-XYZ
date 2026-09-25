@@ -237,6 +237,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   anchorverse: { id: 'anchorverse', name: 'Anchor Verse', cost: 50, desc: 'Grav-anchor hymn — allies within 3 tiles cannot be knocked back or dragged until end of enemy phase' },
   poxedge: { id: 'poxedge', name: 'Pox Edge', cost: 45, desc: 'Corrosion strike — next hit +10% damage and corrodes the target for 5% max hull each turn for 2 turns' },
   beamverse: { id: 'beamverse', name: 'Beam Verse', cost: 50, desc: 'Coherent hymn — beam weapons of allies within 3 tiles deal +15% damage until end of enemy phase' },
+  frailedge: { id: 'frailedge', name: 'Frail Edge', cost: 45, desc: 'Brittle strike — next hit +10% damage and renders the target brittle (+15% damage taken) for 2 turns' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },
