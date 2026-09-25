@@ -248,6 +248,7 @@ export const PARTS: Record<string, PartDef> = {
   ordnanceArray: { id: 'ordnanceArray', name: 'Ordnance Array', desc: 'Ballistic bank — gun & missile weapons +12% damage', price: 3200, gunDmg: 12, missileDmg: 12 },
   pikeRack: { id: 'pikeRack', name: 'Pike Rack', desc: 'Pilum array — melee & missile weapons +12% damage', price: 3200, meleeDmg: 12, missileDmg: 12 },
   scytheRack: { id: 'scytheRack', name: 'Scythe Rack', desc: 'Reaper array — melee & funnel weapons +12% damage', price: 3200, meleeDmg: 12, funnelDmg: 12 },
+  saberRack: { id: 'saberRack', name: 'Saber Rack', desc: 'Fusion-blade array — melee & beam weapons +12% damage', price: 3200, meleeDmg: 12, beamDmg: 12 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -468,6 +469,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'dreadborn', name: 'Dreadborn', desc: '+6% damage per point vs dreaded targets' },
   { id: 'weakborn', name: 'Weakborn', desc: '+6% damage per point vs weakened targets' },
   { id: 'dischordborn', name: 'Dischordborn', desc: '+6% damage per point vs dischorded targets' },
+  { id: 'powerborn', name: 'Powerborn', desc: '+6% damage per point vs targets above 60% EN' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1640,6 +1642,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_tally', name: 'TALLYMASTER', desc: 'Earn 8,000+ salvage credits in a single mission', rewardCr: 100000 },
   { id: 'h_flashwar', name: 'FLASH WAR', desc: 'Win a mission by the end of turn 2', rewardCr: 100000 },
   { id: 'h_godtouched', name: 'GODTOUCHED', desc: 'Reach NG+25', rewardCr: 100000 },
+  { id: 'h_acesolo', name: 'ACE SOLO', desc: 'Win a mission deploying exactly one frame (3+ kills)', rewardCr: 100000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -2079,6 +2082,10 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.turn ?? 99) <= 2;
     case 'h_godtouched':
       return s.ngPlus >= 25;
+    case 'h_acesolo': {
+      const ps = (s.units ?? []).filter((u) => u.side === 'player' && !u.npc);
+      return ps.length === 1 && (s.kills ?? 0) >= 3;
+    }
     case 'h_pinnacle':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 80;
     case 'h_apexlegion':
