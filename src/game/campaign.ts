@@ -306,6 +306,7 @@ export const PARTS: Record<string, PartDef> = {
   hivePlate: { id: 'hivePlate', name: 'Hive Plate', desc: 'Swarm laminate — +1200 max HP & regenerate 1 ammo per turn', price: 3400, hp: 1200, ammoRegen: true },
   psalmPlate: { id: 'psalmPlate', name: 'Psalm Plate', desc: 'Hymn laminate — +8% crit & +3 SP regen per turn', price: 3400, crit: 8, spRegen: 3 },
   fusionPlate: { id: 'fusionPlate', name: 'Fusion Plate', desc: 'Tokamak laminate — +1200 max HP & +10 EN regen per turn', price: 3400, hp: 1200, enRegen: 10 },
+  deadeyePlate: { id: 'deadeyePlate', name: 'Deadeye Plate', desc: 'Marksman laminate — +10 hit & +8% crit', price: 3400, hit: 10, crit: 8 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -589,6 +590,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'voltfoe', name: 'Voltfoe', desc: '+6% damage per point vs frames carrying energy-hungry weapons (20+ EN)' },
   { id: 'shellfoe', name: 'Shellfoe', desc: '+6% damage per point vs frames carrying ammo-fed weapons' },
   { id: 'truefoe', name: 'Truefoe', desc: '+6% damage per point vs frames carrying high-accuracy weapons' },
+  { id: 'heavyfoe', name: 'Heavyfoe', desc: '+6% damage per point vs frames carrying siege-class weapons (4000+ PWR)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1792,6 +1794,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_nemesis6', name: 'NEMESIS VI', desc: 'Destroy 350 frames of a single type', rewardCr: 100000 },
   { id: 'h_pinnacle7', name: 'PINNACLE VII', desc: 'Score rank S on 140 missions', rewardCr: 100000 },
   { id: 'h_godhunter13', name: 'GODHUNTER XIII', desc: 'Destroy 350 bosses across your career', rewardCr: 100000 },
+  { id: 'h_godhunter14', name: 'GODHUNTER XIV', desc: 'Destroy 400 bosses across your career', rewardCr: 100000 },
   { id: 'h_centurion7', name: 'CENTURION VII', desc: 'Fly 120 ranked missions', rewardCr: 100000 },
   { id: 'h_extinction', name: 'EXTINCTION', desc: 'Destroy 20,000 frames across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
@@ -2311,6 +2314,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 300;
     case 'h_godhunter13':
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 350;
+    case 'h_godhunter14':
+      return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 400;
     case 'h_extinction':
       return totalKills >= 20000;
     case 'h_nemesis':
