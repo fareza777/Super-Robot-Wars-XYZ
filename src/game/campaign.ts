@@ -270,6 +270,7 @@ export const PARTS: Record<string, PartDef> = {
   strideCell: { id: 'strideCell', name: 'Stride Cell', desc: 'Vector stride — +8 mobility & +8 hit', price: 3200, mobility: 8, hit: 8 },
   gyroCell: { id: 'gyroCell', name: 'Gyro Cell', desc: 'Stabilizer gyro — +8 evade & immune to knockback/drag', price: 3200, evade: 8, knockProof: true },
   mirageCell: { id: 'mirageCell', name: 'Mirage Cell', desc: 'Ghost-light weave — +8 evade & a 400-point barrier', price: 3200, evade: 8, barrier: 400 },
+  psionCell: { id: 'psionCell', name: 'Psion Cell', desc: 'Psionic uplink — pilot regenerates +3 SP/turn & +8 hit', price: 3200, spRegen: 3, hit: 8 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -516,6 +517,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'stifleborn', name: 'Stifleborn', desc: '+6% damage per point vs targets with a choked reactor (Stifle)' },
   { id: 'poxborn', name: 'Poxborn', desc: '+6% damage per point vs corroding targets (Pox)' },
   { id: 'plagueborn', name: 'Plagueborn', desc: '+4% damage per point vs targets suffering 3+ debuffs' },
+  { id: 'anchorborn', name: 'Anchorborn', desc: '+5% damage per point while anchored (Anchor Verse / Brace Plate)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1685,6 +1687,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_godhunter7', name: 'GODHUNTER VII', desc: 'Destroy 100 bosses across your career', rewardCr: 100000 },
   { id: 'h_dreamteam3', name: 'DREAM TEAM III', desc: 'All pilots reach 500 career kills each', rewardCr: 100000 },
   { id: 'h_pinnacle3', name: 'PINNACLE III', desc: 'Score rank S on 100 missions', rewardCr: 100000 },
+  { id: 'h_pinnacle4', name: 'PINNACLE IV', desc: 'Score rank S on 110 missions', rewardCr: 100000 },
   { id: 'h_peacelord4', name: 'PEACELORD IV', desc: 'Clear 100 side missions', rewardCr: 100000 },
   { id: 'h_apexlegion3', name: 'APEX LEGION III', desc: 'All pilots reach 750 career kills each', rewardCr: 100000 },
   { id: 'h_godhunter8', name: 'GODHUNTER VIII', desc: 'Destroy 150 bosses across your career', rewardCr: 100000 },
@@ -2144,6 +2147,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return kills.length > 0 && kills.every((p) => (p.kills ?? 0) >= 500);
     case 'h_pinnacle3':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 100;
+    case 'h_pinnacle4':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 110;
     case 'h_peacelord4':
       return (s.sideCleared ?? []).length >= 100;
     case 'h_apexlegion3':
