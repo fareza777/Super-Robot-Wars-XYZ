@@ -245,6 +245,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   shellverse: { id: 'shellverse', name: 'Shell Verse', cost: 50, desc: 'Barrage hymn — missile weapons of allies within 3 tiles deal +15% damage until end of enemy phase' },
   tangleedge: { id: 'tangleedge', name: 'Tangle Edge', cost: 45, desc: 'Snare strike — next hit deals +10% damage and clips the target’s weapon range by 1 until end of enemy phase' },
   sealverse: { id: 'sealverse', name: 'Seal Verse', cost: 55, desc: 'Lockdown chant — enemies within 3 tiles cannot fire MAP weapons until end of enemy phase' },
+  zeroverse: { id: 'zeroverse', name: 'Zero Verse', cost: 50, desc: 'Null-field chant — enemies within 3 tiles lose all weapon-kind resists until end of enemy phase' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },
