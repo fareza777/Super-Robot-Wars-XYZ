@@ -195,6 +195,7 @@ function buffNames(u: UnitState): string[] {
   if (u.warlordUntilEndOfEnemyPhase) names.push('WARLORD VERSE');
   if (u.shellUntilEndOfEnemyPhase) names.push('SHELL VERSE');
   if (u.gunUntilEndOfEnemyPhase) names.push('GUN VERSE');
+  if (u.glitchedgeNext) names.push('GLITCH EDGE');
   if (u.mapSealUntilEndOfEnemyPhase) names.push('SEAL VERSE');
   if (u.resistSealUntilEndOfEnemyPhase) names.push('ZERO VERSE');
   if (u.stifleedgeNext) names.push('STIFLE EDGE');
