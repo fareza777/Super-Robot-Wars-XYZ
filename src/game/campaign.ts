@@ -315,6 +315,7 @@ export const PARTS: Record<string, PartDef> = {
   templePlate: { id: 'templePlate', name: 'Temple Plate', desc: 'Choir laminate — +3 SP regen & barrier 400', price: 3400, spRegen: 3, barrier: 400 },
   moorPlate: { id: 'moorPlate', name: 'Moor Plate', desc: 'Anchored laminate — +3 SP regen & immune to knockback/drag', price: 3400, spRegen: 3, knockProof: true },
   vetoPlate: { id: 'vetoPlate', name: 'Veto Plate', desc: 'Defiant laminate — +8% crit & immune to knockback/drag', price: 3400, crit: 8, knockProof: true },
+  keelPlate: { id: 'keelPlate', name: 'Keel Plate', desc: 'Ballast laminate — +10 EN regen & immune to knockback/drag', price: 3400, enRegen: 10, knockProof: true },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -607,6 +608,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'underborn', name: 'Underborn', desc: '+6% damage per point while own hull at 30% or below' },
   { id: 'breakborn', name: 'Breakborn', desc: '+6% damage per point vs frames cracked by break status' },
   { id: 'stunborn', name: 'Stunborn', desc: '+6% damage per point vs stunned frames' },
+  { id: 'suppborn', name: 'Suppborn', desc: '+6% damage per point vs suppressed frames' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1819,6 +1821,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_chainlord7', name: 'CHAINLORD VII', desc: 'Score an 18-kill chain in a single turn', rewardCr: 100000 },
   { id: 'h_stockpile7', name: 'STOCKPILE VII', desc: 'Hold 225 items at once', rewardCr: 100000 },
   { id: 'h_dreamteam6', name: 'DREAM TEAM VI', desc: 'Every pilot reaches 1000 career kills', rewardCr: 100000 },
+  { id: 'h_centurion9', name: 'CENTURION IX', desc: 'Fly 140 ranked missions', rewardCr: 100000 },
   { id: 'h_centurion7', name: 'CENTURION VII', desc: 'Fly 120 ranked missions', rewardCr: 100000 },
   { id: 'h_extinction', name: 'EXTINCTION', desc: 'Destroy 20,000 frames across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
@@ -2250,6 +2253,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.keys(s.missionRank ?? {}).length >= 120;
     case 'h_centurion8':
       return Object.keys(s.missionRank ?? {}).length >= 130;
+    case 'h_centurion9':
+      return Object.keys(s.missionRank ?? {}).length >= 140;
     case 'h_pinnacle2':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 90;
     case 'h_peacelord2':
