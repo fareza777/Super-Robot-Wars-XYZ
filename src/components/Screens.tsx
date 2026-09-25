@@ -106,7 +106,7 @@ export function BriefingScreen() {
             <Text style={styles.briefTxt}>{ch.objective}</Text>
             {ch.mastery && (
               <Text style={{ color: '#ffd34d', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginTop: 2 }}>
-                ★ MASTERY: {ch.mastery.desc} — +{ch.mastery.rewardCr}cr
+                ★ MASTERY: {ch.mastery.desc} — +{ch.mastery.rewardCr}cr{useGame.getState().masteryDone.includes(ch.id) ? ' ✓ DONE' : ''}
               </Text>
             )}
             {hard && <Text style={{ color: '#ff8a5c', fontSize: 11, fontWeight: '800', letterSpacing: 1.5, marginTop: 4 }}>▲ HARD MODE — enemies +15% · mission rewards +25%</Text>}

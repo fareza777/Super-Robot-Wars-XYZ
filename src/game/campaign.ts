@@ -264,6 +264,7 @@ export const PARTS: Record<string, PartDef> = {
   chargeCell: { id: 'chargeCell', name: 'Charge Cell', desc: 'Overfeed battery — +10 EN regen per turn & +8 hit', price: 3200, enRegen: 10, hit: 8 },
   flowCell: { id: 'flowCell', name: 'Flow Cell', desc: 'Riverine conduits — +12 EN regen per turn & +6 evade', price: 3200, enRegen: 12, evade: 6 },
   bracePlate: { id: 'bracePlate', name: 'Brace Plate', desc: 'Anchored laminate — +150 armor and immune to knockback/drag', price: 3200, armor: 150, knockProof: true },
+  lanceWeave: { id: 'lanceWeave', name: 'Lance Weave', desc: 'Pilum laminate — beam & missile damage taken cut by 25%', price: 3200, beamGuard: true, missileGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -500,6 +501,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'gloomborn', name: 'Gloomborn', desc: '+6% damage per point vs targets shrouded in gloom' },
   { id: 'skyborne', name: 'Skyborne', desc: '+5% damage per point vs airborne targets' },
   { id: 'rustborn', name: 'Rustborn', desc: '+6% damage per point vs rusted targets' },
+  { id: 'rootborn', name: 'Rootborn', desc: '+6% damage per point vs rooted targets' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1667,6 +1669,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_apexlegion2', name: 'APEX LEGION II', desc: 'All pilots reach 400 career kills each', rewardCr: 100000 },
   { id: 'h_godhunter7', name: 'GODHUNTER VII', desc: 'Destroy 100 bosses across your career', rewardCr: 100000 },
   { id: 'h_dreamteam3', name: 'DREAM TEAM III', desc: 'All pilots reach 500 career kills each', rewardCr: 100000 },
+  { id: 'h_pinnacle3', name: 'PINNACLE III', desc: 'Score rank S on 100 missions', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
   { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
   { id: 'h_pinnacle2', name: 'PINNACLE II', desc: 'Earn S rank on 90 missions', rewardCr: 100000 },
@@ -2114,6 +2117,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 100;
     case 'h_dreamteam3':
       return kills.length > 0 && kills.every((p) => (p.kills ?? 0) >= 500);
+    case 'h_pinnacle3':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 100;
     case 'h_nemesis':
       return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 100;
     case 'h_genocider':
