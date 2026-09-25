@@ -297,6 +297,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   blitzverse: { id: 'blitzverse', name: 'Blitz Verse', cost: 60, desc: 'Blitz hymn — allies within 3 tiles act again after a kill (overdrive-armed)' },
   drainedge: { id: 'drainedge', name: 'Drain Edge', cost: 45, desc: 'Siphon strike — next hit deals +10% damage and drains 20 EN from the target' },
   carnageverse: { id: 'carnageverse', name: 'Carnage Verse', cost: 60, desc: 'Carnage hymn — allies within 3 tiles bane-mark enemies on hit (+25 crit taken) until end of enemy phase' },
+  bulwarkedge: { id: 'bulwarkedge', name: 'Bulwark Edge', cost: 45, desc: 'Aegis strike — next hit deals +10% damage and grants self a 500-point i-field until end of enemy phase' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },
