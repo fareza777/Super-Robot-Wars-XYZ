@@ -318,6 +318,7 @@ export const PARTS: Record<string, PartDef> = {
   keelPlate: { id: 'keelPlate', name: 'Keel Plate', desc: 'Ballast laminate — +10 EN regen & immune to knockback/drag', price: 3400, enRegen: 10, knockProof: true },
   salvePlate: { id: 'salvePlate', name: 'Salve Plate', desc: 'Mender laminate — +8 evade & +8% hull regen per turn', price: 3400, evade: 8, hpRegen: 8 },
   galePlate: { id: 'galePlate', name: 'Gale Plate', desc: 'Tempest laminate — +8 mobility & +8 evade', price: 3400, mobility: 8, evade: 8 },
+  haloPlate: { id: 'haloPlate', name: 'Halo Plate', desc: 'Aegis laminate — +10 EN regen & barrier 400', price: 3400, enRegen: 10, barrier: 400 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -613,6 +614,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'suppborn', name: 'Suppborn', desc: '+6% damage per point vs suppressed frames' },
   { id: 'markborn', name: 'Markborn', desc: '+6% damage per point vs marked frames' },
   { id: 'loneborn', name: 'Loneborn', desc: '+6% damage per point vs frames with no ally within 2 tiles' },
+  { id: 'eliteborn', name: 'Eliteborn', desc: '+6% damage per point vs elite frames' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1828,6 +1830,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_centurion9', name: 'CENTURION IX', desc: 'Fly 140 ranked missions', rewardCr: 100000 },
   { id: 'h_godhunter15', name: 'GODHUNTER XV', desc: 'Destroy 450 boss frames across your career', rewardCr: 100000 },
   { id: 'h_peacelord7', name: 'PEACELORD VII', desc: 'Clear 160 side missions', rewardCr: 100000 },
+  { id: 'h_nemesis8', name: 'NEMESIS VIII', desc: 'Destroy 450 frames of a single type', rewardCr: 100000 },
   { id: 'h_centurion7', name: 'CENTURION VII', desc: 'Fly 120 ranked missions', rewardCr: 100000 },
   { id: 'h_extinction', name: 'EXTINCTION', desc: 'Destroy 20,000 frames across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
@@ -2409,6 +2412,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 350;
     case 'h_nemesis7':
       return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 400;
+    case 'h_nemesis8':
+      return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 450;
     case 'h_perfectscore': {
       const rs = Object.values(s.missionRank ?? {});
       return rs.length >= 30 && rs.every((r) => r === 'S' || r === 'A');
