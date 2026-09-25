@@ -131,6 +131,7 @@ const UnitCell = React.memo(function UnitCell({ u, chip, ghosting, threat }: { u
       >
         <Image cachePolicy="memory" source={MECH_ART[u.def.id]} style={[StyleSheet.absoluteFill, u.side === 'enemy' && { transform: [{ scaleX: -1 }] }]} contentFit="cover" />
         {u.phase2 && <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,40,40,0.18)' }]} />}
+        {u.alive && !u.phase2 && u.hp <= u.def.maxHp * 0.25 && <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,60,40,0.16)', borderWidth: 2, borderColor: 'rgba(255,110,70,0.85)', borderRadius: 8 }]} />}
         {u.side === 'player' && !u.npc && PILOT_ART[u.def.id] && (
           <View style={styles.faceBadge}>
             <Image cachePolicy="memory" source={PILOT_ART[u.def.id]} style={StyleSheet.absoluteFill} contentFit="cover" />
