@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS, PILOT_STATS } from '../game/campaign';
 
 const ALLY_AOE = new Set(['anthemverse','bastionverse','breachverse','choirverse','clarionverse','cleanseverse','crimsonverse','damperverse','defianceverse','flowverse','foresightverse','fortressverse','freeflowverse','goreverse','juggernautverse','lanceverse','leechverse','magnumverse','mendverse','mirageverse','oathverse','palisadeverse','phantomverse','pinverse','rampartverse','renewalverse','repulseverse','requiemverse','salvoverse','scopeverse','scorchverse','sentinelverse','seraphverse','shelterverse','siphonverse','steadfastverse','surgeverse','swiftverse','thornverse','tideverse','tracerverse','triumphverse','undyingverse','valiantverse','vaultverse','vigilverse','vigorverse','wallverse','wardenverse','wardverse','miraclechorus','sanctumhymn','gracehymn','dirgemist','wardmist','bulwarkaria','warhorn','cantata','fableverse','sustainverse','revelverse','bulwarkverse','anchorverse','beamverse','warlordverse','shellverse','gunverse','funnelverse','reactorverse','haloverse']);
-const ENEMY_AOE = new Set(['armorrot','bindverse','blightverse','curseverse','darkverse','festerverse','despairverse','doomverse','dreadverse','exposeverse','fearverse','feebleverse','frailverse','gloomverse','hexverse','huskverse','jamverse','lockcascade','mireverse','nullverse','rotverse','ruinverse','rustverse','shroudverse','silenceverse','sirenverse','stifleverse','surtaxverse','tangleverse','terrorverse','tetherverse','tideebb','veilbreakverse','voidverse','winterverse','staticchoir','chokerverse','lureverse','rootverse','maimverse','poxverse','shatterverse','riftverse','glitchverse','sealverse','zeroverse','baneverse','duskverse','viceverse','drainverse']);
+const ENEMY_AOE = new Set(['armorrot','bindverse','blightverse','curseverse','darkverse','festerverse','despairverse','doomverse','dreadverse','exposeverse','fearverse','feebleverse','frailverse','gloomverse','hexverse','huskverse','jamverse','lockcascade','mireverse','nullverse','rotverse','ruinverse','rustverse','shroudverse','silenceverse','sirenverse','stifleverse','surtaxverse','tangleverse','terrorverse','tetherverse','tideebb','veilbreakverse','voidverse','winterverse','staticchoir','chokerverse','lureverse','rootverse','maimverse','poxverse','shatterverse','riftverse','glitchverse','sealverse','zeroverse','baneverse','duskverse','viceverse','drainverse','emberverse']);
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { BOND_EVENTS, bondLevel, bondMods } from '../game/bonds';
 import { armorOf, bestCounterWeapon, moveRangeOf, usableWeapons, evadeOf, critChance, damageOf, dist, enCostOf, findSupport, formationBonus, hasPincer, hitChance, key, partBonus, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
@@ -197,6 +197,7 @@ function buffNames(u: UnitState): string[] {
   if (u.gunUntilEndOfEnemyPhase) names.push('GUN VERSE');
   if (u.funnelUntilEndOfEnemyPhase) names.push('FUNNEL VERSE');
   if (u.haloUntilEndOfEnemyPhase) names.push('HALO VERSE');
+  if (u.emberUntilEndOfEnemyPhase) names.push('EMBER VERSE');
   if (u.glitchedgeNext) names.push('GLITCH EDGE');
   if (u.sealedgeNext) names.push('SEAL EDGE');
   if (u.shrededgeNext) names.push('SHRED EDGE');
@@ -653,8 +654,9 @@ export function SidePanel() {
                     const sp = SPIRITS[id];
                     const milestone = !(spiritUnit.def.pilot.spirits as SpiritId[]).includes(id);
                     const nTgt = ALLY_AOE.has(id) || ENEMY_AOE.has(id) ? s.units.filter((x) => x.alive && x.side === (ALLY_AOE.has(id) ? 'player' : 'enemy') && dist(x.pos, spiritUnit.pos) <= 3).length : -1;
+                    const active = ALLY_AOE.has(id) && s.units.some((x) => x.alive && x.side === 'player' && buffNames(x).includes(sp.name.toUpperCase()));
                     return (
-                      <Btn key={id} label={`✦ ${sp.name} · ${spiritCost(spiritUnit, id)} SP${nTgt >= 0 ? ` · ⌀${nTgt}${nTgt === 0 ? ' — EMPTY' : ''}` : ''}${milestone ? ' · ★MILESTONE' : ''}`} sub={sp.desc} disabled={spiritUnit.sp < spiritCost(spiritUnit, id)} onPress={() => s.castSpirit(spiritUnit.uid, id)} accent={milestone ? '#ffd34d' : '#c9a0ff'} />
+                      <Btn key={id} label={`✦ ${sp.name} · ${spiritCost(spiritUnit, id)} SP${nTgt >= 0 ? ` · ⌀${nTgt}${nTgt === 0 ? ' — EMPTY' : ''}` : ''}${active ? ' · ◈ACTIVE' : ''}${milestone ? ' · ★MILESTONE' : ''}`} sub={sp.desc} disabled={spiritUnit.sp < spiritCost(spiritUnit, id)} onPress={() => s.castSpirit(spiritUnit.uid, id)} accent={milestone ? '#ffd34d' : '#c9a0ff'} />
                     );
                   })}
                 </View>
