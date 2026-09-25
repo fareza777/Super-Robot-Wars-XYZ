@@ -263,6 +263,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   bombardverse: { id: 'bombardverse', name: 'Bombard Verse', cost: 55, desc: 'Fire-mission hymn — allies within 3 tiles deal +20% damage with MAP weapons until end of enemy phase' },
   baneedge: { id: 'baneedge', name: 'Bane Edge', cost: 45, desc: 'Hex strike — next hit deals +10% damage and marks the target (+25 crit chance taken)' },
   cowardverse: { id: 'cowardverse', name: 'Coward Verse', cost: 50, desc: 'Terror chant — enemies within 3 tiles lose 20 will instantly' },
+  nadirverse: { id: 'nadirverse', name: 'Nadir Verse', cost: 55, desc: 'Null hymn — enemies within 3 tiles lose weapon-kind resists AND cannot fire MAP weapons until end of enemy phase' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },
