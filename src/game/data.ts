@@ -225,6 +225,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   blindedge: { id: 'blindedge', name: 'Blind Edge', cost: 45, desc: 'Nullifying strike — your next hit deals +10% damage and blinds the target so it cannot land critical hits until end of enemy phase' },
   gloomedge: { id: 'gloomedge', name: 'Gloom Edge', cost: 45, desc: 'Haze strike — next hit +10% damage and shrouds the target in gloom (-20 hit, 2 turns)' },
   sustainverse: { id: 'sustainverse', name: 'Sustain Verse', cost: 50, desc: 'Resupply hymn — allies within 3 tiles fabricate +1 ammo each turn until end of enemy phase' },
+  matadoredge: { id: 'matadoredge', name: 'Matador Edge', cost: 45, desc: 'Taunt strike — next hit +10% damage and provokes the target onto this frame' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },

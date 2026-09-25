@@ -186,6 +186,7 @@ function buffNames(u: UnitState): string[] {
   if (u.fableUntilEndOfEnemyPhase) names.push('FABLE VERSE');
   if (u.sustainUntilEndOfEnemyPhase) names.push('SUSTAIN VERSE');
   if ((u.gloomTurns ?? 0) > 0) names.push(`GLOOM ${u.gloomTurns}`);
+  if (u.matadorNext) names.push('MATADOR EDGE');
   if ((u.clarionTurns ?? 0) > 0) names.push(`CLARION VERSE ${u.clarionTurns}`);
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
@@ -592,7 +593,7 @@ export function SidePanel() {
                           <Text style={styles.tgtCnt} numberOfLines={1}>
                             {cw ? `↩ CNT ${cw.name} ~${cDmg} (${cHc}% · ⚡${critChance(e, unit, cw)}%)` : '↩ SAFE — no counter'} · CRIT {critChance(unit, e)}%{fb > 0 ? ` · ▣FORM +${fb}` : ''}{pin ? ` · ⇄PIN +${10 + partBonus(unit, 'pinDmg')}%` : ''}
                             {(e.def.resists?.[s.pendingWeapon!.kind] ?? 0) > 0 ? ` · 🛡RES −${Math.round((e.def.resists![s.pendingWeapon!.kind] ?? 0) * 100)}%` : ''}
-                            {` · ⇢${dist(s.pendingMove ?? unit.pos, e.pos)}t`}{findSupport(s.units, unit.uid, e) ? ' · ⇒SUP' : ''}
+                            {` · ⇢${dist(s.pendingMove ?? unit.pos, e.pos)}t`}{findSupport(s.units, unit.uid, e) ? ' · ⇒SUP' : ''}{` · +${dmg >= e.hp ? (e.elite ? 110 : 70) : 30} EXP`}
                           </Text>
                         </View>
                         <View style={styles.tgtHitBox}>
