@@ -104,6 +104,7 @@ function buffNames(u: UnitState): string[] {
   if (u.shroudNext) names.push('SHROUD EDGE');
   if (u.rustNext) names.push('RUST EDGE');
   if (u.blindNext) names.push('BLIND EDGE');
+  if (u.flakUntilEndOfEnemyPhase) names.push('FLAK VERSE');
   if (u.cullNext) names.push('CULL EDGE');
   if (u.mortalNext) names.push('MORTAL EDGE');
   if (u.rendNext) names.push('REND EDGE');
