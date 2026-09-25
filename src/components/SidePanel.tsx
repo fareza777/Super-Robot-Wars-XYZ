@@ -110,6 +110,7 @@ function buffNames(u: UnitState): string[] {
   if (u.maraudNext) names.push('MARAUD EDGE');
   if (u.howlNext) names.push('HOWL EDGE');
   if (u.vampNext) names.push('VAMP EDGE');
+  if (u.disarmNext) names.push('DISARM EDGE');
   if (u.repulseUntilEndOfEnemyPhase) names.push('REPULSE VERSE');
   if (u.silencedUntilEndOfEnemyPhase) names.push('SILENCE VERSE');
   if (u.weakenUntilEndOfEnemyPhase) names.push('FEAR VERSE');
@@ -501,7 +502,7 @@ export function SidePanel() {
                             {e.def.name} {e.def.boss ? (e.phase2 ? 'Ω★' : '★') : ''}
                           </Text>
                           <Text style={styles.tgtHp}>
-                            HP {e.hp}/{e.def.maxHp} · ARM {armorOf(e, s.map)} · W {e.will} · EN {e.en} · ⌛{debuffCount(e)}
+                            HP {e.hp}/{e.def.maxHp} · ARM {armorOf(e, s.map)}{Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0) > 0 ? `+⛨${Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0)}` : ''} · W {e.will} · EN {e.en} · ⌛{debuffCount(e)}
                           </Text>
                         </View>
                         <View style={styles.tgtHitBox}>
@@ -543,7 +544,7 @@ export function SidePanel() {
                             {e.def.name} {e.def.boss ? (e.phase2 ? 'Ω★' : '★') : ''}{kill ? ' ☠' : ''}
                           </Text>
                           <Text style={styles.tgtHp}>
-                            HP {e.hp}/{e.def.maxHp} · ARM {armorOf(e, s.map)} · W {e.will} · EN {e.en} · ⌛{debuffCount(e)}
+                            HP {e.hp}/{e.def.maxHp} · ARM {armorOf(e, s.map)}{Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0) > 0 ? `+⛨${Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0)}` : ''} · W {e.will} · EN {e.en} · ⌛{debuffCount(e)}
                           </Text>
                           {/* SRW damage preview — green = HP remaining after the hit */}
                           <View style={styles.tgtBar}>

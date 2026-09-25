@@ -225,6 +225,7 @@ export const PARTS: Record<string, PartDef> = {
   tracerVeil: { id: 'tracerVeil', name: 'Tracer Veil', desc: 'Paint-matrix shroud — +10 hit and +15% damage vs marked/exposed', price: 2800, hit: 10, markDmg: 15 },
   bombardRig: { id: 'bombardRig', name: 'Bombard Rig', desc: 'Siege lattice — MAP weapons +15% damage and +1 weapon range', price: 2800, mapDmg: true, range: 1 },
   emberRounds: { id: 'emberRounds', name: 'Ember Rounds', desc: 'Pyre load — landed hits can ignite the target (25%)', price: 2900, statusBurn: true, hit: 8 },
+  rendLattice: { id: 'rendLattice', name: 'Rend Lattice', desc: 'Sunderweave frame — attacks shred 10% more armor and +8 hit', price: 2900, armorShred: 10, hit: 8 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -422,6 +423,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'halfload', name: 'Halfload', desc: '+6% damage per point when the weapon is at half ammo or less' },
   { id: 'longbarrel', name: 'Longbarrel', desc: '+5% damage per point when attacking from at least 3 tiles away' },
   { id: 'corrosivist', name: 'Corrosivist', desc: '+6% damage per point vs targets suffering Rust Verse corrosion' },
+  { id: 'thinner', name: 'Thinner', desc: '+6% damage per point vs grunt frames (non-boss, non-elite)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1570,6 +1572,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_pinnacle', name: 'PINNACLE', desc: 'Earn S rank on 80 missions', rewardCr: 100000 },
   { id: 'h_apexlegion', name: 'APEX LEGION', desc: 'All pilots reach 250 career kills each', rewardCr: 100000 },
   { id: 'h_stockpile', name: 'STOCKPILE', desc: 'Hold 90 items in the inventory at once', rewardCr: 100000 },
+  { id: 'h_godhunter2', name: 'GODHUNTER II', desc: 'Destroy 30 bosses across your career', rewardCr: 100000 },
   { id: 'h_immortal2', name: 'IMMORTAL II', desc: 'Reach MASTERY ★ on 80 missions', rewardCr: 100000 },
 ];
 
@@ -1966,6 +1969,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return kills.length > 0 && kills.every((p) => (p.kills ?? 0) >= 250);
     case 'h_stockpile':
       return Object.values(s.inventory ?? {}).reduce((n, c) => n + c, 0) >= 90;
+    case 'h_godhunter2':
+      return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 30;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
