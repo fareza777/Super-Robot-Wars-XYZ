@@ -281,6 +281,7 @@ export const PARTS: Record<string, PartDef> = {
   mendGauge: { id: 'mendGauge', name: 'Mend Gauge', desc: 'Regen-linked optics — +10 hit & +8% hull regen per turn', price: 3200, hit: 10, hpRegen: 8 },
   siegeGauge: { id: 'siegeGauge', name: 'Siege Gauge', desc: 'Bastion optics — +8% crit & +100 armor', price: 3200, crit: 8, armor: 100 },
   feedGauge: { id: 'feedGauge', name: 'Feed Gauge', desc: 'Ammo-link optics — +10 hit & regen 1 ammo per turn', price: 3200, hit: 10, ammoRegen: true },
+  keepGauge: { id: 'keepGauge', name: 'Keep Gauge', desc: 'Bastion optics — +1200 max HP & +10 hit', price: 3300, hp: 1200, hit: 10 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -539,6 +540,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'meleefoe', name: 'Meleefoe', desc: '+6% damage per point vs melee-weapon carriers' },
   { id: 'funnelfoe', name: 'Funnelfoe', desc: '+6% damage per point vs funnel-weapon carriers' },
   { id: 'forestborn', name: 'Forestborn', desc: '+5% damage per point vs targets standing in forest' },
+  { id: 'desertborn', name: 'Desertborn', desc: '+5% damage per point vs targets standing on desert' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1747,10 +1749,12 @@ export const HONORS: HonorDef[] = [
   { id: 'h_flashwar', name: 'FLASH WAR', desc: 'Win a mission by the end of turn 2', rewardCr: 100000 },
   { id: 'h_godtouched', name: 'GODTOUCHED', desc: 'Reach NG+25', rewardCr: 100000 },
   { id: 'h_acesolo', name: 'ACE SOLO', desc: 'Win a mission deploying exactly one frame (3+ kills)', rewardCr: 100000 },
+  { id: 'h_ordnance', name: 'ORDNANCE LORD', desc: 'Upgrade 5 weapons to max level (+5)', rewardCr: 100000 },
 ];
 
 /** Whether an honor's condition is currently met. */
 export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; inventory?: Record<string, number>; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; turn?: number;
+weaponUpg?: Record<string, Record<string, number>>;
 missionCh?: { theme?: string; fog?: boolean };
 honorsClaimed?: string[];
 usedResupply?: boolean;
@@ -2260,6 +2264,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
     }
     case 'h_pinnacle':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 80;
+    case 'h_ordnance':
+      return Object.values(s.weaponUpg ?? {}).reduce((n, w) => n + Object.values(w).filter((l) => l >= 5).length, 0) >= 5;
     case 'h_apexlegion':
       return kills.length > 0 && kills.every((p) => (p.kills ?? 0) >= 250);
     case 'h_stockpile2':

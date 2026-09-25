@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS, PILOT_STATS } from '../game/campaign';
 
-const ALLY_AOE = new Set(['anthemverse','bastionverse','breachverse','choirverse','clarionverse','cleanseverse','crimsonverse','damperverse','defianceverse','flowverse','foresightverse','fortressverse','freeflowverse','goreverse','juggernautverse','lanceverse','leechverse','magnumverse','mendverse','mirageverse','oathverse','palisadeverse','phantomverse','pinverse','rampartverse','renewalverse','repulseverse','requiemverse','salvoverse','scopeverse','scorchverse','sentinelverse','seraphverse','shelterverse','siphonverse','steadfastverse','surgeverse','swiftverse','thornverse','tideverse','tracerverse','triumphverse','undyingverse','valiantverse','vaultverse','vigilverse','vigorverse','wallverse','wardenverse','wardverse','miraclechorus','sanctumhymn','gracehymn','dirgemist','wardmist','bulwarkaria','warhorn','cantata','fableverse','sustainverse','revelverse','bulwarkverse','anchorverse','beamverse','warlordverse','shellverse']);
+const ALLY_AOE = new Set(['anthemverse','bastionverse','breachverse','choirverse','clarionverse','cleanseverse','crimsonverse','damperverse','defianceverse','flowverse','foresightverse','fortressverse','freeflowverse','goreverse','juggernautverse','lanceverse','leechverse','magnumverse','mendverse','mirageverse','oathverse','palisadeverse','phantomverse','pinverse','rampartverse','renewalverse','repulseverse','requiemverse','salvoverse','scopeverse','scorchverse','sentinelverse','seraphverse','shelterverse','siphonverse','steadfastverse','surgeverse','swiftverse','thornverse','tideverse','tracerverse','triumphverse','undyingverse','valiantverse','vaultverse','vigilverse','vigorverse','wallverse','wardenverse','wardverse','miraclechorus','sanctumhymn','gracehymn','dirgemist','wardmist','bulwarkaria','warhorn','cantata','fableverse','sustainverse','revelverse','bulwarkverse','anchorverse','beamverse','warlordverse','shellverse','gunverse']);
 const ENEMY_AOE = new Set(['armorrot','bindverse','blightverse','curseverse','darkverse','festerverse','despairverse','doomverse','dreadverse','exposeverse','fearverse','feebleverse','frailverse','gloomverse','hexverse','huskverse','jamverse','lockcascade','mireverse','nullverse','rotverse','ruinverse','rustverse','shroudverse','silenceverse','sirenverse','stifleverse','surtaxverse','tangleverse','terrorverse','tetherverse','tideebb','veilbreakverse','voidverse','winterverse','staticchoir','chokerverse','lureverse','rootverse','maimverse','poxverse','shatterverse','riftverse','glitchverse','sealverse','zeroverse']);
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { BOND_EVENTS, bondLevel, bondMods } from '../game/bonds';
@@ -194,6 +194,7 @@ function buffNames(u: UnitState): string[] {
   if (u.glitchUntilEndOfEnemyPhase) names.push('GLITCH VERSE');
   if (u.warlordUntilEndOfEnemyPhase) names.push('WARLORD VERSE');
   if (u.shellUntilEndOfEnemyPhase) names.push('SHELL VERSE');
+  if (u.gunUntilEndOfEnemyPhase) names.push('GUN VERSE');
   if (u.mapSealUntilEndOfEnemyPhase) names.push('SEAL VERSE');
   if (u.resistSealUntilEndOfEnemyPhase) names.push('ZERO VERSE');
   if (u.stifleedgeNext) names.push('STIFLE EDGE');
@@ -737,6 +738,7 @@ export function SidePanel() {
                       <Text style={[styles.rosterHp, { color: '#8b94b8', width: 34 }]}>🛡{armorOf(u, s.map)}{(u.sieveUntilEndOfEnemyPhase ? 0 : Math.max(u.def.barrier ?? 0, partBonus(u, 'barrier'))) > 0 ? '⛨' : ''}</Text>
                       <Text style={[styles.rosterHp, { color: '#7fd0b0', width: 30 }]}>≫{Math.round(evadeOf(u, s.map))}</Text>
                       <Text style={[styles.rosterHp, { color: '#9fd8ff', width: 26 }]}>⇄{moveRangeOf(u)}</Text>
+                      {(TERRAIN_INFO[terrainAt(s.map, u.pos)]?.def ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#a8c07a', width: 20 }]}>{TERRAIN_INFO[terrainAt(s.map, u.pos)].glyph}</Text>}
                       {(u.doomTurns ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#ff9d7a', width: 24 }]}>☠{u.doomTurns}</Text>}
                       {debuffCount(u) > 0 && <Text style={[styles.rosterHp, { color: '#ff9d7a', width: 26 }]}>⌛{debuffCount(u)}</Text>}
                       <Text style={[styles.rosterHp, { color: u.en < u.def.maxEn * 0.25 ? '#ff9d7a' : '#35c9ff', width: 30 }]}>⛽{u.en}</Text>
