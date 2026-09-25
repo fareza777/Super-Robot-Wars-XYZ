@@ -28,7 +28,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0, truesight: 0, backliner: 0, bombard: 0, ruinbreaker: 0, artillerist: 0, paintburst: 0, fortsoul: 0, hexsurge: 0, coldsteel: 0, capacitor: 0, ironbound: 0, coolloop: 0, gritguard: 0, savant: 0, shieldpierce: 0, pureshot: 0, finisher: 0, aerobat: 0, sureshot: 0, wildfire: 0, archer: 0, stormeye: 0, acehunter: 0, ravager: 0, sledge: 0, overkill: 0, pike: 0, wildswing: 0, zenith: 0, closecombat: 0, chainblade: 0, exploiter: 0, viper: 0, disruptor: 0, myrmidon: 0, sunderfist: 0, bloodborne: 0, harvester: 0, gridshock: 0, shockjock: 0, biggame: 0, razor: 0, retribution: 0, bloodhound: 0, headhunter: 0, soulcut: 0, wardancer: 0, butcher: 0, punisher: 0, wrathborn: 0, tracker: 0, carver: 0, highvolt: 0, ironwill: 0, vigilant: 0, bloodfrenzy: 0, spectral: 0, hexblade: 0, graceful: 0, flakmaster: 0, shepherd: 0, madmen: 0, predator: 0, wither: 0, grandstand: 0, vanguard: 0, phalanx: 0, polymath: 0, isolator: 0, scourge: 0, bloodtrance: 0, snipersoul: 0, aegisshield: 0, stunlock: 0, polluter: 0, finale: 0, sunderborn: 0, landslide: 0, sapper: 0, flanker: 0, tormentor: 0, godsbreaker: 0, momentum: 0, vitals: 0, highhand: 0, saboteur: 0, barrierbane: 0, huntsman: 0, guardbreaker: 0, opening: 0, remembrance: 0, scrapper: 0, ballisteur: 0, awestruck: 0, lifeline: 0, lowburn: 0, bigbang: 0, irongroove: 0, ashstalker: 0, dominant: 0, crossfire: 0, reaping: 0, luminarch: 0, breakdancer: 0, hailborn: 0, rifleborn: 0, flankshot: 0, warlust: 0, halfload: 0, longbarrel: 0, corrosivist: 0, thinner: 0, purist: 0, entropist: 0, suffocator: 0, seaborn: 0, perforator: 0, usurper: 0, empowered: 0, overlord: 0, volleyborn: 0, zenborn: 0, flakborn: 0, highlander: 0, urbanist: 0, preyborn: 0, freefire: 0, tetherborn: 0, shroudborn: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0, truesight: 0, backliner: 0, bombard: 0, ruinbreaker: 0, artillerist: 0, paintburst: 0, fortsoul: 0, hexsurge: 0, coldsteel: 0, capacitor: 0, ironbound: 0, coolloop: 0, gritguard: 0, savant: 0, shieldpierce: 0, pureshot: 0, finisher: 0, aerobat: 0, sureshot: 0, wildfire: 0, archer: 0, stormeye: 0, acehunter: 0, ravager: 0, sledge: 0, overkill: 0, pike: 0, wildswing: 0, zenith: 0, closecombat: 0, chainblade: 0, exploiter: 0, viper: 0, disruptor: 0, myrmidon: 0, sunderfist: 0, bloodborne: 0, harvester: 0, gridshock: 0, shockjock: 0, biggame: 0, razor: 0, retribution: 0, bloodhound: 0, headhunter: 0, soulcut: 0, wardancer: 0, butcher: 0, punisher: 0, wrathborn: 0, tracker: 0, carver: 0, highvolt: 0, ironwill: 0, vigilant: 0, bloodfrenzy: 0, spectral: 0, hexblade: 0, graceful: 0, flakmaster: 0, shepherd: 0, madmen: 0, predator: 0, wither: 0, grandstand: 0, vanguard: 0, phalanx: 0, polymath: 0, isolator: 0, scourge: 0, bloodtrance: 0, snipersoul: 0, aegisshield: 0, stunlock: 0, polluter: 0, finale: 0, sunderborn: 0, landslide: 0, sapper: 0, flanker: 0, tormentor: 0, godsbreaker: 0, momentum: 0, vitals: 0, highhand: 0, saboteur: 0, barrierbane: 0, huntsman: 0, guardbreaker: 0, opening: 0, remembrance: 0, scrapper: 0, ballisteur: 0, awestruck: 0, lifeline: 0, lowburn: 0, bigbang: 0, irongroove: 0, ashstalker: 0, dominant: 0, crossfire: 0, reaping: 0, luminarch: 0, breakdancer: 0, hailborn: 0, rifleborn: 0, flankshot: 0, warlust: 0, halfload: 0, longbarrel: 0, corrosivist: 0, thinner: 0, purist: 0, entropist: 0, suffocator: 0, seaborn: 0, perforator: 0, usurper: 0, empowered: 0, overlord: 0, volleyborn: 0, zenborn: 0, flakborn: 0, highlander: 0, urbanist: 0, preyborn: 0, freefire: 0, tetherborn: 0, shroudborn: 0, curseborn: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
@@ -228,6 +228,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if (att.pierceNext) dmg = Math.round(dmg * 1.10);
   if (att.muteNext) dmg = Math.round(dmg * 1.10);
   if (att.dragNext) dmg = Math.round(dmg * 1.1);
+  if (att.blinkNext) dmg = Math.round(dmg * 1.1);
   if ((att.skills?.usurper ?? 0) > 0 && def.def.boss && !def.phase2) dmg = Math.round(dmg * (1 + att.skills.usurper * 0.06));
   if ((att.skills?.empowered ?? 0) > 0) { const verses = (att.triumphUntilEndOfEnemyPhase ? 1 : 0) + (att.salvoUntilEndOfEnemyPhase ? 1 : 0) + (att.juggernautUntilEndOfEnemyPhase ? 1 : 0) + (att.goreUntilEndOfEnemyPhase ? 1 : 0) + (att.lanceUntilEndOfEnemyPhase ? 1 : 0) + (att.warsongUntilEndOfEnemyPhase ? 1 : 0) + (att.scorchUntilEndOfEnemyPhase ? 1 : 0) + (att.requiemUntilEndOfEnemyPhase ? 1 : 0) + (att.havocUntilEndOfEnemyPhase ? 1 : 0) + (att.crimsonUntilEndOfEnemyPhase ? 1 : 0); dmg = Math.round(dmg * (1 + att.skills.empowered * 0.04 * Math.min(3, verses))); }
   if ((att.skills?.thinner ?? 0) > 0 && !def.def.boss && !def.elite) dmg = Math.round(dmg * (1 + att.skills.thinner * 0.06));
@@ -242,6 +243,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if ((att.skills?.freefire ?? 0) > 0 && (def.silencedUntilEndOfEnemyPhase || def.counterSealUntilEndOfEnemyPhase)) dmg = Math.round(dmg * (1 + att.skills.freefire * 0.06));
   if ((att.skills?.tetherborn ?? 0) > 0 && def.tetherUntilEndOfEnemyPhase) dmg = Math.round(dmg * (1 + att.skills.tetherborn * 0.06));
   if ((att.skills?.shroudborn ?? 0) > 0 && def.shroudUntilEndOfEnemyPhase) dmg = Math.round(dmg * (1 + att.skills.shroudborn * 0.06));
+  if ((att.skills?.curseborn ?? 0) > 0 && def.cursedUntilEndOfEnemyPhase) dmg = Math.round(dmg * (1 + att.skills.curseborn * 0.06));
   if ((att.skills?.warlust ?? 0) > 0) dmg = Math.round(dmg * (1 + att.skills.warlust * 0.03 * Math.min(5, Math.floor(att.kills / 5))));
   if (att.weakenUntilEndOfEnemyPhase) dmg = Math.round(dmg * 0.9);
   if ((att.skills?.bigbang ?? 0) > 0 && w.power === Math.max(...usableWeapons(att).map((x) => x.power))) dmg = Math.round(dmg * (1 + att.skills.bigbang * 0.05));
@@ -909,6 +911,20 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
       break;
     }
   }
+  // blink edge — a landed hit teleports the striker to a free tile beside the target
+  if (result.hit && def.alive && !result.destroyed && att.blinkNext && dist(att.pos, def.pos) > 1) {
+    const opts = [
+      { x: def.pos.x + 1, y: def.pos.y }, { x: def.pos.x - 1, y: def.pos.y },
+      { x: def.pos.x, y: def.pos.y + 1 }, { x: def.pos.x, y: def.pos.y - 1 },
+    ].sort((a, b) => dist(a, att.pos) - dist(b, att.pos));
+    for (const np of opts) {
+      if (np.x < 0 || np.y < 0 || np.x >= state.map.cols || np.y >= state.map.rows) continue;
+      if (!TERRAIN_INFO[terrainAt(state.map, np)].passable[att.def.moveType]) continue;
+      if (state.units.some((o) => o.alive && o !== att && o.pos.x === np.x && o.pos.y === np.y)) continue;
+      att.pos = np;
+      break;
+    }
+  }
   if (result.hit) def.exposed = false;
   if (result.destroyed) {
     def.alive = false;
@@ -1028,7 +1044,7 @@ export function applyAttack(state: GameState, attackerUid: string, defenderUid: 
   att.huntNext = false;
   att.tracerNext = false;
   att.strafeNext = false;
-  att.pyreNext = false; att.cinderNext = false; att.maraudNext = false; att.howlNext = false; att.vampNext = false; att.disarmNext = false; att.twinNext = false; att.pierceNext = false; att.reshiftNext = false; att.muteNext = false; att.dragNext = false;
+  att.pyreNext = false; att.cinderNext = false; att.maraudNext = false; att.howlNext = false; att.vampNext = false; att.disarmNext = false; att.twinNext = false; att.pierceNext = false; att.reshiftNext = false; att.muteNext = false; att.dragNext = false; att.blinkNext = false;
   att.overrunNext = false;
   att.exertNext = false;
   att.skyfallNext = false;
@@ -1095,7 +1111,7 @@ export function applyMapAttack(state: GameState, attackerUid: string, targetTile
   att.huntNext = false;
   att.tracerNext = false;
   att.strafeNext = false;
-  att.pyreNext = false; att.cinderNext = false; att.maraudNext = false; att.howlNext = false; att.vampNext = false; att.disarmNext = false; att.twinNext = false; att.pierceNext = false; att.reshiftNext = false; att.muteNext = false; att.dragNext = false;
+  att.pyreNext = false; att.cinderNext = false; att.maraudNext = false; att.howlNext = false; att.vampNext = false; att.disarmNext = false; att.twinNext = false; att.pierceNext = false; att.reshiftNext = false; att.muteNext = false; att.dragNext = false; att.blinkNext = false;
   att.overrunNext = false;
   att.exertNext = false;
   att.skyfallNext = false;
@@ -1173,7 +1189,7 @@ export function applyAllAttack(state: GameState, attackerUid: string, weaponId: 
   att.huntNext = false;
   att.tracerNext = false;
   att.strafeNext = false;
-  att.pyreNext = false; att.cinderNext = false; att.maraudNext = false; att.howlNext = false; att.vampNext = false; att.disarmNext = false; att.twinNext = false; att.pierceNext = false; att.reshiftNext = false; att.muteNext = false; att.dragNext = false;
+  att.pyreNext = false; att.cinderNext = false; att.maraudNext = false; att.howlNext = false; att.vampNext = false; att.disarmNext = false; att.twinNext = false; att.pierceNext = false; att.reshiftNext = false; att.muteNext = false; att.dragNext = false; att.blinkNext = false;
   att.overrunNext = false;
   att.exertNext = false;
   att.skyfallNext = false;
@@ -1696,6 +1712,9 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
     case 'tangleverse':
       break;
     case 'leechverse':
+      break;
+    case 'blinkedge':
+      u.blinkNext = true;
       break;
     case 'defianceverse':
       break;

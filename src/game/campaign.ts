@@ -243,6 +243,7 @@ export const PARTS: Record<string, PartDef> = {
   haloMesh: { id: 'haloMesh', name: 'Halo Mesh', desc: 'CIWS lattice — incoming funnel & gun damage reduced by 25%', price: 3200, funnelGuard: true, gunGuard: true },
   maulWeave: { id: 'maulWeave', name: 'Maul Weave', desc: 'Brawler laminate — incoming melee & funnel damage reduced by 25%', price: 3200, meleeGuard: true, funnelGuard: true },
   soulReactor: { id: 'soulReactor', name: 'Soul Reactor', desc: 'Soul-fed core — each kill grants +5 will and +15 EN', price: 3200, willOnKill: true, enOnKill: true },
+  duelistLoom: { id: 'duelistLoom', name: 'Duelist Loom', desc: 'Blade-dancer weave — melee weapons +12% damage and counter-attacks +12% damage', price: 3200, meleeDmg: 12, counterDmg: 12 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -458,6 +459,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'freefire', name: 'Freefire', desc: '+6% damage per point vs targets that cannot counter-attack' },
   { id: 'tetherborn', name: 'Tetherborn', desc: '+6% damage per point vs tethered targets' },
   { id: 'shroudborn', name: 'Shroudborn', desc: '+6% damage per point vs shrouded targets' },
+  { id: 'curseborn', name: 'Curseborn', desc: '+6% damage per point vs cursed targets' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1625,6 +1627,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_perfectscore', name: 'PERFECT SCORE', desc: 'Earn rank A or better on all 30 chapters', rewardCr: 100000 },
   { id: 'h_almighty', name: 'ALMIGHTY', desc: 'Earn S rank on all 30 chapters', rewardCr: 100000 },
   { id: 'h_trophywall', name: 'TROPHY WALL', desc: 'Claim 60 honors', rewardCr: 100000 },
+  { id: 'h_lone', name: 'LONE WOLF', desc: 'Win a mission where a single pilot scores every kill (3+ kills)', rewardCr: 100000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -2051,6 +2054,11 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
     }
     case 'h_trophywall':
       return (s.honorsClaimed ?? []).length >= 60;
+    case 'h_lone': {
+      const ps = (s.units ?? []).filter((u) => u.side === 'player' && u.alive && !u.npc);
+      const ks = ps.filter((u) => u.kills > 0);
+      return ps.length >= 1 && ks.length === 1 && ks[0].kills >= 3;
+    }
     case 'h_pinnacle':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 80;
     case 'h_apexlegion':
