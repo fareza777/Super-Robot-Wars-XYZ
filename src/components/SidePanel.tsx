@@ -189,6 +189,7 @@ function buffNames(u: UnitState): string[] {
   if (u.sieveUntilEndOfEnemyPhase) names.push('SIEVE EDGE');
   if (u.sieveNext) names.push('SIEVE EDGE');
   if (u.bulwarkUntilEndOfEnemyPhase) names.push('BULWARK VERSE');
+  if (u.stifleedgeNext) names.push('STIFLE EDGE');
   if (u.rootedUntilEndOfEnemyPhase) names.push('ROOT VERSE');
   if ((u.gloomTurns ?? 0) > 0) names.push(`GLOOM ${u.gloomTurns}`);
   if (u.matadorNext) names.push('MATADOR EDGE');
@@ -622,7 +623,7 @@ export function SidePanel() {
               const milestone = !(spiritUnit.def.pilot.spirits as SpiritId[]).includes(id);
               const nTgt = ALLY_AOE.has(id) || ENEMY_AOE.has(id) ? s.units.filter((x) => x.alive && x.side === (ALLY_AOE.has(id) ? 'player' : 'enemy') && dist(x.pos, spiritUnit.pos) <= 3).length : -1;
               return (
-                <Btn key={id} label={`✦ ${sp.name} · ${spiritCost(spiritUnit, id)} SP${nTgt >= 0 ? ` · ⌀${nTgt}` : ''}${milestone ? ' · ★MILESTONE' : ''}`} sub={sp.desc} disabled={spiritUnit.sp < spiritCost(spiritUnit, id)} onPress={() => s.castSpirit(spiritUnit.uid, id)} accent={milestone ? '#ffd34d' : '#c9a0ff'} />
+                <Btn key={id} label={`✦ ${sp.name} · ${spiritCost(spiritUnit, id)} SP${nTgt >= 0 ? ` · ⌀${nTgt}${nTgt === 0 ? ' — EMPTY' : ''}` : ''}${milestone ? ' · ★MILESTONE' : ''}`} sub={sp.desc} disabled={spiritUnit.sp < spiritCost(spiritUnit, id)} onPress={() => s.castSpirit(spiritUnit.uid, id)} accent={milestone ? '#ffd34d' : '#c9a0ff'} />
               );
             })}
             <Btn label="BACK" onPress={() => useGame.setState({ spiritForUid: null })} accent="#666" />
