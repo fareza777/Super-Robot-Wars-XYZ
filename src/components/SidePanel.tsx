@@ -177,6 +177,7 @@ function buffNames(u: UnitState): string[] {
   if (u.freeflowUntilEndOfEnemyPhase) names.push('FREEFLOW VERSE');
   if (u.feebleUntilEndOfEnemyPhase) names.push('FEEBLE VERSE');
   if (u.festerUntilEndOfEnemyPhase) names.push('FESTER VERSE');
+  if (u.slayUntilEndOfEnemyPhase) names.push('SLAY VERSE');
   if ((u.clarionTurns ?? 0) > 0) names.push(`CLARION VERSE ${u.clarionTurns}`);
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
@@ -725,6 +726,7 @@ export function SidePanel() {
             {(() => { const ti = TERRAIN_INFO[terrainAt(s.map, inspect.pos)]; return ti && (ti.def !== 0 || ti.eva !== 0) ? <Text style={{ color: '#8fa1c7', fontSize: 10.5, marginTop: 3 }}>{ti.glyph} {ti.name}: {ti.def !== 0 ? `${ti.def > 0 ? '+' : ''}${ti.def} ARM` : ''}{ti.def !== 0 && ti.eva !== 0 ? ' · ' : ''}{ti.eva !== 0 ? `${ti.eva > 0 ? '+' : ''}${ti.eva} EVA` : ''}</Text> : null; })()}
             <Text style={{ color: '#8fa1c7', fontSize: 10.5, marginTop: 3 }}>⚔ {inspect.kills ?? 0} kills · ◈ {inspect.dodges ?? 0} dodges</Text>
             <Text style={{ color: '#7fd0b0', fontSize: 10.5, marginTop: 3 }}>⟳ +{5 + partBonus(inspect, 'enRegen') + partBonus(inspect, 'ventEn')} EN per turn</Text>
+            {(() => { const n = s.units.filter((x) => x.alive && x.side !== inspect.side && dist(x.pos, inspect.pos) <= moveRangeOf(x) + Math.max(0, ...x.def.weapons.map((w) => w.rangeMax))).length; return n > 0 ? <Text style={{ color: '#ff6a6a', fontSize: 10.5, marginTop: 3 }}>⚠ {n} HOSTILE{n === 1 ? '' : 'S'} CAN REACH</Text> : null; })()}
             {(inspect.parts ?? []).length > 0 && (
               <Text style={{ color: '#8fb8ff', fontSize: 10.5, marginTop: 3 }}>◈ {(inspect.parts ?? []).map((p) => PARTS[p]?.name ?? p).join(' · ')}</Text>
             )}
