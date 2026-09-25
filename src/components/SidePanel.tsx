@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS, PILOT_STATS } from '../game/campaign';
 
 const ALLY_AOE = new Set(['anthemverse','bastionverse','breachverse','choirverse','clarionverse','cleanseverse','crimsonverse','damperverse','defianceverse','flowverse','foresightverse','fortressverse','freeflowverse','goreverse','juggernautverse','lanceverse','leechverse','magnumverse','mendverse','mirageverse','oathverse','palisadeverse','phantomverse','pinverse','rampartverse','renewalverse','repulseverse','requiemverse','salvoverse','scopeverse','scorchverse','sentinelverse','seraphverse','shelterverse','siphonverse','steadfastverse','surgeverse','swiftverse','thornverse','tideverse','tracerverse','triumphverse','undyingverse','valiantverse','vaultverse','vigilverse','vigorverse','wallverse','wardenverse','wardverse','miraclechorus','sanctumhymn','gracehymn','dirgemist','wardmist','bulwarkaria','warhorn','cantata','fableverse','sustainverse','revelverse','bulwarkverse','anchorverse','beamverse','warlordverse','shellverse']);
-const ENEMY_AOE = new Set(['armorrot','bindverse','blightverse','curseverse','darkverse','festerverse','despairverse','doomverse','dreadverse','exposeverse','fearverse','feebleverse','frailverse','gloomverse','hexverse','huskverse','jamverse','lockcascade','mireverse','nullverse','rotverse','ruinverse','rustverse','shroudverse','silenceverse','sirenverse','stifleverse','surtaxverse','tangleverse','terrorverse','tetherverse','tideebb','veilbreakverse','voidverse','winterverse','staticchoir','chokerverse','lureverse','rootverse','maimverse','poxverse','shatterverse','riftverse','glitchverse']);
+const ENEMY_AOE = new Set(['armorrot','bindverse','blightverse','curseverse','darkverse','festerverse','despairverse','doomverse','dreadverse','exposeverse','fearverse','feebleverse','frailverse','gloomverse','hexverse','huskverse','jamverse','lockcascade','mireverse','nullverse','rotverse','ruinverse','rustverse','shroudverse','silenceverse','sirenverse','stifleverse','surtaxverse','tangleverse','terrorverse','tetherverse','tideebb','veilbreakverse','voidverse','winterverse','staticchoir','chokerverse','lureverse','rootverse','maimverse','poxverse','shatterverse','riftverse','glitchverse','sealverse']);
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { BOND_EVENTS, bondLevel, bondMods } from '../game/bonds';
 import { armorOf, bestCounterWeapon, moveRangeOf, usableWeapons, evadeOf, critChance, damageOf, dist, enCostOf, findSupport, formationBonus, hasPincer, hitChance, key, partBonus, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
@@ -194,6 +194,7 @@ function buffNames(u: UnitState): string[] {
   if (u.glitchUntilEndOfEnemyPhase) names.push('GLITCH VERSE');
   if (u.warlordUntilEndOfEnemyPhase) names.push('WARLORD VERSE');
   if (u.shellUntilEndOfEnemyPhase) names.push('SHELL VERSE');
+  if (u.mapSealUntilEndOfEnemyPhase) names.push('SEAL VERSE');
   if (u.stifleedgeNext) names.push('STIFLE EDGE');
   if (u.poxedgeNext) names.push('POX EDGE');
   if (u.frailedgeNext) names.push('FRAIL EDGE');
@@ -230,7 +231,7 @@ function buffNames(u: UnitState): string[] {
 }
 
 function debuffCount(u: UnitState): number {
-  return (u.statuses?.length ?? 0) + (u.doomTurns ? 1 : 0) + (u.sirenTurns ? 1 : 0) + (u.exposed ? 1 : 0) + (u.rended ? 1 : 0) + (u.sundered ? 1 : 0) + (u.crippled ? 1 : 0) + (u.silencedUntilEndOfEnemyPhase ? 1 : 0) + (u.cursedUntilEndOfEnemyPhase ? 1 : 0) + (u.weakenUntilEndOfEnemyPhase ? 1 : 0) + (u.obscuredTurns ? 1 : 0) + (u.nullifiedUntilEndOfEnemyPhase ? 1 : 0) + (u.tetherUntilEndOfEnemyPhase ? 1 : 0) + (u.rustTurns ? 1 : 0) + (u.stifleTurns ? 1 : 0) + (u.rotTurns ? 1 : 0) + (u.frailTurns ? 1 : 0) + (u.gloomTurns ? 1 : 0) + (u.poxTurns ? 1 : 0) + (u.glitchUntilEndOfEnemyPhase ? 1 : 0);
+  return (u.statuses?.length ?? 0) + (u.doomTurns ? 1 : 0) + (u.sirenTurns ? 1 : 0) + (u.exposed ? 1 : 0) + (u.rended ? 1 : 0) + (u.sundered ? 1 : 0) + (u.crippled ? 1 : 0) + (u.silencedUntilEndOfEnemyPhase ? 1 : 0) + (u.cursedUntilEndOfEnemyPhase ? 1 : 0) + (u.weakenUntilEndOfEnemyPhase ? 1 : 0) + (u.obscuredTurns ? 1 : 0) + (u.nullifiedUntilEndOfEnemyPhase ? 1 : 0) + (u.tetherUntilEndOfEnemyPhase ? 1 : 0) + (u.rustTurns ? 1 : 0) + (u.stifleTurns ? 1 : 0) + (u.rotTurns ? 1 : 0) + (u.frailTurns ? 1 : 0) + (u.gloomTurns ? 1 : 0) + (u.poxTurns ? 1 : 0) + (u.glitchUntilEndOfEnemyPhase ? 1 : 0) + (u.mapSealUntilEndOfEnemyPhase ? 1 : 0);
 }
 
 function Bar({ label, val, max, color }: { label: string; val: number; max: number; color: string }) {
@@ -411,7 +412,7 @@ export function SidePanel() {
             {buffNames(unit).length > 0 && (
               <View style={styles.buffRow}>
                 {buffNames(unit).slice(0, 8).map((n) => (
-                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','VEILBREAK VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE','NULL VERSE','TETHER VERSE','TANGLE VERSE','SURTAX VERSE','HUSK VERSE','FEEBLE VERSE','FESTER VERSE','CHOKER VERSE','PROVOKED','ROOT VERSE','GLITCH VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') || n.startsWith('VEILBREAK') || n.startsWith('RUST') || n.startsWith('STIFLE') || n.startsWith('ROT') || n.startsWith('FRAIL') || n.startsWith('GLOOM') || n.startsWith('POX') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
+                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','VEILBREAK VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE','NULL VERSE','TETHER VERSE','TANGLE VERSE','SURTAX VERSE','HUSK VERSE','FEEBLE VERSE','FESTER VERSE','CHOKER VERSE','PROVOKED','ROOT VERSE','GLITCH VERSE','SEAL VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') || n.startsWith('VEILBREAK') || n.startsWith('RUST') || n.startsWith('STIFLE') || n.startsWith('ROT') || n.startsWith('FRAIL') || n.startsWith('GLOOM') || n.startsWith('POX') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
                 ))}
               </View>
             )}
@@ -799,7 +800,7 @@ export function SidePanel() {
             {buffNames(inspect).length > 0 && (
               <View style={styles.buffRow}>
                 {buffNames(inspect).slice(0, 8).map((n) => (
-                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','VEILBREAK VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE','NULL VERSE','TETHER VERSE','TANGLE VERSE','SURTAX VERSE','HUSK VERSE','FEEBLE VERSE','FESTER VERSE','CHOKER VERSE','PROVOKED','ROOT VERSE','GLITCH VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') || n.startsWith('VEILBREAK') || n.startsWith('RUST') || n.startsWith('STIFLE') || n.startsWith('ROT') || n.startsWith('FRAIL') || n.startsWith('GLOOM') || n.startsWith('POX') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
+                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','VEILBREAK VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE','NULL VERSE','TETHER VERSE','TANGLE VERSE','SURTAX VERSE','HUSK VERSE','FEEBLE VERSE','FESTER VERSE','CHOKER VERSE','PROVOKED','ROOT VERSE','GLITCH VERSE','SEAL VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') || n.startsWith('VEILBREAK') || n.startsWith('RUST') || n.startsWith('STIFLE') || n.startsWith('ROT') || n.startsWith('FRAIL') || n.startsWith('GLOOM') || n.startsWith('POX') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
                 ))}
               </View>
             )}

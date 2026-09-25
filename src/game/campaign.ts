@@ -279,6 +279,7 @@ export const PARTS: Record<string, PartDef> = {
   vigorCell: { id: 'vigorCell', name: 'Vigor Cell', desc: 'Regen-lattice core — +8% hull regen per turn & +100 armor', price: 3200, hpRegen: 8, armor: 100 },
   fluxVeil: { id: 'fluxVeil', name: 'Flux Veil', desc: 'Phase-shift shroud — +8 mobility & barrier 400', price: 3200, mobility: 8, barrier: 400 },
   mendGauge: { id: 'mendGauge', name: 'Mend Gauge', desc: 'Regen-linked optics — +10 hit & +8% hull regen per turn', price: 3200, hit: 10, hpRegen: 8 },
+  siegeGauge: { id: 'siegeGauge', name: 'Siege Gauge', desc: 'Bastion optics — +8% crit & +100 armor', price: 3200, crit: 8, armor: 100 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -535,6 +536,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'gunfoe', name: 'Gunfoe', desc: '+6% damage per point vs gun-weapon carriers' },
   { id: 'missilefoe', name: 'Missilefoe', desc: '+6% damage per point vs missile-weapon carriers' },
   { id: 'meleefoe', name: 'Meleefoe', desc: '+6% damage per point vs melee-weapon carriers' },
+  { id: 'funnelfoe', name: 'Funnelfoe', desc: '+6% damage per point vs funnel-weapon carriers' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1716,6 +1718,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_pinnacle5', name: 'PINNACLE V', desc: 'Score rank S on 120 missions', rewardCr: 100000 },
   { id: 'h_centurion5', name: 'CENTURION V', desc: 'Fly 100 ranked missions', rewardCr: 100000 },
   { id: 'h_tally2', name: 'TALLYMASTER II', desc: 'Earn 12,000+ salvage credits in a single mission', rewardCr: 100000 },
+  { id: 'h_stockpile4', name: 'STOCKPILE IV', desc: 'Hold 150 items in the inventory at once', rewardCr: 100000 },
   { id: 'h_extinction', name: 'EXTINCTION', desc: 'Destroy 20,000 frames across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
   { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
@@ -2159,6 +2162,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.masteryDone.length >= 100;
     case 'h_stockpile3':
       return Object.values(s.inventory ?? {}).reduce((n, c) => n + c, 0) >= 120;
+    case 'h_stockpile4':
+      return Object.values(s.inventory ?? {}).reduce((n, c) => n + c, 0) >= 150;
     case 'h_armory4':
       return (s.partsOwned ?? []).length >= 95;
     case 'h_armory5':
