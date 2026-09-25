@@ -227,6 +227,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   sustainverse: { id: 'sustainverse', name: 'Sustain Verse', cost: 50, desc: 'Resupply hymn — allies within 3 tiles fabricate +1 ammo each turn until end of enemy phase' },
   matadoredge: { id: 'matadoredge', name: 'Matador Edge', cost: 45, desc: 'Taunt strike — next hit +10% damage and provokes the target onto this frame' },
   rootverse: { id: 'rootverse', name: 'Root Verse', cost: 55, desc: 'Grave hymn — enemies within 3 tiles are rooted (cannot move) until end of enemy phase' },
+  maimverse: { id: 'maimverse', name: 'Maim Verse', cost: 55, desc: 'Massacre chant — enemies within 3 tiles are crippled (-15% hit/damage, -2 move, permanent)' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },
