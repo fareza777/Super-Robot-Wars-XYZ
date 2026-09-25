@@ -186,6 +186,8 @@ function buffNames(u: UnitState): string[] {
   if (u.fableUntilEndOfEnemyPhase) names.push('FABLE VERSE');
   if (u.sustainUntilEndOfEnemyPhase) names.push('SUSTAIN VERSE');
   if (u.revelUntilEndOfEnemyPhase) names.push('REVEL VERSE');
+  if (u.sieveUntilEndOfEnemyPhase) names.push('SIEVE EDGE');
+  if (u.sieveNext) names.push('SIEVE EDGE');
   if (u.rootedUntilEndOfEnemyPhase) names.push('ROOT VERSE');
   if ((u.gloomTurns ?? 0) > 0) names.push(`GLOOM ${u.gloomTurns}`);
   if (u.matadorNext) names.push('MATADOR EDGE');
@@ -543,7 +545,7 @@ export function SidePanel() {
                             {e.def.name} {e.def.boss ? (e.phase2 ? 'Ω★' : '★') : ''}
                           </Text>
                           <Text style={styles.tgtHp}>
-                            HP {e.hp}/{e.def.maxHp} · ARM {armorOf(e, s.map)}{Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0) > 0 ? `+⛨${Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0)}` : ''} · W {e.will} · EN {e.en} · ⌛{debuffCount(e)}
+                            HP {e.hp}/{e.def.maxHp} · ARM {armorOf(e, s.map)}{(e.sieveUntilEndOfEnemyPhase ? 0 : Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0)) > 0 ? `+⛨${Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0)}` : ''} · W {e.will} · EN {e.en} · ⌛{debuffCount(e)}
                           </Text>
                         </View>
                         <View style={styles.tgtHitBox}>
@@ -585,7 +587,7 @@ export function SidePanel() {
                             {e.def.name} {e.def.boss ? (e.phase2 ? 'Ω★' : '★') : ''}{kill ? ' ☠' : ''}
                           </Text>
                           <Text style={styles.tgtHp}>
-                            HP {e.hp}/{e.def.maxHp} · ARM {armorOf(e, s.map)}{Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0) > 0 ? `+⛨${Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0)}` : ''} · W {e.will} · EN {e.en} · ⌛{debuffCount(e)}
+                            HP {e.hp}/{e.def.maxHp} · ARM {armorOf(e, s.map)}{(e.sieveUntilEndOfEnemyPhase ? 0 : Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0)) > 0 ? `+⛨${Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0)}` : ''} · W {e.will} · EN {e.en} · ⌛{debuffCount(e)}
                           </Text>
                           {/* SRW damage preview — green = HP remaining after the hit */}
                           <View style={styles.tgtBar}>
@@ -693,14 +695,14 @@ export function SidePanel() {
                         {buffNames(u).length > 0 ? <Text style={{ color: '#d8a5ff' }}> ✧{buffNames(u).length}</Text> : null}
                         {u.crippled ? <Text style={{ color: '#ff9d7a' }}> ⛓</Text> : null}
                         {u.def.weapons.some((w) => w.mapRange != null) ? <Text style={{ color: '#ff9d4d' }}> ◉</Text> : null}
-                        {s.units.some((p) => p.side === 'player' && p.alive && dist(u.pos, p.pos) <= moveRangeOf(u) + Math.max(0, ...u.def.weapons.map((w) => w.rangeMax))) ? <Text style={{ color: '#ff6a6a' }}> ⚠</Text> : null}{usableWeapons(u).length === 0 ? <Text style={{ color: '#ff6a6a' }}> ⊘</Text> : null}
+                        {s.units.some((p) => p.side === 'player' && p.alive && dist(u.pos, p.pos) <= moveRangeOf(u) + Math.max(0, ...u.def.weapons.map((w) => w.rangeMax))) ? <Text style={{ color: '#ff6a6a' }}> ⚠</Text> : null}{usableWeapons(u).length === 0 ? <Text style={{ color: '#ff6a6a' }}> ⊘</Text> : null}{u.provokedTo ? <Text style={{ color: '#ffd34d' }}> 🎯</Text> : null}
                       </Text>
                       <View style={[styles.rosterBarTrack, { backgroundColor: '#2a1216' }]}>
                         <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.hp / u.def.maxHp > 0.5 ? '#ff5a5a' : u.hp / u.def.maxHp > 0.25 ? '#ff9d4d' : '#c92a2a' }]} />
                       </View>
                       <Text style={[styles.rosterHp, u.hp / u.def.maxHp < 0.25 && { color: '#ff8a8a' }]}>{u.hp / u.def.maxHp < 0.25 ? '⚠' : ''}{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
                       <Text style={[styles.rosterHp, { color: '#9fd8ff', width: 30 }]}>R{Math.max(0, ...u.def.weapons.map((w) => w.rangeMax))}</Text>
-                      <Text style={[styles.rosterHp, { color: '#8b94b8', width: 34 }]}>🛡{armorOf(u, s.map)}{Math.max(u.def.barrier ?? 0, partBonus(u, 'barrier')) > 0 ? '⛨' : ''}</Text>
+                      <Text style={[styles.rosterHp, { color: '#8b94b8', width: 34 }]}>🛡{armorOf(u, s.map)}{(u.sieveUntilEndOfEnemyPhase ? 0 : Math.max(u.def.barrier ?? 0, partBonus(u, 'barrier'))) > 0 ? '⛨' : ''}</Text>
                       <Text style={[styles.rosterHp, { color: '#7fd0b0', width: 30 }]}>≫{Math.round(evadeOf(u, s.map))}</Text>
                       <Text style={[styles.rosterHp, { color: '#9fd8ff', width: 26 }]}>⇄{moveRangeOf(u)}</Text>
                       {(u.doomTurns ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#ff9d7a', width: 24 }]}>☠{u.doomTurns}</Text>}
