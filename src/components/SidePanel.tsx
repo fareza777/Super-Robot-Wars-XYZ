@@ -109,6 +109,7 @@ function buffNames(u: UnitState): string[] {
   if (u.cinderNext) names.push('CINDER EDGE');
   if (u.maraudNext) names.push('MARAUD EDGE');
   if (u.howlNext) names.push('HOWL EDGE');
+  if (u.vampNext) names.push('VAMP EDGE');
   if (u.repulseUntilEndOfEnemyPhase) names.push('REPULSE VERSE');
   if (u.silencedUntilEndOfEnemyPhase) names.push('SILENCE VERSE');
   if (u.weakenUntilEndOfEnemyPhase) names.push('FEAR VERSE');
@@ -686,6 +687,7 @@ export function SidePanel() {
             </View>
             {(() => { const ti = TERRAIN_INFO[terrainAt(s.map, inspect.pos)]; return ti && (ti.def !== 0 || ti.eva !== 0) ? <Text style={{ color: '#8fa1c7', fontSize: 10.5, marginTop: 3 }}>{ti.glyph} {ti.name}: {ti.def !== 0 ? `${ti.def > 0 ? '+' : ''}${ti.def} ARM` : ''}{ti.def !== 0 && ti.eva !== 0 ? ' · ' : ''}{ti.eva !== 0 ? `${ti.eva > 0 ? '+' : ''}${ti.eva} EVA` : ''}</Text> : null; })()}
             <Text style={{ color: '#8fa1c7', fontSize: 10.5, marginTop: 3 }}>⚔ {inspect.kills ?? 0} kills · ◈ {inspect.dodges ?? 0} dodges</Text>
+            <Text style={{ color: '#7fd0b0', fontSize: 10.5, marginTop: 3 }}>⟳ +{5 + partBonus(inspect, 'enRegen') + partBonus(inspect, 'ventEn')} EN per turn</Text>
             {(inspect.parts ?? []).length > 0 && (
               <Text style={{ color: '#8fb8ff', fontSize: 10.5, marginTop: 3 }}>◈ {(inspect.parts ?? []).map((p) => PARTS[p]?.name ?? p).join(' · ')}</Text>
             )}

@@ -188,6 +188,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   seraphverse: { id: 'seraphverse', name: 'Seraph Verse', cost: 50, desc: 'Radiant hymn — allies within 3 tiles gain +1 range on non-melee weapons until end of enemy phase' },
   howledge: { id: 'howledge', name: 'Howl Edge', cost: 45, desc: 'Hunting cry — next hit +15% damage and exposes the target' },
   wallverse: { id: 'wallverse', name: 'Wall Verse', cost: 50, desc: 'Rampart hymn — allies within 3 tiles gain a 500-point i-field until end of enemy phase' },
+  vampedge: { id: 'vampedge', name: 'Vamp Edge', cost: 45, desc: 'Bloodthirst strike — next hit +10% damage and heals self 25% of damage dealt' },
   ruinverse: { id: 'ruinverse', name: 'Ruin Verse', cost: 50, desc: 'Entropy wave — enemies within 3 tiles suffer armor break and decay 8% hull per turn for 2 turns' },
   anthemverse: { id: 'anthemverse', name: 'Anthem Verse', cost: 55, desc: 'Restoration hymn — allies within 3 tiles instantly recover 15% hull' },
   doomedge: { id: 'doomedge', name: 'Doom Edge', cost: 45, desc: 'Entropy strike — next hit deals +10% damage and dooms the target to decay 8% hull per turn for 3 turns' },
