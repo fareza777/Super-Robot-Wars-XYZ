@@ -48,7 +48,7 @@ export function MissionSelect() {
             <Text style={styles.mainName}>{ch.name.toUpperCase()}</Text>
             <Text style={styles.mainSub}>{ch.subtitle}</Text>
             <Text style={[styles.themeTag, { color: THEME_ACCENT[ch.theme] ?? '#9fd8ff' }]}>◈ THEATRE — {ch.theme.toUpperCase()}</Text>
-            <Text style={styles.mainObj}>◈ {ch.objective}</Text>
+            <Text style={styles.mainObj}>◈ {ch.objective}{ch.objectiveType === 'survive' ? '' : ` · ⏱ PAR ≤${ch.surviveTurns ?? Math.max(6, Math.ceil(((ch.count ?? 0) + (ch.boss ? 1 : 0)) * 1.1))}`}</Text>
             {ch.mastery && (
               <Text style={styles.masteryLine}>{s.masteryDone.includes(ch.id) ? '★' : '☆'} MASTERY: {ch.mastery.desc}{s.masteryDone.includes(ch.id) ? ' ✓' : ''}</Text>
             )}

@@ -316,6 +316,7 @@ export const PARTS: Record<string, PartDef> = {
   moorPlate: { id: 'moorPlate', name: 'Moor Plate', desc: 'Anchored laminate — +3 SP regen & immune to knockback/drag', price: 3400, spRegen: 3, knockProof: true },
   vetoPlate: { id: 'vetoPlate', name: 'Veto Plate', desc: 'Defiant laminate — +8% crit & immune to knockback/drag', price: 3400, crit: 8, knockProof: true },
   keelPlate: { id: 'keelPlate', name: 'Keel Plate', desc: 'Ballast laminate — +10 EN regen & immune to knockback/drag', price: 3400, enRegen: 10, knockProof: true },
+  salvePlate: { id: 'salvePlate', name: 'Salve Plate', desc: 'Mender laminate — +8 evade & +8% hull regen per turn', price: 3400, evade: 8, hpRegen: 8 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -609,6 +610,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'breakborn', name: 'Breakborn', desc: '+6% damage per point vs frames cracked by break status' },
   { id: 'stunborn', name: 'Stunborn', desc: '+6% damage per point vs stunned frames' },
   { id: 'suppborn', name: 'Suppborn', desc: '+6% damage per point vs suppressed frames' },
+  { id: 'markborn', name: 'Markborn', desc: '+6% damage per point vs marked frames' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -651,7 +653,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse', 'terrorverse', 'mireverse', 'ruinverse', 'shroudverse', 'silenceverse', 'veilbreakverse', 'tetherverse', 'stifleverse', 'despairverse', 'frailverse', 'tangleverse', 'huskverse', 'festerverse', 'lureverse', 'maimverse', 'shatterverse', 'glitchverse', 'zeroverse', 'duskverse', 'drainverse', 'nadirverse', 'suppressverse', 'hazeverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse', 'terrorverse', 'mireverse', 'ruinverse', 'shroudverse', 'silenceverse', 'veilbreakverse', 'tetherverse', 'stifleverse', 'despairverse', 'frailverse', 'tangleverse', 'huskverse', 'festerverse', 'lureverse', 'maimverse', 'shatterverse', 'glitchverse', 'zeroverse', 'duskverse', 'drainverse', 'nadirverse', 'suppressverse', 'hazeverse', 'jinxverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1822,6 +1824,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_stockpile7', name: 'STOCKPILE VII', desc: 'Hold 225 items at once', rewardCr: 100000 },
   { id: 'h_dreamteam6', name: 'DREAM TEAM VI', desc: 'Every pilot reaches 1000 career kills', rewardCr: 100000 },
   { id: 'h_centurion9', name: 'CENTURION IX', desc: 'Fly 140 ranked missions', rewardCr: 100000 },
+  { id: 'h_godhunter15', name: 'GODHUNTER XV', desc: 'Destroy 450 boss frames across your career', rewardCr: 100000 },
   { id: 'h_centurion7', name: 'CENTURION VII', desc: 'Fly 120 ranked missions', rewardCr: 100000 },
   { id: 'h_extinction', name: 'EXTINCTION', desc: 'Destroy 20,000 frames across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
@@ -2359,6 +2362,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 350;
     case 'h_godhunter14':
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 400;
+    case 'h_godhunter15':
+      return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 450;
     case 'h_extinction':
       return totalKills >= 20000;
     case 'h_nemesis':
