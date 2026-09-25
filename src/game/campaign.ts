@@ -320,6 +320,7 @@ export const PARTS: Record<string, PartDef> = {
   galePlate: { id: 'galePlate', name: 'Gale Plate', desc: 'Tempest laminate — +8 mobility & +8 evade', price: 3400, mobility: 8, evade: 8 },
   haloPlate: { id: 'haloPlate', name: 'Halo Plate', desc: 'Aegis laminate — +10 EN regen & barrier 400', price: 3400, enRegen: 10, barrier: 400 },
   packPlate: { id: 'packPlate', name: 'Pack Plate', desc: 'Quartermaster laminate — +8% hull regen & regen 1 ammo per turn', price: 3400, hpRegen: 8, ammoRegen: true },
+  aegisPlate: { id: 'aegisPlate', name: 'Aegis Plate', desc: 'Sanctum laminate — +8% hull regen & barrier 400', price: 3400, hpRegen: 8, barrier: 400 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -617,6 +618,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'loneborn', name: 'Loneborn', desc: '+6% damage per point vs frames with no ally within 2 tiles' },
   { id: 'eliteborn', name: 'Eliteborn', desc: '+6% damage per point vs elite frames' },
   { id: 'dryborn', name: 'Dryborn', desc: '+6% damage per point vs frames with all limited weapons out of ammo' },
+  { id: 'fuelborn', name: 'Fuelborn', desc: '+6% damage per point while own EN at 75% or above' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -655,7 +657,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse', 'goreverse', 'culledge', 'rendedge', 'overedge', 'splatteredge', 'havocverse', 'maimedge', 'hollowedge', 'maraudedge', 'vampedge', 'twinedge', 'phantomedge', 'dragedge', 'rustedge', 'crushedge', 'matadoredge', 'stifleedge', 'frailedge', 'tangleedge', 'sealedge', 'surtaxedge', 'baneedge', 'silenceedge', 'brandedge', 'stunedge'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse', 'goreverse', 'culledge', 'rendedge', 'overedge', 'splatteredge', 'havocverse', 'maimedge', 'hollowedge', 'maraudedge', 'vampedge', 'twinedge', 'phantomedge', 'dragedge', 'rustedge', 'crushedge', 'matadoredge', 'stifleedge', 'frailedge', 'tangleedge', 'sealedge', 'surtaxedge', 'baneedge', 'silenceedge', 'brandedge', 'stunedge', 'chokeedge'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1834,6 +1836,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_peacelord7', name: 'PEACELORD VII', desc: 'Clear 160 side missions', rewardCr: 100000 },
   { id: 'h_nemesis8', name: 'NEMESIS VIII', desc: 'Destroy 450 frames of a single type', rewardCr: 100000 },
   { id: 'h_chainlord8', name: 'CHAINLORD VIII', desc: 'Score a 20-kill chain in a single turn', rewardCr: 100000 },
+  { id: 'h_armory8', name: 'ARMORY LORD VIII', desc: 'Own 160 different parts', rewardCr: 100000 },
   { id: 'h_centurion7', name: 'CENTURION VII', desc: 'Fly 120 ranked missions', rewardCr: 100000 },
   { id: 'h_extinction', name: 'EXTINCTION', desc: 'Destroy 20,000 frames across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
@@ -2317,6 +2320,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.partsOwned ?? []).length >= 125;
     case 'h_armory7':
       return (s.partsOwned ?? []).length >= 140;
+    case 'h_armory8':
+      return (s.partsOwned ?? []).length >= 160;
     case 'h_armory8':
       return (s.partsOwned ?? []).length >= 160;
     case 'h_peacelord3':

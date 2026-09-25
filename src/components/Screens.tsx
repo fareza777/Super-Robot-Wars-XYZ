@@ -223,7 +223,7 @@ export function EndScreen({ victory }: { victory: boolean }) {
       <LinearGradient colors={['rgba(3,5,14,0.55)', 'rgba(3,5,14,0.94)']} style={StyleSheet.absoluteFill} />
       <Text style={[styles.title, { color: victory ? '#ffd34d' : sim ? '#c8a8ff' : '#ff5a5a', fontSize: 40 }]}>{justUnlockedNg ? 'CAMPAIGN COMPLETE' : victory ? 'MISSION COMPLETE' : sim ? 'SIMULATION OVER' : 'MISSION FAILED'}</Text>
       <Text style={styles.briefSub}>
-        {justUnlockedNg ? 'The Steel Throne has fallen — the skies are free.' : victory ? `Cleared in ${turn} turns · ⏱ PAR ≤${missionCh.surviveTurns ?? (useGame.getState().sideId ? Math.max(6, Math.ceil((missionCh.count ?? useGame.getState().map.enemySpawns.length) * 1.2)) : Math.max(6, Math.ceil(((missionCh.count ?? useGame.getState().map.enemySpawns.length) + (missionCh.boss ? 1 : 0)) * 1.1)))}` : sim ? `The squad held through ${simWave} wave${simWave === 1 ? '' : 's'}` : 'Your squad was wiped out'}
+        {justUnlockedNg ? 'The Steel Throne has fallen — the skies are free.' : victory ? `Cleared in ${turn} turns · ☠${useGame.getState().kills} · ⏱ PAR ≤${missionCh.surviveTurns ?? (useGame.getState().sideId ? Math.max(6, Math.ceil((missionCh.count ?? useGame.getState().map.enemySpawns.length) * 1.2)) : Math.max(6, Math.ceil(((missionCh.count ?? useGame.getState().map.enemySpawns.length) + (missionCh.boss ? 1 : 0)) * 1.1)))}` : sim ? `The squad held through ${simWave} wave${simWave === 1 ? '' : 's'}` : 'Your squad was wiped out'}
       </Text>
       {sim && (
         <View style={styles.resultsBox}>

@@ -285,6 +285,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   rimeverse: { id: 'rimeverse', name: 'Rime Verse', cost: 55, desc: 'Frost hymn — allies within 3 tiles chill enemies on hit (slow status, 2 turns) until end of enemy phase' },
   tetheredge: { id: 'tetheredge', name: 'Tether Edge', cost: 45, desc: 'Anchor strike — next hit deals +10% damage and tethers the target (-1 move) until end of enemy phase' },
   staticverse: { id: 'staticverse', name: 'Static Verse', cost: 55, desc: 'Jamming hymn — allies within 3 tiles suppress enemies on hit (supp status, 2 turns) until end of enemy phase' },
+  chokeedge: { id: 'chokeedge', name: 'Choke Edge', cost: 45, desc: 'Garotte strike — next hit deals +10% damage and cuts the target counter range (-1) until end of enemy phase' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },

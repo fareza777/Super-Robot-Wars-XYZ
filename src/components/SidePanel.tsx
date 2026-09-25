@@ -223,6 +223,7 @@ function buffNames(u: UnitState): string[] {
   if (u.crackedgeNext) names.push('CRACK EDGE');
   if (u.stunedgeNext) names.push('STUN EDGE');
   if (u.tetheredgeNext) names.push('TETHER EDGE');
+  if (u.chokeedgeNext) names.push('CHOKE EDGE');
   if (u.poxedgeNext) names.push('POX EDGE');
   if (u.frailedgeNext) names.push('FRAIL EDGE');
   if (u.rootedgeNext) names.push('GRAVE EDGE');
