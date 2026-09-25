@@ -657,7 +657,7 @@ export function SidePanel() {
                 <View key={u.uid} style={styles.rosterRow}>
                   <Text style={[styles.rosterName, u.acted && styles.rosterActed]} numberOfLines={1}>
                     {u.npc ? '🛡 ' : ''}{u.dmgDealt === topDealt && topDealt > 0 ? '◆ ' : ''}{u.def.moveType === 'air' ? '✈ ' : '⬢ '}
-                    {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>{u.attacksMade ? <Text style={{ color: '#8b94b8' }}> ⚔{u.attacksMade}</Text> : null}{s.units.some((o) => o.alive && o.side === u.side && o.uid !== u.uid && dist(o.pos, u.pos) <= 1) ? <Text style={{ color: '#8af0ff' }}> ⚭</Text> : null}{u.acted ? <Text style={{ color: '#4dff7a' }}> ✓</Text> : usableWeapons(u).length === 0 ? <Text style={{ color: '#ff6a6a' }}> ⊘</Text> : null}{s.units.some((x) => x.side === 'enemy' && x.alive && dist(x.pos, u.pos) <= moveRangeOf(x) + Math.max(0, ...x.def.weapons.map((w) => w.rangeMax))) ? <Text style={{ color: '#ff6a6a' }}> ⚠</Text> : null}{(u.will ?? 0) > 0 ? <Text style={{ color: '#ffe08a' }}> W{u.will}</Text> : null}{debuffCount(u) > 0 ? <Text style={{ color: '#ff9d7a' }}> ⌛{debuffCount(u)}</Text> : null}<Text style={{ color: '#c9a0ff' }}> ✦{u.sp}</Text>
+                    {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>{u.attacksMade ? <Text style={{ color: '#8b94b8' }}> ⚔{u.attacksMade}</Text> : null}{s.units.some((o) => o.alive && o.side === u.side && o.uid !== u.uid && dist(o.pos, u.pos) <= 1) ? <Text style={{ color: '#8af0ff' }}> ⚭</Text> : null}{u.acted ? <Text style={{ color: '#4dff7a' }}> ✓</Text> : usableWeapons(u).length === 0 ? <Text style={{ color: '#ff6a6a' }}> ⊘</Text> : null}{s.units.some((x) => x.side === 'enemy' && x.alive && dist(x.pos, u.pos) <= moveRangeOf(x) + Math.max(0, ...x.def.weapons.map((w) => w.rangeMax))) ? <Text style={{ color: '#ff6a6a' }}> ⚠</Text> : null}{(u.will ?? 0) > 0 ? <Text style={{ color: '#ffe08a' }}> W{u.will}</Text> : null}{debuffCount(u) > 0 ? <Text style={{ color: '#ff9d7a' }}> ⌛{debuffCount(u)}</Text> : null}{u.def.weapons.some((w) => w.kind === 'beam') ? <Text style={{ color: '#8af0ff' }}> ⌁</Text> : null}<Text style={{ color: '#c9a0ff' }}> ✦{u.sp}</Text>
                   </Text>
                   <View style={{ flex: 1 }}>
                     <View style={styles.rosterBarTrack}>
@@ -696,7 +696,7 @@ export function SidePanel() {
                       <Text style={[styles.rosterName, { color: '#ffb0a0' }]} numberOfLines={1}>
                         {u.def.boss || u.elite ? '★ ' : ''}{u.phase2 ? 'Ω ' : ''}{u.def.moveType === 'air' ? '✈ ' : '⬢ '}
                         {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>
-                        {debuffCount(u) > 0 ? <Text style={{ color: '#ff9d7a' }}> ⌛{debuffCount(u)}</Text> : null}
+                        {debuffCount(u) > 0 ? <Text style={{ color: '#ff9d7a' }}> ⌛{debuffCount(u)}</Text> : null}{u.def.weapons.some((w) => w.kind === 'beam') ? <Text style={{ color: '#8af0ff' }}> ⌁</Text> : null}
                         {buffNames(u).length > 0 ? <Text style={{ color: '#d8a5ff' }}> ✧{buffNames(u).length}</Text> : null}
                         {u.crippled ? <Text style={{ color: '#ff9d7a' }}> ⛓</Text> : null}
                         {u.def.weapons.some((w) => w.mapRange != null) ? <Text style={{ color: '#ff9d4d' }}> ◉</Text> : null}
