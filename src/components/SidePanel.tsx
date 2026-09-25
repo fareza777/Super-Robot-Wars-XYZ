@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS, PILOT_STATS } from '../game/campaign';
 
-const ALLY_AOE = new Set(['anthemverse','bastionverse','breachverse','choirverse','clarionverse','cleanseverse','crimsonverse','damperverse','defianceverse','flowverse','foresightverse','fortressverse','freeflowverse','goreverse','juggernautverse','lanceverse','leechverse','magnumverse','mendverse','mirageverse','oathverse','palisadeverse','phantomverse','pinverse','rampartverse','renewalverse','repulseverse','requiemverse','salvoverse','scopeverse','scorchverse','sentinelverse','seraphverse','shelterverse','siphonverse','steadfastverse','surgeverse','swiftverse','thornverse','tideverse','tracerverse','triumphverse','undyingverse','valiantverse','vaultverse','vigilverse','vigorverse','wallverse','wardenverse','wardverse','miraclechorus','sanctumhymn','gracehymn','dirgemist','wardmist','bulwarkaria','warhorn','cantata','fableverse','sustainverse','revelverse','bulwarkverse','anchorverse','beamverse','warlordverse','shellverse','gunverse','funnelverse','reactorverse','haloverse','emberverse','bombardverse','hasteverse','riposteverse']);
+const ALLY_AOE = new Set(['anthemverse','bastionverse','breachverse','choirverse','clarionverse','cleanseverse','crimsonverse','damperverse','defianceverse','flowverse','foresightverse','fortressverse','freeflowverse','goreverse','juggernautverse','lanceverse','leechverse','magnumverse','mendverse','mirageverse','oathverse','palisadeverse','phantomverse','pinverse','rampartverse','renewalverse','repulseverse','requiemverse','salvoverse','scopeverse','scorchverse','sentinelverse','seraphverse','shelterverse','siphonverse','steadfastverse','surgeverse','swiftverse','thornverse','tideverse','tracerverse','triumphverse','undyingverse','valiantverse','vaultverse','vigilverse','vigorverse','wallverse','wardenverse','wardverse','miraclechorus','sanctumhymn','gracehymn','dirgemist','wardmist','bulwarkaria','warhorn','cantata','fableverse','sustainverse','revelverse','bulwarkverse','anchorverse','beamverse','warlordverse','shellverse','gunverse','funnelverse','reactorverse','haloverse','emberverse','bombardverse','hasteverse','riposteverse','keenverse']);
 const ENEMY_AOE = new Set(['armorrot','bindverse','blightverse','curseverse','darkverse','festerverse','despairverse','doomverse','dreadverse','exposeverse','fearverse','feebleverse','frailverse','gloomverse','hexverse','huskverse','jamverse','lockcascade','mireverse','nullverse','rotverse','ruinverse','rustverse','shroudverse','silenceverse','sirenverse','stifleverse','surtaxverse','tangleverse','terrorverse','tetherverse','tideebb','veilbreakverse','voidverse','winterverse','staticchoir','chokerverse','lureverse','rootverse','maimverse','poxverse','shatterverse','riftverse','glitchverse','sealverse','zeroverse','baneverse','duskverse','viceverse','drainverse','cowardverse','nadirverse','brandverse','suppressverse']);
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { BOND_EVENTS, bondLevel, bondMods } from '../game/bonds';
@@ -201,6 +201,7 @@ function buffNames(u: UnitState): string[] {
   if (u.bombardverseUntilEndOfEnemyPhase) names.push('BOMBARD VERSE');
   if (u.hasteUntilEndOfEnemyPhase) names.push('HASTE VERSE');
   if (u.riposteUntilEndOfEnemyPhase) names.push('RIPOSTE VERSE');
+  if (u.keenUntilEndOfEnemyPhase) names.push('KEEN VERSE');
   if (u.glitchedgeNext) names.push('GLITCH EDGE');
   if (u.sealedgeNext) names.push('SEAL EDGE');
   if (u.shrededgeNext) names.push('SHRED EDGE');
@@ -695,7 +696,7 @@ export function SidePanel() {
               .filter((u) => u.side === 'player' && u.alive)
               .sort((a, b) => Number(a.acted ?? false) - Number(b.acted ?? false))
               .map((u) => (
-                <View key={u.uid} style={styles.rosterRow}>
+                <Pressable key={u.uid} style={styles.rosterRow} onPress={() => useGame.setState({ inspectUid: u.uid })}>
                   <Text style={[styles.rosterName, u.acted && styles.rosterActed]} numberOfLines={1}>
                     {u.npc ? '🛡 ' : ''}{u.dmgDealt === topDealt && topDealt > 0 ? '◆ ' : ''}{u.def.moveType === 'air' ? '✈ ' : '⬢ '}
                     {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>{u.attacksMade ? <Text style={{ color: '#8b94b8' }}> ⚔{u.attacksMade}</Text> : null}{s.units.some((o) => o.alive && o.side === u.side && o.uid !== u.uid && dist(o.pos, u.pos) <= 1) ? <Text style={{ color: '#8af0ff' }}> ⚭</Text> : null}{u.acted ? <Text style={{ color: '#4dff7a' }}> ✓</Text> : usableWeapons(u).length === 0 ? <Text style={{ color: '#ff6a6a' }}> ⊘</Text> : null}{s.units.some((x) => x.side === 'enemy' && x.alive && dist(x.pos, u.pos) <= moveRangeOf(x) + Math.max(0, ...x.def.weapons.map((w) => w.rangeMax))) ? <Text style={{ color: '#ff6a6a' }}> ⚠</Text> : null}{(u.will ?? 0) > 0 ? <Text style={{ color: '#ffe08a' }}> W{u.will}</Text> : null}{debuffCount(u) > 0 ? <Text style={{ color: '#ff9d7a' }}> ⌛{debuffCount(u)}</Text> : null}{u.def.weapons.some((w) => w.kind === 'beam') ? <Text style={{ color: '#8af0ff' }}> ⌁</Text> : null}{u.def.weapons.some((w) => w.mapRange != null) ? <Text style={{ color: '#ff9d4d' }}> ◉</Text> : null}{u.def.weapons.some((w) => w.sniper) ? <Text style={{ color: '#9fd8ff' }}> ⌖</Text> : null}{Math.max(u.def.barrier ?? 0, partBonus(u, 'barrier'), u.wallUntilEndOfEnemyPhase ? 500 : 0, u.haloUntilEndOfEnemyPhase ? 400 : 0) > 0 ? <Text style={{ color: '#8af0ff' }}> ⛨</Text> : null}<Text style={{ color: '#c9a0ff' }}> ✦{u.sp}</Text>
@@ -722,7 +723,7 @@ export function SidePanel() {
                   {(TERRAIN_INFO[terrainAt(s.map, u.pos)]?.def ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#a8c07a', width: 20 }]}>{TERRAIN_INFO[terrainAt(s.map, u.pos)].glyph}</Text>}
                   <Text style={[styles.rosterHp, { color: '#ffd34d' }]}>{u.kills >= 50 ? '★' : ''}{u.kills}K</Text>
                   {(u.parts?.length ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#7ac7ff' }]}>◈{u.parts.length}</Text>}
-                </View>
+                </Pressable>
               ))}
             <Text style={[styles.menuTitle, { color: '#ff6b6b' }]}>HOSTILES · {s.units.filter((u) => u.side === 'enemy' && u.alive).length}</Text>
             <ScrollView style={{ maxHeight: 92 }} nestedScrollEnabled>

@@ -305,6 +305,7 @@ export const PARTS: Record<string, PartDef> = {
   magnumPlate: { id: 'magnumPlate', name: 'Magnum Plate', desc: 'Chamber laminate — +8% crit & regenerate 1 ammo per turn', price: 3400, crit: 8, ammoRegen: true },
   hivePlate: { id: 'hivePlate', name: 'Hive Plate', desc: 'Swarm laminate — +1200 max HP & regenerate 1 ammo per turn', price: 3400, hp: 1200, ammoRegen: true },
   psalmPlate: { id: 'psalmPlate', name: 'Psalm Plate', desc: 'Hymn laminate — +8% crit & +3 SP regen per turn', price: 3400, crit: 8, spRegen: 3 },
+  fusionPlate: { id: 'fusionPlate', name: 'Fusion Plate', desc: 'Tokamak laminate — +1200 max HP & +10 EN regen per turn', price: 3400, hp: 1200, enRegen: 10 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -587,6 +588,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'mapfoe', name: 'Mapfoe', desc: '+6% damage per point vs frames carrying MAP weapons' },
   { id: 'voltfoe', name: 'Voltfoe', desc: '+6% damage per point vs frames carrying energy-hungry weapons (20+ EN)' },
   { id: 'shellfoe', name: 'Shellfoe', desc: '+6% damage per point vs frames carrying ammo-fed weapons' },
+  { id: 'truefoe', name: 'Truefoe', desc: '+6% damage per point vs frames carrying high-accuracy weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1781,6 +1783,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_stockpile5', name: 'STOCKPILE V', desc: 'Hold 175 items in the inventory at once', rewardCr: 100000 },
   { id: 'h_stockpile6', name: 'STOCKPILE VI', desc: 'Hold 200 items in the inventory at once', rewardCr: 100000 },
   { id: 'h_chainlord5', name: 'CHAINLORD V', desc: 'Score a 14-kill chain in a single turn', rewardCr: 100000 },
+  { id: 'h_chainlord6', name: 'CHAINLORD VI', desc: 'Score a 16-kill chain in a single turn', rewardCr: 100000 },
   { id: 'h_armory6', name: 'ARMORY LORD V', desc: 'Own 125 different parts', rewardCr: 100000 },
   { id: 'h_armory7', name: 'ARMORY LORD VI', desc: 'Own 140 different parts', rewardCr: 100000 },
   { id: 'h_dreamteam4', name: 'DREAM TEAM IV', desc: 'All pilots reach 650 career kills each', rewardCr: 100000 },
@@ -2242,6 +2245,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.chainCount ?? 0) >= 12;
     case 'h_chainlord5':
       return (s.chainCount ?? 0) >= 14;
+    case 'h_chainlord6':
+      return (s.chainCount ?? 0) >= 16;
     case 'h_immortal4':
       return s.masteryDone.length >= 100;
     case 'h_stockpile3':
