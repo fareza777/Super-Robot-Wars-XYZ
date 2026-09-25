@@ -328,6 +328,7 @@ export const PARTS: Record<string, PartDef> = {
   chasmPlate: { id: 'chasmPlate', name: 'Chasm Plate', desc: 'Abyss-anchored laminate — barrier 400 & immune to knockback/drag', price: 3400, barrier: 400, knockProof: true },
   grovePlate: { id: 'grovePlate', name: 'Grove Plate', desc: 'Verdant laminate — +100 armor & regen 1 ammo per turn', price: 3400, armor: 100, ammoRegen: true },
   vigilPlate: { id: 'vigilPlate', name: 'Vigil Plate', desc: 'Sentinel laminate — +100 armor & +3 SP regen per turn', price: 3400, armor: 100, spRegen: 3 },
+  gatePlate: { id: 'gatePlate', name: 'Gate Plate', desc: 'Portcullis laminate — +100 armor & immune to knockback/drag', price: 3400, armor: 100, knockProof: true },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -633,6 +634,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'spentborn', name: 'Spentborn', desc: '+6% damage per point vs frames drained to 40% EN or below' },
   { id: 'festerborn', name: 'Festerborn', desc: '+6% damage per point vs festered (un-healable) frames' },
   { id: 'trampleborn', name: 'Trampleborn', desc: '+6% damage per point vs frames slower than you' },
+  { id: 'coreborn', name: 'Coreborn', desc: '+6% damage per point vs frames away from the map edge' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -675,7 +677,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse', 'terrorverse', 'mireverse', 'ruinverse', 'shroudverse', 'silenceverse', 'veilbreakverse', 'tetherverse', 'stifleverse', 'despairverse', 'frailverse', 'tangleverse', 'huskverse', 'festerverse', 'lureverse', 'maimverse', 'shatterverse', 'glitchverse', 'zeroverse', 'duskverse', 'drainverse', 'nadirverse', 'suppressverse', 'hazeverse', 'jinxverse', 'vexverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse', 'terrorverse', 'mireverse', 'ruinverse', 'shroudverse', 'silenceverse', 'veilbreakverse', 'tetherverse', 'stifleverse', 'despairverse', 'frailverse', 'tangleverse', 'huskverse', 'festerverse', 'lureverse', 'maimverse', 'shatterverse', 'glitchverse', 'zeroverse', 'duskverse', 'drainverse', 'nadirverse', 'suppressverse', 'hazeverse', 'jinxverse', 'vexverse', 'abyssverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1858,6 +1860,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_godhunter16', name: 'GODHUNTER XVI', desc: 'Destroy 500 boss frames over your career', rewardCr: 100000 },
   { id: 'h_stockpile8', name: 'STOCKPILE VIII', desc: 'Hold 250 items at once', rewardCr: 100000 },
   { id: 'h_armory9', name: 'ARMORY LORD IX', desc: 'Own 175 different parts', rewardCr: 100000 },
+  { id: 'h_pinnacle10', name: 'PINNACLE X', desc: 'Score rank S on 170 missions', rewardCr: 100000 },
   { id: 'h_centurion7', name: 'CENTURION VII', desc: 'Fly 120 ranked missions', rewardCr: 100000 },
   { id: 'h_extinction', name: 'EXTINCTION', desc: 'Destroy 20,000 frames across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
@@ -2385,6 +2388,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 150;
     case 'h_pinnacle9':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 160;
+    case 'h_pinnacle10':
+      return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 170;
     case 'h_peacelord4':
       return (s.sideCleared ?? []).length >= 100;
     case 'h_peacelord5':

@@ -293,6 +293,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   pierceverse: { id: 'pierceverse', name: 'Pierce Verse', cost: 55, desc: 'Lance hymn — allies within 3 tiles ignore enemy barriers on every hit until end of enemy phase' },
   festeredge: { id: 'festeredge', name: 'Fester Edge', cost: 45, desc: 'Necrotic strike — next hit deals +10% damage and festers the target (cannot be healed) until end of enemy phase' },
   wraithverse: { id: 'wraithverse', name: 'Wraith Verse', cost: 55, desc: 'Reaper chant — enemies within 3 tiles are cursed (+15% damage taken) and festered (cannot be healed) until end of enemy phase' },
+  abyssverse: { id: 'abyssverse', name: 'Abyss Verse', cost: 55, desc: 'Abyssal chant — enemies within 3 tiles are cursed (+15% damage taken) and bane-marked (+25 crit taken) until end of enemy phase' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },
