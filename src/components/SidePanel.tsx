@@ -94,6 +94,7 @@ function buffNames(u: UnitState): string[] {
   if (u.savageNext) names.push('SAVAGE EDGE');
   if (u.truthedgeNext) names.push('TRUTH EDGE');
   if (u.novaNext) names.push('NOVA EDGE');
+  if (u.muteNext) names.push('MUTE EDGE');
   if (u.cullNext) names.push('CULL EDGE');
   if (u.mortalNext) names.push('MORTAL EDGE');
   if (u.rendNext) names.push('REND EDGE');
@@ -671,6 +672,7 @@ export function SidePanel() {
                       <Text style={[styles.rosterHp, { color: '#9fd8ff', width: 26 }]}>⇄{moveRangeOf(u)}</Text>
                       {(u.doomTurns ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#ff9d7a', width: 24 }]}>☠{u.doomTurns}</Text>}
                       <Text style={[styles.rosterHp, { color: u.en < u.def.maxEn * 0.25 ? '#ff9d7a' : '#35c9ff', width: 30 }]}>⛽{u.en}</Text>
+                      {u.will !== 100 && <Text style={[styles.rosterHp, { color: u.will >= 130 ? '#ffd34d' : '#ff7a9d', width: 30 }]}>W{u.will}</Text>}
                     </View>
                   ),
                 )}
