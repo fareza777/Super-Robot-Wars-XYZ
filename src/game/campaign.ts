@@ -285,6 +285,7 @@ export const PARTS: Record<string, PartDef> = {
   braceGauge: { id: 'braceGauge', name: 'Brace Gauge', desc: 'Moor-linked optics — +10 hit & immune to knockback/drag', price: 3300, hit: 10, knockProof: true },
   focusGauge: { id: 'focusGauge', name: 'Focus Gauge', desc: 'Psi-conduit lattice — +3 SP regen & +10 EN regen per turn', price: 3300, spRegen: 3, enRegen: 10 },
   psiPlate: { id: 'psiPlate', name: 'Psi Plate', desc: 'Psionic laminate — +3 SP regen & +100 armor', price: 3300, spRegen: 3, armor: 100 },
+  wardGauge: { id: 'wardGauge', name: 'Ward Gauge', desc: 'Aegis optics — +8% crit & 400 barrier', price: 3300, crit: 8, barrier: 400 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -547,6 +548,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'snowborn', name: 'Snowborn', desc: '+5% damage per point vs targets standing on snowfield' },
   { id: 'ruinborn', name: 'Ruinborn', desc: '+5% damage per point vs targets standing in ruins' },
   { id: 'voidborn', name: 'Voidborn', desc: '+5% damage per point vs targets standing in the void' },
+  { id: 'willborn', name: 'Willborn', desc: '+6% damage per point vs targets at 120+ will' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1730,6 +1732,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_tally2', name: 'TALLYMASTER II', desc: 'Earn 12,000+ salvage credits in a single mission', rewardCr: 100000 },
   { id: 'h_stockpile4', name: 'STOCKPILE IV', desc: 'Hold 150 items in the inventory at once', rewardCr: 100000 },
   { id: 'h_godhunter11', name: 'GODHUNTER XI', desc: 'Destroy 250 bosses across your career', rewardCr: 100000 },
+  { id: 'h_godhunter12', name: 'GODHUNTER XII', desc: 'Destroy 300 bosses across your career', rewardCr: 100000 },
   { id: 'h_extinction', name: 'EXTINCTION', desc: 'Destroy 20,000 frames across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
   { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
@@ -2214,6 +2217,10 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 175;
     case 'h_godhunter10':
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 200;
+    case 'h_godhunter11':
+      return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 250;
+    case 'h_godhunter12':
+      return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 300;
     case 'h_extinction':
       return totalKills >= 20000;
     case 'h_nemesis':

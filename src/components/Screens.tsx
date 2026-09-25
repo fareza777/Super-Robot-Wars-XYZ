@@ -72,7 +72,7 @@ function BriefingMap({ ch }: { ch: ChapterDef }) {
       </View>
       <Text style={{ color: '#7f95c0', fontSize: 7.5, fontWeight: '800', letterSpacing: 1.5, marginTop: 3 }}>FIELD MAP · blue=you red=hostile</Text>
       <Text style={{ color: '#ff9d8a', fontSize: 8.5, fontWeight: '800', letterSpacing: 1.2, marginTop: 2 }}>
-        {`⌖ HOSTILES ${map.enemySpawns.length}${map.enemySpawns.some((s) => s.elite) ? ` · ★${map.enemySpawns.filter((s) => s.elite).length} ELITE` : ''}${map.enemySpawns.some((s) => ALL_UNITS[s.defId]?.boss) ? ' · Ω BOSS' : ''}${map.reinforce ? ` · ⧗ T${map.reinforce.turn} WAVE` : ''}`}
+        {`⌖ HOSTILES ${map.enemySpawns.length}${map.enemySpawns.some((s) => s.elite) ? ` · ★${map.enemySpawns.filter((s) => s.elite).length} ELITE` : ''}${map.enemySpawns.some((s) => ALL_UNITS[s.defId]?.boss) ? ' · Ω BOSS' : ''}${map.reinforce ? ` · ⧗ T${map.reinforce.turn} WAVE` : ''} · ⏱ PAR ≤${ch.surviveTurns ?? Math.max(6, Math.ceil(((ch.count ?? map.enemySpawns.length) + (ch.boss ? 1 : 0)) * 1.1))}`}
       </Text>
     </View>
   );
