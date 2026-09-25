@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { PILOT_ART } from '../assets';
-import { ALL_UNITS, ITEMS, PARTS } from '../game/campaign';
+import { ALL_UNITS, ITEMS, PARTS, PILOT_STATS } from '../game/campaign';
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { bondMods } from '../game/bonds';
 import { armorOf, bestCounterWeapon, moveRangeOf, usableWeapons, evadeOf, critChance, damageOf, dist, enCostOf, findSupport, formationBonus, hasPincer, hitChance, key, partBonus, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
@@ -99,6 +99,7 @@ function buffNames(u: UnitState): string[] {
   if (u.blinkNext) names.push('BLINK EDGE');
   if (u.curseNext) names.push('CURSE EDGE');
   if (u.shroudNext) names.push('SHROUD EDGE');
+  if (u.rustNext) names.push('RUST EDGE');
   if (u.cullNext) names.push('CULL EDGE');
   if (u.mortalNext) names.push('MORTAL EDGE');
   if (u.rendNext) names.push('REND EDGE');
@@ -720,6 +721,9 @@ export function SidePanel() {
             <Text style={{ color: '#7fd0b0', fontSize: 10.5, marginTop: 3 }}>⟳ +{5 + partBonus(inspect, 'enRegen') + partBonus(inspect, 'ventEn')} EN per turn</Text>
             {(inspect.parts ?? []).length > 0 && (
               <Text style={{ color: '#8fb8ff', fontSize: 10.5, marginTop: 3 }}>◈ {(inspect.parts ?? []).map((p) => PARTS[p]?.name ?? p).join(' · ')}</Text>
+            )}
+            {inspect.skills && Object.values(inspect.skills).some((v) => (v ?? 0) > 0) && (
+              <Text style={{ color: '#c9a0ff', fontSize: 10.5, marginTop: 3 }} numberOfLines={2}>✦ {Object.entries(inspect.skills).filter(([, v]) => (v ?? 0) > 0).map(([k, v]) => `${PILOT_STATS.find((x) => x.id === k)?.name ?? k} +${v}`).join(' · ')}</Text>
             )}
             {inspect.def.pilot.trait && (
               <Text style={styles.traitLine} numberOfLines={1}>

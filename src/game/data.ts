@@ -218,6 +218,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   vaultverse: { id: 'vaultverse', name: 'Vault Verse', cost: 50, desc: 'Prospector hymn — allies within 3 tiles earn +50% salvage per kill until end of enemy phase' },
   shroudedge: { id: 'shroudedge', name: 'Shroud Edge', cost: 45, desc: 'Mirage strike — next hit +10% damage and shrouds the target (-15 evade until end of enemy phase)' },
   freeflowverse: { id: 'freeflowverse', name: 'Freeflow Verse', cost: 50, desc: 'Open conduits — allies within 3 tiles pay 8 less EN per weapon until end of enemy phase' },
+  rustedge: { id: 'rustedge', name: 'Rust Edge', cost: 45, desc: 'Corrosion strike — next hit +10% damage and rusts the target (-300 armor for 2 turns)' },
   ruinverse: { id: 'ruinverse', name: 'Ruin Verse', cost: 50, desc: 'Entropy wave — enemies within 3 tiles suffer armor break and decay 8% hull per turn for 2 turns' },
   anthemverse: { id: 'anthemverse', name: 'Anthem Verse', cost: 55, desc: 'Restoration hymn — allies within 3 tiles instantly recover 15% hull' },
   doomedge: { id: 'doomedge', name: 'Doom Edge', cost: 45, desc: 'Entropy strike — next hit deals +10% damage and dooms the target to decay 8% hull per turn for 3 turns' },
