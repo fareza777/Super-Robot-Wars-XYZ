@@ -212,6 +212,7 @@ function buffNames(u: UnitState): string[] {
   if (u.fearedgeNext) names.push('FEAR EDGE');
   if (u.baneedgeNext) names.push('BANE EDGE');
   if (u.feebleedgeNext) names.push('FEEBLE EDGE');
+  if (u.silenceedgeNext) names.push('SILENCE EDGE');
   if (u.poxedgeNext) names.push('POX EDGE');
   if (u.frailedgeNext) names.push('FRAIL EDGE');
   if (u.rootedgeNext) names.push('GRAVE EDGE');
