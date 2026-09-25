@@ -261,6 +261,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   emberverse: { id: 'emberverse', name: 'Ember Verse', cost: 55, desc: 'Pyre hymn — allies within 3 tiles apply BURN on every hit until end of enemy phase' },
   fearedge: { id: 'fearedge', name: 'Fear Edge', cost: 45, desc: 'Dread strike — next hit deals +10% damage and weakens the target (their attacks deal -10%)' },
   bombardverse: { id: 'bombardverse', name: 'Bombard Verse', cost: 55, desc: 'Fire-mission hymn — allies within 3 tiles deal +20% damage with MAP weapons until end of enemy phase' },
+  baneedge: { id: 'baneedge', name: 'Bane Edge', cost: 45, desc: 'Hex strike — next hit deals +10% damage and marks the target (+25 crit chance taken)' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },
