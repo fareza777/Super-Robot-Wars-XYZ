@@ -291,6 +291,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   pealverse: { id: 'pealverse', name: 'Peal Verse', cost: 60, desc: 'Thunderclap hymn — allies within 3 tiles stun enemies on hit (2 turns) until end of enemy phase' },
   huskedge: { id: 'huskedge', name: 'Husk Edge', cost: 45, desc: 'Draining strike — next hit deals +10% damage and starves the target (no will gain) until end of enemy phase' },
   pierceverse: { id: 'pierceverse', name: 'Pierce Verse', cost: 55, desc: 'Lance hymn — allies within 3 tiles ignore enemy barriers on every hit until end of enemy phase' },
+  festeredge: { id: 'festeredge', name: 'Fester Edge', cost: 45, desc: 'Necrotic strike — next hit deals +10% damage and festers the target (cannot be healed) until end of enemy phase' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },
