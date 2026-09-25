@@ -149,6 +149,7 @@ export function BriefingScreen() {
                 {(prog?.kills ?? 0) > 0 && <Text style={{ color: '#ffb347', fontSize: 8, fontWeight: '700' }}>☠ {prog.kills} KILLS</Text>}
                 {(() => { const nb = BOND_EVENTS.filter((ev) => ev.a === id || ev.b === id).map((ev) => (ev.a === id ? ev.b : ev.a)).filter((pid) => bondLevel(useGame.getState().bonds, id, pid) > 0 && deploySel.includes(pid)).length; return nb > 0 ? <Text style={{ color: '#8af0ff', fontSize: 8, fontWeight: '700' }}>⚭ {nb} BONDED</Text> : null; })()}
                 {(useGame.getState().parts[id]?.length ?? 0) > 0 && <Text style={{ color: '#8af0ff', fontSize: 8, fontWeight: '700' }}>◈{useGame.getState().parts[id].length} PARTS</Text>}
+                <Text style={{ color: '#c9a0ff', fontSize: 8, fontWeight: '700' }}>✦ {d.pilot.spirits.length} SPIRITS</Text>
                 {woundedPilots.includes(id) && <Text style={{ color: '#ff9d9d', fontSize: 9, fontWeight: '800', letterSpacing: 1 }}>🩹 WOUNDED</Text>}
                 <Text style={styles.deployMark}>{on ? '▣ IN' : '▢ OUT'}</Text>
               </Pressable>
