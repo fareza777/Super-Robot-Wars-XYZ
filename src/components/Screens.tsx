@@ -131,7 +131,7 @@ export function BriefingScreen() {
         <Text style={{ color: '#9fe8a9', fontSize: 9, fontWeight: '700', letterSpacing: 0.5, marginTop: 3 }}>
           {`▸ ALLIES ${roster.length} · ΣLV ${roster.reduce((n, id) => n + (pilotProg[id]?.level ?? ALL_UNITS[id]?.level ?? 1), 0)} — ${roster.map((id) => ALL_UNITS[id]?.name ?? id).join(' · ')}`}
         </Text>
-        <Text style={styles.deployLbl}>DEPLOY SQUAD — tap to toggle ({deploySel.length}/{roster.length}) · ΣPWR {deploySel.reduce((n, id2) => n + Math.max(0, ...(ALL_UNITS[id2]?.weapons ?? []).map((w) => w.power)), 0)}</Text>
+        <Text style={styles.deployLbl}>DEPLOY SQUAD — tap to toggle ({deploySel.length}/{roster.length}) · ΣPWR {deploySel.reduce((n, id2) => n + Math.max(0, ...(ALL_UNITS[id2]?.weapons ?? []).map((w) => w.power)), 0)} · ΣHP {deploySel.reduce((n, id2) => n + (ALL_UNITS[id2]?.maxHp ?? 0), 0)}</Text>
         <View style={styles.squadRow}>
           {roster.map((id) => {
             const d = ALL_UNITS[id];
