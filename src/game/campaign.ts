@@ -240,6 +240,7 @@ export const PARTS: Record<string, PartDef> = {
   feedPlate: { id: 'feedPlate', name: 'Feed Plate', desc: 'Loader laminate — +100 armor and regenerate 1 ammo each turn', price: 3100, armor: 100, ammoRegen: true },
   wardMail: { id: 'wardMail', name: 'Ward Mail', desc: 'Aegis laminate — incoming beam & funnel damage reduced by 25%', price: 3200, beamGuard: true, funnelGuard: true },
   cqbWeave: { id: 'cqbWeave', name: 'CQB Weave', desc: 'Close-battle laminate — incoming melee & gun damage reduced by 25%', price: 3100, meleeGuard: true, gunGuard: true },
+  haloMesh: { id: 'haloMesh', name: 'Halo Mesh', desc: 'CIWS lattice — incoming funnel & gun damage reduced by 25%', price: 3200, funnelGuard: true, gunGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -452,6 +453,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'highlander', name: 'Highlander', desc: '+5% damage per point vs targets on mountain terrain' },
   { id: 'urbanist', name: 'Urbanist', desc: '+5% damage per point vs targets on city terrain' },
   { id: 'preyborn', name: 'Preyborn', desc: '+6% damage per point vs targets with no usable weapon' },
+  { id: 'freefire', name: 'Freefire', desc: '+6% damage per point vs targets that cannot counter-attack' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1616,6 +1618,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_nemesis', name: 'NEMESIS', desc: 'Destroy 100 frames of a single type', rewardCr: 100000 },
   { id: 'h_immortal2', name: 'IMMORTAL II', desc: 'Reach MASTERY ★ on 80 missions', rewardCr: 100000 },
   { id: 'h_omnicide', name: 'OMNICIDE', desc: 'Destroy 20 different enemy frame types', rewardCr: 100000 },
+  { id: 'h_perfectscore', name: 'PERFECT SCORE', desc: 'Earn rank A or better on all 30 chapters', rewardCr: 100000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -2031,6 +2034,10 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.masteryDone.length >= 80;
     case 'h_omnicide':
       return Object.keys(s.killsByDef ?? {}).length >= 20;
+    case 'h_perfectscore': {
+      const rs = Object.values(s.missionRank ?? {});
+      return rs.length >= 30 && rs.every((r) => r === 'S' || r === 'A');
+    }
     case 'h_pinnacle':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 80;
     case 'h_apexlegion':

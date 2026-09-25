@@ -248,6 +248,7 @@ export function EndScreen({ victory }: { victory: boolean }) {
             </View>
           )}
           {lastMastery && <Text style={styles.resultsMastery}>★ MASTERY — {lastMastery}</Text>}
+          {!useGame.getState().lostAlly && <Text style={[styles.resultsAce, { color: '#8af0ff' }]}>◆ FLAWLESS — no frames lost</Text>}
           {aces.slice(0, 3).map((u) => (
             <Text key={u.uid} style={styles.resultsAce}>
               ★ {u.def.pilot.name} — {u.kills} kills this mission
