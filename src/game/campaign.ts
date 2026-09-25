@@ -238,6 +238,7 @@ export const PARTS: Record<string, PartDef> = {
   dualLattice: { id: 'dualLattice', name: 'Dual Lattice', desc: 'Prism-kinetic weave — incoming beam & melee damage reduced by 25%', price: 3000, beamGuard: true, meleeGuard: true },
   aegisVeil: { id: 'aegisVeil', name: 'Aegis Veil', desc: 'Point-defense lattice — incoming missile & funnel damage reduced by 25%', price: 3100, missileGuard: true, funnelGuard: true },
   feedPlate: { id: 'feedPlate', name: 'Feed Plate', desc: 'Loader laminate — +100 armor and regenerate 1 ammo each turn', price: 3100, armor: 100, ammoRegen: true },
+  wardMail: { id: 'wardMail', name: 'Ward Mail', desc: 'Aegis laminate — incoming beam & funnel damage reduced by 25%', price: 3200, beamGuard: true, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -448,6 +449,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'zenborn', name: 'Zenborn', desc: '+6% damage per point with will-locked weapons (willReq)' },
   { id: 'flakborn', name: 'Flakborn', desc: '+5% damage per point vs frames carrying MAP weapons' },
   { id: 'highlander', name: 'Highlander', desc: '+5% damage per point vs targets on mountain terrain' },
+  { id: 'urbanist', name: 'Urbanist', desc: '+5% damage per point vs targets on city terrain' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1609,6 +1611,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_reunion', name: 'REUNION', desc: 'Witness all 21 bond events', rewardCr: 100000 },
   { id: 'h_chain3', name: 'CHAINLORD II', desc: 'Score an 8-kill chain in a single turn', rewardCr: 100000 },
   { id: 'h_vrlegend', name: 'VR LEGEND', desc: 'Score 100,000+ in the VR Simulator', rewardCr: 100000 },
+  { id: 'h_nemesis', name: 'NEMESIS', desc: 'Destroy 100 frames of a single type', rewardCr: 100000 },
   { id: 'h_immortal2', name: 'IMMORTAL II', desc: 'Reach MASTERY ★ on 80 missions', rewardCr: 100000 },
 ];
 
@@ -2007,6 +2010,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.chainCount ?? 0) >= 8;
     case 'h_vrlegend':
       return (s.simBest ?? 0) >= 100000;
+    case 'h_nemesis':
+      return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 100;
     case 'h_genocider':
       return totalKills >= 7500;
     case 'h_paragon2':
