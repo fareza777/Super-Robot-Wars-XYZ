@@ -214,6 +214,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   thornverse: { id: 'thornverse', name: 'Thorn Verse', cost: 50, desc: 'Briar ward — allies within 3 tiles reflect 10% of hit damage back at attackers until end of enemy phase' },
   curseedge: { id: 'curseedge', name: 'Curse Edge', cost: 45, desc: 'Hex strike — next hit +10% damage and curses the target (+15% damage taken until end of enemy phase)' },
   surtaxverse: { id: 'surtaxverse', name: 'Surtax Verse', cost: 50, desc: 'Reactor levy — enemies within 3 tiles pay +10 EN per weapon until end of enemy phase' },
+  huskverse: { id: 'huskverse', name: 'Husk Verse', cost: 50, desc: 'Kiai severance — enemies within 3 tiles cannot gain will until end of enemy phase' },
   ruinverse: { id: 'ruinverse', name: 'Ruin Verse', cost: 50, desc: 'Entropy wave — enemies within 3 tiles suffer armor break and decay 8% hull per turn for 2 turns' },
   anthemverse: { id: 'anthemverse', name: 'Anthem Verse', cost: 55, desc: 'Restoration hymn — allies within 3 tiles instantly recover 15% hull' },
   doomedge: { id: 'doomedge', name: 'Doom Edge', cost: 45, desc: 'Entropy strike — next hit deals +10% damage and dooms the target to decay 8% hull per turn for 3 turns' },

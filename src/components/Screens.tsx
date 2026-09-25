@@ -194,6 +194,7 @@ export function EndScreen({ victory }: { victory: boolean }) {
   const kills = useGame((s) => s.kills);
   const lastReward = useGame((s) => s.lastReward);
   const lastSalvage = useGame((s) => s.lastSalvage);
+  const lastLoot = useGame((s) => s.lastLoot);
   const lastMastery = useGame((s) => s.lastMastery);
   const lastRank = useGame((s) => s.lastRank);
   const ngPlus = useGame((s) => s.ngPlus);
@@ -239,6 +240,7 @@ export function EndScreen({ victory }: { victory: boolean }) {
           <Text style={styles.resultsRow}>ENEMY UNITS DESTROYED  {kills}</Text>
           <Text style={styles.resultsRow}>CREDITS EARNED  +{lastReward}</Text>
           {lastSalvage > 0 && <Text style={styles.resultsRow}>SECTOR INCOME  +{lastSalvage}</Text>}
+          {lastLoot.length > 0 && <Text style={styles.resultsRow}>LOOT  {lastLoot.join(' · ')}</Text>}
           {lastRank && (
             <View style={styles.rankRow}>
               <Text style={styles.rankLbl}>BATTLE RANK</Text>
