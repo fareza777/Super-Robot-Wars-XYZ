@@ -245,6 +245,7 @@ export const PARTS: Record<string, PartDef> = {
   soulReactor: { id: 'soulReactor', name: 'Soul Reactor', desc: 'Soul-fed core — each kill grants +5 will and +15 EN', price: 3200, willOnKill: true, enOnKill: true },
   duelistLoom: { id: 'duelistLoom', name: 'Duelist Loom', desc: 'Blade-dancer weave — melee weapons +12% damage and counter-attacks +12% damage', price: 3200, meleeDmg: 12, counterDmg: 12 },
   prismRack: { id: 'prismRack', name: 'Prism Rack', desc: 'Coherent-light array — beam & funnel weapons +12% damage', price: 3200, beamDmg: 12, funnelDmg: 12 },
+  ordnanceArray: { id: 'ordnanceArray', name: 'Ordnance Array', desc: 'Ballistic bank — gun & missile weapons +12% damage', price: 3200, gunDmg: 12, missileDmg: 12 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -462,6 +463,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'shroudborn', name: 'Shroudborn', desc: '+6% damage per point vs shrouded targets' },
   { id: 'curseborn', name: 'Curseborn', desc: '+6% damage per point vs cursed targets' },
   { id: 'nullborn', name: 'Nullborn', desc: '+6% damage per point vs nullified targets' },
+  { id: 'dreadborn', name: 'Dreadborn', desc: '+6% damage per point vs dreaded targets' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1631,6 +1633,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_trophywall', name: 'TROPHY WALL', desc: 'Claim 60 honors', rewardCr: 100000 },
   { id: 'h_lone', name: 'LONE WOLF', desc: 'Win a mission where a single pilot scores every kill (3+ kills)', rewardCr: 100000 },
   { id: 'h_pacifist', name: 'PACIFIST', desc: 'Clear a mission scoring zero kills', rewardCr: 100000 },
+  { id: 'h_tally', name: 'TALLYMASTER', desc: 'Earn 8,000+ salvage credits in a single mission', rewardCr: 100000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -2064,6 +2067,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
     }
     case 'h_pacifist':
       return (s.kills ?? 0) === 0;
+    case 'h_tally':
+      return (s.salvageCr ?? 0) >= 8000;
     case 'h_pinnacle':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 80;
     case 'h_apexlegion':
