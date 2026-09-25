@@ -58,6 +58,7 @@ function buffNames(u: UnitState): string[] {
   if (u.hemoNext) names.push('HEMORRHAGE');
   if (u.voidedgeNext) names.push('VOID EDGE');
   if (u.standFirmUntilEndOfEnemyPhase) names.push('STAND FIRM');
+  if (u.undyingUntilEndOfEnemyPhase) names.push('UNDYING VERSE');
   if (u.plunderNext) names.push('PLUNDER EDGE');
   if (u.firelinkUntilEndOfEnemyPhase) names.push('FIRELINK');
   if (u.dreadedUntilEndOfEnemyPhase) names.push('DREADED');
@@ -552,7 +553,7 @@ export function SidePanel() {
                             <View style={[styles.tgtBarFill, { width: `${(Math.max(0, e.hp - dmg) / e.def.maxHp) * 100}%`, backgroundColor: '#4dff7a' }]} />
                           </View>
                           <Text style={styles.tgtCnt} numberOfLines={1}>
-                            {cw ? `↩ CNT ~${cDmg} (${cHc}% · ⚡${critChance(e, unit, cw)}%)` : '↩ SAFE — no counter'} · CRIT {critChance(unit, e)}%{fb > 0 ? ` · ▣FORM +${fb}` : ''}{pin ? ` · ⇄PIN +${10 + partBonus(unit, 'pinDmg')}%` : ''}
+                            {cw ? `↩ CNT ${cw.name} ~${cDmg} (${cHc}% · ⚡${critChance(e, unit, cw)}%)` : '↩ SAFE — no counter'} · CRIT {critChance(unit, e)}%{fb > 0 ? ` · ▣FORM +${fb}` : ''}{pin ? ` · ⇄PIN +${10 + partBonus(unit, 'pinDmg')}%` : ''}
                             {(e.def.resists?.[s.pendingWeapon!.kind] ?? 0) > 0 ? ` · 🛡RES −${Math.round((e.def.resists![s.pendingWeapon!.kind] ?? 0) * 100)}%` : ''}
                             {` · ⇢${dist(s.pendingMove ?? unit.pos, e.pos)}t`}{findSupport(s.units, unit.uid, e) ? ' · ⇒SUP' : ''}
                           </Text>

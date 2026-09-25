@@ -226,6 +226,7 @@ export const PARTS: Record<string, PartDef> = {
   bombardRig: { id: 'bombardRig', name: 'Bombard Rig', desc: 'Siege lattice — MAP weapons +15% damage and +1 weapon range', price: 2800, mapDmg: true, range: 1 },
   emberRounds: { id: 'emberRounds', name: 'Ember Rounds', desc: 'Pyre load — landed hits can ignite the target (25%)', price: 2900, statusBurn: true, hit: 8 },
   rendLattice: { id: 'rendLattice', name: 'Rend Lattice', desc: 'Sunderweave frame — attacks shred 10% more armor and +8 hit', price: 2900, armorShred: 10, hit: 8 },
+  bastionLoom: { id: 'bastionLoom', name: 'Bastion Loom', desc: 'Bulwark weave — +150 armor and incoming funnel damage cut 25%', price: 2900, armor: 150, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -424,6 +425,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'longbarrel', name: 'Longbarrel', desc: '+5% damage per point when attacking from at least 3 tiles away' },
   { id: 'corrosivist', name: 'Corrosivist', desc: '+6% damage per point vs targets suffering Rust Verse corrosion' },
   { id: 'thinner', name: 'Thinner', desc: '+6% damage per point vs grunt frames (non-boss, non-elite)' },
+  { id: 'purist', name: 'Purist', desc: '+5% damage per point vs targets carrying no statuses, marks or verse effects' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1415,7 +1417,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_aceofaces', name: 'ACE OF ACES', desc: 'Earn an S battle rank on 3 missions', rewardCr: 1500 },
   { id: 'h_fortress', name: 'FORTRESS BREAKER', desc: 'Destroy 3 siege frames (Ballista or Bastion)', rewardCr: 900 },
   { id: 'h_quartermaster', name: 'QUARTERMASTER', desc: 'Stockpile 12 consumable items at once', rewardCr: 800 },
-  { id: 'h_simace', name: 'SIMULATOR ACE', desc: 'Score 3000+ in the VR Simulator', rewardCr: 1000 },
+  { id: 'h_simace2', name: 'SIMULATOR ACE', desc: 'Score 3000+ in the VR Simulator', rewardCr: 1000 },
   { id: 'h_magma', name: 'MAGMA RUNNER', desc: 'Win a mission on a lava field', rewardCr: 700 },
   { id: 'h_mogul', name: 'GRAND TREASURY', desc: 'Hold 50,000 credits at once', rewardCr: 2500 },
   { id: 'h_simvet', name: 'SIM VETERAN', desc: 'Score 6000+ in the VR Simulator', rewardCr: 1500 },
@@ -1444,7 +1446,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_cataclysm', name: 'CATACLYSM', desc: 'Deal 12000+ damage in a single strike', rewardCr: 2000 },
   { id: 'h_consistent', name: 'CONSISTENT', desc: 'Earn rank A or better on 10 missions', rewardCr: 1200 },
   { id: 'h_grim', name: 'GRIM HARVEST', desc: 'Reach 150 total career kills across the squad', rewardCr: 2500 },
-  { id: 'h_eternal', name: 'ETERNAL PILGRIM', desc: 'Reach New Game+3', rewardCr: 3000 },
+  { id: 'h_eternal2', name: 'ETERNAL PILGRIM', desc: 'Reach New Game+3', rewardCr: 3000 },
   { id: 'h_omega', name: 'OMEGA PURGE', desc: 'Destroy 14+ enemy frames in a single battle', rewardCr: 1800 },
   { id: 'h_centurion', name: 'CENTURION', desc: 'One pilot reaches 100 career kills', rewardCr: 4000 },
   { id: 'h_warchest', name: 'WAR CHEST', desc: 'Hold 100,000 credits', rewardCr: 3000 },
@@ -1474,7 +1476,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_annihilation', name: 'ANNIHILATION', desc: 'Destroy 25 frames in a single battle', rewardCr: 2800 },
   { id: 'h_apexstrike', name: 'APEX STRIKE', desc: 'Land a single hit of 30,000+ damage', rewardCr: 3000 },
   { id: 'h_cartographer', name: 'CARTOGRAPHER', desc: 'Clear 15 side missions', rewardCr: 2600 },
-  { id: 'h_marksman', name: 'ROYAL MARKSMAN', desc: 'Earn S rank on 22 missions', rewardCr: 3000 },
+  { id: 'h_marksman2', name: 'ROYAL MARKSMAN', desc: 'Earn S rank on 22 missions', rewardCr: 3000 },
   { id: 'h_longwar', name: 'ATTRITION', desc: 'Win a battle that lasts 15+ turns', rewardCr: 1600 },
   { id: 'h_simdeity', name: 'SIM DEITY', desc: 'Score 20000+ in the VR Simulator', rewardCr: 4500 },
   { id: 'h_graveyard', name: 'GRAVEMAKER', desc: 'Reach 300 total career kills across the squad', rewardCr: 4500 },
@@ -1487,7 +1489,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_salvagebaron', name: 'SALVAGE BARON', desc: 'Accumulate 60000 salvage credits', rewardCr: 3600 },
   { id: 'h_marathon', name: 'MARATHON', desc: 'Win a battle lasting 25 or more turns', rewardCr: 2500 },
   { id: 'h_imperator', name: 'IMPERATOR', desc: 'Earn battle rank S in 28 missions', rewardCr: 5000 },
-  { id: 'h_quartermaster', name: 'QUARTERMASTER', desc: 'Own 35 different parts', rewardCr: 3200 },
+  { id: 'h_quartermaster2', name: 'QUARTERMASTER II', desc: 'Own 35 different parts', rewardCr: 3200 },
   { id: 'h_vrsaint', name: 'VR SAINT', desc: 'Score 25000+ in the VR Simulator', rewardCr: 5000 },
   { id: 'h_warlegion', name: 'WAR LEGION', desc: '400 total career kills across the squad', rewardCr: 4500 },
   { id: 'h_dominator', name: 'DOMINATOR', desc: 'Earn A rank or better on 25 missions', rewardCr: 3800 },
@@ -1495,12 +1497,12 @@ export const HONORS: HonorDef[] = [
   { id: 'h_elitecorps', name: 'ELITE CORPS', desc: 'Six pilots reach 40 career kills', rewardCr: 5000 },
   { id: 'h_transcendent', name: 'TRANSCENDENT', desc: 'Earn MASTERY ★ in 30 missions', rewardCr: 5500 },
   { id: 'h_overlordvr', name: 'OVERLORD', desc: 'Score 30000+ in the VR Simulator', rewardCr: 6000 },
-  { id: 'h_armory', name: 'ARMORY', desc: 'Own 45 different parts', rewardCr: 6500 },
+  { id: 'h_armory2', name: 'ARMORY II', desc: 'Own 45 different parts', rewardCr: 6500 },
   { id: 'h_genocide', name: 'GENOCIDE', desc: 'Destroy 500 frames across the squad', rewardCr: 7000 },
   { id: 'h_duelking', name: 'DUEL KING', desc: 'One pilot reaches 150 career kills', rewardCr: 8000 },
   { id: 'h_immortal', name: 'IMMORTAL', desc: 'Win a battle lasting 30+ turns', rewardCr: 8500 },
   { id: 'h_colossus', name: 'COLOSSUS', desc: 'Land a single hit for 75000+ damage', rewardCr: 9000 },
-  { id: 'h_demigod', name: 'DEMIGOD', desc: 'Earn S rank on 35 missions', rewardCr: 10000 },
+  { id: 'h_demigod2', name: 'DEMIGOD II', desc: 'Earn S rank on 35 missions', rewardCr: 10000 },
   { id: 'h_valhalla', name: 'VALHALLA', desc: 'Reach NG+2 or beyond', rewardCr: 12000 },
   { id: 'h_wareternal', name: 'WAR ETERNAL', desc: 'Score 750 total career kills across the squad', rewardCr: 9000 },
   { id: 'h_harbinger', name: 'HARBINGER', desc: 'One pilot reaches 200 career kills', rewardCr: 8000 },
@@ -1521,7 +1523,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_seraphim', name: 'SERAPHIM', desc: 'Reach NG+8 or beyond', rewardCr: 30000 },
   { id: 'h_godslayer', name: 'GODSLAYER', desc: 'Earn S rank on 60 missions', rewardCr: 32000 },
   { id: 'h_immovable', name: 'IMMOVABLE', desc: 'Earn MASTERY ★ on 50 missions', rewardCr: 34000 },
-  { id: 'h_apocalypse', name: 'APOCALYPSE GOD', desc: 'Land a single blow of 200,000+ damage', rewardCr: 36000 },
+  { id: 'h_apocalypse2', name: 'APOCALYPSE GOD', desc: 'Land a single blow of 200,000+ damage', rewardCr: 36000 },
   { id: 'h_exterminatus', name: 'EXTERMINATUS', desc: 'Land a single blow of 300,000+ damage', rewardCr: 38000 },
   { id: 'h_unmaker', name: 'UNMAKER', desc: 'Earn MASTERY ★ on 60 missions', rewardCr: 40000 },
   { id: 'h_overgod', name: 'OVERGOD', desc: 'Reach NG+9 or beyond', rewardCr: 42000 },
@@ -1535,13 +1537,13 @@ export const HONORS: HonorDef[] = [
   { id: 'h_omniscient', name: 'OMNISCIENT', desc: 'Reach NG+11 or beyond', rewardCr: 60000 },
   { id: 'h_warlord', name: 'WARLORD', desc: 'One pilot reaches 750 career kills', rewardCr: 62000 },
   { id: 'h_arsenal', name: 'ARSENAL', desc: 'Own 60 different parts', rewardCr: 64000 },
-  { id: 'h_tycoon', name: 'TYCOON', desc: 'Hold 250,000 credits at once', rewardCr: 66000 },
+  { id: 'h_tycoon2', name: 'TYCOON II', desc: 'Hold 250,000 credits at once', rewardCr: 66000 },
   { id: 'h_cosmic', name: 'COSMIC', desc: 'Land a single blow of 1,000,000+ damage', rewardCr: 68000 },
   { id: 'h_vrgod', name: 'VR GOD', desc: 'Score 40,000+ in the VR Simulator', rewardCr: 70000 },
   { id: 'h_warmachine', name: 'WARMACHINE', desc: '3000 total career kills across the squad', rewardCr: 72000 },
   { id: 'h_soulforge', name: 'SOULFORGE', desc: 'Witness 18 bond events', rewardCr: 74000 },
   { id: 'h_kingslayer', name: 'KINGSLAYER', desc: 'Destroy 10 boss frames across your career', rewardCr: 76000 },
-  { id: 'h_hoarder', name: 'HOARDER', desc: 'Hold 60 items in the inventory at once', rewardCr: 78000 },
+  { id: 'h_hoarder2', name: 'HOARDER II', desc: 'Hold 60 items in the inventory at once', rewardCr: 78000 },
   { id: 'h_veterano', name: 'VETERANO', desc: 'Clear 30 distinct missions', rewardCr: 80000 },
   { id: 'h_regicide', name: 'REGICIDE', desc: 'Destroy 15 boss frames across your career', rewardCr: 82000 },
   { id: 'h_aceofgods', name: 'ACE OF GODS', desc: 'One pilot reaches 1000 career kills', rewardCr: 84000 },
@@ -1556,7 +1558,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_vrapotheosis', name: 'VR APOTHEOSIS', desc: 'Score 50,000+ in the VR Simulator', rewardCr: 99000 },
   { id: 'h_hoardlord', name: 'HOARDLORD', desc: 'Hold 500,000 credits at once', rewardCr: 100000 },
   { id: 'h_peacelord', name: 'PEACELORD', desc: 'Clear 50 side missions', rewardCr: 100000 },
-  { id: 'h_centurion', name: 'CENTURION', desc: 'Fly 50 ranked missions', rewardCr: 100000 },
+  { id: 'h_centurion2', name: 'CENTURION II', desc: 'Fly 50 ranked missions', rewardCr: 100000 },
   { id: 'h_warehouse', name: 'WAREHOUSE', desc: 'Hold 80 items in inventory at once', rewardCr: 100000 },
   { id: 'h_armorylord', name: 'ARMORY LORD', desc: 'Own 75 different parts', rewardCr: 100000 },
   { id: 'h_paradox', name: 'PARADOX', desc: 'Reach NG+12', rewardCr: 100000 },
@@ -1564,15 +1566,16 @@ export const HONORS: HonorDef[] = [
   { id: 'h_sage', name: 'SAGE', desc: 'Earn MASTERY ★ on 70 missions', rewardCr: 100000 },
   { id: 'h_dreamteam', name: 'DREAM TEAM', desc: 'Every pilot reaches 150 career kills', rewardCr: 100000 },
   { id: 'h_genocider', name: 'GENOCIDER', desc: '7500 total career kills across the squad', rewardCr: 100000 },
-  { id: 'h_paragon', name: 'PARAGON', desc: 'Reach NG+15', rewardCr: 100000 },
+  { id: 'h_paragon2', name: 'PARAGON II', desc: 'Reach NG+15', rewardCr: 100000 },
   { id: 'h_godhunter', name: 'GODHUNTER', desc: 'Destroy 20 bosses across your career', rewardCr: 100000 },
   { id: 'h_simulator', name: 'SIMULATOR', desc: 'Score 75,000+ in the VR Simulator', rewardCr: 100000 },
   { id: 'h_deity', name: 'DEITY', desc: 'Reach NG+18', rewardCr: 100000 },
   { id: 'h_warpath2', name: 'WARPATH II', desc: 'Squad reaches 10,000 total career kills', rewardCr: 100000 },
   { id: 'h_pinnacle', name: 'PINNACLE', desc: 'Earn S rank on 80 missions', rewardCr: 100000 },
   { id: 'h_apexlegion', name: 'APEX LEGION', desc: 'All pilots reach 250 career kills each', rewardCr: 100000 },
-  { id: 'h_stockpile', name: 'STOCKPILE', desc: 'Hold 90 items in the inventory at once', rewardCr: 100000 },
+  { id: 'h_stockpile2', name: 'STOCKPILE II', desc: 'Hold 90 items in the inventory at once', rewardCr: 100000 },
   { id: 'h_godhunter2', name: 'GODHUNTER II', desc: 'Destroy 30 bosses across your career', rewardCr: 100000 },
+  { id: 'h_dreamteam2', name: 'DREAM TEAM II', desc: 'Every pilot reaches 300 career kills', rewardCr: 100000 },
   { id: 'h_immortal2', name: 'IMMORTAL II', desc: 'Reach MASTERY ★ on 80 missions', rewardCr: 100000 },
 ];
 
@@ -1651,7 +1654,7 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return ((s.killsByDef ?? {}).ballista ?? 0) + ((s.killsByDef ?? {}).bastion ?? 0) >= 3;
     case 'h_quartermaster':
       return Object.values(s.inventory ?? {}).reduce((n, c) => n + (c ?? 0), 0) >= 12;
-    case 'h_simace':
+    case 'h_simace2':
       return (s.simBest ?? 0) >= 3000;
     case 'h_magma':
       return s.missionCh?.theme === 'lava';
@@ -1709,7 +1712,7 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'A' || r === 'S').length >= 10;
     case 'h_grim':
       return Object.values(s.killsByDef ?? {}).reduce((a, b) => a + b, 0) >= 150;
-    case 'h_eternal':
+    case 'h_eternal2':
       return s.ngPlus >= 3;
     case 'h_omega':
       return (s.kills ?? 0) >= 14;
@@ -1769,7 +1772,7 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.maxHitEver ?? 0) >= 30000;
     case 'h_cartographer':
       return (s.sideCleared ?? []).length >= 15;
-    case 'h_marksman':
+    case 'h_marksman2':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 22;
     case 'h_longwar':
       return (s.turn ?? 0) >= 15;
@@ -1795,7 +1798,7 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.turn ?? 0) >= 25;
     case 'h_imperator':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 28;
-    case 'h_quartermaster':
+    case 'h_quartermaster2':
       return (s.partsOwned ?? []).length >= 35;
     case 'h_vrsaint':
       return (s.simBest ?? 0) >= 25000;
@@ -1821,7 +1824,7 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.turn ?? 0) >= 30;
     case 'h_colossus':
       return (s.maxHitEver ?? 0) >= 75000;
-    case 'h_demigod':
+    case 'h_demigod2':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 35;
     case 'h_valhalla':
       return (s.ngPlus ?? 0) >= 2;
@@ -1863,7 +1866,7 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 60;
     case 'h_immovable':
       return (s.masteryDone?.length ?? 0) >= 50;
-    case 'h_apocalypse':
+    case 'h_apocalypse2':
       return (s.maxHitEver ?? 0) >= 200000;
     case 'h_exterminatus':
       return (s.maxHitEver ?? 0) >= 300000;
@@ -1891,7 +1894,7 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.pilotProg ?? {}).some((p) => (p.kills ?? 0) >= 750);
     case 'h_arsenal':
       return (s.partsOwned ?? []).length >= 60;
-    case 'h_tycoon':
+    case 'h_tycoon2':
       return (s.credits ?? 0) >= 250000;
     case 'h_cosmic':
       return (s.maxHitEver ?? 0) >= 1000000;
@@ -1903,7 +1906,7 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.bondSeen.length >= 18;
     case 'h_kingslayer':
       return Object.entries(s.killsByDef ?? {}).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) >= 10;
-    case 'h_hoarder':
+    case 'h_hoarder2':
       return Object.values(s.inventory ?? {}).reduce((a, b) => a + b, 0) >= 60;
     case 'h_veterano':
       return Object.keys(s.missionRank ?? {}).length >= 30;
@@ -1933,7 +1936,7 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.credits >= 500000;
     case 'h_peacelord':
       return s.sideCleared.length >= 50;
-    case 'h_centurion':
+    case 'h_centurion2':
       return Object.keys(s.missionRank ?? {}).length >= 50;
     case 'h_warehouse':
       return Object.values(s.inventory ?? {}).reduce((n, c) => n + c, 0) >= 80;
@@ -1951,7 +1954,7 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
     }
     case 'h_genocider':
       return totalKills >= 7500;
-    case 'h_paragon':
+    case 'h_paragon2':
       return s.ngPlus >= 15;
     case 'h_godhunter':
       return (s.killsByDef ? Object.values(s.killsByDef).reduce((n, k) => n + k, 0) : 0) >= 20;
@@ -1967,10 +1970,12 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 80;
     case 'h_apexlegion':
       return kills.length > 0 && kills.every((p) => (p.kills ?? 0) >= 250);
-    case 'h_stockpile':
+    case 'h_stockpile2':
       return Object.values(s.inventory ?? {}).reduce((n, c) => n + c, 0) >= 90;
     case 'h_godhunter2':
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 30;
+    case 'h_dreamteam2':
+      return kills.length > 0 && kills.every((p) => (p.kills ?? 0) >= 300);
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':
@@ -2027,7 +2032,7 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
     }
     case 'h_light':
       return (s.turn ?? 99) <= 3;
-    case 'h_armory':
+    case 'h_armory2':
       return Object.keys(PARTS).every((id) => s.partsOwned?.includes(id));
     case 'h_uns': {
       const ps = (s.units ?? []).filter((u) => u.side === 'player' && u.alive && !u.npc);
