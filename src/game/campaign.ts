@@ -335,6 +335,7 @@ export const PARTS: Record<string, PartDef> = {
   forgePlate: { id: 'forgePlate', name: 'Forge Plate', desc: 'Foundry laminate — +100 armor & +10 EN regen/turn', price: 3400, armor: 100, enRegen: 10 },
   wardLens: { id: 'wardLens', name: 'Ward Lens', desc: 'Aegis optics — +10 hit & barrier 400', price: 3400, hit: 10, barrier: 400 },
   castleGauge: { id: 'castleGauge', name: 'Castle Gauge', desc: 'Keep-mounted optics — +10 hit & +100 armor', price: 3400, hit: 10, armor: 100 },
+  fencerPlate: { id: 'fencerPlate', name: 'Fencer Plate', desc: 'Duelist laminate — +8 evade & +8% crit', price: 3400, evade: 8, crit: 8 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -647,6 +648,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'lavaborn', name: 'Lavaborn', desc: '+5% damage per point vs targets standing on lava' },
   { id: 'medicfoe', name: 'Medicfoe', desc: '+6% damage per point vs medic frames' },
   { id: 'packborn', name: 'Packborn', desc: '+4% damage per point per enemy ally adjacent to the target' },
+  { id: 'gauntletborn', name: 'Gauntletborn', desc: '+4% damage per point per enemy adjacent to you' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1879,6 +1881,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_centurion11', name: 'CENTURION XI', desc: 'Fly 175 ranked missions', rewardCr: 100000 },
   { id: 'h_nemesis9', name: 'NEMESIS IX', desc: 'Destroy 500 frames of one type', rewardCr: 100000 },
   { id: 'h_omnicide5', name: 'OMNICIDE V', desc: 'Destroy 40 different frame types', rewardCr: 100000 },
+  { id: 'h_godhunter17', name: 'GODHUNTER XVII', desc: 'Destroy 550 bosses over your career', rewardCr: 100000 },
   { id: 'h_centurion7', name: 'CENTURION VII', desc: 'Fly 120 ranked missions', rewardCr: 100000 },
   { id: 'h_extinction', name: 'EXTINCTION', desc: 'Destroy 20,000 frames across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
@@ -2450,6 +2453,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 450;
     case 'h_godhunter16':
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 500;
+    case 'h_godhunter17':
+      return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 550;
     case 'h_extinction':
       return totalKills >= 20000;
     case 'h_nemesis':
