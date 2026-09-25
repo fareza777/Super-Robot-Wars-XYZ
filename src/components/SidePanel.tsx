@@ -191,6 +191,7 @@ function buffNames(u: UnitState): string[] {
   if (u.sieveNext) names.push('SIEVE EDGE');
   if (u.bulwarkUntilEndOfEnemyPhase) names.push('BULWARK VERSE');
   if (u.stifleedgeNext) names.push('STIFLE EDGE');
+  if (u.poxedgeNext) names.push('POX EDGE');
   if (u.rootedUntilEndOfEnemyPhase) names.push('ROOT VERSE');
   if ((u.gloomTurns ?? 0) > 0) names.push(`GLOOM ${u.gloomTurns}`);
   if ((u.poxTurns ?? 0) > 0) names.push(`POX ${u.poxTurns}`);
@@ -699,7 +700,7 @@ export function SidePanel() {
                         {buffNames(u).length > 0 ? <Text style={{ color: '#d8a5ff' }}> ✧{buffNames(u).length}</Text> : null}
                         {u.crippled ? <Text style={{ color: '#ff9d7a' }}> ⛓</Text> : null}
                         {u.def.weapons.some((w) => w.mapRange != null) ? <Text style={{ color: '#ff9d4d' }}> ◉</Text> : null}
-                        {s.units.some((p) => p.side === 'player' && p.alive && dist(u.pos, p.pos) <= moveRangeOf(u) + Math.max(0, ...u.def.weapons.map((w) => w.rangeMax))) ? <Text style={{ color: '#ff6a6a' }}> ⚠</Text> : null}{usableWeapons(u).length === 0 ? <Text style={{ color: '#ff6a6a' }}> ⊘</Text> : null}{u.provokedTo ? <Text style={{ color: '#ffd34d' }}> 🎯</Text> : null}{u.anchoredUntilEndOfEnemyPhase || partBonus(u, 'knockProof') > 0 ? <Text style={{ color: '#8af0ff' }}> ⚓</Text> : null}
+                        {s.units.some((p) => p.side === 'player' && p.alive && dist(u.pos, p.pos) <= moveRangeOf(u) + Math.max(0, ...u.def.weapons.map((w) => w.rangeMax))) ? <Text style={{ color: '#ff6a6a' }}> ⚠</Text> : null}{usableWeapons(u).length === 0 ? <Text style={{ color: '#ff6a6a' }}> ⊘</Text> : null}{u.provokedTo ? <Text style={{ color: '#ffd34d' }}> 🎯</Text> : null}{u.anchoredUntilEndOfEnemyPhase || partBonus(u, 'knockProof') > 0 ? <Text style={{ color: '#8af0ff' }}> ⚓</Text> : null}{(u.doomTurns ?? 0) > 0 ? <Text style={{ color: '#ff6a6a' }}> ☠</Text> : null}
                       </Text>
                       <View style={[styles.rosterBarTrack, { backgroundColor: '#2a1216' }]}>
                         <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.hp / u.def.maxHp > 0.5 ? '#ff5a5a' : u.hp / u.def.maxHp > 0.25 ? '#ff9d4d' : '#c92a2a' }]} />

@@ -271,6 +271,7 @@ export const PARTS: Record<string, PartDef> = {
   gyroCell: { id: 'gyroCell', name: 'Gyro Cell', desc: 'Stabilizer gyro — +8 evade & immune to knockback/drag', price: 3200, evade: 8, knockProof: true },
   mirageCell: { id: 'mirageCell', name: 'Mirage Cell', desc: 'Ghost-light weave — +8 evade & a 400-point barrier', price: 3200, evade: 8, barrier: 400 },
   psionCell: { id: 'psionCell', name: 'Psion Cell', desc: 'Psionic uplink — pilot regenerates +3 SP/turn & +8 hit', price: 3200, spRegen: 3, hit: 8 },
+  aegisCell: { id: 'aegisCell', name: 'Aegis Cell', desc: 'Warded halo — +10 hit & a 400-point barrier', price: 3200, hit: 10, barrier: 400 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -518,6 +519,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'poxborn', name: 'Poxborn', desc: '+6% damage per point vs corroding targets (Pox)' },
   { id: 'plagueborn', name: 'Plagueborn', desc: '+4% damage per point vs targets suffering 3+ debuffs' },
   { id: 'anchorborn', name: 'Anchorborn', desc: '+5% damage per point while anchored (Anchor Verse / Brace Plate)' },
+  { id: 'doomborn', name: 'Doomborn', desc: '+6% damage per point vs doomed targets (Doom countdown)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1706,6 +1708,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_nemesis', name: 'NEMESIS', desc: 'Destroy 100 frames of a single type', rewardCr: 100000 },
   { id: 'h_immortal2', name: 'IMMORTAL II', desc: 'Reach MASTERY ★ on 80 missions', rewardCr: 100000 },
   { id: 'h_omnicide', name: 'OMNICIDE', desc: 'Destroy 20 different enemy frame types', rewardCr: 100000 },
+  { id: 'h_omnicide2', name: 'OMNICIDE II', desc: 'Destroy 25 different enemy frame types', rewardCr: 100000 },
   { id: 'h_perfectscore', name: 'PERFECT SCORE', desc: 'Earn rank A or better on all 30 chapters', rewardCr: 100000 },
   { id: 'h_almighty', name: 'ALMIGHTY', desc: 'Earn S rank on all 30 chapters', rewardCr: 100000 },
   { id: 'h_trophywall', name: 'TROPHY WALL', desc: 'Claim 60 honors', rewardCr: 100000 },
@@ -2179,6 +2182,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.masteryDone.length >= 90;
     case 'h_omnicide':
       return Object.keys(s.killsByDef ?? {}).length >= 20;
+    case 'h_omnicide2':
+      return Object.keys(s.killsByDef ?? {}).length >= 25;
     case 'h_perfectscore': {
       const rs = Object.values(s.missionRank ?? {});
       return rs.length >= 30 && rs.every((r) => r === 'S' || r === 'A');
