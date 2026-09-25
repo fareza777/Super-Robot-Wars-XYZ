@@ -198,6 +198,7 @@ function buffNames(u: UnitState): string[] {
   if (u.poxedgeNext) names.push('POX EDGE');
   if (u.frailedgeNext) names.push('FRAIL EDGE');
   if (u.rootedgeNext) names.push('GRAVE EDGE');
+  if (u.tangleedgeNext) names.push('TANGLE EDGE');
   if (u.rootedUntilEndOfEnemyPhase) names.push('ROOT VERSE');
   if ((u.gloomTurns ?? 0) > 0) names.push(`GLOOM ${u.gloomTurns}`);
   if ((u.poxTurns ?? 0) > 0) names.push(`POX ${u.poxTurns}`);
@@ -672,6 +673,7 @@ export function SidePanel() {
             <Text style={[styles.menuTitle, { color: '#4dff7a' }]}>SQUAD · {s.units.filter((u) => u.side === 'player' && u.alive).length}</Text>
             {s.units
               .filter((u) => u.side === 'player' && u.alive)
+              .sort((a, b) => Number(a.acted ?? false) - Number(b.acted ?? false))
               .map((u) => (
                 <View key={u.uid} style={styles.rosterRow}>
                   <Text style={[styles.rosterName, u.acted && styles.rosterActed]} numberOfLines={1}>

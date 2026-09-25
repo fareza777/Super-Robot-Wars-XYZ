@@ -243,6 +243,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   warlordverse: { id: 'warlordverse', name: 'Warlord Verse', cost: 50, desc: 'Vanguard hymn — melee weapons of allies within 3 tiles deal +15% damage until end of enemy phase' },
   rootedge: { id: 'rootedge', name: 'Grave Edge', cost: 45, desc: 'Grave strike — next hit deals +10% damage and roots the target (no movement) until end of enemy phase' },
   shellverse: { id: 'shellverse', name: 'Shell Verse', cost: 50, desc: 'Barrage hymn — missile weapons of allies within 3 tiles deal +15% damage until end of enemy phase' },
+  tangleedge: { id: 'tangleedge', name: 'Tangle Edge', cost: 45, desc: 'Snare strike — next hit deals +10% damage and clips the target’s weapon range by 1 until end of enemy phase' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },
