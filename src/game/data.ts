@@ -269,6 +269,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   riposteverse: { id: 'riposteverse', name: 'Riposte Verse', cost: 55, desc: 'Counter hymn — allies within 3 tiles deal +15% counter-attack damage until end of enemy phase' },
   silenceedge: { id: 'silenceedge', name: 'Silence Edge', cost: 45, desc: 'Hush strike — next hit deals +10% damage and silences the target (cannot counter-attack) until end of enemy phase' },
   brandverse: { id: 'brandverse', name: 'Brand Verse', cost: 55, desc: 'Targeting hex — enemies within 3 tiles are marked (+25 hit & +15% damage taken, 2 turns)' },
+  suppressverse: { id: 'suppressverse', name: 'Suppress Verse', cost: 55, desc: 'Suppression fire — enemies within 3 tiles suffer -20 hit on their attacks (2 turns)' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },
