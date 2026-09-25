@@ -208,6 +208,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   damperverse: { id: 'damperverse', name: 'Damper Verse', cost: 55, desc: 'Bulwark ward — hits on allies within 3 tiles are capped at 3000 damage until end of enemy phase' },
   dragedge: { id: 'dragedge', name: 'Drag Edge', cost: 45, desc: 'Harpoon strike — the next hit deals +10% damage and hauls the target one tile toward this frame' },
   gloomverse: { id: 'gloomverse', name: 'Gloom Verse', cost: 50, desc: 'Gloom shroud — enemies within 3 tiles suffer -20 hit for 2 turns' },
+  tangleverse: { id: 'tangleverse', name: 'Tangle Verse', cost: 50, desc: 'Tangle field — enemies within 3 tiles lose 1 weapon range until end of enemy phase' },
   ruinverse: { id: 'ruinverse', name: 'Ruin Verse', cost: 50, desc: 'Entropy wave — enemies within 3 tiles suffer armor break and decay 8% hull per turn for 2 turns' },
   anthemverse: { id: 'anthemverse', name: 'Anthem Verse', cost: 55, desc: 'Restoration hymn — allies within 3 tiles instantly recover 15% hull' },
   doomedge: { id: 'doomedge', name: 'Doom Edge', cost: 45, desc: 'Entropy strike — next hit deals +10% damage and dooms the target to decay 8% hull per turn for 3 turns' },
