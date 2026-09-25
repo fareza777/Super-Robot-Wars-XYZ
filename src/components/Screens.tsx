@@ -7,6 +7,7 @@ import { play } from '../audio';
 import { CHAPTERS_COUNT, ChapterDef, chapterOf, missionOf, rosterFor, ALL_UNITS, ROUTE_INFO, genMap, HONORS, honorDone } from '../game/campaign';
 import { TERRAIN_INFO, TRAITS } from '../game/data';
 import { useGame } from '../game/store';
+import { BOND_EVENTS, bondLevel } from '../game/bonds';
 
 export function TitleScreen() {
   const start = useGame((s) => s.start);
@@ -145,6 +146,7 @@ export function BriefingScreen() {
                 {d.pilot.trait && <Text style={{ color: d.pilot.faceColor ?? '#9fd0ff', fontSize: 8, fontWeight: '700', letterSpacing: 0.5 }} numberOfLines={1}>◆ {TRAITS[d.pilot.trait].name}</Text>}
                 <Text style={{ color: '#ffd34d', fontSize: 8, fontWeight: '700' }}>{prog?.kills ?? 0} career kills</Text>
                 {(prog?.pp ?? 0) > 0 && <Text style={{ color: '#c9a0ff', fontSize: 8, fontWeight: '700' }}>⬆ {prog.pp} PP unspent</Text>}
+                {(() => { const nb = BOND_EVENTS.filter((ev) => ev.a === id || ev.b === id).map((ev) => (ev.a === id ? ev.b : ev.a)).filter((pid) => bondLevel(useGame.getState().bonds, id, pid) > 0 && deploySel.includes(pid)).length; return nb > 0 ? <Text style={{ color: '#8af0ff', fontSize: 8, fontWeight: '700' }}>⚭ {nb} BONDED</Text> : null; })()}
                 {(useGame.getState().parts[id]?.length ?? 0) > 0 && <Text style={{ color: '#8af0ff', fontSize: 8, fontWeight: '700' }}>◈{useGame.getState().parts[id].length} PARTS</Text>}
                 {woundedPilots.includes(id) && <Text style={{ color: '#ff9d9d', fontSize: 9, fontWeight: '800', letterSpacing: 1 }}>🩹 WOUNDED</Text>}
                 <Text style={styles.deployMark}>{on ? '▣ IN' : '▢ OUT'}</Text>

@@ -184,6 +184,7 @@ function buffNames(u: UnitState): string[] {
   if (u.festerUntilEndOfEnemyPhase) names.push('FESTER VERSE');
   if (u.slayUntilEndOfEnemyPhase) names.push('SLAY VERSE');
   if (u.fableUntilEndOfEnemyPhase) names.push('FABLE VERSE');
+  if ((u.gloomTurns ?? 0) > 0) names.push(`GLOOM ${u.gloomTurns}`);
   if ((u.clarionTurns ?? 0) > 0) names.push(`CLARION VERSE ${u.clarionTurns}`);
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
