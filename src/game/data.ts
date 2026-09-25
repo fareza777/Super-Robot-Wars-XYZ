@@ -190,6 +190,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   wallverse: { id: 'wallverse', name: 'Wall Verse', cost: 50, desc: 'Rampart hymn — allies within 3 tiles gain a 500-point i-field until end of enemy phase' },
   vampedge: { id: 'vampedge', name: 'Vamp Edge', cost: 45, desc: 'Bloodthirst strike — next hit +10% damage and heals self 25% of damage dealt' },
   rustverse: { id: 'rustverse', name: 'Rust Verse', cost: 50, desc: 'Oxidation wave — enemies within 3 tiles lose 300 armor for 2 turns' },
+  stifleverse: { id: 'stifleverse', name: 'Stifle Verse', cost: 50, desc: 'Reactor choke — enemies within 3 tiles regain no EN for 2 turns' },
   ruinverse: { id: 'ruinverse', name: 'Ruin Verse', cost: 50, desc: 'Entropy wave — enemies within 3 tiles suffer armor break and decay 8% hull per turn for 2 turns' },
   anthemverse: { id: 'anthemverse', name: 'Anthem Verse', cost: 55, desc: 'Restoration hymn — allies within 3 tiles instantly recover 15% hull' },
   doomedge: { id: 'doomedge', name: 'Doom Edge', cost: 45, desc: 'Entropy strike — next hit deals +10% damage and dooms the target to decay 8% hull per turn for 3 turns' },

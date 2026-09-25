@@ -28,7 +28,7 @@ export function makeUnit(defId: string, side: UnitState['side'], pos: Pos, uid: 
     kills: 0,
     parts: [],
     pp: 0,
-    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0, truesight: 0, backliner: 0, bombard: 0, ruinbreaker: 0, artillerist: 0, paintburst: 0, fortsoul: 0, hexsurge: 0, coldsteel: 0, capacitor: 0, ironbound: 0, coolloop: 0, gritguard: 0, savant: 0, shieldpierce: 0, pureshot: 0, finisher: 0, aerobat: 0, sureshot: 0, wildfire: 0, archer: 0, stormeye: 0, acehunter: 0, ravager: 0, sledge: 0, overkill: 0, pike: 0, wildswing: 0, zenith: 0, closecombat: 0, chainblade: 0, exploiter: 0, viper: 0, disruptor: 0, myrmidon: 0, sunderfist: 0, bloodborne: 0, harvester: 0, gridshock: 0, shockjock: 0, biggame: 0, razor: 0, retribution: 0, bloodhound: 0, headhunter: 0, soulcut: 0, wardancer: 0, butcher: 0, punisher: 0, wrathborn: 0, tracker: 0, carver: 0, highvolt: 0, ironwill: 0, vigilant: 0, bloodfrenzy: 0, spectral: 0, hexblade: 0, graceful: 0, flakmaster: 0, shepherd: 0, madmen: 0, predator: 0, wither: 0, grandstand: 0, vanguard: 0, phalanx: 0, polymath: 0, isolator: 0, scourge: 0, bloodtrance: 0, snipersoul: 0, aegisshield: 0, stunlock: 0, polluter: 0, finale: 0, sunderborn: 0, landslide: 0, sapper: 0, flanker: 0, tormentor: 0, godsbreaker: 0, momentum: 0, vitals: 0, highhand: 0, saboteur: 0, barrierbane: 0, huntsman: 0, guardbreaker: 0, opening: 0, remembrance: 0, scrapper: 0, ballisteur: 0, awestruck: 0, lifeline: 0, lowburn: 0, bigbang: 0, irongroove: 0, ashstalker: 0, dominant: 0, crossfire: 0, reaping: 0, luminarch: 0, breakdancer: 0, hailborn: 0, rifleborn: 0, flankshot: 0, warlust: 0, halfload: 0 },
+    skills: { hit: 0, evade: 0, dmg: 0, def: 0, countercut: 0, esave: 0, hitrun: 0, crit: 0, scavenger: 0, regen: 0, riposte: 0, lastStand: 0, assassin: 0, brawler: 0, initiative: 0, gunner: 0, plunderer: 0, bodyguard: 0, opportunist: 0, warcry: 0, pointBlank: 0, bloodlust: 0, reaver: 0, bulwark: 0, duelist: 0, juggernaut: 0, giantSlayer: 0, loneWolf: 0, overwhelm: 0, outgunned: 0, tankbuster: 0, coordinator: 0, sentinel: 0, gambit: 0, warcaster: 0, underdog: 0, skirmisher: 0, engineer: 0, cohort: 0, entrench: 0, steadfast: 0, precision: 0, surge: 0, reflex: 0, outflank: 0, foeswarm: 0, cannonade: 0, gunsmith: 0, luminance: 0, swarmer: 0, phantomstep: 0, parry: 0, piercer: 0, heavycal: 0, anchor: 0, dreadnought: 0, resolute: 0, siegeadept: 0, cadence: 0, wingman: 0, fullmag: 0, dirgesong: 0, burnout: 0, divebomb: 0, arsenalmind: 0, titanbreaker: 0, truesight: 0, backliner: 0, bombard: 0, ruinbreaker: 0, artillerist: 0, paintburst: 0, fortsoul: 0, hexsurge: 0, coldsteel: 0, capacitor: 0, ironbound: 0, coolloop: 0, gritguard: 0, savant: 0, shieldpierce: 0, pureshot: 0, finisher: 0, aerobat: 0, sureshot: 0, wildfire: 0, archer: 0, stormeye: 0, acehunter: 0, ravager: 0, sledge: 0, overkill: 0, pike: 0, wildswing: 0, zenith: 0, closecombat: 0, chainblade: 0, exploiter: 0, viper: 0, disruptor: 0, myrmidon: 0, sunderfist: 0, bloodborne: 0, harvester: 0, gridshock: 0, shockjock: 0, biggame: 0, razor: 0, retribution: 0, bloodhound: 0, headhunter: 0, soulcut: 0, wardancer: 0, butcher: 0, punisher: 0, wrathborn: 0, tracker: 0, carver: 0, highvolt: 0, ironwill: 0, vigilant: 0, bloodfrenzy: 0, spectral: 0, hexblade: 0, graceful: 0, flakmaster: 0, shepherd: 0, madmen: 0, predator: 0, wither: 0, grandstand: 0, vanguard: 0, phalanx: 0, polymath: 0, isolator: 0, scourge: 0, bloodtrance: 0, snipersoul: 0, aegisshield: 0, stunlock: 0, polluter: 0, finale: 0, sunderborn: 0, landslide: 0, sapper: 0, flanker: 0, tormentor: 0, godsbreaker: 0, momentum: 0, vitals: 0, highhand: 0, saboteur: 0, barrierbane: 0, huntsman: 0, guardbreaker: 0, opening: 0, remembrance: 0, scrapper: 0, ballisteur: 0, awestruck: 0, lifeline: 0, lowburn: 0, bigbang: 0, irongroove: 0, ashstalker: 0, dominant: 0, crossfire: 0, reaping: 0, luminarch: 0, breakdancer: 0, hailborn: 0, rifleborn: 0, flankshot: 0, warlust: 0, halfload: 0, longbarrel: 0 },
     altDef: def.transformInto ? ALL_UNITS[def.transformInto] : undefined,
     baseDefId: def.transformInto ? def.id : undefined,
   };
@@ -246,6 +246,7 @@ export function damageOf(att: UnitState, def: UnitState, w: WeaponDef, map: MapD
   if ((att.skills?.sapper ?? 0) > 0 && TERRAIN_INFO[terrainAt(map, def.pos)].def > 0) dmg = Math.round(dmg * (1 + att.skills.sapper * 0.05));
   if ((att.skills?.flankshot ?? 0) > 0 && TERRAIN_INFO[terrainAt(map, def.pos)].def <= 0) dmg = Math.round(dmg * (1 + att.skills.flankshot * 0.05));
   if ((att.skills?.halfload ?? 0) > 0 && w.ammo != null && (att.ammo[w.id] ?? 0) <= Math.ceil(w.ammo / 2)) dmg = Math.round(dmg * (1 + att.skills.halfload * 0.06));
+  if ((att.skills?.longbarrel ?? 0) > 0 && dist(att.pos, def.pos) >= 3) dmg = Math.round(dmg * (1 + att.skills.longbarrel * 0.05));
   if (units && hasPincer(units, att, def) && (att.skills?.flanker ?? 0) > 0) dmg = Math.round(dmg * (1 + att.skills.flanker * 0.04));
   if ((def.doomTurns ?? 0) > 0 && (att.skills?.tormentor ?? 0) > 0) dmg = Math.round(dmg * (1 + att.skills.tormentor * 0.06));
   if (def.phase2 && (att.skills?.godsbreaker ?? 0) > 0) dmg = Math.round(dmg * (1 + att.skills.godsbreaker * 0.05));
@@ -1602,6 +1603,8 @@ export function applySpirit(u: UnitState, spirit: SpiritId): void {
       break;
     case 'rustverse':
       break;
+    case 'stifleverse':
+      break;
     case 'defianceverse':
       break;
     case 'havocverse':
@@ -2055,7 +2058,7 @@ export function phaseRecovery(u: UnitState, map: MapDef, units?: UnitState[]): {
   const t = TERRAIN_INFO[terrainAt(map, u.pos)];
   const aura = units ? units.filter((a) => a.alive && a.side === u.side && a.uid !== u.uid && partBonus(a, 'auraEn') > 0 && dist(a.pos, u.pos) <= 2).length * 6 : 0;
   const healPct = units ? units.filter((a) => a.alive && a.side === u.side && a.uid !== u.uid && partBonus(a, 'auraHeal') > 0 && dist(a.pos, u.pos) <= 2).reduce((n, a) => n + partBonus(a, 'auraHeal'), 0) : 0;
-  const enGain = Math.min(u.def.maxEn - u.en, 5 + (t.enRegen ?? 0) + partBonus(u, 'enRegen') + aura + partBonus(u, 'ventEn') + (u.renewalTurns ? 10 : 0));
+  const enGain = u.stifleTurns ? 0 : Math.min(u.def.maxEn - u.en, 5 + (t.enRegen ?? 0) + partBonus(u, 'enRegen') + aura + partBonus(u, 'ventEn') + (u.renewalTurns ? 10 : 0));
   const hpGain = Math.min(u.def.maxHp - u.hp, Math.round(u.def.maxHp * (t.hpRegen ?? 0)) + Math.round(u.def.maxHp * (partBonus(u, 'hpRegen') / 100)) + Math.round(u.def.maxHp * 0.01 * (u.skills?.regen ?? 0)) + Math.round(u.def.maxHp * healPct / 100) + (partBonus(u, 'lowHpRegen') > 0 && u.hp < u.def.maxHp * 0.4 ? Math.round(u.def.maxHp * 0.08) : 0) + (u.graceTurns ? Math.round(u.def.maxHp * 0.05) : 0) + (u.mendTurns ? Math.round(u.def.maxHp * 0.05) : 0));
   if (u.graceTurns) u.graceTurns -= 1;
   if (u.renewalTurns) u.renewalTurns -= 1;
@@ -2065,6 +2068,7 @@ export function phaseRecovery(u: UnitState, map: MapDef, units?: UnitState[]): {
   if (u.bastionTurns) u.bastionTurns -= 1;
   if (u.obscuredTurns) u.obscuredTurns -= 1;
   if (u.rustTurns) u.rustTurns -= 1;
+  if (u.stifleTurns) u.stifleTurns -= 1;
   if (u.mendTurns) u.mendTurns -= 1;
   if (u.doomTurns) u.doomTurns -= 1;
   const hpLoss = partBonus(u, 'terraProof') > 0 ? 0 : Math.min(u.hp - 1, Math.round(u.def.maxHp * (t.hpDmg ?? 0))) + (u.doomTurns ? Math.min(u.hp - 1, Math.round(u.def.maxHp * 0.08)) : 0); // terrain & decay can't kill — leaves 1 HP
