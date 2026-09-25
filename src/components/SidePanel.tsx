@@ -219,6 +219,7 @@ function buffNames(u: UnitState): string[] {
   if (u.sirenedgeNext) names.push('SIREN EDGE');
   if (u.brandedgeNext) names.push('BRAND EDGE');
   if (u.crackedgeNext) names.push('CRACK EDGE');
+  if (u.stunedgeNext) names.push('STUN EDGE');
   if (u.poxedgeNext) names.push('POX EDGE');
   if (u.frailedgeNext) names.push('FRAIL EDGE');
   if (u.rootedgeNext) names.push('GRAVE EDGE');
@@ -634,7 +635,7 @@ export function SidePanel() {
                           <Text style={styles.tgtCnt} numberOfLines={1}>
                             {cw ? `↩ CNT ${cw.name} ~${cDmg} (${cHc}% · ⚡${critChance(e, unit, cw)}%)` : '↩ SAFE — no counter'} · CRIT {critChance(unit, e)}%{fb > 0 ? ` · ▣FORM +${fb}` : ''}{pin ? ` · ⇄PIN +${10 + partBonus(unit, 'pinDmg')}%` : ''}
                             {(e.def.resists?.[s.pendingWeapon!.kind] ?? 0) > 0 ? ` · 🛡RES −${Math.round((e.def.resists![s.pendingWeapon!.kind] ?? 0) * 100)}%` : ''}
-                            {` · ⇢${dist(s.pendingMove ?? unit.pos, e.pos)}t`}{findSupport(s.units, unit.uid, e) ? ' · ⇒SUP' : ''}{` · +${dmg >= e.hp ? (e.elite ? 110 : 70) : 30} EXP`}{s.pendingWeapon?.status ? ' ☣' : ''}
+                            {` · ⇢${dist(s.pendingMove ?? unit.pos, e.pos)}t`}{findSupport(s.units, unit.uid, e) ? ' · ⇒SUP' : ''}{` · +${dmg >= e.hp ? (e.elite ? 110 : 70) : 30} EXP`}{s.pendingWeapon?.status ? ' ☣' : ''}{(e.doomTurns ?? 0) + (e.sirenTurns ?? 0) + (e.poxTurns ?? 0) + (e.rotTurns ?? 0) > 0 ? ' ⌛' : ''}
                           </Text>
                         </View>
                         <View style={styles.tgtHitBox}>

@@ -279,6 +279,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   huntverse: { id: 'huntverse', name: 'Hunt Verse', cost: 55, desc: 'Predator hymn — allies within 3 tiles brand enemies on hit (marked: +25 hit and +15% damage taken, 2 turns) until end of enemy phase' },
   crackedge: { id: 'crackedge', name: 'Crack Edge', cost: 45, desc: 'Rending strike — next hit deals +10% damage and cracks the target frame (break status, 2 turns)' },
   rendverse: { id: 'rendverse', name: 'Rend Verse', cost: 55, desc: 'Sunder hymn — allies within 3 tiles crack enemy frames on hit (break status, 2 turns) until end of enemy phase' },
+  stunedge: { id: 'stunedge', name: 'Stun Edge', cost: 45, desc: 'Neural strike — next hit deals +10% damage and stuns the target (cannot act, 2 turns)' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },
