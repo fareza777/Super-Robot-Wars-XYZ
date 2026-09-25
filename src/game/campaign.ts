@@ -232,6 +232,7 @@ export const PARTS: Record<string, PartDef> = {
   nullLattice: { id: 'nullLattice', name: 'Null Lattice', desc: 'Anti-blast weave — incoming MAP damage cut 30% and +100 armor', price: 2900, mapGuard: true, armor: 100 },
   novaCore: { id: 'novaCore', name: 'Nova Core', desc: 'Overload conduits — EN weapons +15% damage and cost 15% less EN', price: 3000, enDmg: 15, enSaver: 15 },
   hydraFeed: { id: 'hydraFeed', name: 'Hydra Feed', desc: 'Dual-feed loader — ammo weapons +15% damage and regenerate 1 ammo each turn', price: 3000, ammoDmg: 15, ammoRegen: true },
+  flakMesh: { id: 'flakMesh', name: 'Flak Mesh', desc: 'Flak weave — incoming gun and missile damage cut 25%', price: 2900, gunGuard: true, missileGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -436,6 +437,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'seaborn', name: 'Seaborn', desc: '+5% damage per point vs targets standing on water' },
   { id: 'perforator', name: 'Perforator', desc: 'Attacks ignore 10% more of target armor per point' },
   { id: 'usurper', name: 'Usurper', desc: '+6% damage per point vs bosses before their Ω phase' },
+  { id: 'empowered', name: 'Empowered', desc: '+4% damage per point per offensive verse on this frame (max 3)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1591,6 +1593,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
   { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
   { id: 'h_pinnacle2', name: 'PINNACLE II', desc: 'Earn S rank on 90 missions', rewardCr: 100000 },
+  { id: 'h_peacelord2', name: 'PEACELORD II', desc: 'Clean 60 side missions', rewardCr: 100000 },
   { id: 'h_immortal2', name: 'IMMORTAL II', desc: 'Reach MASTERY ★ on 80 missions', rewardCr: 100000 },
 ];
 
@@ -1977,6 +1980,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.keys(s.missionRank ?? {}).length >= 75;
     case 'h_pinnacle2':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 90;
+    case 'h_peacelord2':
+      return s.sideCleared.length >= 60;
     case 'h_genocider':
       return totalKills >= 7500;
     case 'h_paragon2':
