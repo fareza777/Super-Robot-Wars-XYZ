@@ -249,6 +249,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   gunverse: { id: 'gunverse', name: 'Gun Verse', cost: 50, desc: 'Deadeye hymn — gun weapons of allies within 3 tiles deal +15% damage until end of enemy phase' },
   glitchedge: { id: 'glitchedge', name: 'Glitch Edge', cost: 45, desc: 'Static strike — next hit +10% damage and degrades target hits to grazes until end of enemy phase' },
   funnelverse: { id: 'funnelverse', name: 'Funnel Verse', cost: 50, desc: 'Swarm hymn — funnel weapons of allies within 3 tiles deal +15% damage until end of enemy phase' },
+  sealedge: { id: 'sealedge', name: 'Seal Edge', cost: 45, desc: 'Lockdown strike — next hit +10% damage and seals target MAP weapons until end of enemy phase' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },
