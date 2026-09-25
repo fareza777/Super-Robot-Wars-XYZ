@@ -206,6 +206,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   surgeverse: { id: 'surgeverse', name: 'Surge Verse', cost: 50, desc: 'Kiai hymn — allies within 3 tiles gain +15% critical chance until end of enemy phase' },
   muteedge: { id: 'muteedge', name: 'Mute Edge', cost: 45, desc: 'Silencing strike — the next hit deals +10% damage and seals the target’s counter-attack' },
   damperverse: { id: 'damperverse', name: 'Damper Verse', cost: 55, desc: 'Bulwark ward — hits on allies within 3 tiles are capped at 3000 damage until end of enemy phase' },
+  dragedge: { id: 'dragedge', name: 'Drag Edge', cost: 45, desc: 'Harpoon strike — the next hit deals +10% damage and hauls the target one tile toward this frame' },
   ruinverse: { id: 'ruinverse', name: 'Ruin Verse', cost: 50, desc: 'Entropy wave — enemies within 3 tiles suffer armor break and decay 8% hull per turn for 2 turns' },
   anthemverse: { id: 'anthemverse', name: 'Anthem Verse', cost: 55, desc: 'Restoration hymn — allies within 3 tiles instantly recover 15% hull' },
   doomedge: { id: 'doomedge', name: 'Doom Edge', cost: 45, desc: 'Entropy strike — next hit deals +10% damage and dooms the target to decay 8% hull per turn for 3 turns' },

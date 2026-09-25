@@ -2,7 +2,7 @@
   "expo": {
     "name": "Steel Ark XYZ",
     "slug": "super-robot-wars-xyz",
-    "version": "27.7.0",
+    "version": "27.8.0",
     "orientation": "landscape",
     "icon": "./assets/art/icon.png",
     "userInterfaceStyle": "dark",

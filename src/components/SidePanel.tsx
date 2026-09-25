@@ -95,6 +95,7 @@ function buffNames(u: UnitState): string[] {
   if (u.truthedgeNext) names.push('TRUTH EDGE');
   if (u.novaNext) names.push('NOVA EDGE');
   if (u.muteNext) names.push('MUTE EDGE');
+  if (u.dragNext) names.push('DRAG EDGE');
   if (u.cullNext) names.push('CULL EDGE');
   if (u.mortalNext) names.push('MORTAL EDGE');
   if (u.rendNext) names.push('REND EDGE');
