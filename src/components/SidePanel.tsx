@@ -651,6 +651,7 @@ export function SidePanel() {
                         {debuffCount(u) > 0 ? <Text style={{ color: '#ff9d7a' }}> ⌛{debuffCount(u)}</Text> : null}
                         {buffNames(u).length > 0 ? <Text style={{ color: '#d8a5ff' }}> ✧{buffNames(u).length}</Text> : null}
                         {u.crippled ? <Text style={{ color: '#ff9d7a' }}> ⛓</Text> : null}
+                        {u.def.weapons.some((w) => w.mapRange != null) ? <Text style={{ color: '#ff9d4d' }}> ◉</Text> : null}
                       </Text>
                       <View style={[styles.rosterBarTrack, { backgroundColor: '#2a1216' }]}>
                         <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.hp / u.def.maxHp > 0.5 ? '#ff5a5a' : u.hp / u.def.maxHp > 0.25 ? '#ff9d4d' : '#c92a2a' }]} />
