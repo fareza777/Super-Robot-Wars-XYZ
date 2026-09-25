@@ -196,6 +196,7 @@ function buffNames(u: UnitState): string[] {
   if (u.stifleedgeNext) names.push('STIFLE EDGE');
   if (u.poxedgeNext) names.push('POX EDGE');
   if (u.frailedgeNext) names.push('FRAIL EDGE');
+  if (u.rootedgeNext) names.push('GRAVE EDGE');
   if (u.rootedUntilEndOfEnemyPhase) names.push('ROOT VERSE');
   if ((u.gloomTurns ?? 0) > 0) names.push(`GLOOM ${u.gloomTurns}`);
   if ((u.poxTurns ?? 0) > 0) names.push(`POX ${u.poxTurns}`);
@@ -711,7 +712,7 @@ export function SidePanel() {
                       </Text>
                     </View>
                   ) : (
-                    <View key={u.uid} style={styles.rosterRow}>
+                    <Pressable key={u.uid} style={styles.rosterRow} onPress={() => useGame.setState({ inspectUid: u.uid })}>
                       <Text style={[styles.rosterName, { color: '#ffb0a0' }]} numberOfLines={1}>
                         {u.def.boss || u.elite ? '★ ' : ''}{u.phase2 ? 'Ω ' : ''}{u.def.moveType === 'air' ? '✈ ' : '⬢ '}
                         {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>
@@ -733,7 +734,7 @@ export function SidePanel() {
                       {debuffCount(u) > 0 && <Text style={[styles.rosterHp, { color: '#ff9d7a', width: 26 }]}>⌛{debuffCount(u)}</Text>}
                       <Text style={[styles.rosterHp, { color: u.en < u.def.maxEn * 0.25 ? '#ff9d7a' : '#35c9ff', width: 30 }]}>⛽{u.en}</Text>
                       {u.will !== 100 && <Text style={[styles.rosterHp, { color: u.will >= 130 ? '#ffd34d' : '#ff7a9d', width: 30 }]}>W{u.will}</Text>}
-                    </View>
+                    </Pressable>
                   ),
                 )}
             </ScrollView>
