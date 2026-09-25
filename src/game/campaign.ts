@@ -268,6 +268,7 @@ export const PARTS: Record<string, PartDef> = {
   bastionCell: { id: 'bastionCell', name: 'Bastion Cell', desc: 'Bulwark battery — +150 armor & +8 hit', price: 3200, armor: 150, hit: 8 },
   longeyeCell: { id: 'longeyeCell', name: 'Long Eye Cell', desc: 'Deadeye reticle — +10 hit & counter-attacks +12% damage', price: 3200, hit: 10, counterDmg: 12 },
   strideCell: { id: 'strideCell', name: 'Stride Cell', desc: 'Vector stride — +8 mobility & +8 hit', price: 3200, mobility: 8, hit: 8 },
+  gyroCell: { id: 'gyroCell', name: 'Gyro Cell', desc: 'Stabilizer gyro — +8 evade & immune to knockback/drag', price: 3200, evade: 8, knockProof: true },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -512,6 +513,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'sieveborn', name: 'Sieveborn', desc: '+6% damage per point vs targets with a collapsed barrier' },
   { id: 'wallborn', name: 'Wallborn', desc: 'Rampart stance — +5% damage per point while your barrier is active' },
   { id: 'stifleborn', name: 'Stifleborn', desc: '+6% damage per point vs targets with a choked reactor (Stifle)' },
+  { id: 'poxborn', name: 'Poxborn', desc: '+6% damage per point vs corroding targets (Pox)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1674,6 +1676,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_immortal4', name: 'IMMORTAL IV', desc: 'Reach MASTERY ★ on 100 missions', rewardCr: 100000 },
   { id: 'h_stockpile3', name: 'STOCKPILE III', desc: 'Hold 120 items in the inventory at once', rewardCr: 100000 },
   { id: 'h_armory4', name: 'ARMORY LORD III', desc: 'Own 95 different parts', rewardCr: 100000 },
+  { id: 'h_armory5', name: 'ARMORY LORD IV', desc: 'Own 110 different parts', rewardCr: 100000 },
   { id: 'h_peacelord3', name: 'PEACELORD III', desc: 'Clear 75 side missions', rewardCr: 100000 },
   { id: 'h_godhunter6', name: 'GODHUNTER VI', desc: 'Destroy 75 bosses across your career', rewardCr: 100000 },
   { id: 'h_apexlegion2', name: 'APEX LEGION II', desc: 'All pilots reach 400 career kills each', rewardCr: 100000 },
@@ -2122,6 +2125,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.values(s.inventory ?? {}).reduce((n, c) => n + c, 0) >= 120;
     case 'h_armory4':
       return (s.partsOwned ?? []).length >= 95;
+    case 'h_armory5':
+      return (s.partsOwned ?? []).length >= 110;
     case 'h_peacelord3':
       return (s.sideCleared ?? []).length >= 75;
     case 'h_godhunter6':
