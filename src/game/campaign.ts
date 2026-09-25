@@ -220,6 +220,7 @@ export const PARTS: Record<string, PartDef> = {
   juggerPlate: { id: 'juggerPlate', name: 'Juggernaut Plate', desc: 'Siege laminate — +200 armor but -1 movement', price: 2600, armor: 200, move: -1 },
   seekerRack: { id: 'seekerRack', name: 'Seeker Rack', desc: 'Guidance lattice — missile weapons +15% damage and +8 hit', price: 2500, missileDmg: 15, hit: 8 },
   shadeLoom: { id: 'shadeLoom', name: 'Shade Loom', desc: 'Duskweave frame — +10 mobility and counter-attacks +10% damage', price: 2600, mobility: 10, counterDmg: 10 },
+  triguard: { id: 'triguard', name: 'Tri Guard', desc: 'Trifold lattice — beam & gun damage taken -25%', price: 2700, beamGuard: true, gunGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -412,6 +413,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'breakdancer', name: 'Breakdancer', desc: '+5% damage per point vs armor-broken targets' },
   { id: 'hailborn', name: 'Hailborn', desc: '+5% damage per point with missile weapons' },
   { id: 'rifleborn', name: 'Rifleborn', desc: '+5% damage per point with gun weapons' },
+  { id: 'flankshot', name: 'Flankshot', desc: '+5% damage per point vs targets on open ground (no defensive terrain)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1556,6 +1558,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_godhunter', name: 'GODHUNTER', desc: 'Destroy 20 bosses across your career', rewardCr: 100000 },
   { id: 'h_simulator', name: 'SIMULATOR', desc: 'Score 75,000+ in the VR Simulator', rewardCr: 100000 },
   { id: 'h_deity', name: 'DEITY', desc: 'Reach NG+18', rewardCr: 100000 },
+  { id: 'h_warpath', name: 'WARPATH', desc: 'Squad reaches 10,000 total career kills', rewardCr: 100000 },
 ];
 
 /** Whether an honor's condition is currently met. */
@@ -1941,6 +1944,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.simBest ?? 0) >= 75000;
     case 'h_deity':
       return s.ngPlus >= 18;
+    case 'h_warpath':
+      return totalKills >= 10000;
     case 'h_annihilator':
       return (s.maxHitEver ?? 0) >= 8000;
     case 'h_ironwill':

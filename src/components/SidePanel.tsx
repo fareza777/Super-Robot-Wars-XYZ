@@ -117,6 +117,7 @@ function buffNames(u: UnitState): string[] {
   if (u.nullifiedUntilEndOfEnemyPhase) names.push('NULL VERSE');
   if (u.tetherUntilEndOfEnemyPhase) names.push('TETHER VERSE');
   if (u.seraphUntilEndOfEnemyPhase) names.push('SERAPH VERSE');
+  if (u.wallUntilEndOfEnemyPhase) names.push('WALL VERSE');
   if ((u.obscuredTurns ?? 0) > 0) names.push(`VEILBREAK VERSE ${u.obscuredTurns}`);
   if (u.palisadeUntilEndOfEnemyPhase) names.push('PALISADE VERSE');
   // magnumverse is instant — no chip
@@ -649,7 +650,7 @@ export function SidePanel() {
                       </View>
                       <Text style={[styles.rosterHp, u.hp / u.def.maxHp < 0.25 && { color: '#ff8a8a' }]}>{u.hp / u.def.maxHp < 0.25 ? '⚠' : ''}{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
                       <Text style={[styles.rosterHp, { color: '#9fd8ff', width: 30 }]}>R{Math.max(0, ...u.def.weapons.map((w) => w.rangeMax))}</Text>
-                      <Text style={[styles.rosterHp, { color: '#8b94b8', width: 34 }]}>🛡{armorOf(u, s.map)}</Text>
+                      <Text style={[styles.rosterHp, { color: '#8b94b8', width: 34 }]}>🛡{armorOf(u, s.map)}{Math.max(u.def.barrier ?? 0, partBonus(u, 'barrier')) > 0 ? '⛨' : ''}</Text>
                       <Text style={[styles.rosterHp, { color: '#7fd0b0', width: 30 }]}>≫{Math.round(evadeOf(u, s.map))}</Text>
                       <Text style={[styles.rosterHp, { color: '#9fd8ff', width: 26 }]}>⇄{moveRangeOf(u)}</Text>
                       {(u.doomTurns ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#ff9d7a', width: 24 }]}>☠{u.doomTurns}</Text>}
