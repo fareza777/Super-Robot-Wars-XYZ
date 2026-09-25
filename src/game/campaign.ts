@@ -253,6 +253,7 @@ export const PARTS: Record<string, PartDef> = {
   linkedCell: { id: 'linkedCell', name: 'Linked Cell', desc: 'Co-loader array — beam & ammo weapons +12% damage', price: 3200, beamDmg: 12, ammoDmg: 12 },
   voltaicRack: { id: 'voltaicRack', name: 'Voltaic Rack', desc: 'Charged array — missile & EN weapons +12% damage', price: 3200, missileDmg: 12, enDmg: 12 },
   hybridCell: { id: 'hybridCell', name: 'Hybrid Cell', desc: 'Split-feed array — gun & EN weapons +12% damage', price: 3200, gunDmg: 12, enDmg: 12 },
+  shrapnelRack: { id: 'shrapnelRack', name: 'Shrapnel Rack', desc: 'Frag array — missile & ammo weapons +12% damage', price: 3200, missileDmg: 12, ammoDmg: 12 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -478,6 +479,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'trophyborn', name: 'Trophyborn', desc: '+6% damage per point vs elite targets' },
   { id: 'swiftborn', name: 'Swiftborn', desc: '+6% damage per point vs nimbler targets' },
   { id: 'massborn', name: 'Massborn', desc: '+6% damage per point vs targets with larger arsenals' },
+  { id: 'scorchborn', name: 'Scorchborn', desc: '+6% damage per point vs burning targets' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -520,7 +522,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse', 'terrorverse', 'mireverse', 'ruinverse', 'shroudverse', 'silenceverse', 'veilbreakverse', 'tetherverse', 'stifleverse', 'despairverse', 'frailverse', 'tangleverse', 'huskverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse', 'terrorverse', 'mireverse', 'ruinverse', 'shroudverse', 'silenceverse', 'veilbreakverse', 'tetherverse', 'stifleverse', 'despairverse', 'frailverse', 'tangleverse', 'huskverse', 'festerverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1634,6 +1636,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_armory3', name: 'ARMORY LORD II', desc: 'Own 85 different parts', rewardCr: 100000 },
   { id: 'h_chainlord3', name: 'CHAINLORD III', desc: 'Score a 10-kill chain in a single turn', rewardCr: 100000 },
   { id: 'h_immortal3', name: 'IMMORTAL III', desc: 'Reach MASTERY ★ on 90 missions', rewardCr: 100000 },
+  { id: 'h_vrlegend2', name: 'VR DEITY', desc: 'Score 150,000+ in the VR Simulator', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
   { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
   { id: 'h_pinnacle2', name: 'PINNACLE II', desc: 'Earn S rank on 90 missions', rewardCr: 100000 },
@@ -2059,6 +2062,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.chainCount ?? 0) >= 10;
     case 'h_vrlegend':
       return (s.simBest ?? 0) >= 100000;
+    case 'h_vrlegend2':
+      return (s.simBest ?? 0) >= 150000;
     case 'h_nemesis':
       return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 100;
     case 'h_genocider':

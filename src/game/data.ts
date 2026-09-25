@@ -220,6 +220,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   freeflowverse: { id: 'freeflowverse', name: 'Freeflow Verse', cost: 50, desc: 'Open conduits — allies within 3 tiles pay 8 less EN per weapon until end of enemy phase' },
   rustedge: { id: 'rustedge', name: 'Rust Edge', cost: 45, desc: 'Corrosion strike — next hit +10% damage and rusts the target (-300 armor for 2 turns)' },
   feebleverse: { id: 'feebleverse', name: 'Feeble Verse', cost: 50, desc: 'Enervation chant — enemies within 3 tiles counter-attack at -25% damage until end of enemy phase' },
+  festerverse: { id: 'festerverse', name: 'Fester Verse', cost: 50, desc: 'Blight seal — enemies within 3 tiles cannot be healed until end of enemy phase' },
   ruinverse: { id: 'ruinverse', name: 'Ruin Verse', cost: 50, desc: 'Entropy wave — enemies within 3 tiles suffer armor break and decay 8% hull per turn for 2 turns' },
   anthemverse: { id: 'anthemverse', name: 'Anthem Verse', cost: 55, desc: 'Restoration hymn — allies within 3 tiles instantly recover 15% hull' },
   doomedge: { id: 'doomedge', name: 'Doom Edge', cost: 45, desc: 'Entropy strike — next hit deals +10% damage and dooms the target to decay 8% hull per turn for 3 turns' },

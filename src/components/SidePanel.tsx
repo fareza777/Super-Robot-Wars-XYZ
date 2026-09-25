@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS, PILOT_STATS } from '../game/campaign';
 
 const ALLY_AOE = new Set(['anthemverse','bastionverse','breachverse','choirverse','clarionverse','cleanseverse','crimsonverse','damperverse','defianceverse','flowverse','foresightverse','fortressverse','freeflowverse','goreverse','juggernautverse','lanceverse','leechverse','magnumverse','mendverse','mirageverse','oathverse','palisadeverse','phantomverse','pinverse','rampartverse','renewalverse','repulseverse','requiemverse','salvoverse','scopeverse','scorchverse','sentinelverse','seraphverse','shelterverse','siphonverse','steadfastverse','surgeverse','swiftverse','thornverse','tideverse','tracerverse','triumphverse','undyingverse','valiantverse','vaultverse','vigilverse','vigorverse','wallverse','wardenverse','wardverse','miraclechorus','sanctumhymn','gracehymn','dirgemist','wardmist','bulwarkaria','warhorn','cantata']);
-const ENEMY_AOE = new Set(['armorrot','bindverse','blightverse','curseverse','darkverse','despairverse','doomverse','dreadverse','exposeverse','fearverse','feebleverse','frailverse','gloomverse','hexverse','huskverse','jamverse','lockcascade','mireverse','nullverse','rotverse','ruinverse','rustverse','shroudverse','silenceverse','sirenverse','stifleverse','surtaxverse','tangleverse','terrorverse','tetherverse','tideebb','veilbreakverse','voidverse','winterverse','staticchoir']);
+const ENEMY_AOE = new Set(['armorrot','bindverse','blightverse','curseverse','darkverse','festerverse','despairverse','doomverse','dreadverse','exposeverse','fearverse','feebleverse','frailverse','gloomverse','hexverse','huskverse','jamverse','lockcascade','mireverse','nullverse','rotverse','ruinverse','rustverse','shroudverse','silenceverse','sirenverse','stifleverse','surtaxverse','tangleverse','terrorverse','tetherverse','tideebb','veilbreakverse','voidverse','winterverse','staticchoir']);
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { bondMods } from '../game/bonds';
 import { armorOf, bestCounterWeapon, moveRangeOf, usableWeapons, evadeOf, critChance, damageOf, dist, enCostOf, findSupport, formationBonus, hasPincer, hitChance, key, partBonus, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
@@ -176,6 +176,7 @@ function buffNames(u: UnitState): string[] {
   if (u.vaultUntilEndOfEnemyPhase) names.push('VAULT VERSE');
   if (u.freeflowUntilEndOfEnemyPhase) names.push('FREEFLOW VERSE');
   if (u.feebleUntilEndOfEnemyPhase) names.push('FEEBLE VERSE');
+  if (u.festerUntilEndOfEnemyPhase) names.push('FESTER VERSE');
   if ((u.clarionTurns ?? 0) > 0) names.push(`CLARION VERSE ${u.clarionTurns}`);
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
@@ -384,7 +385,7 @@ export function SidePanel() {
             {buffNames(unit).length > 0 && (
               <View style={styles.buffRow}>
                 {buffNames(unit).slice(0, 8).map((n) => (
-                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','VEILBREAK VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE','NULL VERSE','TETHER VERSE','TANGLE VERSE','SURTAX VERSE','HUSK VERSE','FEEBLE VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') || n.startsWith('VEILBREAK') || n.startsWith('RUST') || n.startsWith('STIFLE') || n.startsWith('ROT') || n.startsWith('FRAIL') || n.startsWith('GLOOM') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
+                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','VEILBREAK VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE','NULL VERSE','TETHER VERSE','TANGLE VERSE','SURTAX VERSE','HUSK VERSE','FEEBLE VERSE','FESTER VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') || n.startsWith('VEILBREAK') || n.startsWith('RUST') || n.startsWith('STIFLE') || n.startsWith('ROT') || n.startsWith('FRAIL') || n.startsWith('GLOOM') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
                 ))}
               </View>
             )}
@@ -743,7 +744,7 @@ export function SidePanel() {
             {buffNames(inspect).length > 0 && (
               <View style={styles.buffRow}>
                 {buffNames(inspect).slice(0, 8).map((n) => (
-                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','VEILBREAK VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE','NULL VERSE','TETHER VERSE','TANGLE VERSE','SURTAX VERSE','HUSK VERSE','FEEBLE VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') || n.startsWith('VEILBREAK') || n.startsWith('RUST') || n.startsWith('STIFLE') || n.startsWith('ROT') || n.startsWith('FRAIL') || n.startsWith('GLOOM') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
+                  <Text key={n} style={[styles.buffChip, { color: ['SUNDERED','DISCHORD','SUPPRESSED','INTERFERENCE','NO-COUNTER','EXPOSED','BREAK','RENDED','CRIPPLED','WOUNDED','CURSE VERSE','SHROUD VERSE','SILENCE VERSE','FEAR VERSE','VEILBREAK VERSE','RUIN VERSE','HEX VERSE','BIND VERSE','BLIGHT VERSE','MIRE VERSE','TERROR VERSE','NULL VERSE','TETHER VERSE','TANGLE VERSE','SURTAX VERSE','HUSK VERSE','FEEBLE VERSE','FESTER VERSE'].includes(n) || n.startsWith('DOOM') || n.startsWith('SIREN') || n.startsWith('VEILBREAK') || n.startsWith('RUST') || n.startsWith('STIFLE') || n.startsWith('ROT') || n.startsWith('FRAIL') || n.startsWith('GLOOM') ? '#ff9d7a' : n.endsWith('EDGE') ? '#ffd34d' : n.includes('VERSE') ? '#c9a0ff' : '#8af0ff' }]}>✦ {n}</Text>
                 ))}
               </View>
             )}
