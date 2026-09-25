@@ -112,6 +112,7 @@ function buffNames(u: UnitState): string[] {
   if (u.howlNext) names.push('HOWL EDGE');
   if (u.vampNext) names.push('VAMP EDGE');
   if (u.disarmNext) names.push('DISARM EDGE');
+  if (u.pierceNext) names.push('PIERCE EDGE');
   if (u.twinNext) names.push('TWIN EDGE');
   if (u.repulseUntilEndOfEnemyPhase) names.push('REPULSE VERSE');
   if (u.silencedUntilEndOfEnemyPhase) names.push('SILENCE VERSE');

@@ -3,7 +3,7 @@ import { Animated, Easing, PanResponder, Pressable, StyleSheet, Text, useWindowD
 import { Image } from 'expo-image';
 import { MECH_ART, PILOT_ART, TERRAIN_ART } from '../assets';
 import { TERRAIN_INFO } from '../game/data';
-import { dist, isStealthHidden, key, same } from '../game/engine';
+import { dist, isStealthHidden, key, moveRangeOf, same } from '../game/engine';
 import { fogLit, useGame } from '../game/store';
 import { MapDef, Pos, UnitState } from '../game/types';
 
@@ -97,7 +97,7 @@ const Tile = React.memo(function Tile({
 });
 
 /** Unit chip (mech art + hp bar + level) — memoized; only re-renders when its own unit state changes. */
-const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitState; chip: number; ghosting: boolean }) {
+const UnitCell = React.memo(function UnitCell({ u, chip, ghosting, threat }: { u: UnitState; chip: number; ghosting: boolean; threat?: boolean }) {
   // gentle hover bob — each unit runs its own loop, staggered by uid so the
   // squadron doesn't bob in lockstep
   const bob = useRef(new Animated.Value(0)).current;
@@ -123,8 +123,8 @@ const UnitCell = React.memo(function UnitCell({ u, chip, ghosting }: { u: UnitSt
           {
             width: chip,
             height: chip,
-            borderColor: u.phase2 ? '#ff3030' : u.def.boss || u.elite ? '#ffd34d' : u.side === 'player' ? (u.npc ? '#7dff9d' : '#6db4ff') : '#ff6b6b',
-            borderWidth: u.phase2 ? 2.5 : 1.5,
+            borderColor: u.phase2 ? '#ff3030' : threat ? '#ff2020' : u.def.boss || u.elite ? '#ffd34d' : u.side === 'player' ? (u.npc ? '#7dff9d' : '#6db4ff') : '#ff6b6b',
+            borderWidth: u.phase2 || threat ? 2.5 : 1.5,
             opacity: u.acted || ghosting ? 0.45 : 1,
           },
         ]}
@@ -205,6 +205,7 @@ function SelReticle({ tw, th }: { tw: number; th: number }) {
 
 export function MapGrid() {
   const units = useGame((s) => s.units);
+  const inThreat = (u: UnitState) => u.side === 'enemy' && u.alive && units.some((p) => p.side === 'player' && p.alive && dist(u.pos, p.pos) <= moveRangeOf(u) + Math.max(0, ...u.def.weapons.map((w) => w.rangeMax)));
   const map = useGame((s) => s.map);
   const missionCh = useGame((s) => s.missionCh);
   const moveTiles = useGame((s) => s.moveTiles);
@@ -315,10 +316,10 @@ export function MapGrid() {
           .filter((u) => u.alive && !(missionCh.fog && u.side === 'enemy' && !fogLit(units, u.pos)) && !isStealthHidden(u, units))
           .map((u) => {
             const walking = walk && walk.uid === u.uid && walk.path.length > 1;
-            if (walking) return <WalkingChip key={u.uid} path={walk!.path} tw={tw} th={th} cell={<UnitCell u={u} chip={chip} ghosting={false} />} />;
+            if (walking) return <WalkingChip key={u.uid} path={walk!.path} tw={tw} th={th} cell={<UnitCell u={u} chip={chip} ghosting={false} threat={inThreat(u)} />} />;
             return (
               <View key={u.uid} pointerEvents="none" style={[styles.unitWrap, { left: u.pos.x * tw, top: u.pos.y * th, width: tw, height: th }]}>
-                <UnitCell u={u} chip={chip} ghosting={!!ghost && u.uid === ghost.uid} />
+                <UnitCell u={u} chip={chip} ghosting={!!ghost && u.uid === ghost.uid} threat={inThreat(u)} />
               </View>
             );
           })}
