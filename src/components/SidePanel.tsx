@@ -103,6 +103,7 @@ function buffNames(u: UnitState): string[] {
   if (u.curseNext) names.push('CURSE EDGE');
   if (u.shroudNext) names.push('SHROUD EDGE');
   if (u.rustNext) names.push('RUST EDGE');
+  if (u.blindNext) names.push('BLIND EDGE');
   if (u.cullNext) names.push('CULL EDGE');
   if (u.mortalNext) names.push('MORTAL EDGE');
   if (u.rendNext) names.push('REND EDGE');
@@ -727,6 +728,7 @@ export function SidePanel() {
             <Text style={{ color: '#8fa1c7', fontSize: 10.5, marginTop: 3 }}>⚔ {inspect.kills ?? 0} kills · ◈ {inspect.dodges ?? 0} dodges</Text>
             <Text style={{ color: '#7fd0b0', fontSize: 10.5, marginTop: 3 }}>⟳ +{5 + partBonus(inspect, 'enRegen') + partBonus(inspect, 'ventEn')} EN per turn</Text>
             {(() => { const n = s.units.filter((x) => x.alive && x.side !== inspect.side && dist(x.pos, inspect.pos) <= moveRangeOf(x) + Math.max(0, ...x.def.weapons.map((w) => w.rangeMax))).length; return n > 0 ? <Text style={{ color: '#ff6a6a', fontSize: 10.5, marginTop: 3 }}>⚠ {n} HOSTILE{n === 1 ? '' : 'S'} CAN REACH</Text> : null; })()}
+            {(() => { const n = s.units.filter((x) => x.alive && x.side !== inspect.side && dist(x.pos, inspect.pos) <= moveRangeOf(inspect) + Math.max(0, ...inspect.def.weapons.map((w) => w.rangeMax))).length; return n > 0 ? <Text style={{ color: '#ffb84d', fontSize: 10.5, marginTop: 3 }}>⚔ CAN STRIKE {n} {inspect.side === 'enemy' ? 'SQUAD' : 'HOSTILE'}{n === 1 ? '' : 'S'}</Text> : null; })()}
             {(inspect.parts ?? []).length > 0 && (
               <Text style={{ color: '#8fb8ff', fontSize: 10.5, marginTop: 3 }}>◈ {(inspect.parts ?? []).map((p) => PARTS[p]?.name ?? p).join(' · ')}</Text>
             )}

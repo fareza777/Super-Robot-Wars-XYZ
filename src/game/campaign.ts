@@ -255,6 +255,7 @@ export const PARTS: Record<string, PartDef> = {
   hybridCell: { id: 'hybridCell', name: 'Hybrid Cell', desc: 'Split-feed array — gun & EN weapons +12% damage', price: 3200, gunDmg: 12, enDmg: 12 },
   shrapnelRack: { id: 'shrapnelRack', name: 'Shrapnel Rack', desc: 'Frag array — missile & ammo weapons +12% damage', price: 3200, missileDmg: 12, ammoDmg: 12 },
   waspCell: { id: 'waspCell', name: 'Wasp Cell', desc: 'Stinger array — funnel & ammo weapons +12% damage', price: 3200, funnelDmg: 12, ammoDmg: 12 },
+  brassRack: { id: 'brassRack', name: 'Brass Rack', desc: 'Rotary array — gun & ammo weapons +12% damage', price: 3200, gunDmg: 12, ammoDmg: 12 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -482,6 +483,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'massborn', name: 'Massborn', desc: '+6% damage per point vs targets with larger arsenals' },
   { id: 'scorchborn', name: 'Scorchborn', desc: '+6% damage per point vs burning targets' },
   { id: 'hyenaborn', name: 'Hyenaborn', desc: '+6% damage per point vs units that already acted' },
+  { id: 'davidborn', name: 'Davidborn', desc: '+6% damage per point vs higher-level targets' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1640,6 +1642,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_immortal3', name: 'IMMORTAL III', desc: 'Reach MASTERY ★ on 90 missions', rewardCr: 100000 },
   { id: 'h_vrlegend2', name: 'VR DEITY', desc: 'Score 150,000+ in the VR Simulator', rewardCr: 100000 },
   { id: 'h_godhunter5', name: 'GODHUNTER V', desc: 'Destroy 60 bosses across your career', rewardCr: 100000 },
+  { id: 'h_chainlord4', name: 'CHAINLORD IV', desc: 'Score a 12-kill chain in a single turn', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
   { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
   { id: 'h_pinnacle2', name: 'PINNACLE II', desc: 'Earn S rank on 90 missions', rewardCr: 100000 },
@@ -2069,6 +2072,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.simBest ?? 0) >= 150000;
     case 'h_godhunter5':
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 60;
+    case 'h_chainlord4':
+      return (s.chainCount ?? 0) >= 12;
     case 'h_nemesis':
       return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 100;
     case 'h_genocider':
