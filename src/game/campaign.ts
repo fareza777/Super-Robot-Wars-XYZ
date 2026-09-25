@@ -257,6 +257,7 @@ export const PARTS: Record<string, PartDef> = {
   waspCell: { id: 'waspCell', name: 'Wasp Cell', desc: 'Stinger array — funnel & ammo weapons +12% damage', price: 3200, funnelDmg: 12, ammoDmg: 12 },
   brassRack: { id: 'brassRack', name: 'Brass Rack', desc: 'Rotary array — gun & ammo weapons +12% damage', price: 3200, gunDmg: 12, ammoDmg: 12 },
   pyreRack: { id: 'pyreRack', name: 'Pyre Rack', desc: 'Fusion array — melee & EN weapons +12% damage', price: 3200, meleeDmg: 12, enDmg: 12 },
+  mortarRack: { id: 'mortarRack', name: 'Mortar Rack', desc: 'Siege array — missile & ammo weapons +12% damage', price: 3200, missileDmg: 12, ammoDmg: 12 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -486,6 +487,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'hyenaborn', name: 'Hyenaborn', desc: '+6% damage per point vs units that already acted' },
   { id: 'davidborn', name: 'Davidborn', desc: '+6% damage per point vs higher-level targets' },
   { id: 'hushborn', name: 'Hushborn', desc: '+6% damage per point vs counter-sealed targets' },
+  { id: 'voltborn', name: 'Voltborn', desc: '+5% damage per point while own EN is above 60%' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -524,7 +526,7 @@ const P = (p: PilotDef) => p;
 const U = (u: UnitDef) => u;
 
 export const CAMPAIGN_PILOTS = {
-  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse', 'goreverse', 'culledge', 'rendedge', 'overedge', 'splatteredge', 'havocverse', 'maimedge', 'hollowedge', 'maraudedge', 'vampedge', 'twinedge', 'phantomedge', 'dragedge', 'rustedge'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
+  raxp: P({ name: 'Cap. Rax Daver', callsign: 'RED', melee: 66, ranged: 62, defense: 62, evade: 60, maxSp: 55, spirits: ['valor', 'strike', 'miracle', 'overdrive', 'resolve', 'guts', 'relentless', 'execute', 'hunt', 'exert', 'reaper', 'carnage', 'gorelust', 'hemorrhage', 'plunderedge', 'lacerate', 'thrillkill', 'ravenous', 'rageverse', 'furyverse', 'ravageverse', 'crimsonverse', 'goreverse', 'culledge', 'rendedge', 'overedge', 'splatteredge', 'havocverse', 'maimedge', 'hollowedge', 'maraudedge', 'vampedge', 'twinedge', 'phantomedge', 'dragedge', 'rustedge', 'crushedge'], faceColor: '#ff7a7a', trait: 'crimson_fury', lastWords: 'Heh... not bad, Ardent. The throne... is yours to storm.', killQuip: 'Your courage deserved a better machine.' }),
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
@@ -1646,6 +1648,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_godhunter5', name: 'GODHUNTER V', desc: 'Destroy 60 bosses across your career', rewardCr: 100000 },
   { id: 'h_chainlord4', name: 'CHAINLORD IV', desc: 'Score a 12-kill chain in a single turn', rewardCr: 100000 },
   { id: 'h_immortal4', name: 'IMMORTAL IV', desc: 'Reach MASTERY ★ on 100 missions', rewardCr: 100000 },
+  { id: 'h_stockpile3', name: 'STOCKPILE III', desc: 'Hold 120 items in the inventory at once', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
   { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
   { id: 'h_pinnacle2', name: 'PINNACLE II', desc: 'Earn S rank on 90 missions', rewardCr: 100000 },
@@ -2079,6 +2082,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.chainCount ?? 0) >= 12;
     case 'h_immortal4':
       return s.masteryDone.length >= 100;
+    case 'h_stockpile3':
+      return Object.values(s.inventory ?? {}).reduce((n, c) => n + c, 0) >= 120;
     case 'h_nemesis':
       return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 100;
     case 'h_genocider':
