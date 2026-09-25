@@ -22,6 +22,7 @@ const Tile = React.memo(function Tile({
   inAtk,
   inThreat,
   inDanger,
+  inSpirit,
   crate,
   beacon,
   reach,
@@ -41,6 +42,7 @@ const Tile = React.memo(function Tile({
   inAtk: boolean;
   inThreat: boolean;
   inDanger: boolean;
+  inSpirit: boolean;
   crate: boolean;
   beacon: boolean;
   reach: boolean;
@@ -91,6 +93,7 @@ const Tile = React.memo(function Tile({
           {aimed && <Text style={styles.aimTag}>◎</Text>}
         </Animated.View>
       )}
+      {inSpirit && !inMove && !inAtk && <View style={[styles.overlay, styles.spiritOv]} pointerEvents="none" />}
       {inFog && <View style={[styles.overlay, styles.fogOv]} pointerEvents="none" />}
     </Pressable>
   );
@@ -219,6 +222,7 @@ export function MapGrid() {
   const pendingMove = useGame((s) => s.pendingMove);
   const pendingWeapon = useGame((s) => s.pendingWeapon);
   const mapAim = useGame((s) => s.mapAim);
+  const spiritForUid = useGame((s) => s.spiritForUid);
   const walk = useGame((s) => s.walk);
   const tapTile = useGame((s) => s.tapTile);
   const { width, height } = useWindowDimensions();
@@ -296,6 +300,7 @@ export function MapGrid() {
             inAtk={attackTiles.has(key(p))}
             inThreat={threatTiles.has(key(p))}
             inDanger={dangerTiles.has(key(p))}
+            inSpirit={!!spiritForUid && !!units.find((x) => x.uid === spiritForUid && x.alive) && dist(p, units.find((x) => x.uid === spiritForUid)!.pos) <= 3}
             crate={crates.some((c) => c.pos.x === p.x && c.pos.y === p.y)}
             beacon={!!missionCh.seizePos && missionCh.seizePos.x === p.x && missionCh.seizePos.y === p.y}
             reach={!!missionCh.reachPos && missionCh.reachPos.x === p.x && missionCh.reachPos.y === p.y}
@@ -419,6 +424,7 @@ const styles = StyleSheet.create({
   aimTag: { color: '#ffcf6a', fontSize: 16, fontWeight: '900', textShadowColor: 'rgba(255,160,40,1)', textShadowRadius: 8 },
   fogOv: { backgroundColor: 'rgba(4,7,14,0.58)' },
   threatOv: { backgroundColor: 'rgba(255,150,40,0.26)', borderWidth: 1, borderColor: 'rgba(255,150,40,0.35)' },
+  spiritOv: { backgroundColor: 'rgba(201,160,255,0.14)', borderWidth: 1.5, borderColor: 'rgba(201,160,255,0.6)' },
   hazardOv: { backgroundColor: 'rgba(255,90,30,0.22)', borderColor: 'rgba(255,140,60,0.9)', borderStyle: 'dashed' },
   dangerOv: { backgroundColor: 'rgba(255,50,50,0.16)' },
   crateTag: { position: 'absolute', top: 3, right: 3, color: '#ffd34d', fontSize: 15, fontWeight: '900', textShadowColor: 'rgba(255,190,40,0.9)', textShadowRadius: 5 },
