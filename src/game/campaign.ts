@@ -291,6 +291,7 @@ export const PARTS: Record<string, PartDef> = {
   surgeGauge: { id: 'surgeGauge', name: 'Surge Gauge', desc: 'Overfeed optics — +8% crit & +10 EN regen per turn', price: 3400, crit: 8, enRegen: 10 },
   museGauge: { id: 'museGauge', name: 'Muse Gauge', desc: 'Aria-linked optics — +3 SP regen & +8 evade', price: 3400, spRegen: 3, evade: 8 },
   wispPlate: { id: 'wispPlate', name: 'Wisp Plate', desc: 'Ghost laminate — +1200 max HP & +8 evade', price: 3400, hp: 1200, evade: 8 },
+  stridePlate: { id: 'stridePlate', name: 'Stride Plate', desc: 'Vector-moored laminate — +8 mobility & immune to knockback/drag', price: 3400, mobility: 8, knockProof: true },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -559,6 +560,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'sniperfoe', name: 'Sniperfoe', desc: '+6% damage per point vs frames carrying sniper weapons' },
   { id: 'moonborn', name: 'Moonborn', desc: '+5% damage per point vs targets standing on lunar surface' },
   { id: 'clusterborn', name: 'Clusterborn', desc: '+4% damage per point vs targets with 2+ allies adjacent — focus fire' },
+  { id: 'knockfoe', name: 'Knockfoe', desc: '+6% damage per point vs frames carrying knockback/drag weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1748,6 +1750,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_omnicide4', name: 'OMNICIDE IV', desc: 'Destroy 35 different enemy frame types', rewardCr: 100000 },
   { id: 'h_centurion6', name: 'CENTURION VI', desc: 'Fly 110 ranked missions', rewardCr: 100000 },
   { id: 'h_apexlegion5', name: 'APEX LEGION V', desc: 'All pilots reach 1500 career kills each', rewardCr: 100000 },
+  { id: 'h_nemesis4', name: 'NEMESIS IV', desc: 'Destroy 250 frames of a single type', rewardCr: 100000 },
   { id: 'h_extinction', name: 'EXTINCTION', desc: 'Destroy 20,000 frames across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
   { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
@@ -2274,6 +2277,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 150;
     case 'h_nemesis3':
       return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 200;
+    case 'h_nemesis4':
+      return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 250;
     case 'h_perfectscore': {
       const rs = Object.values(s.missionRank ?? {});
       return rs.length >= 30 && rs.every((r) => r === 'S' || r === 'A');

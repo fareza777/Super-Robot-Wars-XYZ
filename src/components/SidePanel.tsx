@@ -5,7 +5,7 @@ import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS, PILOT_STATS } from '../game/campaign';
 
 const ALLY_AOE = new Set(['anthemverse','bastionverse','breachverse','choirverse','clarionverse','cleanseverse','crimsonverse','damperverse','defianceverse','flowverse','foresightverse','fortressverse','freeflowverse','goreverse','juggernautverse','lanceverse','leechverse','magnumverse','mendverse','mirageverse','oathverse','palisadeverse','phantomverse','pinverse','rampartverse','renewalverse','repulseverse','requiemverse','salvoverse','scopeverse','scorchverse','sentinelverse','seraphverse','shelterverse','siphonverse','steadfastverse','surgeverse','swiftverse','thornverse','tideverse','tracerverse','triumphverse','undyingverse','valiantverse','vaultverse','vigilverse','vigorverse','wallverse','wardenverse','wardverse','miraclechorus','sanctumhymn','gracehymn','dirgemist','wardmist','bulwarkaria','warhorn','cantata','fableverse','sustainverse','revelverse','bulwarkverse','anchorverse','beamverse','warlordverse','shellverse','gunverse','funnelverse','reactorverse','haloverse']);
-const ENEMY_AOE = new Set(['armorrot','bindverse','blightverse','curseverse','darkverse','festerverse','despairverse','doomverse','dreadverse','exposeverse','fearverse','feebleverse','frailverse','gloomverse','hexverse','huskverse','jamverse','lockcascade','mireverse','nullverse','rotverse','ruinverse','rustverse','shroudverse','silenceverse','sirenverse','stifleverse','surtaxverse','tangleverse','terrorverse','tetherverse','tideebb','veilbreakverse','voidverse','winterverse','staticchoir','chokerverse','lureverse','rootverse','maimverse','poxverse','shatterverse','riftverse','glitchverse','sealverse','zeroverse','baneverse','duskverse']);
+const ENEMY_AOE = new Set(['armorrot','bindverse','blightverse','curseverse','darkverse','festerverse','despairverse','doomverse','dreadverse','exposeverse','fearverse','feebleverse','frailverse','gloomverse','hexverse','huskverse','jamverse','lockcascade','mireverse','nullverse','rotverse','ruinverse','rustverse','shroudverse','silenceverse','sirenverse','stifleverse','surtaxverse','tangleverse','terrorverse','tetherverse','tideebb','veilbreakverse','voidverse','winterverse','staticchoir','chokerverse','lureverse','rootverse','maimverse','poxverse','shatterverse','riftverse','glitchverse','sealverse','zeroverse','baneverse','duskverse','viceverse']);
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { BOND_EVENTS, bondLevel, bondMods } from '../game/bonds';
 import { armorOf, bestCounterWeapon, moveRangeOf, usableWeapons, evadeOf, critChance, damageOf, dist, enCostOf, findSupport, formationBonus, hasPincer, hitChance, key, partBonus, rallyBonus, spiritCost, terrainAt, terrainDesc, weaponsAgainst } from '../game/engine';
@@ -568,7 +568,7 @@ export function SidePanel() {
                             {e.def.name} {e.def.boss ? (e.phase2 ? 'Ω★' : '★') : ''}
                           </Text>
                           <Text style={styles.tgtHp}>
-                            HP {e.hp}/{e.def.maxHp} · ARM {armorOf(e, s.map)}{(e.sieveUntilEndOfEnemyPhase ? 0 : Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0)) > 0 ? `+⛨${Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0)}` : ''} · W {e.will} · EN {e.en} · ⌛{debuffCount(e)}
+                            HP {e.hp}/{e.def.maxHp} · ARM {armorOf(e, s.map)}{(e.sieveUntilEndOfEnemyPhase ? 0 : Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0, e.haloUntilEndOfEnemyPhase ? 400 : 0)) > 0 ? `+⛨${Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0, e.haloUntilEndOfEnemyPhase ? 400 : 0)}` : ''} · W {e.will} · EN {e.en} · ⌛{debuffCount(e)}
                           </Text>
                         </View>
                         <View style={styles.tgtHitBox}>
@@ -610,7 +610,7 @@ export function SidePanel() {
                             {e.def.name} {e.def.boss ? (e.phase2 ? 'Ω★' : '★') : ''}{kill ? ' ☠' : ''}
                           </Text>
                           <Text style={styles.tgtHp}>
-                            HP {e.hp}/{e.def.maxHp} · ARM {armorOf(e, s.map)}{(e.sieveUntilEndOfEnemyPhase ? 0 : Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0)) > 0 ? `+⛨${Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0)}` : ''} · W {e.will} · EN {e.en} · ⌛{debuffCount(e)}
+                            HP {e.hp}/{e.def.maxHp} · ARM {armorOf(e, s.map)}{(e.sieveUntilEndOfEnemyPhase ? 0 : Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0, e.haloUntilEndOfEnemyPhase ? 400 : 0)) > 0 ? `+⛨${Math.max(e.def.barrier ?? 0, partBonus(e, 'barrier'), e.wallUntilEndOfEnemyPhase ? 500 : 0, e.haloUntilEndOfEnemyPhase ? 400 : 0)}` : ''} · W {e.will} · EN {e.en} · ⌛{debuffCount(e)}
                           </Text>
                           {/* SRW damage preview — green = HP remaining after the hit */}
                           <View style={styles.tgtBar}>
