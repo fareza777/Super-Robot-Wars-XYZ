@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { PILOT_ART } from '../assets';
 import { ALL_UNITS, ITEMS, PARTS, PILOT_STATS } from '../game/campaign';
 
-const ALLY_AOE = new Set(['anthemverse','bastionverse','breachverse','choirverse','clarionverse','cleanseverse','crimsonverse','damperverse','defianceverse','flowverse','foresightverse','fortressverse','freeflowverse','goreverse','juggernautverse','lanceverse','leechverse','magnumverse','mendverse','mirageverse','oathverse','palisadeverse','phantomverse','pinverse','rampartverse','renewalverse','repulseverse','requiemverse','salvoverse','scopeverse','scorchverse','sentinelverse','seraphverse','shelterverse','siphonverse','steadfastverse','surgeverse','swiftverse','thornverse','tideverse','tracerverse','triumphverse','undyingverse','valiantverse','vaultverse','vigilverse','vigorverse','wallverse','wardenverse','wardverse','miraclechorus','sanctumhymn','gracehymn','dirgemist','wardmist','bulwarkaria','warhorn','cantata','fableverse','sustainverse','revelverse']);
+const ALLY_AOE = new Set(['anthemverse','bastionverse','breachverse','choirverse','clarionverse','cleanseverse','crimsonverse','damperverse','defianceverse','flowverse','foresightverse','fortressverse','freeflowverse','goreverse','juggernautverse','lanceverse','leechverse','magnumverse','mendverse','mirageverse','oathverse','palisadeverse','phantomverse','pinverse','rampartverse','renewalverse','repulseverse','requiemverse','salvoverse','scopeverse','scorchverse','sentinelverse','seraphverse','shelterverse','siphonverse','steadfastverse','surgeverse','swiftverse','thornverse','tideverse','tracerverse','triumphverse','undyingverse','valiantverse','vaultverse','vigilverse','vigorverse','wallverse','wardenverse','wardverse','miraclechorus','sanctumhymn','gracehymn','dirgemist','wardmist','bulwarkaria','warhorn','cantata','fableverse','sustainverse','revelverse','bulwarkverse']);
 const ENEMY_AOE = new Set(['armorrot','bindverse','blightverse','curseverse','darkverse','festerverse','despairverse','doomverse','dreadverse','exposeverse','fearverse','feebleverse','frailverse','gloomverse','hexverse','huskverse','jamverse','lockcascade','mireverse','nullverse','rotverse','ruinverse','rustverse','shroudverse','silenceverse','sirenverse','stifleverse','surtaxverse','tangleverse','terrorverse','tetherverse','tideebb','veilbreakverse','voidverse','winterverse','staticchoir','chokerverse','lureverse','rootverse','maimverse']);
 import { SPIRITS, TERRAIN_INFO, TRAITS } from '../game/data';
 import { BOND_EVENTS, bondLevel, bondMods } from '../game/bonds';
@@ -188,6 +188,7 @@ function buffNames(u: UnitState): string[] {
   if (u.revelUntilEndOfEnemyPhase) names.push('REVEL VERSE');
   if (u.sieveUntilEndOfEnemyPhase) names.push('SIEVE EDGE');
   if (u.sieveNext) names.push('SIEVE EDGE');
+  if (u.bulwarkUntilEndOfEnemyPhase) names.push('BULWARK VERSE');
   if (u.rootedUntilEndOfEnemyPhase) names.push('ROOT VERSE');
   if ((u.gloomTurns ?? 0) > 0) names.push(`GLOOM ${u.gloomTurns}`);
   if (u.matadorNext) names.push('MATADOR EDGE');
@@ -736,7 +737,7 @@ export function SidePanel() {
             <View style={styles.statRow}>
               <Text style={styles.statTxt}>🛡 ARM {armorOf(inspect, s.map)}{Math.max(inspect.def.barrier ?? 0, partBonus(inspect, 'barrier')) > 0 ? ` · ⛨${Math.max(inspect.def.barrier ?? 0, partBonus(inspect, 'barrier'))}` : ''}</Text>
               <Text style={styles.statTxt}>≫ EVA {Math.round(evadeOf(inspect, s.map))}</Text>
-              <Text style={styles.statTxt}>▸ MOV {moveRangeOf(inspect)} {inspect.def.moveType === 'air' ? '✈' : '⬢'}</Text>
+              <Text style={styles.statTxt}>▸ MOV {moveRangeOf(inspect)} {inspect.def.moveType === 'air' ? '✈' : '⬢'}{inspect.repulseUntilEndOfEnemyPhase || partBonus(inspect, 'counterRange') > 0 ? ' ↩+1' : ''}</Text>
             </View>
             {(() => { const ti = TERRAIN_INFO[terrainAt(s.map, inspect.pos)]; return ti && (ti.def !== 0 || ti.eva !== 0) ? <Text style={{ color: '#8fa1c7', fontSize: 10.5, marginTop: 3 }}>{ti.glyph} {ti.name}: {ti.def !== 0 ? `${ti.def > 0 ? '+' : ''}${ti.def} ARM` : ''}{ti.def !== 0 && ti.eva !== 0 ? ' · ' : ''}{ti.eva !== 0 ? `${ti.eva > 0 ? '+' : ''}${ti.eva} EVA` : ''}</Text> : null; })()}
             <Text style={{ color: '#8fa1c7', fontSize: 10.5, marginTop: 3 }}>⚔ {inspect.kills ?? 0} kills · ◈ {inspect.dodges ?? 0} dodges</Text>

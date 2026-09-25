@@ -266,6 +266,7 @@ export const PARTS: Record<string, PartDef> = {
   bracePlate: { id: 'bracePlate', name: 'Brace Plate', desc: 'Anchored laminate — +150 armor and immune to knockback/drag', price: 3200, armor: 150, knockProof: true },
   lanceWeave: { id: 'lanceWeave', name: 'Lance Weave', desc: 'Pilum laminate — beam & missile damage taken cut by 25%', price: 3200, beamGuard: true, missileGuard: true },
   bastionCell: { id: 'bastionCell', name: 'Bastion Cell', desc: 'Bulwark battery — +150 armor & +8 hit', price: 3200, armor: 150, hit: 8 },
+  longeyeCell: { id: 'longeyeCell', name: 'Long Eye Cell', desc: 'Deadeye reticle — +10 hit & counter-attacks +12% damage', price: 3200, hit: 10, counterDmg: 12 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -508,6 +509,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'primeborn', name: 'Primeborn', desc: '+5% damage per point while own hull is 80% or more' },
   { id: 'spiritborn', name: 'Spiritborn', desc: '+5% damage per point while own SP is 40 or more' },
   { id: 'sieveborn', name: 'Sieveborn', desc: '+6% damage per point vs targets with a collapsed barrier' },
+  { id: 'wallborn', name: 'Wallborn', desc: 'Rampart stance — +5% damage per point while your barrier is active' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1679,6 +1681,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_peacelord4', name: 'PEACELORD IV', desc: 'Clear 100 side missions', rewardCr: 100000 },
   { id: 'h_apexlegion3', name: 'APEX LEGION III', desc: 'All pilots reach 750 career kills each', rewardCr: 100000 },
   { id: 'h_godhunter8', name: 'GODHUNTER VIII', desc: 'Destroy 150 bosses across your career', rewardCr: 100000 },
+  { id: 'h_godhunter9', name: 'GODHUNTER IX', desc: 'Destroy 175 bosses across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
   { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
   { id: 'h_pinnacle2', name: 'PINNACLE II', desc: 'Earn S rank on 90 missions', rewardCr: 100000 },
@@ -2134,6 +2137,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return kills.length > 0 && kills.every((p) => (p.kills ?? 0) >= 750);
     case 'h_godhunter8':
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 150;
+    case 'h_godhunter9':
+      return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 175;
     case 'h_nemesis':
       return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 100;
     case 'h_genocider':
