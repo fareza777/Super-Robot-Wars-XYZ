@@ -262,6 +262,7 @@ export const PARTS: Record<string, PartDef> = {
   pirateRack: { id: 'pirateRack', name: 'Pirate Rack', desc: 'Buccaneer array — melee & ammo weapons +12% damage', price: 3200, meleeDmg: 12, ammoDmg: 12 },
   dawnWeave: { id: 'dawnWeave', name: 'Dawn Weave', desc: 'Aurora laminate — +10 hit & +8 evade', price: 3200, hit: 10, evade: 8 },
   chargeCell: { id: 'chargeCell', name: 'Charge Cell', desc: 'Overfeed battery — +10 EN regen per turn & +8 hit', price: 3200, enRegen: 10, hit: 8 },
+  flowCell: { id: 'flowCell', name: 'Flow Cell', desc: 'Riverine conduits — +12 EN regen per turn & +6 evade', price: 3200, enRegen: 12, evade: 6 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -496,6 +497,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'matadorborn', name: 'Matadorborn', desc: '+6% damage per point vs provoked targets' },
   { id: 'ironsideborn', name: 'Ironsideborn', desc: '+4% damage per point while own armor is 600 or more' },
   { id: 'gloomborn', name: 'Gloomborn', desc: '+6% damage per point vs targets shrouded in gloom' },
+  { id: 'skyborne', name: 'Skyborne', desc: '+5% damage per point vs airborne targets' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1661,6 +1663,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_peacelord3', name: 'PEACELORD III', desc: 'Clear 75 side missions', rewardCr: 100000 },
   { id: 'h_godhunter6', name: 'GODHUNTER VI', desc: 'Destroy 75 bosses across your career', rewardCr: 100000 },
   { id: 'h_apexlegion2', name: 'APEX LEGION II', desc: 'All pilots reach 400 career kills each', rewardCr: 100000 },
+  { id: 'h_godhunter7', name: 'GODHUNTER VII', desc: 'Destroy 100 bosses across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
   { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
   { id: 'h_pinnacle2', name: 'PINNACLE II', desc: 'Earn S rank on 90 missions', rewardCr: 100000 },
@@ -2104,6 +2107,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 75;
     case 'h_apexlegion2':
       return kills.length > 0 && kills.every((p) => (p.kills ?? 0) >= 400);
+    case 'h_godhunter7':
+      return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 100;
     case 'h_nemesis':
       return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 100;
     case 'h_genocider':
