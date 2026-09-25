@@ -767,7 +767,7 @@ export function SidePanel() {
       {s.phase === 'player' && !s.enemyBusy && (
         <View>
           <Pressable onPress={s.endTurn} style={({ pressed }) => [styles.endTurn, allActed && styles.endTurnReady, pressed && { opacity: 0.8 }]}>
-            <Text style={styles.endTurnTxt}>{allActed ? 'END TURN ▸ ALL UNITS ACTED' : 'END TURN ▸'}</Text>
+            <Text style={styles.endTurnTxt}>{allActed ? 'END TURN ▸ ALL UNITS ACTED' : `END TURN ▸ ${s.units.filter((u) => u.side === 'player' && u.alive && !u.acted && !u.npc).length} IDLE`}</Text>
           </Pressable>
           <Pressable onPress={s.retreatMission} style={({ pressed }) => [styles.retreat, pressed && { opacity: 0.6 }]}>
             <Text style={styles.retreatTxt}>◂ RETREAT MISSION</Text>

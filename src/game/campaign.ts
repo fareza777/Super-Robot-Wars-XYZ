@@ -228,6 +228,7 @@ export const PARTS: Record<string, PartDef> = {
   rendLattice: { id: 'rendLattice', name: 'Rend Lattice', desc: 'Sunderweave frame — attacks shred 10% more armor and +8 hit', price: 2900, armorShred: 10, hit: 8 },
   bastionLoom: { id: 'bastionLoom', name: 'Bastion Loom', desc: 'Bulwark weave — +150 armor and incoming funnel damage cut 25%', price: 2900, armor: 150, funnelGuard: true },
   bullheadRam: { id: 'bullheadRam', name: 'Bullhead Ram', desc: 'Impact prow — knockback attacks shove one extra tile and +100 armor', price: 2900, armor: 100, knockPlus: true },
+  taserRounds: { id: 'taserRounds', name: 'Taser Rounds', desc: 'Arc load — hits can stun (15%) and +8 hit', price: 2900, statusStun: true, hit: 8 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -428,6 +429,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'thinner', name: 'Thinner', desc: '+6% damage per point vs grunt frames (non-boss, non-elite)' },
   { id: 'purist', name: 'Purist', desc: '+5% damage per point vs targets carrying no statuses, marks or verse effects' },
   { id: 'entropist', name: 'Entropist', desc: '+6% damage per point vs targets suffering countdown decay (doom, rust, stifle, veilbreak, siren)' },
+  { id: 'suffocator', name: 'Suffocator', desc: '+6% damage per point vs targets below 40% EN' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1579,6 +1581,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_godhunter2', name: 'GODHUNTER II', desc: 'Destroy 30 bosses across your career', rewardCr: 100000 },
   { id: 'h_dreamteam2', name: 'DREAM TEAM II', desc: 'Every pilot reaches 300 career kills', rewardCr: 100000 },
   { id: 'h_exterminus', name: 'EXTERMINUS', desc: 'Destroy 15000 foes across the squad career', rewardCr: 100000 },
+  { id: 'h_godhunter3', name: 'GODHUNTER III', desc: 'Destroy 40 bosses across your career', rewardCr: 100000 },
   { id: 'h_immortal2', name: 'IMMORTAL II', desc: 'Reach MASTERY ★ on 80 missions', rewardCr: 100000 },
 ];
 
@@ -1957,6 +1960,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
     }
     case 'h_exterminus':
       return totalKills >= 15000;
+    case 'h_godhunter3':
+      return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 40;
     case 'h_genocider':
       return totalKills >= 7500;
     case 'h_paragon2':
