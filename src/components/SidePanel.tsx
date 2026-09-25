@@ -206,6 +206,7 @@ function buffNames(u: UnitState): string[] {
   if (u.baneUntilEndOfEnemyPhase) names.push('BANE VERSE');
   if (u.stifleedgeNext) names.push('STIFLE EDGE');
   if (u.surtaxedgeNext) names.push('SURTAX EDGE');
+  if (u.fearedgeNext) names.push('FEAR EDGE');
   if (u.poxedgeNext) names.push('POX EDGE');
   if (u.frailedgeNext) names.push('FRAIL EDGE');
   if (u.rootedgeNext) names.push('GRAVE EDGE');
@@ -710,7 +711,7 @@ export function SidePanel() {
                   <Text style={[styles.rosterHp, { color: u.en < u.def.maxEn * 0.25 ? '#ff9d7a' : '#35c9ff', width: 30 }]}>⛽{u.en}</Text>
                   <Text style={[styles.rosterHp, { color: '#9fd8ff', width: 30 }]}>R{Math.max(0, ...u.def.weapons.map((w) => w.rangeMax))}</Text>
                   <Text style={[styles.rosterHp, { color: '#8b94b8', width: 34 }]}>🛡{armorOf(u, s.map)}{(u.sieveUntilEndOfEnemyPhase ? 0 : Math.max(u.def.barrier ?? 0, partBonus(u, 'barrier'), u.wallUntilEndOfEnemyPhase ? 500 : 0, u.haloUntilEndOfEnemyPhase ? 400 : 0)) > 0 ? '⛨' : ''}</Text>
-                  <Text style={[styles.rosterHp, { color: '#7fd0b0', width: 30 }]}>≫{Math.round(evadeOf(u, s.map))}</Text>
+                  <Text style={[styles.rosterHp, { color: '#7fd0b0', width: 30 }]}>≫{Math.round(evadeOf(u, s.map))}</Text>{(u.dodges ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#8af0ff', width: 26 }]}>−{(u.dodges ?? 0) * 8}</Text>}
                   <Text style={[styles.rosterHp, { color: '#9fd8ff' }]}>⇄{moveRangeOf(u)}</Text>
                   {(TERRAIN_INFO[terrainAt(s.map, u.pos)]?.def ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#a8c07a', width: 20 }]}>{TERRAIN_INFO[terrainAt(s.map, u.pos)].glyph}</Text>}
                   <Text style={[styles.rosterHp, { color: '#ffd34d' }]}>{u.kills >= 50 ? '★' : ''}{u.kills}K</Text>
@@ -746,7 +747,7 @@ export function SidePanel() {
                       <Text style={[styles.rosterHp, u.hp / u.def.maxHp < 0.25 && { color: '#ff8a8a' }]}>{u.hp / u.def.maxHp < 0.25 ? '⚠' : ''}{Math.round((u.hp / u.def.maxHp) * 100)}%</Text>
                       <Text style={[styles.rosterHp, { color: '#9fd8ff', width: 30 }]}>R{Math.max(0, ...u.def.weapons.map((w) => w.rangeMax))}</Text>
                       <Text style={[styles.rosterHp, { color: '#8b94b8', width: 34 }]}>🛡{armorOf(u, s.map)}{(u.sieveUntilEndOfEnemyPhase ? 0 : Math.max(u.def.barrier ?? 0, partBonus(u, 'barrier'), u.wallUntilEndOfEnemyPhase ? 500 : 0, u.haloUntilEndOfEnemyPhase ? 400 : 0)) > 0 ? '⛨' : ''}</Text>
-                      <Text style={[styles.rosterHp, { color: '#7fd0b0', width: 30 }]}>≫{Math.round(evadeOf(u, s.map))}</Text>
+                      <Text style={[styles.rosterHp, { color: '#7fd0b0', width: 30 }]}>≫{Math.round(evadeOf(u, s.map))}</Text>{(u.dodges ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#8af0ff', width: 26 }]}>−{(u.dodges ?? 0) * 8}</Text>}
                       <Text style={[styles.rosterHp, { color: '#9fd8ff', width: 26 }]}>⇄{moveRangeOf(u)}</Text>
                       {(TERRAIN_INFO[terrainAt(s.map, u.pos)]?.def ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#a8c07a', width: 20 }]}>{TERRAIN_INFO[terrainAt(s.map, u.pos)].glyph}</Text>}
                       {(u.doomTurns ?? 0) > 0 && <Text style={[styles.rosterHp, { color: '#ff9d7a', width: 24 }]}>☠{u.doomTurns}</Text>}

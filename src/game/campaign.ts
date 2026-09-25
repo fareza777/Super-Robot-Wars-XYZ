@@ -294,6 +294,7 @@ export const PARTS: Record<string, PartDef> = {
   stridePlate: { id: 'stridePlate', name: 'Stride Plate', desc: 'Vector-moored laminate — +8 mobility & immune to knockback/drag', price: 3400, mobility: 8, knockProof: true },
   dreadPlate: { id: 'dreadPlate', name: 'Dread Plate', desc: 'Warlord laminate — +100 armor & +8 mobility', price: 3400, armor: 100, mobility: 8 },
   phantomPlate: { id: 'phantomPlate', name: 'Phantom Plate', desc: 'Mirage laminate — +100 armor & +8 evade', price: 3400, armor: 100, evade: 8 },
+  tidePlate: { id: 'tidePlate', name: 'Tide Plate', desc: 'Neptune laminate — +1200 max HP & +8% hull regen per turn', price: 3400, hp: 1200, hpRegen: 8 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -565,6 +566,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'knockfoe', name: 'Knockfoe', desc: '+6% damage per point vs frames carrying knockback/drag weapons' },
   { id: 'drainfoe', name: 'Drainfoe', desc: '+6% damage per point vs frames carrying drain weapons' },
   { id: 'piercefoe', name: 'Piercefoe', desc: '+6% damage per point vs frames carrying pierce weapons' },
+  { id: 'chainfoe', name: 'Chainfoe', desc: '+6% damage per point vs frames carrying chain-arc weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1757,6 +1759,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_nemesis4', name: 'NEMESIS IV', desc: 'Destroy 250 frames of a single type', rewardCr: 100000 },
   { id: 'h_pinnacle6', name: 'PINNACLE VI', desc: 'Score rank S on 130 missions', rewardCr: 100000 },
   { id: 'h_stockpile5', name: 'STOCKPILE V', desc: 'Hold 175 items in the inventory at once', rewardCr: 100000 },
+  { id: 'h_chainlord5', name: 'CHAINLORD V', desc: 'Score a 14-kill chain in a single turn', rewardCr: 100000 },
   { id: 'h_extinction', name: 'EXTINCTION', desc: 'Destroy 20,000 frames across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
   { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
@@ -2205,6 +2208,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return (s.killsByDef ? Object.entries(s.killsByDef).filter(([id]) => ALL_UNITS[id]?.boss).reduce((n, [, k]) => n + k, 0) : 0) >= 60;
     case 'h_chainlord4':
       return (s.chainCount ?? 0) >= 12;
+    case 'h_chainlord5':
+      return (s.chainCount ?? 0) >= 14;
     case 'h_immortal4':
       return s.masteryDone.length >= 100;
     case 'h_stockpile3':
