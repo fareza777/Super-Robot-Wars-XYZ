@@ -236,6 +236,7 @@ export const PARTS: Record<string, PartDef> = {
   siphonLoom: { id: 'siphonLoom', name: 'Siphon Loom', desc: 'Siphon weave — hits restore 10% of damage as hull and +3 SP on hit', price: 3000, drainCoil: true, thrallWeave: true },
   warforgeCore: { id: 'warforgeCore', name: 'Warforge Core', desc: 'Warforged heart — +5 will per kill and counter +12% damage', price: 3000, willOnKill: true, counterDmg: 12 },
   dualLattice: { id: 'dualLattice', name: 'Dual Lattice', desc: 'Prism-kinetic weave — incoming beam & melee damage reduced by 25%', price: 3000, beamGuard: true, meleeGuard: true },
+  aegisVeil: { id: 'aegisVeil', name: 'Aegis Veil', desc: 'Point-defense lattice — incoming missile & funnel damage reduced by 25%', price: 3100, missileGuard: true, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -444,6 +445,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'overlord', name: 'Overlord', desc: '+5% damage per point vs lower-level frames' },
   { id: 'volleyborn', name: 'Volleyborn', desc: '+6% damage per point when firing a multi-strike weapon' },
   { id: 'zenborn', name: 'Zenborn', desc: '+6% damage per point with will-locked weapons (willReq)' },
+  { id: 'flakborn', name: 'Flakborn', desc: '+5% damage per point vs frames carrying MAP weapons' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1603,6 +1605,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_chain2', name: 'CHAINLORD', desc: 'Score a 6-kill chain in a single turn', rewardCr: 100000 },
   { id: 'h_apotheon', name: 'APOTHEON', desc: 'Reach New Game+20', rewardCr: 100000 },
   { id: 'h_reunion', name: 'REUNION', desc: 'Witness all 21 bond events', rewardCr: 100000 },
+  { id: 'h_chain3', name: 'CHAINLORD II', desc: 'Score an 8-kill chain in a single turn', rewardCr: 100000 },
   { id: 'h_immortal2', name: 'IMMORTAL II', desc: 'Reach MASTERY ★ on 80 missions', rewardCr: 100000 },
 ];
 
@@ -1997,6 +2000,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.ngPlus >= 20;
     case 'h_reunion':
       return (s.bondSeen ?? []).length >= 21;
+    case 'h_chain3':
+      return (s.chainCount ?? 0) >= 8;
     case 'h_genocider':
       return totalKills >= 7500;
     case 'h_paragon2':

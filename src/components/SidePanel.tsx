@@ -124,6 +124,7 @@ function buffNames(u: UnitState): string[] {
   if (u.tetherUntilEndOfEnemyPhase) names.push('TETHER VERSE');
   if (u.seraphUntilEndOfEnemyPhase) names.push('SERAPH VERSE');
   if (u.lanceUntilEndOfEnemyPhase) names.push('LANCE VERSE');
+  if (u.surgeUntilEndOfEnemyPhase) names.push('SURGE VERSE');
   if (u.terraUntilEndOfEnemyPhase) names.push('WARDEN VERSE');
   if (u.wallUntilEndOfEnemyPhase) names.push('WALL VERSE');
   if (u.scorchUntilEndOfEnemyPhase) names.push('SCORCH VERSE');
@@ -658,7 +659,7 @@ export function SidePanel() {
                         {buffNames(u).length > 0 ? <Text style={{ color: '#d8a5ff' }}> ✧{buffNames(u).length}</Text> : null}
                         {u.crippled ? <Text style={{ color: '#ff9d7a' }}> ⛓</Text> : null}
                         {u.def.weapons.some((w) => w.mapRange != null) ? <Text style={{ color: '#ff9d4d' }}> ◉</Text> : null}
-                        {s.units.some((p) => p.side === 'player' && p.alive && dist(u.pos, p.pos) <= moveRangeOf(u) + Math.max(0, ...u.def.weapons.map((w) => w.rangeMax))) ? <Text style={{ color: '#ff6a6a' }}> ⚠</Text> : null}
+                        {s.units.some((p) => p.side === 'player' && p.alive && dist(u.pos, p.pos) <= moveRangeOf(u) + Math.max(0, ...u.def.weapons.map((w) => w.rangeMax))) ? <Text style={{ color: '#ff6a6a' }}> ⚠</Text> : null}{usableWeapons(u).length === 0 ? <Text style={{ color: '#ff6a6a' }}> ⊘</Text> : null}
                       </Text>
                       <View style={[styles.rosterBarTrack, { backgroundColor: '#2a1216' }]}>
                         <View style={[styles.rosterBarFill, { width: `${(u.hp / u.def.maxHp) * 100}%`, backgroundColor: u.hp / u.def.maxHp > 0.5 ? '#ff5a5a' : u.hp / u.def.maxHp > 0.25 ? '#ff9d4d' : '#c92a2a' }]} />
