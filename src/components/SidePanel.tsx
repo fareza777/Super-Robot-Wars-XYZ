@@ -162,6 +162,7 @@ function buffNames(u: UnitState): string[] {
   if ((u.frailTurns ?? 0) > 0) names.push(`FRAIL VERSE ${u.frailTurns}`);
   if ((u.gloomTurns ?? 0) > 0) names.push(`GLOOM VERSE ${u.gloomTurns}`);
   if (u.tangleUntilEndOfEnemyPhase) names.push('TANGLE VERSE');
+  if (u.leechUntilEndOfEnemyPhase) names.push('LEECH VERSE');
   if ((u.clarionTurns ?? 0) > 0) names.push(`CLARION VERSE ${u.clarionTurns}`);
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');

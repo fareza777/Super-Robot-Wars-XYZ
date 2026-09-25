@@ -242,6 +242,7 @@ export const PARTS: Record<string, PartDef> = {
   cqbWeave: { id: 'cqbWeave', name: 'CQB Weave', desc: 'Close-battle laminate — incoming melee & gun damage reduced by 25%', price: 3100, meleeGuard: true, gunGuard: true },
   haloMesh: { id: 'haloMesh', name: 'Halo Mesh', desc: 'CIWS lattice — incoming funnel & gun damage reduced by 25%', price: 3200, funnelGuard: true, gunGuard: true },
   maulWeave: { id: 'maulWeave', name: 'Maul Weave', desc: 'Brawler laminate — incoming melee & funnel damage reduced by 25%', price: 3200, meleeGuard: true, funnelGuard: true },
+  soulReactor: { id: 'soulReactor', name: 'Soul Reactor', desc: 'Soul-fed core — each kill grants +5 will and +15 EN', price: 3200, willOnKill: true, enOnKill: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -456,6 +457,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'preyborn', name: 'Preyborn', desc: '+6% damage per point vs targets with no usable weapon' },
   { id: 'freefire', name: 'Freefire', desc: '+6% damage per point vs targets that cannot counter-attack' },
   { id: 'tetherborn', name: 'Tetherborn', desc: '+6% damage per point vs tethered targets' },
+  { id: 'shroudborn', name: 'Shroudborn', desc: '+6% damage per point vs shrouded targets' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1622,11 +1624,13 @@ export const HONORS: HonorDef[] = [
   { id: 'h_omnicide', name: 'OMNICIDE', desc: 'Destroy 20 different enemy frame types', rewardCr: 100000 },
   { id: 'h_perfectscore', name: 'PERFECT SCORE', desc: 'Earn rank A or better on all 30 chapters', rewardCr: 100000 },
   { id: 'h_almighty', name: 'ALMIGHTY', desc: 'Earn S rank on all 30 chapters', rewardCr: 100000 },
+  { id: 'h_trophywall', name: 'TROPHY WALL', desc: 'Claim 60 honors', rewardCr: 100000 },
 ];
 
 /** Whether an honor's condition is currently met. */
 export function honorDone(h: HonorDef, s: { pilotProg: Record<string, { kills?: number }>; masteryDone: number[]; bondSeen: string[]; sideCleared: string[]; ngPlus: number; credits: number; simBest?: number; killsByDef?: Record<string, number>; missionRank?: Record<number, 'S' | 'A' | 'B' | 'C'>; partsOwned?: string[]; inventory?: Record<string, number>; snowFox?: boolean; extremeWon?: boolean; shepHon?: boolean; flawlessHon?: boolean; maxHitEver?: number; turn?: number;
 missionCh?: { theme?: string; fog?: boolean };
+honorsClaimed?: string[];
 usedResupply?: boolean;
 salvageCr?: number;
 kills?: number;
@@ -2045,6 +2049,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       const rs2 = Object.values(s.missionRank ?? {});
       return rs2.length >= 30 && rs2.every((r) => r === 'S');
     }
+    case 'h_trophywall':
+      return (s.honorsClaimed ?? []).length >= 60;
     case 'h_pinnacle':
       return Object.values(s.missionRank ?? {}).filter((r) => r === 'S').length >= 80;
     case 'h_apexlegion':
