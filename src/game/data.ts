@@ -255,6 +255,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   reactorverse: { id: 'reactorverse', name: 'Reactor Verse', cost: 50, desc: 'Conduit hymn — allies within 3 tiles restore +30 EN instantly' },
   shrededge: { id: 'shrededge', name: 'Shred Edge', cost: 45, desc: 'Rending strike — next hit +10% damage and strips target weapon-kind resists until end of enemy phase' },
   haloverse: { id: 'haloverse', name: 'Halo Verse', cost: 55, desc: 'Sanctum hymn — allies within 3 tiles gain a 400 barrier until end of enemy phase' },
+  surtaxedge: { id: 'surtaxedge', name: 'Surtax Edge', cost: 45, desc: 'Reactor-spike strike — next hit +10% damage and levies target +10 EN per weapon until end of enemy phase' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },

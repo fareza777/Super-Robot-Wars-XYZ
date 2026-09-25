@@ -204,6 +204,7 @@ function buffNames(u: UnitState): string[] {
   if (u.resistSealUntilEndOfEnemyPhase) names.push('ZERO VERSE');
   if (u.baneUntilEndOfEnemyPhase) names.push('BANE VERSE');
   if (u.stifleedgeNext) names.push('STIFLE EDGE');
+  if (u.surtaxedgeNext) names.push('SURTAX EDGE');
   if (u.poxedgeNext) names.push('POX EDGE');
   if (u.frailedgeNext) names.push('FRAIL EDGE');
   if (u.rootedgeNext) names.push('GRAVE EDGE');
@@ -688,7 +689,7 @@ export function SidePanel() {
                 <View key={u.uid} style={styles.rosterRow}>
                   <Text style={[styles.rosterName, u.acted && styles.rosterActed]} numberOfLines={1}>
                     {u.npc ? '🛡 ' : ''}{u.dmgDealt === topDealt && topDealt > 0 ? '◆ ' : ''}{u.def.moveType === 'air' ? '✈ ' : '⬢ '}
-                    {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>{u.attacksMade ? <Text style={{ color: '#8b94b8' }}> ⚔{u.attacksMade}</Text> : null}{s.units.some((o) => o.alive && o.side === u.side && o.uid !== u.uid && dist(o.pos, u.pos) <= 1) ? <Text style={{ color: '#8af0ff' }}> ⚭</Text> : null}{u.acted ? <Text style={{ color: '#4dff7a' }}> ✓</Text> : usableWeapons(u).length === 0 ? <Text style={{ color: '#ff6a6a' }}> ⊘</Text> : null}{s.units.some((x) => x.side === 'enemy' && x.alive && dist(x.pos, u.pos) <= moveRangeOf(x) + Math.max(0, ...x.def.weapons.map((w) => w.rangeMax))) ? <Text style={{ color: '#ff6a6a' }}> ⚠</Text> : null}{(u.will ?? 0) > 0 ? <Text style={{ color: '#ffe08a' }}> W{u.will}</Text> : null}{debuffCount(u) > 0 ? <Text style={{ color: '#ff9d7a' }}> ⌛{debuffCount(u)}</Text> : null}{u.def.weapons.some((w) => w.kind === 'beam') ? <Text style={{ color: '#8af0ff' }}> ⌁</Text> : null}<Text style={{ color: '#c9a0ff' }}> ✦{u.sp}</Text>
+                    {u.def.name} <Text style={{ color: '#6b7694' }}>Lv{u.level}</Text>{u.attacksMade ? <Text style={{ color: '#8b94b8' }}> ⚔{u.attacksMade}</Text> : null}{s.units.some((o) => o.alive && o.side === u.side && o.uid !== u.uid && dist(o.pos, u.pos) <= 1) ? <Text style={{ color: '#8af0ff' }}> ⚭</Text> : null}{u.acted ? <Text style={{ color: '#4dff7a' }}> ✓</Text> : usableWeapons(u).length === 0 ? <Text style={{ color: '#ff6a6a' }}> ⊘</Text> : null}{s.units.some((x) => x.side === 'enemy' && x.alive && dist(x.pos, u.pos) <= moveRangeOf(x) + Math.max(0, ...x.def.weapons.map((w) => w.rangeMax))) ? <Text style={{ color: '#ff6a6a' }}> ⚠</Text> : null}{(u.will ?? 0) > 0 ? <Text style={{ color: '#ffe08a' }}> W{u.will}</Text> : null}{debuffCount(u) > 0 ? <Text style={{ color: '#ff9d7a' }}> ⌛{debuffCount(u)}</Text> : null}{u.def.weapons.some((w) => w.kind === 'beam') ? <Text style={{ color: '#8af0ff' }}> ⌁</Text> : null}{u.def.weapons.some((w) => w.mapRange != null) ? <Text style={{ color: '#ff9d4d' }}> ◉</Text> : null}{u.def.weapons.some((w) => w.sniper) ? <Text style={{ color: '#9fd8ff' }}> ⌖</Text> : null}{Math.max(u.def.barrier ?? 0, partBonus(u, 'barrier'), u.wallUntilEndOfEnemyPhase ? 500 : 0, u.haloUntilEndOfEnemyPhase ? 400 : 0) > 0 ? <Text style={{ color: '#8af0ff' }}> ⛨</Text> : null}<Text style={{ color: '#c9a0ff' }}> ✦{u.sp}</Text>
                   </Text>
                   <View style={{ flex: 1 }}>
                     <View style={styles.rosterBarTrack}>
