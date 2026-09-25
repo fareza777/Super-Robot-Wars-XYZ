@@ -258,6 +258,7 @@ export const PARTS: Record<string, PartDef> = {
   brassRack: { id: 'brassRack', name: 'Brass Rack', desc: 'Rotary array — gun & ammo weapons +12% damage', price: 3200, gunDmg: 12, ammoDmg: 12 },
   pyreRack: { id: 'pyreRack', name: 'Pyre Rack', desc: 'Fusion array — melee & EN weapons +12% damage', price: 3200, meleeDmg: 12, enDmg: 12 },
   mortarRack: { id: 'mortarRack', name: 'Mortar Rack', desc: 'Siege array — missile & ammo weapons +12% damage', price: 3200, missileDmg: 12, ammoDmg: 12 },
+  cutlassRack: { id: 'cutlassRack', name: 'Cutlass Rack', desc: 'Corsair array — melee & gun weapons +12% damage', price: 3200, meleeDmg: 12, gunDmg: 12 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -488,6 +489,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'davidborn', name: 'Davidborn', desc: '+6% damage per point vs higher-level targets' },
   { id: 'hushborn', name: 'Hushborn', desc: '+6% damage per point vs counter-sealed targets' },
   { id: 'voltborn', name: 'Voltborn', desc: '+5% damage per point while own EN is above 60%' },
+  { id: 'garotteborn', name: 'Garotteborn', desc: '+6% damage per point vs choked targets (Choker Verse)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1649,6 +1651,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_chainlord4', name: 'CHAINLORD IV', desc: 'Score a 12-kill chain in a single turn', rewardCr: 100000 },
   { id: 'h_immortal4', name: 'IMMORTAL IV', desc: 'Reach MASTERY ★ on 100 missions', rewardCr: 100000 },
   { id: 'h_stockpile3', name: 'STOCKPILE III', desc: 'Hold 120 items in the inventory at once', rewardCr: 100000 },
+  { id: 'h_armory4', name: 'ARMORY LORD III', desc: 'Own 95 different parts', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
   { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
   { id: 'h_pinnacle2', name: 'PINNACLE II', desc: 'Earn S rank on 90 missions', rewardCr: 100000 },
@@ -2084,6 +2087,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return s.masteryDone.length >= 100;
     case 'h_stockpile3':
       return Object.values(s.inventory ?? {}).reduce((n, c) => n + c, 0) >= 120;
+    case 'h_armory4':
+      return (s.partsOwned ?? []).length >= 95;
     case 'h_nemesis':
       return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 100;
     case 'h_genocider':
