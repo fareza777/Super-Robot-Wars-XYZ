@@ -98,6 +98,7 @@ function buffNames(u: UnitState): string[] {
   if (u.dragNext) names.push('DRAG EDGE');
   if (u.blinkNext) names.push('BLINK EDGE');
   if (u.curseNext) names.push('CURSE EDGE');
+  if (u.shroudNext) names.push('SHROUD EDGE');
   if (u.cullNext) names.push('CULL EDGE');
   if (u.mortalNext) names.push('MORTAL EDGE');
   if (u.rendNext) names.push('REND EDGE');
