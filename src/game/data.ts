@@ -273,6 +273,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   keenverse: { id: 'keenverse', name: 'Keen Verse', cost: 50, desc: 'War-hymn — allies within 3 tiles gain +10% crit chance until end of enemy phase' },
   sirenedge: { id: 'sirenedge', name: 'Siren Edge', cost: 45, desc: 'Wailing strike — next hit deals +10% damage and sirens the target (-15 hit for 2 turns)' },
   arsenalverse: { id: 'arsenalverse', name: 'Arsenal Verse', cost: 55, desc: 'Quartermaster hymn — allies within 3 tiles restock all limited ammo instantly' },
+  brandedge: { id: 'brandedge', name: 'Brand Edge', cost: 45, desc: 'Targeting strike — next hit deals +10% damage and brands the target (marked: +25 hit and +15% damage taken, 2 turns)' },
   flakverse: { id: 'flakverse', name: 'Flak Verse', cost: 50, desc: 'Point-defense hymn — allies within 3 tiles take 20% less damage from ranged attackers until end of enemy phase' },
   crushedge: { id: 'crushedge', name: 'Crush Edge', cost: 45, desc: 'Breaker strike — your next hit deals +10% damage and breaks the target frame' },
   chokerverse: { id: 'chokerverse', name: 'Choker Verse', cost: 50, desc: 'Strangle chant — enemies within 3 tiles counter-attack at -1 range until end of enemy phase' },

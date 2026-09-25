@@ -215,6 +215,7 @@ function buffNames(u: UnitState): string[] {
   if (u.feebleedgeNext) names.push('FEEBLE EDGE');
   if (u.silenceedgeNext) names.push('SILENCE EDGE');
   if (u.sirenedgeNext) names.push('SIREN EDGE');
+  if (u.brandedgeNext) names.push('BRAND EDGE');
   if (u.poxedgeNext) names.push('POX EDGE');
   if (u.frailedgeNext) names.push('FRAIL EDGE');
   if (u.rootedgeNext) names.push('GRAVE EDGE');
@@ -665,7 +666,7 @@ export function SidePanel() {
                     const nTgt = ALLY_AOE.has(id) || ENEMY_AOE.has(id) ? s.units.filter((x) => x.alive && x.side === (ALLY_AOE.has(id) ? 'player' : 'enemy') && dist(x.pos, spiritUnit.pos) <= 3).length : -1;
                     const active = s.units.some((x) => x.alive && (ALLY_AOE.has(id) ? x.side === 'player' : ENEMY_AOE.has(id) ? x.side === 'enemy' : false) && buffNames(x).includes(sp.name.toUpperCase()));
                     return (
-                      <Btn key={id} label={`✦ ${sp.name} · ${spiritCost(spiritUnit, id)} SP${nTgt >= 0 ? ` · ⌀${nTgt}${nTgt === 0 ? ' — EMPTY' : ''}` : ''}${active ? ' · ◈ACTIVE' : ''}${milestone ? ' · ★MILESTONE' : ''}`} sub={sp.desc} disabled={spiritUnit.sp < spiritCost(spiritUnit, id)} onPress={() => s.castSpirit(spiritUnit.uid, id)} accent={milestone ? '#ffd34d' : '#c9a0ff'} />
+                      <Btn key={id} label={`✦ ${sp.name} · ${spiritCost(spiritUnit, id)} SP${nTgt >= 0 ? ` · ⌀${nTgt}${nTgt === 0 ? ' — EMPTY' : ''}` : ''}${id.endsWith('edge') ? ' · NEXT HIT' : ''}${active ? ' · ◈ACTIVE' : ''}${milestone ? ' · ★MILESTONE' : ''}`} sub={sp.desc} disabled={spiritUnit.sp < spiritCost(spiritUnit, id)} onPress={() => s.castSpirit(spiritUnit.uid, id)} accent={milestone ? '#ffd34d' : '#c9a0ff'} />
                     );
                   })}
                 </View>
