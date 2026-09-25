@@ -303,6 +303,7 @@ export const PARTS: Record<string, PartDef> = {
   saintPlate: { id: 'saintPlate', name: 'Saint Plate', desc: 'Choir laminate — +3 SP regen & +8% hull regen per turn', price: 3400, spRegen: 3, hpRegen: 8 },
   magpiePlate: { id: 'magpiePlate', name: 'Magpie Plate', desc: 'Scavenger laminate — +8 evade & regenerate 1 ammo per turn', price: 3400, evade: 8, ammoRegen: true },
   magnumPlate: { id: 'magnumPlate', name: 'Magnum Plate', desc: 'Chamber laminate — +8% crit & regenerate 1 ammo per turn', price: 3400, crit: 8, ammoRegen: true },
+  hivePlate: { id: 'hivePlate', name: 'Hive Plate', desc: 'Swarm laminate — +1200 max HP & regenerate 1 ammo per turn', price: 3400, hp: 1200, ammoRegen: true },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -583,6 +584,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'skirmfoe', name: 'Skirmfoe', desc: '+6% damage per point vs frames carrying hit-and-run weapons' },
   { id: 'willfoe', name: 'Willfoe', desc: '+6% damage per point vs frames carrying will-locked weapons' },
   { id: 'mapfoe', name: 'Mapfoe', desc: '+6% damage per point vs frames carrying MAP weapons' },
+  { id: 'voltfoe', name: 'Voltfoe', desc: '+6% damage per point vs frames carrying energy-hungry weapons (20+ EN)' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1781,6 +1783,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_armory7', name: 'ARMORY LORD VI', desc: 'Own 140 different parts', rewardCr: 100000 },
   { id: 'h_dreamteam4', name: 'DREAM TEAM IV', desc: 'All pilots reach 650 career kills each', rewardCr: 100000 },
   { id: 'h_nemesis5', name: 'NEMESIS V', desc: 'Destroy 300 frames of a single type', rewardCr: 100000 },
+  { id: 'h_nemesis6', name: 'NEMESIS VI', desc: 'Destroy 350 frames of a single type', rewardCr: 100000 },
   { id: 'h_pinnacle7', name: 'PINNACLE VII', desc: 'Score rank S on 140 missions', rewardCr: 100000 },
   { id: 'h_godhunter13', name: 'GODHUNTER XIII', desc: 'Destroy 350 bosses across your career', rewardCr: 100000 },
   { id: 'h_centurion7', name: 'CENTURION VII', desc: 'Fly 120 ranked missions', rewardCr: 100000 },
@@ -2334,6 +2337,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 250;
     case 'h_nemesis5':
       return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 300;
+    case 'h_nemesis6':
+      return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 350;
     case 'h_perfectscore': {
       const rs = Object.values(s.missionRank ?? {});
       return rs.length >= 30 && rs.every((r) => r === 'S' || r === 'A');
