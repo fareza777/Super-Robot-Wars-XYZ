@@ -194,6 +194,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   scorchverse: { id: 'scorchverse', name: 'Scorch Verse', cost: 55, desc: 'Incendiary hymn — hits landed by allies within 3 tiles also ignite the target until end of enemy phase' },
   disarmedge: { id: 'disarmedge', name: 'Disarm Edge', cost: 45, desc: 'Sabotage strike — next hit +10% damage and strips 2 ammo from every enemy weapon' },
   undyingverse: { id: 'undyingverse', name: 'Undying Verse', cost: 55, desc: 'Guardian hymn — allies within 3 tiles survive a killing blow at 1 HP (once each) until end of enemy phase' },
+  twinedge: { id: 'twinedge', name: 'Twin Edge', cost: 50, desc: 'Split arc — the next attack fires one extra strike' },
   ruinverse: { id: 'ruinverse', name: 'Ruin Verse', cost: 50, desc: 'Entropy wave — enemies within 3 tiles suffer armor break and decay 8% hull per turn for 2 turns' },
   anthemverse: { id: 'anthemverse', name: 'Anthem Verse', cost: 55, desc: 'Restoration hymn — allies within 3 tiles instantly recover 15% hull' },
   doomedge: { id: 'doomedge', name: 'Doom Edge', cost: 45, desc: 'Entropy strike — next hit deals +10% damage and dooms the target to decay 8% hull per turn for 3 turns' },

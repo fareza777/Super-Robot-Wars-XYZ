@@ -112,6 +112,7 @@ function buffNames(u: UnitState): string[] {
   if (u.howlNext) names.push('HOWL EDGE');
   if (u.vampNext) names.push('VAMP EDGE');
   if (u.disarmNext) names.push('DISARM EDGE');
+  if (u.twinNext) names.push('TWIN EDGE');
   if (u.repulseUntilEndOfEnemyPhase) names.push('REPULSE VERSE');
   if (u.silencedUntilEndOfEnemyPhase) names.push('SILENCE VERSE');
   if (u.weakenUntilEndOfEnemyPhase) names.push('FEAR VERSE');
@@ -407,7 +408,7 @@ export function SidePanel() {
               return (
                 <Btn
                   key={w.id}
-                  label={`${w.kind === 'gun' ? '⌖' : w.kind === 'beam' ? '✦' : w.kind === 'missile' ? '▲' : w.kind === 'funnel' ? '◈' : '⚔'} ${w.name}${reason ? ` · ${reason}` : ''}`}
+                  label={`${w.kind === 'gun' ? '⌖' : w.kind === 'beam' ? '✦' : w.kind === 'missile' ? '▲' : w.kind === 'funnel' ? '◈' : '⚔'} ${w.name}${(w.multiHit ?? 1) > 1 ? ` ×${w.multiHit}` : ''}${reason ? ` · ${reason}` : ''}`}
                   sub={stat}
                   accent={hitsAny && !disabled ? '#ff6b6b' : undefined}
                   disabled={disabled}
@@ -728,7 +729,7 @@ export function SidePanel() {
             <Text style={[styles.menuTitle, { color: '#8fa1c7' }]}>ARMAMENT</Text>
             {inspect.def.weapons.map((w) => (
               <Text key={w.id} style={[styles.weapLine, w.ammo != null && (inspect.ammo[w.id] ?? 0) <= 0 && { color: '#ff8a8a' }]} numberOfLines={1}>
-                {w.kind === 'melee' ? '⚔' : w.kind === 'gun' ? '⌖' : w.kind === 'beam' ? '✦' : w.kind === 'missile' ? '▲' : '◈'} {w.name} · POW {w.power} · R{w.rangeMin}-{w.rangeMax}
+                {w.kind === 'melee' ? '⚔' : w.kind === 'gun' ? '⌖' : w.kind === 'beam' ? '✦' : w.kind === 'missile' ? '▲' : '◈'} {w.name} · POW {w.power}{(w.multiHit ?? 1) > 1 ? ` ×${w.multiHit}` : ''} · R{w.rangeMin}-{w.rangeMax}
                 {w.mapRange != null ? ` · AREA ${w.mapRange}` : ''}
                 {w.willReq ? ` · W${w.willReq}` : ''}
                 {w.critMod ? ` · CRIT+${w.critMod}` : ''}
