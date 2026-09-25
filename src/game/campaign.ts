@@ -334,6 +334,7 @@ export const PARTS: Record<string, PartDef> = {
   scopePlate: { id: 'scopePlate', name: 'Scope Plate', desc: 'Marksman laminate — +10 hit & +8 evade', price: 3400, hit: 10, evade: 8 },
   forgePlate: { id: 'forgePlate', name: 'Forge Plate', desc: 'Foundry laminate — +100 armor & +10 EN regen/turn', price: 3400, armor: 100, enRegen: 10 },
   wardLens: { id: 'wardLens', name: 'Ward Lens', desc: 'Aegis optics — +10 hit & barrier 400', price: 3400, hit: 10, barrier: 400 },
+  castleGauge: { id: 'castleGauge', name: 'Castle Gauge', desc: 'Keep-mounted optics — +10 hit & +100 armor', price: 3400, hit: 10, armor: 100 },
   novaCell: { id: 'novaCell', name: 'Nova Cell', desc: 'Star-forged lattice — +8% crit & +8 evade', price: 3200, crit: 8, evade: 8 },
   haloCell: { id: 'haloCell', name: 'Halo Cell', desc: 'Point-defense halo — +10 hit & incoming funnel damage cut 25%', price: 3200, hit: 10, funnelGuard: true },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
@@ -645,6 +646,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'vengeborn', name: 'Vengeborn', desc: '+4% damage per point per fallen ally' },
   { id: 'lavaborn', name: 'Lavaborn', desc: '+5% damage per point vs targets standing on lava' },
   { id: 'medicfoe', name: 'Medicfoe', desc: '+6% damage per point vs medic frames' },
+  { id: 'packborn', name: 'Packborn', desc: '+4% damage per point per enemy ally adjacent to the target' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -687,7 +689,7 @@ export const CAMPAIGN_PILOTS = {
   moorinp: P({ name: 'Gen. Moorin', callsign: 'GEN', melee: 72, ranged: 70, defense: 78, evade: 52, maxSp: 70, spirits: ['grit', 'guard', 'strike'], faceColor: '#a8b8a0', trait: 'rally', lastWords: 'The Empire does not fall with me... it only grows quieter.', killQuip: 'This is what defiance costs.' }),
   serkap: P({ name: 'Void Empress Serka', callsign: 'EMP', melee: 74, ranged: 82, defense: 66, evade: 80, maxSp: 75, spirits: ['strike', 'valor', 'focus'], faceColor: '#d8a0ff', lastWords: 'Beautiful... to the void we all return.', killQuip: 'Hush now. The void was always calling.' }),
   baron: P({ name: 'The Bloody Baron', callsign: 'REAPER', melee: 78, ranged: 80, defense: 64, evade: 76, maxSp: 66, spirits: ['strike', 'valor', 'grit'], faceColor: '#ff8860', lastWords: 'Hah... the hunt ends where it began. Well flown, little Arks.', killQuip: 'Nothing personal. You were simply worth more dead.' }),
-  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse', 'terrorverse', 'mireverse', 'ruinverse', 'shroudverse', 'silenceverse', 'veilbreakverse', 'tetherverse', 'stifleverse', 'despairverse', 'frailverse', 'tangleverse', 'huskverse', 'festerverse', 'lureverse', 'maimverse', 'shatterverse', 'glitchverse', 'zeroverse', 'duskverse', 'drainverse', 'nadirverse', 'suppressverse', 'hazeverse', 'jinxverse', 'vexverse', 'abyssverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
+  veep: P({ name: 'Lt. Vee Corrin', callsign: 'FALCON', melee: 58, ranged: 79, defense: 60, evade: 84, maxSp: 58, spirits: ['focus', 'strike', 'accel', 'vanish', 'overdrive', 'resolve', 'wish', 'gravity', 'reboot', 'siphon', 'glacial', 'strafe', 'cantata', 'interfere', 'dischord', 'winterverse', 'wardmist', 'dreadverse', 'dirgemist', 'tideverse', 'tideebb', 'darkverse', 'sirenverse', 'curseverse', 'doomverse', 'hexverse', 'blightverse', 'terrorverse', 'mireverse', 'ruinverse', 'shroudverse', 'silenceverse', 'veilbreakverse', 'tetherverse', 'stifleverse', 'despairverse', 'frailverse', 'tangleverse', 'huskverse', 'festerverse', 'lureverse', 'maimverse', 'shatterverse', 'glitchverse', 'zeroverse', 'duskverse', 'drainverse', 'nadirverse', 'suppressverse', 'hazeverse', 'jinxverse', 'vexverse', 'abyssverse', 'quietusverse'], faceColor: '#8ef0e8', trait: 'falcon_wing' }),
   bramp: P({ name: 'Warden Bram', callsign: 'GATE', melee: 80, ranged: 55, defense: 82, evade: 50, maxSp: 60, spirits: ['grit', 'guard'], faceColor: '#c8a878', trait: 'rally', lastWords: 'The gate... opens for no one now.', killQuip: 'None pass the gate. None.' }),
   // recurring rival ace — hunts the squad across the war, always comes back for a rematch
   vossen: P({ name: 'Cpt. Vossen', callsign: 'ACE', melee: 74, ranged: 78, defense: 72, evade: 76, maxSp: 65, spirits: ['focus', 'strike', 'grit'], faceColor: '#ff6a5a', trait: 'ace_instinct', lastWords: 'A draw today, Ardent. The Drake flies again.', killQuip: 'Too slow. The Drake does not wait.' }),
@@ -1876,6 +1878,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_peacelord9', name: 'PEACELORD IX', desc: 'Clear 200 side missions', rewardCr: 100000 },
   { id: 'h_centurion11', name: 'CENTURION XI', desc: 'Fly 175 ranked missions', rewardCr: 100000 },
   { id: 'h_nemesis9', name: 'NEMESIS IX', desc: 'Destroy 500 frames of one type', rewardCr: 100000 },
+  { id: 'h_omnicide5', name: 'OMNICIDE V', desc: 'Destroy 40 different frame types', rewardCr: 100000 },
   { id: 'h_centurion7', name: 'CENTURION VII', desc: 'Fly 120 ranked missions', rewardCr: 100000 },
   { id: 'h_extinction', name: 'EXTINCTION', desc: 'Destroy 20,000 frames across your career', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
@@ -2475,6 +2478,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return Object.keys(s.killsByDef ?? {}).length >= 30;
     case 'h_omnicide4':
       return Object.keys(s.killsByDef ?? {}).length >= 35;
+    case 'h_omnicide5':
+      return Object.keys(s.killsByDef ?? {}).length >= 40;
     case 'h_nemesis2':
       return Math.max(0, ...Object.values(s.killsByDef ?? {})) >= 150;
     case 'h_nemesis3':
