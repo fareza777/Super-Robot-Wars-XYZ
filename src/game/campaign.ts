@@ -252,6 +252,7 @@ export const PARTS: Record<string, PartDef> = {
   hornetRack: { id: 'hornetRack', name: 'Hornet Rack', desc: 'Sting array — funnel & gun weapons +12% damage', price: 3200, funnelDmg: 12, gunDmg: 12 },
   linkedCell: { id: 'linkedCell', name: 'Linked Cell', desc: 'Co-loader array — beam & ammo weapons +12% damage', price: 3200, beamDmg: 12, ammoDmg: 12 },
   voltaicRack: { id: 'voltaicRack', name: 'Voltaic Rack', desc: 'Charged array — missile & EN weapons +12% damage', price: 3200, missileDmg: 12, enDmg: 12 },
+  hybridCell: { id: 'hybridCell', name: 'Hybrid Cell', desc: 'Split-feed array — gun & EN weapons +12% damage', price: 3200, gunDmg: 12, enDmg: 12 },
   hymnLoom: { id: 'hymnLoom', name: 'Hymn Loom', desc: 'Choir lattice — allies within 2 tiles regen +5% hull per turn', price: 1800, auraHeal: 5 },
   aegisCarapace: { id: 'aegisCarapace', name: 'Aegis Carapace', desc: 'Sanctum plate — +100 armor, plus +400 more while hull is below 40%', price: 1900, armor: 100, lowHpArmor: true },
   aegisField: { id: 'aegisField', name: 'Aegis Field', desc: '-20% damage taken — projected barrier', price: 2000, dmgTaken: -20 },
@@ -476,6 +477,7 @@ export const PILOT_STATS: PilotStatDef[] = [
   { id: 'winterborn', name: 'Winterborn', desc: '+6% damage per point vs slowed targets' },
   { id: 'trophyborn', name: 'Trophyborn', desc: '+6% damage per point vs elite targets' },
   { id: 'swiftborn', name: 'Swiftborn', desc: '+6% damage per point vs nimbler targets' },
+  { id: 'massborn', name: 'Massborn', desc: '+6% damage per point vs targets with larger arsenals' },
 ];
 
 export const MAX_PILOT_SKILL = 20;
@@ -1631,6 +1633,7 @@ export const HONORS: HonorDef[] = [
   { id: 'h_godhunter4', name: 'GODHUNTER IV', desc: 'Destroy 50 bosses across your career', rewardCr: 100000 },
   { id: 'h_armory3', name: 'ARMORY LORD II', desc: 'Own 85 different parts', rewardCr: 100000 },
   { id: 'h_chainlord3', name: 'CHAINLORD III', desc: 'Score a 10-kill chain in a single turn', rewardCr: 100000 },
+  { id: 'h_immortal3', name: 'IMMORTAL III', desc: 'Reach MASTERY ★ on 90 missions', rewardCr: 100000 },
   { id: 'h_soulbound', name: 'SOULBOUND', desc: 'Witness 20 bond events', rewardCr: 100000 },
   { id: 'h_centurion3', name: 'CENTURION III', desc: 'Fly 75 ranked missions', rewardCr: 100000 },
   { id: 'h_pinnacle2', name: 'PINNACLE II', desc: 'Earn S rank on 90 missions', rewardCr: 100000 },
@@ -2072,6 +2075,8 @@ units?: { def: { id: string; maxHp?: number }; kills: number; alive: boolean; si
       return totalKills >= 10000;
     case 'h_immortal2':
       return s.masteryDone.length >= 80;
+    case 'h_immortal3':
+      return s.masteryDone.length >= 90;
     case 'h_omnicide':
       return Object.keys(s.killsByDef ?? {}).length >= 20;
     case 'h_perfectscore': {
