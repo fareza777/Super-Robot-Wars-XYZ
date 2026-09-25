@@ -200,6 +200,7 @@ export const SPIRITS: Record<SpiritId, SpiritDef> = {
   lanceverse: { id: 'lanceverse', name: 'Lance Verse', cost: 50, desc: 'Piercing hymn — allies within 3 tiles ignore 20% of target armor until end of enemy phase' },
   pierceedge: { id: 'pierceedge', name: 'Pierce Edge', cost: 45, desc: 'Lance strike — next attack +10% damage and ignores i-fields/barriers entirely' },
   wardenverse: { id: 'wardenverse', name: 'Warden Verse', cost: 50, desc: 'Bulwark hymn — allies within 3 tiles take no terrain damage until end of enemy phase' },
+  phantomedge: { id: 'phantomedge', name: 'Phantom Edge', cost: 50, desc: 'Phantom strike — if next attack destroys the target, this frame may act again' },
   ruinverse: { id: 'ruinverse', name: 'Ruin Verse', cost: 50, desc: 'Entropy wave — enemies within 3 tiles suffer armor break and decay 8% hull per turn for 2 turns' },
   anthemverse: { id: 'anthemverse', name: 'Anthem Verse', cost: 55, desc: 'Restoration hymn — allies within 3 tiles instantly recover 15% hull' },
   doomedge: { id: 'doomedge', name: 'Doom Edge', cost: 45, desc: 'Entropy strike — next hit deals +10% damage and dooms the target to decay 8% hull per turn for 3 turns' },
