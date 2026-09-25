@@ -394,7 +394,7 @@ export function HQScreen() {
               <Text style={[styles.panelTitle, { marginTop: 14 }]}>HONORS</Text>
               <Text style={{ color: '#8fa0c8', fontSize: 10, letterSpacing: 1, marginTop: 2 }}>{s.honorsClaimed.length}/{HONORS.length} CLAIMED · {HONORS.filter((h) => !s.honorsClaimed.includes(h.id) && honorDone(h, s)).length} READY</Text>
               <View style={styles.recordBox}>
-                {HONORS.map((h) => {
+                {[...HONORS].sort((a, b) => (s.honorsClaimed.includes(b.id) ? 0 : honorDone(b, s) ? 2 : 1) - (s.honorsClaimed.includes(a.id) ? 0 : honorDone(a, s) ? 2 : 1)).map((h) => {
                   const claimed = s.honorsClaimed.includes(h.id);
                   const done = honorDone(h, s);
                   return (

@@ -170,6 +170,7 @@ function buffNames(u: UnitState): string[] {
   if (u.surtaxUntilEndOfEnemyPhase) names.push('SURTAX VERSE');
   if (u.huskUntilEndOfEnemyPhase) names.push('HUSK VERSE');
   if (u.vaultUntilEndOfEnemyPhase) names.push('VAULT VERSE');
+  if (u.freeflowUntilEndOfEnemyPhase) names.push('FREEFLOW VERSE');
   if ((u.clarionTurns ?? 0) > 0) names.push(`CLARION VERSE ${u.clarionTurns}`);
   if (u.lacerateNext) names.push('LACERATE');
   if (u.sundered) names.push('SUNDERED');
